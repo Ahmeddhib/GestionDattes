@@ -1,26 +1,22 @@
 "use server";
 
+import { createRoleValidator } from "@/validators/role.validator";
 import { roleService } from "@/services/role.service";
-import { auth } from "@/lib/auth";
-import { canManageRoles } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 
-export async function createRoleAction(data: { name: string; description?: string }) {
-    const session = await auth();
+export async function createRoleAction(formData: unknown) {
+    const parsed = createRoleValidator.safeParse(formData);
 
-    if (!session?.user) {
-        return { error: "Non authentifié" };
-    }
-
-    if (!canManageRoles(session.user.role)) {
-        return { error: "Accès non autorisé" };
+    if (!parsed.success) {
+        return { error: parsed.error.flatten().fieldErrors };
     }
 
     try {
-        const newRole = await roleService.createRole(data);
+        const data = await roleService.createRole(parsed.data);
         revalidatePath("/dashboard/roles");
-        return { success: true, role: newRole };
-    } catch (error: any) {
-        return { error: error.message };
+        revalidatePath("/dashboard");
+        return { data };
+    } catch (e) {
+        return { error: e instanceof Error ? e.message : "Erreur lors de la création du rôle" };
     }
 }

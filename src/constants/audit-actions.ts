@@ -1,0 +1,15 @@
+export const AUDIT_ACTIONS = {
+    // Users
+    CREATE_USER: "CREATE_USER",
+    UPDATE_USER: "UPDATE_USER",
+    ACTIVATE_USER: "ACTIVATE_USER",
+    DEACTIVATE_USER: "DEACTIVATE_USER",
+
+    // Roles
+    CREATE_ROLE: "CREATE_ROLE",
+    UPDATE_ROLE: "UPDATE_ROLE",
+    DELETE_ROLE: "DELETE_ROLE",
+    CHANGE_ROLE: "CHANGE_ROLE",
+} as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

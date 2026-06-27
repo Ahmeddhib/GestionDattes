@@ -1,19 +1,34 @@
-import { getUsersAction } from "@/actions/users/get-users.action";
-import { getRolesAction } from "@/actions/roles/get-roles.action";
-import UsersClient from "./users-client";
-import { redirect } from "next/navigation";
+import { userService } from "@/services/user.service";
+import { roleService } from "@/services/role.service";
+import { UsersTable } from "@/components/features/users/UsersTable";
+import { Suspense } from "react";
+import { TableSkeleton } from "@/components/shared/LoadingSkeleton";
+
+export const metadata = {
+    title: "Utilisateurs — Gestion des Dattes",
+};
+
+async function UsersData() {
+    const [usersResult, rolesResult] = await Promise.all([
+        userService.getUsers(),
+        roleService.getRoles(),
+    ]);
+
+    return (
+        <UsersTable
+            initialData={usersResult.data}
+            initialTotal={usersResult.total}
+            roles={rolesResult.data}
+        />
+    );
+}
 
 export default async function UsersPage() {
-    const [usersRes, rolesRes] = await Promise.all([getUsersAction(), getRolesAction()]);
-
-    if (usersRes.error) {
-        if (usersRes.error === "Non authentifié") redirect("/login");
-        return <div className="p-8 text-red-500">{usersRes.error}</div>;
-    }
-
-    if (rolesRes.error) {
-        return <div className="p-8 text-red-500">{rolesRes.error}</div>;
-    }
-
-    return <UsersClient initialUsers={usersRes.users || []} roles={rolesRes.roles || []} />;
+    return (
+        <div className="p-8">
+            <Suspense fallback={<TableSkeleton rows={8} />}>
+                <UsersData />
+            </Suspense>
+        </div>
+    );
 }

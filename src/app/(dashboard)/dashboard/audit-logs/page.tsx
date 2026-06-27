@@ -1,14 +1,23 @@
-import { getAuditLogsAction } from "@/actions/audit/get-audit-logs.action";
-import AuditLogsClient from "./audit-logs-client";
-import { redirect } from "next/navigation";
+import { auditService } from "@/services/audit.service";
+import { AuditLogsTable } from "@/components/features/audit/AuditLogsTable";
+import { Suspense } from "react";
+import { TableSkeleton } from "@/components/shared/LoadingSkeleton";
+
+export const metadata = {
+    title: "Journal d'audit — Gestion des Dattes",
+};
+
+async function AuditLogsData() {
+    const { data, total } = await auditService.getAuditLogs({ pageSize: 20 });
+    return <AuditLogsTable initialData={data} initialTotal={total} />;
+}
 
 export default async function AuditLogsPage() {
-    const res = await getAuditLogsAction();
-
-    if (res.error) {
-        if (res.error === "Non authentifié") redirect("/login");
-        return <div className="p-8 text-red-500">{res.error}</div>;
-    }
-
-    return <AuditLogsClient initialLogs={res.logs ?? []} />;
+    return (
+        <div className="p-8">
+            <Suspense fallback={<TableSkeleton rows={10} />}>
+                <AuditLogsData />
+            </Suspense>
+        </div>
+    );
 }

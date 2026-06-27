@@ -1,36 +1,24 @@
 "use server";
 
 import { userService } from "@/services/user.service";
-import { auth } from "@/lib/auth";
-import { canManageUsers } from "@/lib/permissions";
+import { updateUserValidator } from "@/validators/user.validator";
 import { revalidatePath } from "next/cache";
-import { ROUTES } from "@/lib/routes";
 
-export async function updateUserAction(
-    id: string,
-    data: {
-        name?: string;
-        email?: string;
-        password?: string;
-        roleId?: string;
-    }
-) {
-    const session = await auth();
+export async function updateUserAction(id: string, formData: unknown) {
+    const parsed = updateUserValidator.safeParse(formData);
 
-    if (!session?.user) {
-        return { error: "Non authentifié" };
-    }
-
-    if (!canManageUsers(session.user.role)) {
-        return { error: "Accès non autorisé" };
+    if (!parsed.success) {
+        return { error: parsed.error.flatten().fieldErrors };
     }
 
     try {
-        const user = await userService.updateUser(id, data);
-        revalidatePath(ROUTES.USERS);
-        revalidatePath(`${ROUTES.USERS}/${id}`);
-        return { user, success: true };
-    } catch (error: any) {
-        return { error: error.message };
+        const data = await userService.updateUser(id, parsed.data);
+        revalidatePath("/dashboard/users");
+        revalidatePath("/dashboard");
+        return { data };
+    } catch (error) {
+        return {
+            error: error instanceof Error ? error.message : "Erreur lors de la mise à jour de l'utilisateur"
+        };
     }
 }

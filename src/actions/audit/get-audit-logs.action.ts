@@ -1,24 +1,20 @@
 "use server";
 
-import { getAuditLogs } from "@/services/audit.service";
-import { auth } from "@/lib/auth";
-import { canManageUsers } from "@/lib/permissions";
+import { auditService } from "@/services/audit.service";
+import type { AuditAction } from "@/generated/prisma";
 
-export async function getAuditLogsAction() {
-    const session = await auth();
-
-    if (!session?.user) {
-        return { error: "Non authentifié" };
-    }
-
-    if (!canManageUsers(session.user.role)) {
-        return { error: "Accès non autorisé" };
-    }
-
+export async function getAuditLogsAction(options?: {
+    page?: number;
+    pageSize?: number;
+    actorId?: string;
+    action?: AuditAction;
+}) {
     try {
-        const logs = await getAuditLogs(200);
-        return { logs };
-    } catch (error: any) {
-        return { error: error.message };
+        const result = await auditService.getAuditLogs(options);
+        return { data: result };
+    } catch (error) {
+        return {
+            error: error instanceof Error ? error.message : "Erreur lors de la récupération des logs d'audit"
+        };
     }
 }

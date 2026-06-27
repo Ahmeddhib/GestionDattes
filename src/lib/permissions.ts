@@ -1,28 +1,25 @@
-export const ROLES = {
-    ADMIN: "ADMIN",
-    AGENT: "AGENT",
-    LABORANTIN: "LABORANTIN",
-} as const;
+import { auth } from "./auth";
+import { PERMISSIONS, type Permission } from "@/constants/permissions";
 
-export type Role = (typeof ROLES)[keyof typeof ROLES];
+export async function requirePermission(permission: Permission): Promise<void> {
+    const session = await auth();
 
-export function canManageUsers(role: string): boolean {
-    return role === ROLES.ADMIN;
+    if (!session?.user) {
+        throw new Error("Non authentifié");
+    }
+
+    const allowedRoles = PERMISSIONS[permission];
+
+    if (!allowedRoles.includes(session.user.role as any)) {
+        throw new Error(`Permission refusée: ${permission}`);
+    }
 }
 
-export function canViewUsers(role: string): boolean {
-    return role === ROLES.ADMIN;
-}
-
-export function canEditUser(role: string, targetRole: string): boolean {
-    if (role === ROLES.ADMIN) return true;
-    return false;
-}
-
-export function canManageRoles(role: string): boolean {
-    return role === ROLES.ADMIN;
-}
-
-export function canViewRoles(role: string): boolean {
-    return role === ROLES.ADMIN;
+export async function hasPermission(permission: Permission): Promise<boolean> {
+    try {
+        await requirePermission(permission);
+        return true;
+    } catch {
+        return false;
+    }
 }

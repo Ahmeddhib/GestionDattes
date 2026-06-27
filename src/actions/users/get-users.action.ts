@@ -1,24 +1,19 @@
 "use server";
 
 import { userService } from "@/services/user.service";
-import { auth } from "@/lib/auth";
-import { canViewUsers } from "@/lib/permissions";
 
-export async function getUsersAction() {
-    const session = await auth();
-
-    if (!session?.user) {
-        return { error: "Non authentifié" };
-    }
-
-    if (!canViewUsers(session.user.role)) {
-        return { error: "Accès non autorisé" };
-    }
-
+export async function getUsersAction(options?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    active?: boolean;
+}) {
     try {
-        const users = await userService.getAllUsers();
-        return { users };
-    } catch (error: any) {
-        return { error: error.message };
+        const result = await userService.getUsers(options);
+        return { data: result };
+    } catch (error) {
+        return {
+            error: error instanceof Error ? error.message : "Erreur lors de la récupération des utilisateurs"
+        };
     }
 }

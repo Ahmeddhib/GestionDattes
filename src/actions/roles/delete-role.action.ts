@@ -1,26 +1,22 @@
 "use server";
 
+import { deleteRoleValidator } from "@/validators/role.validator";
 import { roleService } from "@/services/role.service";
-import { auth } from "@/lib/auth";
-import { canManageRoles } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 
 export async function deleteRoleAction(id: string) {
-    const session = await auth();
+    const parsed = deleteRoleValidator.safeParse({ id });
 
-    if (!session?.user) {
-        return { error: "Non authentifié" };
-    }
-
-    if (!canManageRoles(session.user.role)) {
-        return { error: "Accès non autorisé" };
+    if (!parsed.success) {
+        return { error: parsed.error.flatten().fieldErrors };
     }
 
     try {
-        await roleService.deleteRole(id);
+        const data = await roleService.deleteRole(parsed.data.id);
         revalidatePath("/dashboard/roles");
-        return { success: true };
-    } catch (error: any) {
-        return { error: error.message };
+        revalidatePath("/dashboard");
+        return { data };
+    } catch (e) {
+        return { error: e instanceof Error ? e.message : "Erreur lors de la suppression du rôle" };
     }
 }

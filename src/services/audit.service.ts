@@ -1,56 +1,19 @@
-import { prisma } from "@/lib/prisma";
-import { AuditAction } from "@/generated/prisma";
+import { auditRepository } from "@/repositories/audit.repository";
+import { requirePermission } from "@/lib/permissions";
+import type { AuditAction } from "@/generated/prisma";
 
-export async function logAction(
-    actorId: string,
-    targetId: string | null,
-    action: AuditAction,
-    description: string
-) {
-    return prisma.auditLog.create({
-        data: {
-            actorId,
-            targetId,
-            action,
-            description,
-        },
-    });
-}
+export const auditService = {
+    async log(data: { actorId: string; action: AuditAction; description?: string; targetId?: string }) {
+        return auditRepository.create(data);
+    },
 
-export async function getAuditLogs(limit = 100) {
-    return prisma.auditLog.findMany({
-        take: limit,
-        orderBy: {
-            createdAt: "desc",
-        },
-        include: {
-            actor: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                },
-            },
-        },
-    });
-}
+    async getAuditLogs(options?: { page?: number; pageSize?: number; actorId?: string; action?: AuditAction }) {
+        await requirePermission("audit:read");
+        return auditRepository.findAll(options);
+    },
 
-export async function getAuditLogsByUser(userId: string) {
-    return prisma.auditLog.findMany({
-        where: {
-            OR: [{ actorId: userId }, { targetId: userId }],
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-        include: {
-            actor: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                },
-            },
-        },
-    });
-}
+    async getAuditLogsCount() {
+        await requirePermission("audit:read");
+        return auditRepository.count();
+    },
+};

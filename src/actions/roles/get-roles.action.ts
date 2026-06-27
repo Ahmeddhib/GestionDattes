@@ -1,24 +1,12 @@
 "use server";
 
 import { roleService } from "@/services/role.service";
-import { auth } from "@/lib/auth";
-import { canViewRoles } from "@/lib/permissions";
 
-export async function getRolesAction() {
-    const session = await auth();
-
-    if (!session?.user) {
-        return { error: "Non authentifié" };
-    }
-
-    if (!canViewRoles(session.user.role)) {
-        return { error: "Accès non autorisé" };
-    }
-
+export async function getRolesAction(options?: { page?: number; pageSize?: number; search?: string }) {
     try {
-        const roles = await roleService.getAllRoles();
-        return { roles };
-    } catch (error: any) {
-        return { error: error.message };
+        const data = await roleService.getRoles(options);
+        return { data };
+    } catch (e) {
+        return { error: e instanceof Error ? e.message : "Erreur lors de la récupération des rôles" };
     }
 }
