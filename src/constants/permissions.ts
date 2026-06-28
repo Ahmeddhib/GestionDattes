@@ -2,19 +2,19 @@ import { ROLES } from "./roles";
 
 export const PERMISSIONS = {
     // Users
-    "users:read": [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DIRECTEUR],
-    "users:create": [ROLES.SUPER_ADMIN, ROLES.ADMIN],
-    "users:update": [ROLES.SUPER_ADMIN, ROLES.ADMIN],
-    "users:delete": [ROLES.SUPER_ADMIN],
+    "users:read": [ROLES.ADMIN, ROLES.DIRECTION],
+    "users:create": [ROLES.ADMIN],
+    "users:update": [ROLES.ADMIN],
+    "users:delete": [ROLES.ADMIN],
 
     // Roles
-    "roles:read": [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DIRECTEUR],
-    "roles:create": [ROLES.SUPER_ADMIN, ROLES.ADMIN],
-    "roles:update": [ROLES.SUPER_ADMIN, ROLES.ADMIN],
-    "roles:delete": [ROLES.SUPER_ADMIN],
+    "roles:read": [ROLES.ADMIN, ROLES.DIRECTION],
+    "roles:create": [ROLES.ADMIN],
+    "roles:update": [ROLES.ADMIN],
+    "roles:delete": [ROLES.ADMIN],
 
     // Audit
-    "audit:read": [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DIRECTEUR],
+    "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

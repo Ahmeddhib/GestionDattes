@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
@@ -14,7 +15,6 @@ import { UpdateUserDialog } from "./UpdateUserDialog";
 import { activateUserAction } from "@/actions/users/activate-user.action";
 import { deactivateUserAction } from "@/actions/users/deactivate-user.action";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 interface User {
     id: string;
@@ -43,6 +43,12 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<string | null>(null);
+
+    // Synchroniser avec les props quand elles changent (après router.refresh())
+    useEffect(() => {
+        setData(initialData);
+        setTotal(initialTotal);
+    }, [initialData, initialTotal]);
 
     const pageSize = 10;
     const totalPages = Math.ceil(total / pageSize);
@@ -86,7 +92,9 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
     };
 
     const handleUserCreated = () => {
+        // Fermer le dialog
         setShowCreateDialog(false);
+        // Rafraîchir la page pour obtenir les nouvelles données
         router.refresh();
     };
 

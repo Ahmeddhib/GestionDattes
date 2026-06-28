@@ -1,21 +1,13 @@
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../src/generated/prisma"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-  users       User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
+// ================== ENUMS ==================
 
 enum AuditAction {
   CREATE_USER
@@ -26,6 +18,34 @@ enum AuditAction {
   CREATE_ROLE
   UPDATE_ROLE
   DELETE_ROLE
+  CREATE_REGION
+  UPDATE_REGION
+  DELETE_REGION
+  CREATE_AGRICULTEUR
+  UPDATE_AGRICULTEUR
+  DELETE_AGRICULTEUR
+  CREATE_LIVRAISON
+  UPDATE_LIVRAISON
+  DELETE_LIVRAISON
+  CREATE_VENTE
+  UPDATE_VENTE
+  DELETE_VENTE
+  CREATE_BON_SORTIE
+  UPDATE_BON_SORTIE
+  DELETE_BON_SORTIE
+}
+
+// ================== MODELS ==================
+
+// ---- Gestion des Utilisateurs & RBAC ----
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model User {
@@ -38,8 +58,11 @@ model User {
   role      Role     @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   auditLogs AuditLog[] @relation("ActorLogs")
+
+  @@index([email])
+  @@index([roleId])
 }
 
 model AuditLog {
@@ -48,10 +71,223 @@ model AuditLog {
   targetId    String?
   action      AuditAction
   description String?
+  details     Json?
   createdAt   DateTime    @default(now())
-  
+
   actor User @relation("ActorLogs", fields: [actorId], references: [id])
-  
+
   @@index([actorId])
   @@index([targetId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ---- Gestion Géographique ----
+
+model Region {
+  id           String        @id @default(cuid())
+  nom          String
+  code         String?       @unique
+  agriculteurs Agriculteur[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([code])
+}
+
+// ---- Gestion des Produits ----
+
+model TypeDate {
+  id          String      @id @default(cuid())
+  nom         String      @unique
+  description String?
+  livraisons  Livraison[]
+  stocks      StockDate[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model TypeCaisse {
+  id         String      @id @default(cuid())
+  nom        String      @unique
+  poidsKg    Float
+  livraisons Livraison[]
+  bonSorties BonSortie[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+// ---- Gestion des Agriculteurs ----
+
+model Agriculteur {
+  id                String      @id @default(cuid())
+  code              String      @unique
+  cin               String      @unique
+  nom               String
+  prenom            String
+  telephone         String?
+  adresse           String?
+  nbPalmiers        Int
+  superficie        Float?
+  productionEstimee Float?
+  regionId          String
+  region            Region      @relation(fields: [regionId], references: [id])
+  livraisons        Livraison[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([code])
+  @@index([cin])
+  @@index([regionId])
+}
+
+// ---- Gestion des Livraisons & Réception ----
+
+model Livraison {
+  id            String        @id @default(cuid())
+  numeroLot     String        @unique
+  dateLivraison DateTime
+  quantiteKg    Float
+  agriculteurId String
+  agriculteur   Agriculteur   @relation(fields: [agriculteurId], references: [id])
+  typeDateId    String
+  typeDate      TypeDate      @relation(fields: [typeDateId], references: [id])
+  typeCaisseId  String
+  typeCaisse    TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
+  bonAchat      BonAchat?
+  pesee         Pesee?
+  echantillons  Echantillon[]
+  stocks        StockDate[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([numeroLot])
+  @@index([agriculteurId])
+  @@index([dateLivraison])
+}
+
+model BonAchat {
+  id          String    @id @default(cuid())
+  numero      String    @unique
+  prixKg      Float
+  montant     Float
+  livraisonId String    @unique
+  livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([numero])
+}
+
+model Pesee {
+  id          String    @id @default(cuid())
+  poidsBrut   Float
+  poidsNet    Float
+  tare        Float?
+  livraisonId String    @unique
+  livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+// ---- Gestion Laboratoire ----
+
+model Echantillon {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  livraisonId String
+  livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  analyses    Analyse[]
+  createdAt   DateTime  @default(now())
+
+  @@index([code])
+  @@index([livraisonId])
+}
+
+model Analyse {
+  id            String      @id @default(cuid())
+  echantillonId String
+  echantillon   Echantillon @relation(fields: [echantillonId], references: [id])
+  dateAnalyse   DateTime    @default(now())
+  humidite      Float?
+  tauxSucre     Float?
+  calibre       String?
+  qualite       String?
+  observations  String?
+  conforme      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([echantillonId])
+  @@index([dateAnalyse])
+}
+
+// ---- Gestion des Stocks ----
+
+model StockDate {
+  id          String      @id @default(cuid())
+  quantite    Float
+  dateEntree  DateTime    @default(now())
+  typeDateId  String
+  typeDate    TypeDate    @relation(fields: [typeDateId], references: [id])
+  livraisonId String
+  livraison   Livraison   @relation(fields: [livraisonId], references: [id])
+  ventes      Vente[]
+  bonSorties  BonSortie[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([typeDateId])
+  @@index([livraisonId])
+  @@index([dateEntree])
+}
+
+// ---- Gestion des Clients & Ventes ----
+
+model Client {
+  id        String   @id @default(cuid())
+  nom       String
+  telephone String?
+  adresse   String?
+  email     String?
+  ventes    Vente[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([nom])
+}
+
+model Vente {
+  id           String    @id @default(cuid())
+  date         DateTime  @default(now())
+  quantite     Float
+  prixUnitaire Float
+  montant      Float
+  clientId     String
+  client       Client    @relation(fields: [clientId], references: [id])
+  stockId      String
+  stock        StockDate @relation(fields: [stockId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@index([clientId])
+  @@index([stockId])
+  @@index([date])
+}
+
+// ---- Gestion des Sorties ----
+
+model BonSortie {
+  id             String     @id @default(cuid())
+  numero         String     @unique
+  dateSortie     DateTime   @default(now())
+  quantiteTotale Float
+  stockId        String
+  stock          StockDate  @relation(fields: [stockId], references: [id])
+  typeCaisseId   String
+  typeCaisse     TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([numero])
+  @@index([stockId])
+  @@index([dateSortie])
 }

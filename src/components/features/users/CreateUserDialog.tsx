@@ -37,8 +37,16 @@ export function CreateUserDialog({ roles, open, onClose }: CreateUserDialogProps
                 toast.error(typeof result.error === "string" ? result.error : "Erreur lors de la création");
             } else {
                 toast.success("Utilisateur créé avec succès");
-                router.refresh();
+                // Réinitialiser le formulaire
+                setFormData({
+                    name: "",
+                    email: "",
+                    password: "",
+                    roleId: roles[0]?.id || "",
+                });
+                // Fermer et rafraîchir
                 onClose();
+                router.refresh();
             }
         } catch (error) {
             toast.error("Une erreur est survenue");

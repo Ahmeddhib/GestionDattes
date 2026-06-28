@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { authEdge as auth } from "@/lib/auth-edge";
 import { NextResponse } from "next/server";
 import { ROUTES } from "@/lib/routes";
 

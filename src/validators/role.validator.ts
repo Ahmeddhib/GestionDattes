@@ -20,7 +20,7 @@ export const updateRoleValidator = z.object({
 });
 
 export const deleteRoleValidator = z.object({
-    id: z.string().cuid("ID invalide"),
+    id: z.string().min(1, "ID invalide"),
 });
 
 export type CreateRoleInput = z.infer<typeof createRoleValidator>;

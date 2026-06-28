@@ -1,9 +1,9 @@
 export const ROLES = {
-    SUPER_ADMIN: "SUPER_ADMIN",
     ADMIN: "ADMIN",
-    DIRECTEUR: "DIRECTEUR",
-    GESTIONNAIRE: "GESTIONNAIRE",
+    AGENT: "AGENT",
     LABORANTIN: "LABORANTIN",
+    RESPONSABLE_STOCK: "RESPONSABLE_STOCK",
+    DIRECTION: "DIRECTION",
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];

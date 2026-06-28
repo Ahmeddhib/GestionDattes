@@ -9,9 +9,18 @@ export async function requirePermission(permission: Permission): Promise<void> {
     }
 
     const allowedRoles = PERMISSIONS[permission];
+    const userRole = session.user.role as string;
 
-    if (!allowedRoles.includes(session.user.role as any)) {
-        throw new Error(`Permission refusée: ${permission}`);
+    // Debug log
+    console.log("🔐 Permission check:", {
+        permission,
+        userRole,
+        allowedRoles,
+        isAllowed: allowedRoles.includes(userRole as any),
+    });
+
+    if (!allowedRoles.includes(userRole as any)) {
+        throw new Error(`Permission refusée: ${permission}. Votre rôle (${userRole}) n'a pas accès.`);
     }
 }
 

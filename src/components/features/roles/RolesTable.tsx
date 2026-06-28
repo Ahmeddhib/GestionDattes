@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
 import { Badge } from "@/components/shared/Badge";
@@ -28,6 +29,7 @@ interface RolesTableProps {
 }
 
 export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
+    const router = useRouter();
     const [data, setData] = useState(initialData);
     const [total, setTotal] = useState(initialTotal);
     const [currentPage, setCurrentPage] = useState(1);
@@ -35,6 +37,12 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
     const [deletingRole, setDeletingRole] = useState<Role | null>(null);
+
+    // Synchroniser avec les props quand elles changent (après router.refresh())
+    useEffect(() => {
+        setData(initialData);
+        setTotal(initialTotal);
+    }, [initialData, initialTotal]);
 
     const pageSize = 10;
     const totalPages = Math.ceil(total / pageSize);
@@ -48,6 +56,21 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         // TODO: Refetch data for new page
+    };
+
+    const handleRoleCreated = () => {
+        setShowCreateDialog(false);
+        router.refresh();
+    };
+
+    const handleRoleUpdated = () => {
+        setEditingRole(null);
+        router.refresh();
+    };
+
+    const handleRoleDeleted = () => {
+        setDeletingRole(null);
+        router.refresh();
     };
 
     return (
@@ -177,7 +200,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
             {showCreateDialog && (
                 <CreateRoleDialog
                     open={showCreateDialog}
-                    onClose={() => setShowCreateDialog(false)}
+                    onClose={handleRoleCreated}
                 />
             )}
 
@@ -185,7 +208,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                 <UpdateRoleDialog
                     role={editingRole}
                     open={!!editingRole}
-                    onClose={() => setEditingRole(null)}
+                    onClose={handleRoleUpdated}
                 />
             )}
 
@@ -193,7 +216,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                 <DeleteRoleDialog
                     role={deletingRole}
                     open={!!deletingRole}
-                    onClose={() => setDeletingRole(null)}
+                    onClose={handleRoleDeleted}
                 />
             )}
         </>

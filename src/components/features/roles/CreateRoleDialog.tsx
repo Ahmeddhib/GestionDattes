@@ -33,8 +33,14 @@ export function CreateRoleDialog({ open, onClose }: CreateRoleDialogProps) {
                 toast.error(typeof result.error === "string" ? result.error : "Erreur lors de la création");
             } else {
                 toast.success("Rôle créé avec succès");
-                router.refresh();
+                // Réinitialiser le formulaire
+                setFormData({
+                    name: "",
+                    description: "",
+                });
+                // Fermer et rafraîchir
                 onClose();
+                router.refresh();
             }
         } catch (error) {
             toast.error("Une erreur est survenue");

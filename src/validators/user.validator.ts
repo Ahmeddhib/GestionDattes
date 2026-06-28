@@ -4,14 +4,14 @@ export const createUserValidator = z.object({
     name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Le nom ne peut pas dépasser 100 caractères"),
     email: z.string().email("Email invalide").toLowerCase(),
     password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-    roleId: z.string().cuid("ID de rôle invalide"),
+    roleId: z.string().min(1, "Le rôle est requis"),
 });
 
 export const updateUserValidator = z.object({
     name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Le nom ne peut pas dépasser 100 caractères").optional(),
     email: z.string().email("Email invalide").toLowerCase().optional(),
     password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères").optional(),
-    roleId: z.string().cuid("ID de rôle invalide").optional(),
+    roleId: z.string().min(1, "Le rôle est requis").optional(),
 });
 
 export const loginValidator = z.object({

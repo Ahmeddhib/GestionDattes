@@ -20,21 +20,29 @@ export const userService = {
     },
 
     async createUser(data: { name: string; email: string; password: string; roleId: string }) {
+        console.log("🔧 userService.createUser - Début");
+        console.log("📋 Données:", { name: data.name, email: data.email, roleId: data.roleId });
+
         await requirePermission("users:create");
+        console.log("✅ Permission accordée");
 
         // Vérifier si l'email existe déjà
         const existing = await userRepository.findByEmail(data.email);
         if (existing) {
+            console.log("❌ Email déjà existant");
             throw new Error("Un utilisateur avec cet email existe déjà");
         }
+        console.log("✅ Email disponible");
 
         // Hasher le mot de passe
         const hashedPassword = await bcrypt.hash(data.password, 10);
+        console.log("✅ Mot de passe hashé");
 
         const user = await userRepository.create({
             ...data,
             password: hashedPassword,
         });
+        console.log("✅ Utilisateur créé en DB:", user.id);
 
         // Log audit
         const session = await auth();
@@ -45,6 +53,7 @@ export const userService = {
                 description: `Création de l'utilisateur "${data.name}" (${data.email})`,
                 targetId: user.id,
             });
+            console.log("✅ Audit log créé");
         }
 
         return user;
