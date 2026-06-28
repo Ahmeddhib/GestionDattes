@@ -5,40 +5,46 @@
 ### Problème : Edge Runtime et Prisma
 **Erreur** : `Module not found: Can't resolve '@neondatabase/serverless'` dans le middleware
 
-**Cause** : Le middleware Next.js utilise Edge Runtime qui ne supporte pas tous les modules Node.js. Prisma avec Neon adapter utilise des modules incompatibles avec Edge Runtime.
+**Cause** : Le middleware Next.js utilise Edge Runtime qui ne supporte pas tous les modules Node.js. Le middleware importait `auth.ts` qui importait `prisma.ts`, créant une chaîne d'imports incompatible avec Edge Runtime.
 
-**Solution** : Créer deux versions d'auth :
-- `auth.ts` - Version complète avec Prisma (pour les pages et API routes)
-- `auth-edge.ts` - Version Edge-compatible sans Prisma (pour le middleware)
+**Solution** : Simplifier le middleware pour qu'il vérifie uniquement le cookie de session NextAuth, sans importer Prisma ou auth.
 
 ---
 
 ## 📁 Fichiers Créés/Modifiés
 
-### 1. `src/lib/auth-edge.ts` ✨ NOUVEAU
+### 1. `src/middleware.ts` ✅ SIMPLIFIÉ
 ```typescript
-import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { ROUTES } from "@/lib/routes";
 
-// Version Edge-compatible de auth (sans Prisma)
-// Utilisée uniquement dans le middleware
-export const {
-    auth: authEdge,
-} = NextAuth({
-    session: {
-        strategy: "jwt",
-    },
-    pages: {
-        signIn: "/login",
-    },
-    providers: [],
-});
+export function middleware(req: NextRequest) {
+    const pathname = req.nextUrl.pathname;
+    
+    // Vérifier si l'utilisateur a un token de session NextAuth
+    const sessionToken = req.cookies.get("authjs.session-token") || 
+                        req.cookies.get("__Secure-authjs.session-token");
+    const isLoggedIn = !!sessionToken;
+
+    // Redirect to login if not authenticated
+    if (!isLoggedIn) {
+        return NextResponse.redirect(new URL(ROUTES.LOGIN, req.url));
+    }
+
+    return NextResponse.next();
+}
+
+export const config = {
+    matcher: ["/dashboard/:path*"],
+};
 ```
 
-### 2. `src/middleware.ts` ✅ MODIFIÉ
-```typescript
-import { authEdge as auth } from "@/lib/auth-edge";  // ← Changé
-// ... reste du code
-```
+**Avantages** :
+- ✅ Aucune dépendance vers Prisma ou modules Node.js
+- ✅ Compatible Edge Runtime
+- ✅ Rapide et léger
+- ✅ Vérifie la session NextAuth via cookie
 
 ### 3. `vercel.json` ✨ NOUVEAU
 ```json
