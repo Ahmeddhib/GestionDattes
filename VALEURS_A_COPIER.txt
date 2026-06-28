@@ -1,0 +1,93 @@
+════════════════════════════════════════════════════════
+ VALEURS À COPIER-COLLER DANS VERCEL
+════════════════════════════════════════════════════════
+
+📍 Vercel Dashboard → Settings → Environment Variables
+
+Pour chaque variable:
+1. Cliquez [+ Add New]
+2. Copiez le Name
+3. Copiez le Value
+4. Cochez ✅ Production ✅ Preview ✅ Development
+5. Cliquez Save
+
+════════════════════════════════════════════════════════
+ VARIABLE 1: DATABASE_URL
+════════════════════════════════════════════════════════
+
+Name:
+DATABASE_URL
+
+Value:
+postgresql://neondb_owner:npg_Xsv6pBKUH7zS@ep-shiny-night-ah5a382i-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+════════════════════════════════════════════════════════
+ VARIABLE 2: DIRECT_URL
+════════════════════════════════════════════════════════
+
+Name:
+DIRECT_URL
+
+Value:
+postgresql://neondb_owner:npg_Xsv6pBKUH7zS@ep-shiny-night-ah5a382i.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+════════════════════════════════════════════════════════
+ VARIABLE 3: AUTH_SECRET
+════════════════════════════════════════════════════════
+
+⚠️ IMPORTANT: Générez d'abord le secret!
+
+Dans votre terminal, exécutez:
+  node scripts/generate-auth-secret.js
+
+Puis copiez le secret généré ci-dessous:
+
+Name:
+AUTH_SECRET
+
+Value:
+[COLLEZ LE SECRET GÉNÉRÉ ICI]
+
+════════════════════════════════════════════════════════
+ VARIABLE 4: NEXTAUTH_URL
+════════════════════════════════════════════════════════
+
+⚠️ IMPORTANT: Remplacez par votre vraie URL Vercel!
+
+Pour trouver votre URL:
+  - Allez dans Deployments
+  - Copiez l'URL du déploiement (ex: gestion-dattes-xyz.vercel.app)
+
+Name:
+NEXTAUTH_URL
+
+Value:
+https://VOTRE-URL-ICI.vercel.app
+
+Exemple:
+https://gestion-dattes-ahmeddhib.vercel.app
+
+════════════════════════════════════════════════════════
+ VÉRIFICATION
+════════════════════════════════════════════════════════
+
+Après avoir ajouté les 4 variables, vous devriez voir:
+
+✅ DATABASE_URL    (Production, Preview, Development)
+✅ DIRECT_URL      (Production, Preview, Development)
+✅ AUTH_SECRET     (Production, Preview, Development)
+✅ NEXTAUTH_URL    (Production, Preview, Development)
+
+════════════════════════════════════════════════════════
+ ÉTAPE SUIVANTE
+════════════════════════════════════════════════════════
+
+Après avoir ajouté les variables:
+
+1. Allez dans l'onglet Deployments
+2. Cliquez sur les 3 points (⋮) du dernier build
+3. Cliquez Redeploy
+4. Attendez 3-5 minutes
+5. Testez votre application!
+
+════════════════════════════════════════════════════════

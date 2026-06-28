@@ -12,9 +12,14 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient() {
     const connectionString = process.env.DATABASE_URL;
 
+    // Durant le build Vercel, DATABASE_URL peut ne pas être disponible
+    // On crée un client Prisma sans adapter pour permettre le build
     if (!connectionString) {
-        console.error("❌ DATABASE_URL is not defined!");
-        throw new Error("DATABASE_URL is not defined in environment variables");
+        console.warn("⚠️ DATABASE_URL not found - creating Prisma client without adapter (build mode)");
+
+        return new PrismaClient({
+            log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+        });
     }
 
     console.log("✅ Creating Prisma client with Neon adapter...");
