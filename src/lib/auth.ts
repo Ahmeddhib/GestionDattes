@@ -9,11 +9,13 @@ export const {
     signOut,
     auth,
 } = NextAuth({
+    basePath: "/api/auth",
     session: {
         strategy: "jwt",
     },
     pages: {
         signIn: "/login",
+        error: "/login",
     },
     providers: [
         Credentials({
@@ -73,4 +75,5 @@ export const {
             return session;
         },
     },
+    debug: process.env.NODE_ENV === "development",
 });

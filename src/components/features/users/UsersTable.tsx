@@ -15,6 +15,7 @@ import { UpdateUserDialog } from "./UpdateUserDialog";
 import { activateUserAction } from "@/actions/users/activate-user.action";
 import { deactivateUserAction } from "@/actions/users/deactivate-user.action";
 import { toast } from "sonner";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 interface User {
     id: string;
@@ -35,6 +36,7 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps) {
+    const { t } = useClientTranslations();
     const router = useRouter();
     const [data, setData] = useState(initialData);
     const [total, setTotal] = useState(initialTotal);
@@ -72,7 +74,7 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                 : await activateUserAction(user.id);
 
             if (result.error) {
-                toast.error(typeof result.error === "string" ? result.error : "Erreur");
+                toast.error(typeof result.error === "string" ? result.error : t("messages.error.generic"));
             } else {
                 // Mettre à jour immédiatement le state local
                 setData((prevData) =>
@@ -80,12 +82,12 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                         u.id === user.id ? { ...u, active: !u.active } : u
                     )
                 );
-                toast.success(user.active ? "Utilisateur désactivé" : "Utilisateur activé");
+                toast.success(user.active ? t("users.deactivated") : t("users.activated"));
                 // Refresh pour synchroniser avec le serveur
                 router.refresh();
             }
         } catch (error) {
-            toast.error("Une erreur est survenue");
+            toast.error(t("messages.error.generic"));
         } finally {
             setLoading(null);
         }
@@ -109,21 +111,21 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-[#2C1A00]">Gestion des utilisateurs</h2>
-                        <p className="text-gray-600 mt-1">Gérez les comptes utilisateurs du système</p>
+                        <h2 className="text-2xl font-bold text-[#2C1A00]">{t("users.title")}</h2>
+                        <p className="text-gray-600 mt-1">{t("users.description")}</p>
                     </div>
                     <Button
                         variant="primary"
                         onClick={() => setShowCreateDialog(true)}
                     >
                         <Plus className="w-4 h-4 mr-2" />
-                        Nouvel utilisateur
+                        {t("users.createNew")}
                     </Button>
                 </div>
 
                 {/* Search */}
                 <SearchBar
-                    placeholder="Rechercher un utilisateur..."
+                    placeholder={t("users.searchPlaceholder")}
                     onSearch={handleSearch}
                 />
 
@@ -132,15 +134,15 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                     {data.length === 0 ? (
                         <EmptyState
                             icon={<Users className="w-12 h-12" />}
-                            title="Aucun utilisateur trouvé"
-                            description="Commencez par créer votre premier utilisateur"
+                            title={t("users.noResults")}
+                            description={t("users.noResultsDescription")}
                             action={
                                 <Button
                                     variant="primary"
                                     onClick={() => setShowCreateDialog(true)}
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Créer un utilisateur
+                                    {t("users.createNew")}
                                 </Button>
                             }
                         />
@@ -150,16 +152,16 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                                 <thead>
                                     <tr className="border-b border-[#F0E0C0]">
                                         <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Utilisateur
+                                            {t("users.name")}
                                         </th>
                                         <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Rôle
+                                            {t("users.role")}
                                         </th>
                                         <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Statut
+                                            {t("users.status")}
                                         </th>
                                         <th className="text-right py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Actions
+                                            {t("common.actions")}
                                         </th>
                                     </tr>
                                 </thead>
@@ -189,7 +191,7 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                                             </td>
                                             <td className="py-4 px-4">
                                                 <Badge variant={user.active ? "success" : "default"}>
-                                                    {user.active ? "Actif" : "Inactif"}
+                                                    {user.active ? t("users.active") : t("users.inactive")}
                                                 </Badge>
                                             </td>
                                             <td className="py-4 px-4">

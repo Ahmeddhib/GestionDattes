@@ -9,24 +9,57 @@ datasource db {
 
 // ================== ENUMS ==================
 
+enum StatutPret {
+  EN_COURS  // caisses prêtées, pas encore retournées
+  RETOURNE  // toutes les caisses retournées
+  INCOMPLET // retour partiel — manque des caisses
+}
+
 enum AuditAction {
+  // Users
   CREATE_USER
   UPDATE_USER
   ACTIVATE_USER
   DEACTIVATE_USER
   CHANGE_ROLE
+  // Roles
   CREATE_ROLE
   UPDATE_ROLE
   DELETE_ROLE
+  // Régions
   CREATE_REGION
   UPDATE_REGION
   DELETE_REGION
+  // Agriculteurs
   CREATE_AGRICULTEUR
   UPDATE_AGRICULTEUR
   DELETE_AGRICULTEUR
+  // Référentiels
+  CREATE_TYPE_DATE
+  UPDATE_TYPE_DATE
+  DELETE_TYPE_DATE
+  CREATE_TYPE_CAISSE
+  UPDATE_TYPE_CAISSE
+  DELETE_TYPE_CAISSE
+  // Réception & Prêt
   CREATE_LIVRAISON
   UPDATE_LIVRAISON
   DELETE_LIVRAISON
+  CREATE_PRET_CAISSE
+  RETOUR_PRET_CAISSE
+  CREATE_BON_ACHAT
+  UPDATE_BON_ACHAT
+  CREATE_PESEE
+  UPDATE_PESEE
+  // Stock & Conditionnement
+  CREATE_STOCK
+  UPDATE_STOCK
+  CREATE_CONDITIONNEMENT
+  UPDATE_CONDITIONNEMENT
+  DELETE_CONDITIONNEMENT
+  // Ventes & Sorties
+  CREATE_CLIENT
+  UPDATE_CLIENT
   CREATE_VENTE
   UPDATE_VENTE
   DELETE_VENTE
@@ -56,13 +89,20 @@ model User {
   active    Boolean  @default(true)
   roleId    String
   role      Role     @relation(fields: [roleId], references: [id])
+  regionId  String?
+  region    Region?  @relation(fields: [regionId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  auditLogs AuditLog[] @relation("ActorLogs")
+  bonAchats   BonAchat[]   @relation("BonAchatCreator")
+  ventes      Vente[]      @relation("VenteCreator")
+  bonSorties  BonSortie[]  @relation("BonSortieCreator")
+  pretCaisses PretCaisse[] @relation("PretCreator")
+  auditLogs   AuditLog[]   @relation("ActorLogs")
 
   @@index([email])
   @@index([roleId])
+  @@index([regionId])
 }
 
 model AuditLog {
@@ -89,6 +129,7 @@ model Region {
   nom          String
   code         String?       @unique
   agriculteurs Agriculteur[]
+  users        User[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -108,21 +149,23 @@ model TypeDate {
 }
 
 model TypeCaisse {
-  id         String      @id @default(cuid())
-  nom        String      @unique
-  poidsKg    Float
-  livraisons Livraison[]
-  bonSorties BonSortie[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id               String            @id @default(cuid())
+  nom              String            @unique
+  poidsKg          Float
+  livraisons       Livraison[]
+  bonSorties       BonSortie[]
+  conditionnements Conditionnement[]
+  pretCaisses      PretCaisse[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 // ---- Gestion des Agriculteurs ----
 
 model Agriculteur {
-  id                String      @id @default(cuid())
-  code              String      @unique
-  cin               String      @unique
+  id                String       @id @default(cuid())
+  code              String       @unique
+  cin               String       @unique
   nom               String
   prenom            String
   telephone         String?
@@ -131,17 +174,49 @@ model Agriculteur {
   superficie        Float?
   productionEstimee Float?
   regionId          String
-  region            Region      @relation(fields: [regionId], references: [id])
+  region            Region       @relation(fields: [regionId], references: [id])
   livraisons        Livraison[]
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  pretCaisses       PretCaisse[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@index([code])
   @@index([cin])
   @@index([regionId])
+  @@index([nom])
 }
 
 // ---- Gestion des Livraisons & Réception ----
+
+// ---- Prêt de Caisses ----
+// Flux : gérant prête N caisses type X → agriculteur revient avec exactement N caisses type X
+// nombreRetourne doit être = nombrePrete pour statut RETOURNE
+// si nombreRetourne < nombrePrete → statut INCOMPLET + écart signalé
+model PretCaisse {
+  id              String     @id @default(cuid())
+  nombrePrete     Int
+  nombreRetourne  Int        @default(0)
+  statut          StatutPret @default(EN_COURS)
+  datePreT        DateTime   @default(now())
+  dateRetour      DateTime?
+  observations    String?
+  agriculteurId   String
+  agriculteur     Agriculteur @relation(fields: [agriculteurId], references: [id])
+  typeCaisseId    String
+  typeCaisse      TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
+  livraisonId     String?
+  livraison       Livraison?  @relation(fields: [livraisonId], references: [id])
+  createdById     String
+  createdBy       User        @relation("PretCreator", fields: [createdById], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([agriculteurId])
+  @@index([typeCaisseId])
+  @@index([livraisonId])
+  @@index([statut])
+  @@index([createdById])
+}
 
 model Livraison {
   id            String        @id @default(cuid())
@@ -158,12 +233,15 @@ model Livraison {
   pesee         Pesee?
   echantillons  Echantillon[]
   stocks        StockDate[]
+  pretCaisses   PretCaisse[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
   @@index([numeroLot])
   @@index([agriculteurId])
+  @@index([typeDateId])
   @@index([dateLivraison])
+  @@index([createdAt])
 }
 
 model BonAchat {
@@ -173,10 +251,13 @@ model BonAchat {
   montant     Float
   livraisonId String    @unique
   livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  createdById String
+  createdBy   User      @relation("BonAchatCreator", fields: [createdById], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([numero])
+  @@index([createdById])
 }
 
 model Pesee {
@@ -224,21 +305,38 @@ model Analyse {
 // ---- Gestion des Stocks ----
 
 model StockDate {
-  id          String      @id @default(cuid())
-  quantite    Float
-  dateEntree  DateTime    @default(now())
-  typeDateId  String
-  typeDate    TypeDate    @relation(fields: [typeDateId], references: [id])
-  livraisonId String
-  livraison   Livraison   @relation(fields: [livraisonId], references: [id])
-  ventes      Vente[]
-  bonSorties  BonSortie[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                 String            @id @default(cuid())
+  quantite           Float
+  quantiteDisponible Float
+  dateEntree         DateTime          @default(now())
+  typeDateId         String
+  typeDate           TypeDate          @relation(fields: [typeDateId], references: [id])
+  livraisonId        String
+  livraison          Livraison         @relation(fields: [livraisonId], references: [id])
+  conditionnements   Conditionnement[]
+  ventes             Vente[]
+  bonSorties         BonSortie[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   @@index([typeDateId])
   @@index([livraisonId])
   @@index([dateEntree])
+}
+
+model Conditionnement {
+  id            String     @id @default(cuid())
+  nombreCaisses Int
+  poidsTotal    Float
+  stockId       String
+  stock         StockDate  @relation(fields: [stockId], references: [id])
+  typeCaisseId  String
+  typeCaisse    TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([stockId])
+  @@index([typeCaisseId])
 }
 
 // ---- Gestion des Clients & Ventes ----
@@ -266,10 +364,13 @@ model Vente {
   client       Client    @relation(fields: [clientId], references: [id])
   stockId      String
   stock        StockDate @relation(fields: [stockId], references: [id])
+  createdById  String
+  createdBy    User      @relation("VenteCreator", fields: [createdById], references: [id])
   createdAt    DateTime  @default(now())
 
   @@index([clientId])
   @@index([stockId])
+  @@index([createdById])
   @@index([date])
 }
 
@@ -284,10 +385,13 @@ model BonSortie {
   stock          StockDate  @relation(fields: [stockId], references: [id])
   typeCaisseId   String
   typeCaisse     TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+  createdById    String
+  createdBy      User       @relation("BonSortieCreator", fields: [createdById], references: [id])
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
   @@index([numero])
   @@index([stockId])
+  @@index([createdById])
   @@index([dateSortie])
 }

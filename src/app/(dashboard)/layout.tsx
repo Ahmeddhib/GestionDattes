@@ -26,7 +26,7 @@ export default async function DashboardLayout({
             />
             <div className="flex-1 flex flex-col">
                 <TopBar />
-                <main className="flex-1 bg-sand">
+                <main className="flex-1 bg-white">
                     {children}
                 </main>
             </div>

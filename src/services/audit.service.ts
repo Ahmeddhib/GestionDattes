@@ -3,7 +3,7 @@ import { requirePermission } from "@/lib/permissions";
 import type { AuditAction } from "@/generated/prisma";
 
 export const auditService = {
-    async log(data: { actorId: string; action: AuditAction; description?: string; targetId?: string }) {
+    async log(data: { actorId: string; action: AuditAction; description?: string; targetId?: string; details?: any }) {
         return auditRepository.create(data);
     },
 

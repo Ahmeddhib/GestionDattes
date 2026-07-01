@@ -57,6 +57,7 @@ export const auditRepository = {
         action: AuditAction;
         description?: string;
         targetId?: string;
+        details?: any;
     }) {
         return prisma.auditLog.create({
             data,

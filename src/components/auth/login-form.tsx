@@ -10,6 +10,7 @@ import { ROUTES } from "@/lib/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/shared/Button";
 import { Eye, EyeOff, Mail, Lock, LogIn, AlertCircle, CheckCircle, ShieldCheck } from "lucide-react";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 const schema = z.object({
     email: z.string().email("Email invalide"),
@@ -20,6 +21,7 @@ type FormData = z.infer<typeof schema>;
 
 export function LoginForm() {
     const router = useRouter();
+    const { t } = useClientTranslations();
     const [showPwd, setShowPwd] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -54,7 +56,7 @@ export function LoginForm() {
             {/* Email */}
             <div className="space-y-1.5">
                 <label className="text-xs font-medium" style={{ color: "#5C3A1A" }}>
-                    Adresse email
+                    {t("auth.email")}
                 </label>
                 <div className="relative">
                     <Mail
@@ -79,7 +81,7 @@ export function LoginForm() {
             {/* Password */}
             <div className="space-y-1.5">
                 <label className="text-xs font-medium" style={{ color: "#5C3A1A" }}>
-                    Mot de passe
+                    {t("auth.password")}
                 </label>
                 <div className="relative">
                     <Lock
@@ -112,7 +114,7 @@ export function LoginForm() {
             {/* Forgot */}
             <div className="text-right">
                 <a href="#" className="text-xs hover:underline" style={{ color: "#C17A2B" }}>
-                    Mot de passe oublié ?
+                    {t("auth.forgotPassword")}
                 </a>
             </div>
 
@@ -124,7 +126,7 @@ export function LoginForm() {
                 style={{ background: "#C17A2B" }}
             >
                 <LogIn className="w-4 h-4" />
-                {loading ? "Connexion…" : "Se connecter"}
+                {loading ? t("auth.loggingIn") : t("auth.loginButton")}
             </Button>
 
             {/* Feedback */}

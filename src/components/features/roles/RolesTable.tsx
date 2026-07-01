@@ -12,6 +12,7 @@ import { Plus, Edit, Trash2, Shield } from "lucide-react";
 import { CreateRoleDialog } from "./CreateRoleDialog";
 import { UpdateRoleDialog } from "./UpdateRoleDialog";
 import { DeleteRoleDialog } from "./DeleteRoleDialog";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 interface Role {
     id: string;
@@ -29,6 +30,7 @@ interface RolesTableProps {
 }
 
 export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
+    const { t } = useClientTranslations();
     const router = useRouter();
     const [data, setData] = useState(initialData);
     const [total, setTotal] = useState(initialTotal);
@@ -79,21 +81,21 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-[#2C1A00]">Gestion des rôles</h2>
-                        <p className="text-gray-600 mt-1">Gérez les rôles et permissions du système</p>
+                        <h2 className="text-2xl font-bold text-[#2C1A00]">{t("roles.title")}</h2>
+                        <p className="text-gray-600 mt-1">{t("roles.description")}</p>
                     </div>
                     <Button
                         variant="primary"
                         onClick={() => setShowCreateDialog(true)}
                     >
                         <Plus className="w-4 h-4 mr-2" />
-                        Nouveau rôle
+                        {t("roles.createNew")}
                     </Button>
                 </div>
 
                 {/* Search */}
                 <SearchBar
-                    placeholder="Rechercher un rôle..."
+                    placeholder={t("roles.searchPlaceholder")}
                     onSearch={handleSearch}
                 />
 
@@ -102,15 +104,15 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                     {data.length === 0 ? (
                         <EmptyState
                             icon={<Shield className="w-12 h-12" />}
-                            title="Aucun rôle trouvé"
-                            description="Commencez par créer votre premier rôle"
+                            title={t("roles.noResults")}
+                            description={t("roles.noResultsDescription")}
                             action={
                                 <Button
                                     variant="primary"
                                     onClick={() => setShowCreateDialog(true)}
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Créer un rôle
+                                    {t("roles.createNew")}
                                 </Button>
                             }
                         />
@@ -120,16 +122,16 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                                 <thead>
                                     <tr className="border-b border-[#F0E0C0]">
                                         <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Nom
+                                            {t("roles.name")}
                                         </th>
                                         <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Description
+                                            {t("roles.description")}
                                         </th>
                                         <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Utilisateurs
+                                            {t("roles.users")}
                                         </th>
                                         <th className="text-right py-3 px-4 font-semibold text-[#2C1A00]">
-                                            Actions
+                                            {t("common.actions")}
                                         </th>
                                     </tr>
                                 </thead>
@@ -154,7 +156,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                                             </td>
                                             <td className="py-4 px-4">
                                                 <Badge variant="secondary">
-                                                    {role._count.users} utilisateur{role._count.users > 1 ? "s" : ""}
+                                                    {role._count.users} {role._count.users > 1 ? t("roles.usersCount") : t("roles.userCount")}
                                                 </Badge>
                                             </td>
                                             <td className="py-4 px-4">

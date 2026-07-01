@@ -1,0 +1,33 @@
+"use server";
+
+import { auth } from "@/lib/auth";
+import { regionService } from "@/services/region.service";
+import { updateRegionSchema, type UpdateRegionInput } from "@/validators/region.validator";
+
+/**
+ * Server Action: Mettre à jour une région
+ */
+export async function updateRegionAction(data: UpdateRegionInput) {
+    try {
+        const session = await auth();
+
+        if (!session?.user?.id) {
+            return { success: false, error: "Non authentifié" };
+        }
+
+        // Validation
+        const validated = updateRegionSchema.parse(data);
+
+        const region = await regionService.update(session.user.id, validated);
+
+        return { success: true, data: region };
+    } catch (error: any) {
+        console.error("❌ updateRegionAction error:", error);
+
+        if (error.name === "ZodError") {
+            return { success: false, error: "Données invalides", details: error.errors };
+        }
+
+        return { success: false, error: error.message || "Erreur lors de la mise à jour de la région" };
+    }
+}

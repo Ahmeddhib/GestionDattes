@@ -1,6 +1,6 @@
 import { userService } from "@/services/user.service";
 import { roleService } from "@/services/role.service";
-import { UsersTable } from "@/components/features/users/UsersTable";
+import { UsersPageContent } from "./UsersPageContent";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/shared/LoadingSkeleton";
 
@@ -15,7 +15,7 @@ async function UsersData() {
     ]);
 
     return (
-        <UsersTable
+        <UsersPageContent
             initialData={usersResult.data}
             initialTotal={usersResult.total}
             roles={rolesResult.data}
@@ -25,10 +25,8 @@ async function UsersData() {
 
 export default async function UsersPage() {
     return (
-        <div className="p-8">
-            <Suspense fallback={<TableSkeleton rows={8} />}>
-                <UsersData />
-            </Suspense>
-        </div>
+        <Suspense fallback={<TableSkeleton rows={8} />}>
+            <UsersData />
+        </Suspense>
     );
 }

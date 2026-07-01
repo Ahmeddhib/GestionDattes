@@ -1,14 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/shared/Button";
-import { updateUserAction } from "@/actions/users/update-user.action";
-import { toast } from "sonner";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { updateUserAction } from "@/actions/users/update-user.action";
+import { updateUserValidator, type UpdateUserInput } from "@/validators/user.validator";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 interface User {
     id: string;
@@ -28,126 +52,188 @@ interface UpdateUserDialogProps {
 }
 
 export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialogProps) {
+    const { t } = useClientTranslations();
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        name: user.name,
-        email: user.email,
-        password: "",
-        roleId: user.role.id,
+    const [isLoading, setIsLoading] = useState(false);
+
+    const form = useForm<UpdateUserInput>({
+        resolver: zodResolver(updateUserValidator),
+        defaultValues: {
+            name: user.name,
+            email: user.email,
+            password: "",
+            roleId: user.role.id,
+        },
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    useEffect(() => {
+        form.reset({
+            name: user.name,
+            email: user.email,
+            password: "",
+            roleId: user.role.id,
+        });
+    }, [user, form]);
 
+    const onSubmit = async (data: UpdateUserInput) => {
         try {
+            setIsLoading(true);
+
             // Remove password if empty
-            const dataToSend = formData.password
-                ? formData
-                : { name: formData.name, email: formData.email, roleId: formData.roleId };
+            const dataToSend = data.password
+                ? data
+                : { name: data.name, email: data.email, roleId: data.roleId };
 
             const result = await updateUserAction(user.id, dataToSend);
 
-            if (result.error) {
-                toast.error(typeof result.error === "string" ? result.error : "Erreur lors de la mise à jour");
-            } else {
-                toast.success("Utilisateur mis à jour avec succès");
-                router.refresh();
-                onClose();
+            if ("error" in result) {
+                const errorMessage = typeof result.error === "string"
+                    ? result.error
+                    : t("messages.error.generic");
+                toast.error(errorMessage);
+                return;
             }
+
+            toast.success(t("messages.success.updated", { entity: t("users.title") }));
+            onClose();
+            router.refresh();
         } catch (error) {
-            toast.error("Une erreur est survenue");
+            console.error("Erreur:", error);
+            toast.error(t("messages.error.generic"));
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="bg-white border-[#F0E0C0]">
+            <DialogContent className="sm:max-w-[500px] bg-white border-[#F0E0C0] rounded-[14px]">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-[#2C1A00]">
-                        Modifier l'utilisateur
-                    </DialogTitle>
+                    <DialogTitle className="text-[#3D1C00]">{t("users.updateDialog")}</DialogTitle>
+                    <DialogDescription className="text-[#3D1C00]/60">
+                        {t("users.updateDescription")}
+                    </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <Label htmlFor="name">Nom complet *</Label>
-                        <Input
-                            id="name"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="Ahmed Ben Salah"
-                            required
-                            className="rounded-[7px] border-[#F0E0C0]"
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[#3D1C00]">{t("users.name")} *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Ahmed Ben Salah"
+                                            {...field}
+                                            disabled={isLoading}
+                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
 
-                    <div>
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            placeholder="ahmed@dattes.tn"
-                            required
-                            className="rounded-[7px] border-[#F0E0C0]"
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[#3D1C00]">{t("users.email")} *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="email"
+                                            placeholder="ahmed@dattes.tn"
+                                            {...field}
+                                            disabled={isLoading}
+                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
 
-                    <div>
-                        <Label htmlFor="password">Nouveau mot de passe (optionnel)</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            placeholder="Laisser vide pour ne pas changer"
-                            minLength={6}
-                            className="rounded-[7px] border-[#F0E0C0]"
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[#3D1C00]">
+                                        {t("users.newPassword")}
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder={t("users.passwordOptional")}
+                                            {...field}
+                                            disabled={isLoading}
+                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
 
-                    <div>
-                        <Label htmlFor="roleId">Rôle *</Label>
-                        <Select
-                            value={formData.roleId}
-                            onValueChange={(value) => setFormData({ ...formData, roleId: value })}
-                        >
-                            <SelectTrigger className="rounded-[7px] border-[#F0E0C0]">
-                                <SelectValue placeholder="Sélectionner un rôle" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {roles.map((role) => (
-                                    <SelectItem key={role.id} value={role.id}>
-                                        {role.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                        <FormField
+                            control={form.control}
+                            name="roleId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[#3D1C00]">{t("users.role")} *</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        disabled={isLoading}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]">
+                                                <SelectValue placeholder={t("users.selectRole")} />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {roles.map((role) => (
+                                                <SelectItem key={role.id} value={role.id}>
+                                                    {role.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    <div className="flex gap-3 justify-end pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onClose}
-                            disabled={loading}
-                        >
-                            Annuler
-                        </Button>
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            disabled={loading}
-                        >
-                            {loading ? "Mise à jour..." : "Enregistrer"}
-                        </Button>
-                    </div>
-                </form>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="rounded-[9px] border-[#F0E0C0]"
+                            >
+                                {t("common.cancel")}
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        {t("users.updating")}
+                                    </>
+                                ) : (
+                                    t("common.save")
+                                )}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     );

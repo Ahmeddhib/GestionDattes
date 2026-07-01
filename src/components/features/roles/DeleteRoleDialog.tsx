@@ -15,6 +15,7 @@ import { deleteRoleAction } from "@/actions/roles/delete-role.action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 interface Role {
     id: string;
@@ -28,6 +29,7 @@ interface DeleteRoleDialogProps {
 }
 
 export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps) {
+    const { t } = useClientTranslations();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -38,14 +40,14 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
             const result = await deleteRoleAction(role.id);
 
             if (result.error) {
-                toast.error(typeof result.error === "string" ? result.error : "Erreur lors de la suppression");
+                toast.error(typeof result.error === "string" ? result.error : t("messages.error.generic"));
             } else {
-                toast.success("Rôle supprimé avec succès");
+                toast.success(t("messages.success.deleted", { entity: t("roles.title") }));
                 router.refresh();
                 onClose();
             }
         } catch (error) {
-            toast.error("Une erreur est survenue");
+            toast.error(t("messages.error.generic"));
         } finally {
             setLoading(false);
         }
@@ -60,18 +62,19 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
                             <AlertTriangle className="w-6 h-6 text-red-600" />
                         </div>
                         <AlertDialogTitle className="text-xl font-bold text-[#2C1A00]">
-                            Supprimer le rôle
+                            {t("roles.deleteDialog")}
                         </AlertDialogTitle>
                     </div>
                     <AlertDialogDescription className="text-gray-600">
-                        Êtes-vous sûr de vouloir supprimer le rôle <strong>{role.name}</strong> ?
-                        Cette action est irréversible.
+                        {t("roles.deleteWarning", { name: role.name })}
+                        <br />
+                        {t("roles.deleteIrreversible")}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel asChild>
                         <Button variant="outline" disabled={loading}>
-                            Annuler
+                            {t("common.cancel")}
                         </Button>
                     </AlertDialogCancel>
                     <Button
@@ -80,7 +83,7 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
                         disabled={loading}
                         className="bg-red-600 hover:bg-red-700"
                     >
-                        {loading ? "Suppression..." : "Supprimer"}
+                        {loading ? t("roles.deleting") : t("common.delete")}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

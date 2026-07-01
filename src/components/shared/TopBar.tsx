@@ -2,24 +2,31 @@
 
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-
-const routeNames: Record<string, string> = {
-    "/dashboard": "Tableau de bord",
-    "/dashboard/users": "Utilisateurs",
-    "/dashboard/roles": "Rôles",
-    "/dashboard/audit-logs": "Journal d'audit",
-};
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 export function TopBar() {
     const pathname = usePathname();
-    const pageName = routeNames[pathname] || "Dashboard";
+    const { t } = useClientTranslations();
+
+    // Map routes to translation keys
+    const routeTranslationKeys: Record<string, string> = {
+        "/dashboard": "nav.dashboard",
+        "/dashboard/users": "nav.users",
+        "/dashboard/roles": "nav.roles",
+        "/dashboard/audit-logs": "nav.auditLogs",
+        "/dashboard/regions": "nav.regions",
+        "/dashboard/agriculteurs": "nav.agriculteurs",
+    };
+
+    const pageName = t(routeTranslationKeys[pathname] || "nav.dashboard");
 
     // Generate breadcrumbs
     const segments = pathname.split("/").filter(Boolean);
     const breadcrumbs = segments.map((segment, index) => {
         const path = "/" + segments.slice(0, index + 1).join("/");
         return {
-            label: routeNames[path] || segment.charAt(0).toUpperCase() + segment.slice(1),
+            label: t(routeTranslationKeys[path] || "common.loading"),
             path,
             isLast: index === segments.length - 1,
         };
@@ -41,6 +48,11 @@ export function TopBar() {
                         </div>
                     ))}
                 </div>
+            </div>
+
+            {/* Language Switcher */}
+            <div className="flex items-center gap-2">
+                <LanguageSwitcher />
             </div>
         </header>
     );
