@@ -1,7 +1,53 @@
 import { z } from "zod";
 
 /**
- * Validation pour la création d'un agriculteur
+ * Factory function pour créer les validateurs d'agriculteur avec messages traduits
+ */
+export const createAgriculteurValidators = (t: (key: string) => string) => {
+    const createAgriculteurSchema = z.object({
+        code: z
+            .string()
+            .min(3, t("validation.minLength").replace("{min}", "3"))
+            .max(20, t("validation.maxLength").replace("{max}", "20")),
+        cin: z
+            .string()
+            .length(8, t("validation.cinExact")),
+        nom: z.string().min(2, t("validation.minLength").replace("{min}", "2")),
+        prenom: z.string().min(2, t("validation.minLength").replace("{min}", "2")),
+        telephone: z.string().optional(),
+        adresse: z.string().optional(),
+        nbPalmiers: z.number().int(t("validation.integer")).min(1, t("validation.minValue").replace("{min}", "1")),
+        superficie: z.number().positive(t("validation.positive")).optional(),
+        productionEstimee: z.number().positive(t("validation.positive")).optional(),
+        regionId: z.string().min(1, t("validation.required")),
+    });
+
+    const updateAgriculteurSchema = z.object({
+        id: z.string().min(1, t("validation.required")),
+        code: z
+            .string()
+            .min(3, t("validation.minLength").replace("{min}", "3"))
+            .max(20, t("validation.maxLength").replace("{max}", "20"))
+            .optional(),
+        cin: z
+            .string()
+            .length(8, t("validation.cinExact"))
+            .optional(),
+        nom: z.string().min(2, t("validation.minLength").replace("{min}", "2")).optional(),
+        prenom: z.string().min(2, t("validation.minLength").replace("{min}", "2")).optional(),
+        telephone: z.string().optional().nullable(),
+        adresse: z.string().optional().nullable(),
+        nbPalmiers: z.number().int(t("validation.integer")).min(1, t("validation.minValue").replace("{min}", "1")).optional(),
+        superficie: z.number().positive(t("validation.positive")).optional().nullable(),
+        productionEstimee: z.number().positive(t("validation.positive")).optional().nullable(),
+        regionId: z.string().min(1, t("validation.required")).optional(),
+    });
+
+    return { createAgriculteurSchema, updateAgriculteurSchema };
+};
+
+/**
+ * Schémas par défaut (français) pour compatibilité
  */
 export const createAgriculteurSchema = z.object({
     code: z.string().min(3, "Le code doit contenir au moins 3 caractères").max(20, "Le code ne peut pas dépasser 20 caractères"),
@@ -16,9 +62,6 @@ export const createAgriculteurSchema = z.object({
     regionId: z.string().min(1, "La région est requise"),
 });
 
-/**
- * Validation pour la mise à jour d'un agriculteur
- */
 export const updateAgriculteurSchema = z.object({
     id: z.string().min(1, "L'ID est requis"),
     code: z.string().min(3, "Le code doit contenir au moins 3 caractères").max(20, "Le code ne peut pas dépasser 20 caractères").optional(),
@@ -33,8 +76,6 @@ export const updateAgriculteurSchema = z.object({
     regionId: z.string().min(1, "La région est requise").optional(),
 });
 
-/**
- * Types TypeScript dérivés des schémas
- */
 export type CreateAgriculteurInput = z.infer<typeof createAgriculteurSchema>;
 export type UpdateAgriculteurInput = z.infer<typeof updateAgriculteurSchema>;
+

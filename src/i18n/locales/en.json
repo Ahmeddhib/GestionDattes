@@ -22,6 +22,21 @@
         "lastPage": "Last page",
         "columns": "Columns"
     },
+    "validation": {
+        "required": "This field is required",
+        "invalidEmail": "Invalid email",
+        "minLength": "Must contain at least {min} characters",
+        "maxLength": "Cannot exceed {max} characters",
+        "minValue": "Must be at least {min}",
+        "positive": "Must be a positive number",
+        "integer": "Must be an integer",
+        "invalidFormat": "Invalid format",
+        "exactLength": "Must contain exactly {length} characters",
+        "uppercaseOnly": "Must be uppercase only",
+        "roleFormat": "Name must be uppercase with underscores (e.g., SUPER_ADMIN)",
+        "passwordMin": "Password must contain at least 8 characters",
+        "cinExact": "ID number must contain exactly 8 characters"
+    },
     "nav": {
         "dashboard": "Dashboard",
         "regions": "Regions",
@@ -117,7 +132,7 @@
         "total": "Total Roles",
         "createNew": "New Role",
         "name": "Role name",
-        "description": "Description",
+        "descriptionLabel": "Description",
         "descriptionPlaceholder": "Role description and responsibilities",
         "users": "Users",
         "userCount": "user",

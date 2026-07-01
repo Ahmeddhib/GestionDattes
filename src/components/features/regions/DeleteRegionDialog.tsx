@@ -67,7 +67,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] border-[#F0E0C0] rounded-[14px]">
+            <DialogContent className="sm:max-w-[500px] bg-white border-[#F0E0C0] rounded-[14px]">
                 <DialogHeader>
                     <div className="flex items-start gap-4">
                         <div className="rounded-full bg-red-100 p-3">
@@ -88,7 +88,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
                 </DialogHeader>
 
                 {!canDelete && (
-                    <div className="rounded-[7px] bg-red-50 border border-red-200 p-4">
+                    <div className="rounded-[7px] bg-white border border-red-200 p-4">
                         <p className="text-sm text-red-800 font-medium mb-2">
                             ❌ {t("messages.error.cannotDelete", { entity: t("regions.title") })}
                         </p>
@@ -106,7 +106,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
                 )}
 
                 {canDelete && (
-                    <div className="rounded-[7px] bg-amber-50 border border-amber-200 p-4">
+                    <div className="rounded-[7px] bg-white border border-amber-500 p-4">
                         <p className="text-sm text-amber-800">
                             ⚠️ {t("regions.deleteIrreversible")}
                         </p>

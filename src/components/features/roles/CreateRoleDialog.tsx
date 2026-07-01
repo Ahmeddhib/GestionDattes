@@ -108,7 +108,7 @@ export function CreateRoleDialog({ open, onClose }: CreateRoleDialogProps) {
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("roles.description")}</FormLabel>
+                                    <FormLabel className="text-[#3D1C00]">{t("roles.descriptionLabel")}</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             placeholder={t("roles.descriptionPlaceholder")}

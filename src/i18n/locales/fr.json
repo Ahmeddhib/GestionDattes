@@ -22,6 +22,21 @@
         "lastPage": "Dernière page",
         "columns": "Colonnes"
     },
+    "validation": {
+        "required": "Ce champ est requis",
+        "invalidEmail": "Email invalide",
+        "minLength": "Doit contenir au moins {min} caractères",
+        "maxLength": "Ne peut pas dépasser {max} caractères",
+        "minValue": "Doit être au moins {min}",
+        "positive": "Doit être un nombre positif",
+        "integer": "Doit être un nombre entier",
+        "invalidFormat": "Format invalide",
+        "exactLength": "Doit contenir exactement {length} caractères",
+        "uppercaseOnly": "Doit être en majuscules uniquement",
+        "roleFormat": "Le nom doit être en majuscules avec underscores (ex: SUPER_ADMIN)",
+        "passwordMin": "Le mot de passe doit contenir au moins 8 caractères",
+        "cinExact": "Le CIN doit contenir exactement 8 caractères"
+    },
     "nav": {
         "dashboard": "Tableau de bord",
         "regions": "Régions",
@@ -117,7 +132,7 @@
         "total": "Total Rôles",
         "createNew": "Nouveau Rôle",
         "name": "Nom du rôle",
-        "description": "Description",
+        "descriptionLabel": "Description",
         "descriptionPlaceholder": "Description du rôle et de ses responsabilités",
         "users": "Utilisateurs",
         "userCount": "utilisateur",

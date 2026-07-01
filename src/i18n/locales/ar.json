@@ -22,6 +22,21 @@
         "lastPage": "الصفحة الأخيرة",
         "columns": "الأعمدة"
     },
+    "validation": {
+        "required": "هذا الحقل مطلوب",
+        "invalidEmail": "البريد الإلكتروني غير صالح",
+        "minLength": "يجب أن يحتوي على {min} أحرف على الأقل",
+        "maxLength": "لا يمكن أن يتجاوز {max} حرف",
+        "minValue": "يجب أن يكون على الأقل {min}",
+        "positive": "يجب أن يكون رقمًا موجبًا",
+        "integer": "يجب أن يكون رقمًا صحيحًا",
+        "invalidFormat": "صيغة غير صالحة",
+        "exactLength": "يجب أن يحتوي على {length} أحرف بالضبط",
+        "uppercaseOnly": "يجب أن يكون بأحرف كبيرة فقط",
+        "roleFormat": "يجب أن يكون الاسم بأحرف كبيرة مع شرطات سفلية (مثال: SUPER_ADMIN)",
+        "passwordMin": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل",
+        "cinExact": "يجب أن يحتوي رقم التعريف على 8 أحرف بالضبط"
+    },
     "nav": {
         "dashboard": "لوحة التحكم",
         "regions": "المناطق",
@@ -117,7 +132,7 @@
         "total": "إجمالي الأدوار",
         "createNew": "دور جديد",
         "name": "اسم الدور",
-        "description": "الوصف",
+        "descriptionLabel": "الوصف",
         "descriptionPlaceholder": "وصف الدور ومسؤولياته",
         "users": "المستخدمون",
         "userCount": "مستخدم",

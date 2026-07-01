@@ -55,7 +55,7 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
 
     return (
         <AlertDialog open={open} onOpenChange={onClose}>
-            <AlertDialogContent className="bg-white border-[#F0E0C0]">
+            <AlertDialogContent className="bg-white border-[#F0E0C0] rounded-[14px]">
                 <AlertDialogHeader>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="w-12 h-12 rounded-[9px] bg-red-100 flex items-center justify-center">
@@ -65,10 +65,13 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
                             {t("roles.deleteDialog")}
                         </AlertDialogTitle>
                     </div>
-                    <AlertDialogDescription className="text-gray-600">
-                        {t("roles.deleteWarning", { name: role.name })}
-                        <br />
-                        {t("roles.deleteIrreversible")}
+                    <AlertDialogDescription className="text-gray-600 bg-white border border-amber-500 rounded-[7px] p-4 mt-4">
+                        <p className="text-sm text-amber-800 mb-2">
+                            ⚠️ {t("roles.deleteWarning", { name: role.name })}
+                        </p>
+                        <p className="text-sm text-amber-800">
+                            {t("roles.deleteIrreversible")}
+                        </p>
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
