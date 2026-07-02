@@ -4,27 +4,28 @@ import { requirePermission } from "@/lib/permissions";
 import type { CreateRegionInput, UpdateRegionInput } from "@/validators/region.validator";
 
 /**
- * Service de gestion des régions
+ * Service de gestion des régions (MULTI-TENANT)
  * Logique métier + RBAC + Audit
+ * Toutes les opérations sont filtrées par tenantId
  */
 export const regionService = {
     /**
-     * Récupérer toutes les régions
+     * Récupérer toutes les régions (du tenant)
      * Permission: Tous les utilisateurs authentifiés peuvent voir les régions
      */
-    async getAll(userId: string) {
+    async getAll(tenantId: string, userId: string) {
         await requirePermission("region:read");
 
-        return regionRepository.findAll();
+        return regionRepository.findAll(tenantId);
     },
 
     /**
-     * Récupérer une région par ID
+     * Récupérer une région par ID (avec vérification tenant)
      */
-    async getById(userId: string, regionId: string) {
+    async getById(tenantId: string, userId: string, regionId: string) {
         await requirePermission("region:read");
 
-        const region = await regionRepository.findById(regionId);
+        const region = await regionRepository.findById(tenantId, regionId);
 
         if (!region) {
             throw new Error("Région introuvable");
@@ -34,27 +35,28 @@ export const regionService = {
     },
 
     /**
-     * Créer une nouvelle région
+     * Créer une nouvelle région (dans le tenant)
      * Permission: ADMIN uniquement
      */
-    async create(userId: string, data: CreateRegionInput) {
+    async create(tenantId: string, userId: string, data: CreateRegionInput) {
         await requirePermission("region:create");
 
-        // Vérifier que le code n'existe pas déjà (si fourni)
+        // Vérifier que le code n'existe pas déjà dans ce tenant
         if (data.code) {
-            const existing = await regionRepository.findByCode(data.code);
+            const existing = await regionRepository.findByCode(tenantId, data.code);
             if (existing) {
-                throw new Error("Une région avec ce code existe déjà");
+                throw new Error("Une région avec ce code existe déjà dans cette Wakala");
             }
         }
 
-        const region = await regionRepository.create({
+        const region = await regionRepository.create(tenantId, {
             nom: data.nom,
             code: data.code,
         });
 
         // Audit
         await auditService.log({
+            tenantId, // IMPORTANT: Audit aussi filtré par tenant
             actorId: userId,
             action: "CREATE_REGION",
             targetId: region.id,
@@ -66,32 +68,33 @@ export const regionService = {
     },
 
     /**
-     * Mettre à jour une région
+     * Mettre à jour une région (avec vérification tenant)
      * Permission: ADMIN uniquement
      */
-    async update(userId: string, data: UpdateRegionInput) {
+    async update(tenantId: string, userId: string, data: UpdateRegionInput) {
         await requirePermission("region:update");
 
-        const existing = await regionRepository.findById(data.id);
+        const existing = await regionRepository.findById(tenantId, data.id);
         if (!existing) {
             throw new Error("Région introuvable");
         }
 
-        // Vérifier que le nouveau code n'existe pas déjà (si fourni et différent)
+        // Vérifier que le nouveau code n'existe pas déjà dans ce tenant
         if (data.code && data.code !== existing.code) {
-            const codeExists = await regionRepository.findByCode(data.code);
+            const codeExists = await regionRepository.findByCode(tenantId, data.code);
             if (codeExists) {
-                throw new Error("Une région avec ce code existe déjà");
+                throw new Error("Une région avec ce code existe déjà dans cette Wakala");
             }
         }
 
-        const region = await regionRepository.update(data.id, {
+        const region = await regionRepository.update(tenantId, data.id, {
             nom: data.nom,
             code: data.code,
         });
 
         // Audit
         await auditService.log({
+            tenantId,
             actorId: userId,
             action: "UPDATE_REGION",
             targetId: region.id,
@@ -103,34 +106,29 @@ export const regionService = {
     },
 
     /**
-     * Supprimer une région
+     * Supprimer une région (avec vérification tenant)
      * Permission: ADMIN uniquement
-     * Règle métier: Une région ne peut être supprimée si elle a des agriculteurs ou utilisateurs associés
+     * Règle métier: Une région ne peut être supprimée si elle a des agriculteurs associés
      */
-    async delete(userId: string, regionId: string) {
+    async delete(tenantId: string, userId: string, regionId: string) {
         await requirePermission("region:delete");
 
-        const region = await regionRepository.findById(regionId);
+        const region = await regionRepository.findById(tenantId, regionId);
         if (!region) {
             throw new Error("Région introuvable");
         }
 
-        // Vérifier qu'aucun agriculteur n'est associé
-        const hasAgriculteurs = await regionRepository.hasAgriculteurs(regionId);
+        // Vérifier qu'aucun agriculteur n'est associé (dans ce tenant)
+        const hasAgriculteurs = await regionRepository.hasAgriculteurs(tenantId, regionId);
         if (hasAgriculteurs) {
             throw new Error("Impossible de supprimer une région avec des agriculteurs associés");
         }
 
-        // Vérifier qu'aucun utilisateur n'est associé
-        const hasUsers = await regionRepository.hasUsers(regionId);
-        if (hasUsers) {
-            throw new Error("Impossible de supprimer une région avec des utilisateurs associés");
-        }
-
-        await regionRepository.delete(regionId);
+        await regionRepository.delete(tenantId, regionId);
 
         // Audit
         await auditService.log({
+            tenantId,
             actorId: userId,
             action: "DELETE_REGION",
             targetId: regionId,

@@ -7,41 +7,434 @@ datasource db {
   provider = "postgresql"
 }
 
-// ================== ENUMS ==================
+model Agriculteur {
+  id                String       @id @default(cuid())
+  code              String
+  cin               String
+  nom               String
+  prenom            String
+  telephone         String?
+  adresse           String?
+  nbPalmiers        Int
+  superficie        Float?
+  productionEstimee Float?
+  regionId          String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  tenantId          String
+  Region            Region       @relation(fields: [regionId], references: [id])
+  Tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Livraison         Livraison[]
+  PretCaisse        PretCaisse[]
 
-enum StatutPret {
-  EN_COURS  // caisses prêtées, pas encore retournées
-  RETOURNE  // toutes les caisses retournées
-  INCOMPLET // retour partiel — manque des caisses
+  @@unique([tenantId, cin])
+  @@unique([tenantId, code])
+  @@index([cin])
+  @@index([code])
+  @@index([nom])
+  @@index([regionId])
+  @@index([tenantId])
+}
+
+model Analyse {
+  id            String      @id
+  echantillonId String
+  dateAnalyse   DateTime    @default(now())
+  humidite      Float?
+  tauxSucre     Float?
+  calibre       String?
+  qualite       String?
+  observations  String?
+  conforme      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime
+  tenantId      String
+  Echantillon   Echantillon @relation(fields: [echantillonId], references: [id])
+  Tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([dateAnalyse])
+  @@index([echantillonId])
+  @@index([tenantId])
+}
+
+model AuditLog {
+  id          String      @id
+  actorId     String
+  targetId    String?
+  action      AuditAction
+  description String?
+  details     Json?
+  createdAt   DateTime    @default(now())
+  tenantId    String
+  User        User        @relation(fields: [actorId], references: [id])
+  Tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([action])
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([targetId])
+  @@index([tenantId])
+}
+
+model BonAchat {
+  id          String    @id
+  numero      String
+  prixKg      Float
+  montant     Float
+  livraisonId String    @unique
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  tenantId    String
+  User        User      @relation(fields: [createdById], references: [id])
+  Livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  Tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, numero])
+  @@index([createdById])
+  @@index([numero])
+  @@index([tenantId])
+}
+
+model BonSortie {
+  id             String     @id
+  numero         String
+  dateSortie     DateTime   @default(now())
+  quantiteTotale Float
+  stockId        String
+  typeCaisseId   String
+  createdById    String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime
+  tenantId       String
+  User           User       @relation(fields: [createdById], references: [id])
+  StockDate      StockDate  @relation(fields: [stockId], references: [id])
+  Tenant         Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse     TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+
+  @@unique([tenantId, numero])
+  @@index([createdById])
+  @@index([dateSortie])
+  @@index([numero])
+  @@index([stockId])
+  @@index([tenantId])
+}
+
+model Client {
+  id        String   @id
+  nom       String
+  telephone String?
+  adresse   String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  tenantId  String
+  Tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Vente     Vente[]
+
+  @@index([nom])
+  @@index([tenantId])
+}
+
+model Conditionnement {
+  id            String     @id
+  nombreCaisses Int
+  poidsTotal    Float
+  stockId       String
+  typeCaisseId  String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime
+  tenantId      String
+  StockDate     StockDate  @relation(fields: [stockId], references: [id])
+  Tenant        Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse    TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+
+  @@index([stockId])
+  @@index([tenantId])
+  @@index([typeCaisseId])
+}
+
+model Echantillon {
+  id          String    @id
+  code        String
+  livraisonId String
+  createdAt   DateTime  @default(now())
+  tenantId    String
+  Analyse     Analyse[]
+  Livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  Tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, code])
+  @@index([code])
+  @@index([livraisonId])
+  @@index([tenantId])
+}
+
+model Livraison {
+  id            String        @id
+  numeroLot     String
+  dateLivraison DateTime
+  quantiteKg    Float
+  agriculteurId String
+  typeDateId    String
+  typeCaisseId  String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime
+  tenantId      String
+  BonAchat      BonAchat?
+  Echantillon   Echantillon[]
+  Agriculteur   Agriculteur   @relation(fields: [agriculteurId], references: [id])
+  Tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse    TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
+  TypeDate      TypeDate      @relation(fields: [typeDateId], references: [id])
+  Pesee         Pesee?
+  PretCaisse    PretCaisse[]
+  StockDate     StockDate[]
+
+  @@unique([tenantId, numeroLot])
+  @@index([agriculteurId])
+  @@index([createdAt])
+  @@index([dateLivraison])
+  @@index([numeroLot])
+  @@index([tenantId])
+  @@index([typeDateId])
+}
+
+model Pesee {
+  id          String    @id
+  poidsBrut   Float
+  poidsNet    Float
+  tare        Float?
+  livraisonId String    @unique
+  createdAt   DateTime  @default(now())
+  tenantId    String
+  Livraison   Livraison @relation(fields: [livraisonId], references: [id])
+  Tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model PretCaisse {
+  id             String      @id
+  nombrePrete    Int
+  nombreRetourne Int         @default(0)
+  statut         StatutPret  @default(EN_COURS)
+  datePreT       DateTime    @default(now())
+  dateRetour     DateTime?
+  observations   String?
+  agriculteurId  String
+  typeCaisseId   String
+  livraisonId    String?
+  createdById    String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime
+  tenantId       String
+  Agriculteur    Agriculteur @relation(fields: [agriculteurId], references: [id])
+  User           User        @relation(fields: [createdById], references: [id])
+  Livraison      Livraison?  @relation(fields: [livraisonId], references: [id])
+  Tenant         Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse     TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
+
+  @@index([agriculteurId])
+  @@index([createdById])
+  @@index([livraisonId])
+  @@index([statut])
+  @@index([tenantId])
+  @@index([typeCaisseId])
+}
+
+model Region {
+  id          String        @id @default(cuid())
+  nom         String
+  code        String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  tenantId    String
+  Agriculteur Agriculteur[]
+  Tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, code])
+  @@index([code])
+  @@index([tenantId])
+}
+
+model Role {
+  id          String       @id
+  name        String       @unique
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  TenantUser  TenantUser[]
+}
+
+model StockDate {
+  id                 String            @id
+  quantite           Float
+  quantiteDisponible Float
+  dateEntree         DateTime          @default(now())
+  typeDateId         String
+  livraisonId        String
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime
+  tenantId           String
+  BonSortie          BonSortie[]
+  Conditionnement    Conditionnement[]
+  Livraison          Livraison         @relation(fields: [livraisonId], references: [id])
+  Tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeDate           TypeDate          @relation(fields: [typeDateId], references: [id])
+  Vente              Vente[]
+
+  @@index([dateEntree])
+  @@index([livraisonId])
+  @@index([tenantId])
+  @@index([typeDateId])
+}
+
+model Tenant {
+  id              String            @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name            String
+  code            String            @unique
+  active          Boolean           @default(true)
+  address         String?
+  phone           String?
+  email           String?
+  settings        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now())
+  Agriculteur     Agriculteur[]
+  Analyse         Analyse[]
+  AuditLog        AuditLog[]
+  BonAchat        BonAchat[]
+  BonSortie       BonSortie[]
+  Client          Client[]
+  Conditionnement Conditionnement[]
+  Echantillon     Echantillon[]
+  Livraison       Livraison[]
+  Pesee           Pesee[]
+  PretCaisse      PretCaisse[]
+  Region          Region[]
+  StockDate       StockDate[]
+  TenantUser      TenantUser[]
+  TypeCaisse      TypeCaisse[]
+  TypeDate        TypeDate[]
+  Vente           Vente[]
+
+  @@index([active])
+  @@index([code])
+}
+
+model TenantUser {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId    String
+  tenantId  String
+  roleId    String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  Role      Role     @relation(fields: [roleId], references: [id])
+  Tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([roleId])
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model TypeCaisse {
+  id              String            @id
+  nom             String
+  poidsKg         Float
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  tenantId        String
+  BonSortie       BonSortie[]
+  Conditionnement Conditionnement[]
+  Livraison       Livraison[]
+  PretCaisse      PretCaisse[]
+  Tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, nom])
+  @@index([tenantId])
+}
+
+model TypeDate {
+  id          String      @id
+  nom         String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime
+  tenantId    String
+  Livraison   Livraison[]
+  StockDate   StockDate[]
+  Tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, nom])
+  @@index([tenantId])
+}
+
+model User {
+  id         String       @id
+  name       String
+  email      String       @unique
+  password   String
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  AuditLog   AuditLog[]
+  BonAchat   BonAchat[]
+  BonSortie  BonSortie[]
+  PretCaisse PretCaisse[]
+  TenantUser TenantUser[]
+  Vente      Vente[]
+
+  @@index([email])
+}
+
+model Vente {
+  id           String    @id
+  date         DateTime  @default(now())
+  quantite     Float
+  prixUnitaire Float
+  montant      Float
+  clientId     String
+  stockId      String
+  createdById  String
+  createdAt    DateTime  @default(now())
+  tenantId     String
+  Client       Client    @relation(fields: [clientId], references: [id])
+  User         User      @relation(fields: [createdById], references: [id])
+  StockDate    StockDate @relation(fields: [stockId], references: [id])
+  Tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([createdById])
+  @@index([date])
+  @@index([stockId])
+  @@index([tenantId])
 }
 
 enum AuditAction {
-  // Users
   CREATE_USER
   UPDATE_USER
   ACTIVATE_USER
   DEACTIVATE_USER
   CHANGE_ROLE
-  // Roles
   CREATE_ROLE
   UPDATE_ROLE
   DELETE_ROLE
-  // Régions
   CREATE_REGION
   UPDATE_REGION
   DELETE_REGION
-  // Agriculteurs
   CREATE_AGRICULTEUR
   UPDATE_AGRICULTEUR
   DELETE_AGRICULTEUR
-  // Référentiels
   CREATE_TYPE_DATE
   UPDATE_TYPE_DATE
   DELETE_TYPE_DATE
   CREATE_TYPE_CAISSE
   UPDATE_TYPE_CAISSE
   DELETE_TYPE_CAISSE
-  // Réception & Prêt
   CREATE_LIVRAISON
   UPDATE_LIVRAISON
   DELETE_LIVRAISON
@@ -51,13 +444,11 @@ enum AuditAction {
   UPDATE_BON_ACHAT
   CREATE_PESEE
   UPDATE_PESEE
-  // Stock & Conditionnement
   CREATE_STOCK
   UPDATE_STOCK
   CREATE_CONDITIONNEMENT
   UPDATE_CONDITIONNEMENT
   DELETE_CONDITIONNEMENT
-  // Ventes & Sorties
   CREATE_CLIENT
   UPDATE_CLIENT
   CREATE_VENTE
@@ -66,332 +457,14 @@ enum AuditAction {
   CREATE_BON_SORTIE
   UPDATE_BON_SORTIE
   DELETE_BON_SORTIE
+  CREATE_TENANT
+  UPDATE_TENANT
+  ACTIVATE_TENANT
+  DEACTIVATE_TENANT
 }
 
-// ================== MODELS ==================
-
-// ---- Gestion des Utilisateurs & RBAC ----
-
-model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-  users       User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  active    Boolean  @default(true)
-  roleId    String
-  role      Role     @relation(fields: [roleId], references: [id])
-  regionId  String?
-  region    Region?  @relation(fields: [regionId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  bonAchats   BonAchat[]   @relation("BonAchatCreator")
-  ventes      Vente[]      @relation("VenteCreator")
-  bonSorties  BonSortie[]  @relation("BonSortieCreator")
-  pretCaisses PretCaisse[] @relation("PretCreator")
-  auditLogs   AuditLog[]   @relation("ActorLogs")
-
-  @@index([email])
-  @@index([roleId])
-  @@index([regionId])
-}
-
-model AuditLog {
-  id          String      @id @default(cuid())
-  actorId     String
-  targetId    String?
-  action      AuditAction
-  description String?
-  details     Json?
-  createdAt   DateTime    @default(now())
-
-  actor User @relation("ActorLogs", fields: [actorId], references: [id])
-
-  @@index([actorId])
-  @@index([targetId])
-  @@index([action])
-  @@index([createdAt])
-}
-
-// ---- Gestion Géographique ----
-
-model Region {
-  id           String        @id @default(cuid())
-  nom          String
-  code         String?       @unique
-  agriculteurs Agriculteur[]
-  users        User[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-
-  @@index([code])
-}
-
-// ---- Gestion des Produits ----
-
-model TypeDate {
-  id          String      @id @default(cuid())
-  nom         String      @unique
-  description String?
-  livraisons  Livraison[]
-  stocks      StockDate[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-model TypeCaisse {
-  id               String            @id @default(cuid())
-  nom              String            @unique
-  poidsKg          Float
-  livraisons       Livraison[]
-  bonSorties       BonSortie[]
-  conditionnements Conditionnement[]
-  pretCaisses      PretCaisse[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-}
-
-// ---- Gestion des Agriculteurs ----
-
-model Agriculteur {
-  id                String       @id @default(cuid())
-  code              String       @unique
-  cin               String       @unique
-  nom               String
-  prenom            String
-  telephone         String?
-  adresse           String?
-  nbPalmiers        Int
-  superficie        Float?
-  productionEstimee Float?
-  regionId          String
-  region            Region       @relation(fields: [regionId], references: [id])
-  livraisons        Livraison[]
-  pretCaisses       PretCaisse[]
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-
-  @@index([code])
-  @@index([cin])
-  @@index([regionId])
-  @@index([nom])
-}
-
-// ---- Gestion des Livraisons & Réception ----
-
-// ---- Prêt de Caisses ----
-// Flux : gérant prête N caisses type X → agriculteur revient avec exactement N caisses type X
-// nombreRetourne doit être = nombrePrete pour statut RETOURNE
-// si nombreRetourne < nombrePrete → statut INCOMPLET + écart signalé
-model PretCaisse {
-  id              String     @id @default(cuid())
-  nombrePrete     Int
-  nombreRetourne  Int        @default(0)
-  statut          StatutPret @default(EN_COURS)
-  datePreT        DateTime   @default(now())
-  dateRetour      DateTime?
-  observations    String?
-  agriculteurId   String
-  agriculteur     Agriculteur @relation(fields: [agriculteurId], references: [id])
-  typeCaisseId    String
-  typeCaisse      TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
-  livraisonId     String?
-  livraison       Livraison?  @relation(fields: [livraisonId], references: [id])
-  createdById     String
-  createdBy       User        @relation("PretCreator", fields: [createdById], references: [id])
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@index([agriculteurId])
-  @@index([typeCaisseId])
-  @@index([livraisonId])
-  @@index([statut])
-  @@index([createdById])
-}
-
-model Livraison {
-  id            String        @id @default(cuid())
-  numeroLot     String        @unique
-  dateLivraison DateTime
-  quantiteKg    Float
-  agriculteurId String
-  agriculteur   Agriculteur   @relation(fields: [agriculteurId], references: [id])
-  typeDateId    String
-  typeDate      TypeDate      @relation(fields: [typeDateId], references: [id])
-  typeCaisseId  String
-  typeCaisse    TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
-  bonAchat      BonAchat?
-  pesee         Pesee?
-  echantillons  Echantillon[]
-  stocks        StockDate[]
-  pretCaisses   PretCaisse[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  @@index([numeroLot])
-  @@index([agriculteurId])
-  @@index([typeDateId])
-  @@index([dateLivraison])
-  @@index([createdAt])
-}
-
-model BonAchat {
-  id          String    @id @default(cuid())
-  numero      String    @unique
-  prixKg      Float
-  montant     Float
-  livraisonId String    @unique
-  livraison   Livraison @relation(fields: [livraisonId], references: [id])
-  createdById String
-  createdBy   User      @relation("BonAchatCreator", fields: [createdById], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@index([numero])
-  @@index([createdById])
-}
-
-model Pesee {
-  id          String    @id @default(cuid())
-  poidsBrut   Float
-  poidsNet    Float
-  tare        Float?
-  livraisonId String    @unique
-  livraison   Livraison @relation(fields: [livraisonId], references: [id])
-  createdAt   DateTime  @default(now())
-}
-
-// ---- Gestion Laboratoire ----
-
-model Echantillon {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  livraisonId String
-  livraison   Livraison @relation(fields: [livraisonId], references: [id])
-  analyses    Analyse[]
-  createdAt   DateTime  @default(now())
-
-  @@index([code])
-  @@index([livraisonId])
-}
-
-model Analyse {
-  id            String      @id @default(cuid())
-  echantillonId String
-  echantillon   Echantillon @relation(fields: [echantillonId], references: [id])
-  dateAnalyse   DateTime    @default(now())
-  humidite      Float?
-  tauxSucre     Float?
-  calibre       String?
-  qualite       String?
-  observations  String?
-  conforme      Boolean     @default(true)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  @@index([echantillonId])
-  @@index([dateAnalyse])
-}
-
-// ---- Gestion des Stocks ----
-
-model StockDate {
-  id                 String            @id @default(cuid())
-  quantite           Float
-  quantiteDisponible Float
-  dateEntree         DateTime          @default(now())
-  typeDateId         String
-  typeDate           TypeDate          @relation(fields: [typeDateId], references: [id])
-  livraisonId        String
-  livraison          Livraison         @relation(fields: [livraisonId], references: [id])
-  conditionnements   Conditionnement[]
-  ventes             Vente[]
-  bonSorties         BonSortie[]
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-
-  @@index([typeDateId])
-  @@index([livraisonId])
-  @@index([dateEntree])
-}
-
-model Conditionnement {
-  id            String     @id @default(cuid())
-  nombreCaisses Int
-  poidsTotal    Float
-  stockId       String
-  stock         StockDate  @relation(fields: [stockId], references: [id])
-  typeCaisseId  String
-  typeCaisse    TypeCaisse @relation(fields: [typeCaisseId], references: [id])
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  @@index([stockId])
-  @@index([typeCaisseId])
-}
-
-// ---- Gestion des Clients & Ventes ----
-
-model Client {
-  id        String   @id @default(cuid())
-  nom       String
-  telephone String?
-  adresse   String?
-  email     String?
-  ventes    Vente[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([nom])
-}
-
-model Vente {
-  id           String    @id @default(cuid())
-  date         DateTime  @default(now())
-  quantite     Float
-  prixUnitaire Float
-  montant      Float
-  clientId     String
-  client       Client    @relation(fields: [clientId], references: [id])
-  stockId      String
-  stock        StockDate @relation(fields: [stockId], references: [id])
-  createdById  String
-  createdBy    User      @relation("VenteCreator", fields: [createdById], references: [id])
-  createdAt    DateTime  @default(now())
-
-  @@index([clientId])
-  @@index([stockId])
-  @@index([createdById])
-  @@index([date])
-}
-
-// ---- Gestion des Sorties ----
-
-model BonSortie {
-  id             String     @id @default(cuid())
-  numero         String     @unique
-  dateSortie     DateTime   @default(now())
-  quantiteTotale Float
-  stockId        String
-  stock          StockDate  @relation(fields: [stockId], references: [id])
-  typeCaisseId   String
-  typeCaisse     TypeCaisse @relation(fields: [typeCaisseId], references: [id])
-  createdById    String
-  createdBy      User       @relation("BonSortieCreator", fields: [createdById], references: [id])
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-
-  @@index([numero])
-  @@index([stockId])
-  @@index([createdById])
-  @@index([dateSortie])
+enum StatutPret {
+  EN_COURS
+  RETOURNE
+  INCOMPLET
 }

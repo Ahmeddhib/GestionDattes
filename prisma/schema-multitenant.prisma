@@ -1,0 +1,525 @@
+// ================== MULTI-TENANT SCHEMA ==================
+// Shared Database Multi-Tenancy Architecture
+// Every business entity MUST have tenantId
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================== ENUMS ==================
+
+enum StatutPret {
+  EN_COURS
+  RETOURNE
+  INCOMPLET
+}
+
+enum AuditAction {
+  // Users
+  CREATE_USER
+  UPDATE_USER
+  ACTIVATE_USER
+  DEACTIVATE_USER
+  CHANGE_ROLE
+  // Roles
+  CREATE_ROLE
+  UPDATE_ROLE
+  DELETE_ROLE
+  // Régions
+  CREATE_REGION
+  UPDATE_REGION
+  DELETE_REGION
+  // Agriculteurs
+  CREATE_AGRICULTEUR
+  UPDATE_AGRICULTEUR
+  DELETE_AGRICULTEUR
+  // Référentiels
+  CREATE_TYPE_DATE
+  UPDATE_TYPE_DATE
+  DELETE_TYPE_DATE
+  CREATE_TYPE_CAISSE
+  UPDATE_TYPE_CAISSE
+  DELETE_TYPE_CAISSE
+  // Réception & Prêt
+  CREATE_LIVRAISON
+  UPDATE_LIVRAISON
+  DELETE_LIVRAISON
+  CREATE_PRET_CAISSE
+  RETOUR_PRET_CAISSE
+  CREATE_BON_ACHAT
+  UPDATE_BON_ACHAT
+  CREATE_PESEE
+  UPDATE_PESEE
+  // Stock & Conditionnement
+  CREATE_STOCK
+  UPDATE_STOCK
+  CREATE_CONDITIONNEMENT
+  UPDATE_CONDITIONNEMENT
+  DELETE_CONDITIONNEMENT
+  // Ventes & Sorties
+  CREATE_CLIENT
+  UPDATE_CLIENT
+  CREATE_VENTE
+  UPDATE_VENTE
+  DELETE_VENTE
+  CREATE_BON_SORTIE
+  UPDATE_BON_SORTIE
+  DELETE_BON_SORTIE
+  // Tenants
+  CREATE_TENANT
+  UPDATE_TENANT
+  ACTIVATE_TENANT
+  DEACTIVATE_TENANT
+}
+
+// ================== MULTI-TENANT CORE ==================
+
+// Wakala (Agency) = Tenant
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String   // Nom de la Wakala
+  code        String   @unique // Code unique de la Wakala
+  active      Boolean  @default(true)
+  address     String?
+  phone       String?
+  email       String?
+  settings    Json?    // Settings spécifiques par tenant
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenantUsers      TenantUser[]
+  regions          Region[]
+  agriculteurs     Agriculteur[]
+  typeDates        TypeDate[]
+  typeCaisses      TypeCaisse[]
+  livraisons       Livraison[]
+  pretCaisses      PretCaisse[]
+  bonAchats        BonAchat[]
+  pesees           Pesee[]
+  echantillons     Echantillon[]
+  analyses         Analyse[]
+  stockDates       StockDate[]
+  conditionnements Conditionnement[]
+  clients          Client[]
+  ventes           Vente[]
+  bonSorties       BonSortie[]
+  auditLogs        AuditLog[]
+
+  @@index([code])
+  @@index([active])
+}
+
+// Junction table: User can belong to multiple Tenants
+model TenantUser {
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  roleId    String // Role within THIS tenant
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, tenantId])
+  @@index([userId])
+  @@index([tenantId])
+  @@index([roleId])
+}
+
+// ================== USERS & RBAC ==================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantUsers TenantUser[]
+
+  @@index([name])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Multi-tenant relations
+  tenantUsers TenantUser[]
+
+  @@index([email])
+  @@index([active])
+}
+
+// ================== AUDIT ==================
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  tenantId    String // TENANT-SCOPED
+  actorId     String // User who performed the action
+  targetId    String? // ID of the affected entity
+  action      AuditAction
+  description String?
+  details     Json?
+  createdAt   DateTime    @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([actorId])
+  @@index([targetId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ================== GÉOGRAPHIE ==================
+
+model Region {
+  id           String        @id @default(cuid())
+  tenantId     String // TENANT-SCOPED
+  nom          String
+  code         String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agriculteurs Agriculteur[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([code])
+}
+
+// ================== PRODUITS ==================
+
+model TypeDate {
+  id          String      @id @default(cuid())
+  tenantId    String // TENANT-SCOPED
+  nom         String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  livraisons Livraison[]
+  stocks     StockDate[]
+
+  @@unique([tenantId, nom])
+  @@index([tenantId])
+}
+
+model TypeCaisse {
+  id               String            @id @default(cuid())
+  tenantId         String // TENANT-SCOPED
+  nom              String
+  poidsKg          Float
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  livraisons       Livraison[]
+  bonSorties       BonSortie[]
+  conditionnements Conditionnement[]
+  pretCaisses      PretCaisse[]
+
+  @@unique([tenantId, nom])
+  @@index([tenantId])
+}
+
+// ================== AGRICULTEURS ==================
+
+model Agriculteur {
+  id                String       @id @default(cuid())
+  tenantId          String // TENANT-SCOPED
+  code              String
+  cin               String
+  nom               String
+  prenom            String
+  telephone         String?
+  adresse           String?
+  nbPalmiers        Int
+  superficie        Float?
+  productionEstimee Float?
+  regionId          String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  region      Region       @relation(fields: [regionId], references: [id])
+  livraisons  Livraison[]
+  pretCaisses PretCaisse[]
+
+  @@unique([tenantId, code])
+  @@unique([tenantId, cin])
+  @@index([tenantId])
+  @@index([code])
+  @@index([cin])
+  @@index([regionId])
+  @@index([nom])
+}
+
+// ================== PRÊT DE CAISSES ==================
+
+model PretCaisse {
+  id             String     @id @default(cuid())
+  tenantId       String // TENANT-SCOPED
+  nombrePrete    Int
+  nombreRetourne Int        @default(0)
+  statut         StatutPret @default(EN_COURS)
+  datePreT       DateTime   @default(now())
+  dateRetour     DateTime?
+  observations   String?
+  agriculteurId  String
+  typeCaisseId   String
+  livraisonId    String?
+  createdById    String // User ID
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agriculteur Agriculteur @relation(fields: [agriculteurId], references: [id])
+  typeCaisse  TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
+  livraison   Livraison?  @relation(fields: [livraisonId], references: [id])
+
+  @@index([tenantId])
+  @@index([agriculteurId])
+  @@index([typeCaisseId])
+  @@index([livraisonId])
+  @@index([statut])
+  @@index([createdById])
+}
+
+// ================== LIVRAISONS ==================
+
+model Livraison {
+  id            String        @id @default(cuid())
+  tenantId      String // TENANT-SCOPED
+  numeroLot     String
+  dateLivraison DateTime
+  quantiteKg    Float
+  agriculteurId String
+  typeDateId    String
+  typeCaisseId  String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agriculteur  Agriculteur   @relation(fields: [agriculteurId], references: [id])
+  typeDate     TypeDate      @relation(fields: [typeDateId], references: [id])
+  typeCaisse   TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
+  bonAchat     BonAchat?
+  pesee        Pesee?
+  echantillons Echantillon[]
+  stocks       StockDate[]
+  pretCaisses  PretCaisse[]
+
+  @@unique([tenantId, numeroLot])
+  @@index([tenantId])
+  @@index([numeroLot])
+  @@index([agriculteurId])
+  @@index([typeDateId])
+  @@index([dateLivraison])
+}
+
+model BonAchat {
+  id          String    @id @default(cuid())
+  tenantId    String // TENANT-SCOPED
+  numero      String
+  prixKg      Float
+  montant     Float
+  livraisonId String    @unique
+  createdById String // User ID
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  livraison Livraison @relation(fields: [livraisonId], references: [id])
+
+  @@unique([tenantId, numero])
+  @@index([tenantId])
+  @@index([numero])
+  @@index([createdById])
+}
+
+model Pesee {
+  id          String    @id @default(cuid())
+  tenantId    String // TENANT-SCOPED
+  poidsBrut   Float
+  poidsNet    Float
+  tare        Float?
+  livraisonId String    @unique
+  createdAt   DateTime  @default(now())
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  livraison Livraison @relation(fields: [livraisonId], references: [id])
+
+  @@index([tenantId])
+}
+
+// ================== LABORATOIRE ==================
+
+model Echantillon {
+  id          String    @id @default(cuid())
+  tenantId    String // TENANT-SCOPED
+  code        String
+  livraisonId String
+  createdAt   DateTime  @default(now())
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  livraison Livraison @relation(fields: [livraisonId], references: [id])
+  analyses  Analyse[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([code])
+  @@index([livraisonId])
+}
+
+model Analyse {
+  id            String      @id @default(cuid())
+  tenantId      String // TENANT-SCOPED
+  echantillonId String
+  dateAnalyse   DateTime    @default(now())
+  humidite      Float?
+  tauxSucre     Float?
+  calibre       String?
+  qualite       String?
+  observations  String?
+  conforme      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  echantillon Echantillon @relation(fields: [echantillonId], references: [id])
+
+  @@index([tenantId])
+  @@index([echantillonId])
+  @@index([dateAnalyse])
+}
+
+// ================== STOCKS ==================
+
+model StockDate {
+  id                 String            @id @default(cuid())
+  tenantId           String // TENANT-SCOPED
+  quantite           Float
+  quantiteDisponible Float
+  dateEntree         DateTime          @default(now())
+  typeDateId         String
+  livraisonId        String
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  typeDate         TypeDate          @relation(fields: [typeDateId], references: [id])
+  livraison        Livraison         @relation(fields: [livraisonId], references: [id])
+  conditionnements Conditionnement[]
+  ventes           Vente[]
+  bonSorties       BonSortie[]
+
+  @@index([tenantId])
+  @@index([typeDateId])
+  @@index([livraisonId])
+  @@index([dateEntree])
+}
+
+model Conditionnement {
+  id            String     @id @default(cuid())
+  tenantId      String // TENANT-SCOPED
+  nombreCaisses Int
+  poidsTotal    Float
+  stockId       String
+  typeCaisseId  String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stock      StockDate  @relation(fields: [stockId], references: [id])
+  typeCaisse TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+
+  @@index([tenantId])
+  @@index([stockId])
+  @@index([typeCaisseId])
+}
+
+// ================== CLIENTS & VENTES ==================
+
+model Client {
+  id        String   @id @default(cuid())
+  tenantId  String // TENANT-SCOPED
+  nom       String
+  telephone String?
+  adresse   String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ventes Vente[]
+
+  @@index([tenantId])
+  @@index([nom])
+}
+
+model Vente {
+  id           String    @id @default(cuid())
+  tenantId     String // TENANT-SCOPED
+  date         DateTime  @default(now())
+  quantite     Float
+  prixUnitaire Float
+  montant      Float
+  clientId     String
+  stockId      String
+  createdById  String // User ID
+  createdAt    DateTime  @default(now())
+
+  tenant Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  client Client    @relation(fields: [clientId], references: [id])
+  stock  StockDate @relation(fields: [stockId], references: [id])
+
+  @@index([tenantId])
+  @@index([clientId])
+  @@index([stockId])
+  @@index([createdById])
+  @@index([date])
+}
+
+// ================== SORTIES ==================
+
+model BonSortie {
+  id             String     @id @default(cuid())
+  tenantId       String // TENANT-SCOPED
+  numero         String
+  dateSortie     DateTime   @default(now())
+  quantiteTotale Float
+  stockId        String
+  typeCaisseId   String
+  createdById    String // User ID
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stock      StockDate  @relation(fields: [stockId], references: [id])
+  typeCaisse TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+
+  @@unique([tenantId, numero])
+  @@index([tenantId])
+  @@index([numero])
+  @@index([stockId])
+  @@index([createdById])
+  @@index([dateSortie])
+}

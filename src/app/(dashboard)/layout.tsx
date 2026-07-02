@@ -25,7 +25,14 @@ export default async function DashboardLayout({
                 }}
             />
             <div className="flex-1 flex flex-col">
-                <TopBar />
+                <TopBar
+                    user={{
+                        id: session.user.id,
+                        tenantId: session.user.tenantId,
+                        tenantName: session.user.tenantName,
+                        tenantCode: session.user.tenantCode,
+                    }}
+                />
                 <main className="flex-1 bg-white">
                     {children}
                 </main>

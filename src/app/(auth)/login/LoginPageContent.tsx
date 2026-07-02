@@ -2,9 +2,25 @@
 
 import { LoginForm } from "@/components/auth/login-form";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { useEffect, useState } from "react";
+import { Building2 } from "lucide-react";
 
 export function LoginPageContent() {
     const { t } = useClientTranslations();
+    const [selectedWakala, setSelectedWakala] = useState<{
+        id: string;
+        code: string;
+    } | null>(null);
+
+    useEffect(() => {
+        // Récupérer la Wakala sélectionnée depuis sessionStorage
+        const wakalaId = sessionStorage.getItem("selectedWakalaId");
+        const wakalaCode = sessionStorage.getItem("selectedWakalaCode");
+
+        if (wakalaId && wakalaCode) {
+            setSelectedWakala({ id: wakalaId, code: wakalaCode });
+        }
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#FAF0DC] flex items-center justify-center p-4">
@@ -18,7 +34,8 @@ export function LoginPageContent() {
                     <div
                         className="absolute inset-0 pointer-events-none"
                         style={{
-                            backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.015) 8px, rgba(255,255,255,0.015) 9px)"
+                            backgroundImage:
+                                "repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.015) 8px, rgba(255,255,255,0.015) 9px)",
                         }}
                     />
 
@@ -41,6 +58,32 @@ export function LoginPageContent() {
                             </div>
                         </div>
 
+                        {/* Wakala Sélectionnée */}
+                        {selectedWakala && (
+                            <div
+                                className="mb-6 p-4 rounded-xl"
+                                style={{
+                                    background: "rgba(193,122,43,0.15)",
+                                    border: "1px solid rgba(193,122,43,0.3)",
+                                }}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Building2 className="w-5 h-5" style={{ color: "#C17A2B" }} />
+                                    <div>
+                                        <p className="text-xs" style={{ color: "rgba(245,230,200,0.6)" }}>
+                                            Wakala sélectionnée
+                                        </p>
+                                        <p
+                                            className="text-sm font-semibold font-mono"
+                                            style={{ color: "#F5E6C8" }}
+                                        >
+                                            {selectedWakala.code}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <p
                             className="text-xl font-medium leading-relaxed mb-3"
                             style={{ color: "#F5E6C8" }}
@@ -55,16 +98,28 @@ export function LoginPageContent() {
                     {/* Stats */}
                     <div className="relative flex flex-col gap-3">
                         {[
-                            { value: "20 000+", label: "Agriculteurs enregistrés", bg: "#C17A2B" },
-                            { value: "100 000+", label: "Livraisons traitées", bg: "#8B4A0F" },
-                            { value: "Analyses en temps réel", label: "Qualité & traçabilité", bg: "#5C7A8B" },
+                            {
+                                value: "20 000+",
+                                label: "Agriculteurs enregistrés",
+                                bg: "#C17A2B",
+                            },
+                            {
+                                value: "100 000+",
+                                label: "Livraisons traitées",
+                                bg: "#8B4A0F",
+                            },
+                            {
+                                value: "Analyses en temps réel",
+                                label: "Qualité & traçabilité",
+                                bg: "#5C7A8B",
+                            },
                         ].map((s) => (
                             <div
                                 key={s.label}
                                 className="flex items-center gap-3 rounded-xl p-3"
                                 style={{
                                     background: "rgba(255,255,255,0.06)",
-                                    border: "0.5px solid rgba(255,255,255,0.1)"
+                                    border: "0.5px solid rgba(255,255,255,0.1)",
                                 }}
                             >
                                 <div
@@ -77,7 +132,10 @@ export function LoginPageContent() {
                                     <p className="text-sm font-medium" style={{ color: "#F5E6C8" }}>
                                         {s.value}
                                     </p>
-                                    <p className="text-[11px]" style={{ color: "rgba(245,230,200,0.45)" }}>
+                                    <p
+                                        className="text-[11px]"
+                                        style={{ color: "rgba(245,230,200,0.45)" }}
+                                    >
                                         {s.label}
                                     </p>
                                 </div>
@@ -107,7 +165,7 @@ export function LoginPageContent() {
                                 {t("auth.welcomeBack")}
                             </p>
                         </div>
-                        <LoginForm />
+                        <LoginForm selectedWakalaId={selectedWakala?.id} />
                     </div>
                 </div>
             </div>

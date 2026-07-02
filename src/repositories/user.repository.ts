@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { PAGINATION } from "@/constants/pagination";
 
+/**
+ * Repository User (MULTI-TENANT)
+ * Note: Les utilisateurs n'ont plus de rôle global.
+ * Les rôles sont gérés par TenantUser (rôle par Wakala).
+ */
 export const userRepository = {
     async findAll(options?: { page?: number; pageSize?: number; search?: string; active?: boolean }) {
         const page = options?.page || 1;
@@ -32,10 +37,20 @@ export const userRepository = {
                     active: true,
                     createdAt: true,
                     updatedAt: true,
-                    role: {
+                    // Rôles via TenantUser
+                    TenantUser: {
                         select: {
-                            id: true,
-                            name: true,
+                            Role: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                            Tenant: {
+                                select: {
+                                    name: true,
+                                    code: true,
+                                },
+                            },
                         },
                     },
                 },
@@ -57,14 +72,25 @@ export const userRepository = {
                 name: true,
                 email: true,
                 active: true,
-                roleId: true,
                 createdAt: true,
                 updatedAt: true,
-                role: {
+                TenantUser: {
                     select: {
-                        id: true,
-                        name: true,
-                        description: true,
+                        Role: {
+                            select: {
+                                id: true,
+                                name: true,
+                                description: true,
+                            },
+                        },
+                        Tenant: {
+                            select: {
+                                id: true,
+                                name: true,
+                                code: true,
+                            },
+                        },
+                        active: true,
                     },
                 },
             },
@@ -80,16 +106,21 @@ export const userRepository = {
                 email: true,
                 password: true,
                 active: true,
-                role: {
+                TenantUser: {
                     select: {
-                        name: true,
+                        Role: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        tenantId: true,
                     },
                 },
             },
         });
     },
 
-    async create(data: { name: string; email: string; password: string; roleId: string }) {
+    async create(data: { id: string; name: string; email: string; password: string }) {
         return prisma.user.create({
             data,
             select: {
@@ -98,18 +129,13 @@ export const userRepository = {
                 email: true,
                 active: true,
                 createdAt: true,
-                role: {
-                    select: {
-                        name: true,
-                    },
-                },
             },
         });
     },
 
     async update(
         id: string,
-        data: { name?: string; email?: string; password?: string; roleId?: string; active?: boolean }
+        data: { name?: string; email?: string; password?: string; active?: boolean }
     ) {
         return prisma.user.update({
             where: { id },
@@ -120,11 +146,6 @@ export const userRepository = {
                 email: true,
                 active: true,
                 updatedAt: true,
-                role: {
-                    select: {
-                        name: true,
-                    },
-                },
             },
         });
     },

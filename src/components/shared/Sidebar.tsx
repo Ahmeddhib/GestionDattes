@@ -135,8 +135,7 @@ export function Sidebar({ user }: SidebarProps) {
                     <button
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-[9px] bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
                         onClick={() => {
-                            // TODO: Handle logout
-                            window.location.href = "/api/auth/signout";
+                            window.location.href = "/api/auth/signout?callbackUrl=/";
                         }}
                     >
                         <LogOut className="w-4 h-4" />

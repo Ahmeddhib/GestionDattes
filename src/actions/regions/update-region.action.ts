@@ -3,9 +3,10 @@
 import { auth } from "@/lib/auth";
 import { regionService } from "@/services/region.service";
 import { updateRegionSchema, type UpdateRegionInput } from "@/validators/region.validator";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Server Action: Mettre à jour une région
+ * Server Action: Mettre à jour une région (MULTI-TENANT)
  */
 export async function updateRegionAction(data: UpdateRegionInput) {
     try {
@@ -15,10 +16,13 @@ export async function updateRegionAction(data: UpdateRegionInput) {
             return { success: false, error: "Non authentifié" };
         }
 
+        // CRITIQUE: Récupérer le tenantId depuis la session
+        const tenantId = await getTenantId();
+
         // Validation
         const validated = updateRegionSchema.parse(data);
 
-        const region = await regionService.update(session.user.id, validated);
+        const region = await regionService.update(tenantId, session.user.id, validated);
 
         return { success: true, data: region };
     } catch (error: any) {

@@ -94,7 +94,7 @@ export function DashboardNav({ session }: DashboardNavProps) {
                         </div>
 
                         <button
-                            onClick={() => signOut({ callbackUrl: ROUTES.LOGIN })}
+                            onClick={() => signOut({ callbackUrl: "/" })}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all duration-150"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

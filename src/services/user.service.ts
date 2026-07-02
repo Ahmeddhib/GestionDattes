@@ -7,7 +7,28 @@ import bcrypt from "bcryptjs";
 export const userService = {
     async getUsers(options?: { page?: number; pageSize?: number; search?: string; active?: boolean }) {
         await requirePermission("users:read");
-        return userRepository.findAll(options);
+        const result = await userRepository.findAll(options);
+
+        // Transformer les données pour le format attendu par le composant
+        const transformedData = result.data.map((user) => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            active: user.active,
+            createdAt: user.createdAt,
+            // Prendre le premier rôle (premier tenant)
+            role: user.TenantUser[0]?.Role ? {
+                id: user.TenantUser[0].Role.name, // Utiliser name comme id temporairement
+                name: user.TenantUser[0].Role.name,
+            } : { id: 'unknown', name: 'Sans rôle' },
+        }));
+
+        return {
+            data: transformedData,
+            total: result.total,
+            page: result.page,
+            pageSize: result.pageSize,
+        };
     },
 
     async getUserById(id: string) {

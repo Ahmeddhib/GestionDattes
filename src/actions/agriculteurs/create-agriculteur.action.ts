@@ -3,9 +3,10 @@
 import { auth } from "@/lib/auth";
 import { agriculteurService } from "@/services/agriculteur.service";
 import { createAgriculteurSchema, type CreateAgriculteurInput } from "@/validators/agriculteur.validator";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Server Action: Créer un nouvel agriculteur
+ * Server Action: Créer un nouvel agriculteur (MULTI-TENANT)
  */
 export async function createAgriculteurAction(data: CreateAgriculteurInput) {
     try {
@@ -15,10 +16,13 @@ export async function createAgriculteurAction(data: CreateAgriculteurInput) {
             return { success: false, error: "Non authentifié" };
         }
 
+        // CRITIQUE: Récupérer le tenantId depuis la session
+        const tenantId = await getTenantId();
+
         // Validation
         const validated = createAgriculteurSchema.parse(data);
 
-        const agriculteur = await agriculteurService.create(session.user.id, validated);
+        const agriculteur = await agriculteurService.create(tenantId, session.user.id, validated);
 
         return { success: true, data: agriculteur };
     } catch (error: any) {

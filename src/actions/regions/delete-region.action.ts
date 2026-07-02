@@ -2,9 +2,10 @@
 
 import { auth } from "@/lib/auth";
 import { regionService } from "@/services/region.service";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Server Action: Supprimer une région
+ * Server Action: Supprimer une région (MULTI-TENANT)
  */
 export async function deleteRegionAction(regionId: string) {
     try {
@@ -14,7 +15,10 @@ export async function deleteRegionAction(regionId: string) {
             return { success: false, error: "Non authentifié" };
         }
 
-        await regionService.delete(session.user.id, regionId);
+        // CRITIQUE: Récupérer le tenantId depuis la session
+        const tenantId = await getTenantId();
+
+        await regionService.delete(tenantId, session.user.id, regionId);
 
         return { success: true };
     } catch (error: any) {

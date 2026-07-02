@@ -95,9 +95,9 @@ export function NavUser({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => signOut({ callbackUrl: ROUTES.LOGIN })}
+                            onClick={() => signOut({ callbackUrl: "/" })}
                         >
-                            <LogOutIcon className="mr-2 h-4 w-4" />
+                            <LogOutIcon className="mr-2 h-4 h-4" />
                             Déconnexion
                         </DropdownMenuItem>
                     </DropdownMenuContent>

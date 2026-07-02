@@ -2,9 +2,10 @@
 
 import { auth } from "@/lib/auth";
 import { agriculteurService } from "@/services/agriculteur.service";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Server Action: Supprimer un agriculteur
+ * Server Action: Supprimer un agriculteur (MULTI-TENANT)
  */
 export async function deleteAgriculteurAction(agriculteurId: string) {
     try {
@@ -14,7 +15,10 @@ export async function deleteAgriculteurAction(agriculteurId: string) {
             return { success: false, error: "Non authentifié" };
         }
 
-        await agriculteurService.delete(session.user.id, agriculteurId);
+        // CRITIQUE: Récupérer le tenantId depuis la session
+        const tenantId = await getTenantId();
+
+        await agriculteurService.delete(tenantId, session.user.id, agriculteurId);
 
         return { success: true };
     } catch (error: any) {

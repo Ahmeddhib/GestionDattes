@@ -1,6 +1,7 @@
 "use server";
 
 import { auditService } from "@/services/audit.service";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 import type { AuditAction } from "@/generated/prisma";
 
 export async function getAuditLogsAction(options?: {
@@ -10,7 +11,8 @@ export async function getAuditLogsAction(options?: {
     action?: AuditAction;
 }) {
     try {
-        const result = await auditService.getAuditLogs(options);
+        const tenantId = await getTenantId();
+        const result = await auditService.getAuditLogs(tenantId, options);
         return { data: result };
     } catch (error) {
         return {

@@ -2,9 +2,11 @@
 
 import { auth } from "@/lib/auth";
 import { regionService } from "@/services/region.service";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Server Action: Récupérer toutes les régions
+ * Server Action: Récupérer toutes les régions (MULTI-TENANT)
+ * Filtre automatiquement par tenantId depuis la session
  */
 export async function getRegionsAction() {
     try {
@@ -14,7 +16,10 @@ export async function getRegionsAction() {
             return { success: false, error: "Non authentifié" };
         }
 
-        const regions = await regionService.getAll(session.user.id);
+        // CRITIQUE: Récupérer le tenantId depuis la session (jamais du client)
+        const tenantId = await getTenantId();
+
+        const regions = await regionService.getAll(tenantId, session.user.id);
 
         return { success: true, data: regions };
     } catch (error: any) {

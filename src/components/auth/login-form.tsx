@@ -19,7 +19,11 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export function LoginForm() {
+interface LoginFormProps {
+    selectedWakalaId?: string;
+}
+
+export function LoginForm({ selectedWakalaId }: LoginFormProps) {
     const router = useRouter();
     const { t } = useClientTranslations();
     const [showPwd, setShowPwd] = useState(false);
@@ -38,16 +42,28 @@ export function LoginForm() {
         const res = await signIn("credentials", {
             email: data.email,
             password: data.password,
+            tenantId: selectedWakalaId, // Passer le tenantId sélectionné
             redirect: false,
         });
 
         setLoading(false);
 
         if (res?.error) {
-            setError("Email ou mot de passe incorrect.");
+            // Gérer les différents types d'erreurs
+            if (res.error === "ACCOUNT_DISABLED") {
+                setError("Ce compte est désactivé. Contactez l'administrateur.");
+            } else if (res.error === "MISSING_CREDENTIALS") {
+                setError("Email et mot de passe requis.");
+            } else if (res.error === "TENANT_ACCESS_DENIED") {
+                setError("Vous n'avez pas accès à cette Wakala.");
+            } else {
+                setError("Email ou mot de passe incorrect.");
+            }
         } else {
             setSuccess(true);
+            // Rediriger vers dashboard
             router.push(ROUTES.DASHBOARD);
+            router.refresh();
         }
     };
 

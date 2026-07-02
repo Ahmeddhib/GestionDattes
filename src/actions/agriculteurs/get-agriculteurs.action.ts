@@ -2,9 +2,11 @@
 
 import { auth } from "@/lib/auth";
 import { agriculteurService } from "@/services/agriculteur.service";
+import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Server Action: Récupérer tous les agriculteurs
+ * Server Action: Récupérer tous les agriculteurs (MULTI-TENANT)
+ * Filtre automatiquement par tenantId depuis la session
  */
 export async function getAgricultureursAction() {
     try {
@@ -14,7 +16,10 @@ export async function getAgricultureursAction() {
             return { success: false, error: "Non authentifié" };
         }
 
-        const agriculteurs = await agriculteurService.getAll(session.user.id);
+        // CRITIQUE: Récupérer le tenantId depuis la session
+        const tenantId = await getTenantId();
+
+        const agriculteurs = await agriculteurService.getAll(tenantId, session.user.id);
 
         return { success: true, data: agriculteurs };
     } catch (error: any) {

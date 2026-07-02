@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { PAGINATION } from "@/constants/pagination";
 
+/**
+ * Repository Role (MULTI-TENANT)
+ * Note: Les rôles sont globaux mais les assignations se font via TenantUser
+ */
 export const roleRepository = {
     async findAll(options?: { page?: number; pageSize?: number; search?: string }) {
         const page = options?.page || 1;
@@ -28,7 +32,7 @@ export const roleRepository = {
                     createdAt: true,
                     updatedAt: true,
                     _count: {
-                        select: { users: true },
+                        select: { TenantUser: true }, // Compter via TenantUser
                     },
                 },
                 skip: (page - 1) * pageSize,
@@ -51,7 +55,7 @@ export const roleRepository = {
                 createdAt: true,
                 updatedAt: true,
                 _count: {
-                    select: { users: true },
+                    select: { TenantUser: true }, // Compter via TenantUser
                 },
             },
         });

@@ -2,20 +2,24 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
 /**
- * Repository pour les opérations CRUD sur les régions
- * Couche d'accès aux données - pas de logique métier
+ * Repository MULTI-TENANT pour les régions
+ * Toutes les méthodes filtrent automatiquement par tenantId
+ * 
+ * RÈGLE CRITIQUE: Le tenantId doit TOUJOURS être passé depuis la session, jamais du client
  */
 export const regionRepository = {
     /**
-     * Récupérer toutes les régions
+     * Récupérer toutes les régions d'un tenant
      */
-    async findAll() {
+    async findAll(tenantId: string) {
         return prisma.region.findMany({
+            where: {
+                tenantId, // FILTRAGE OBLIGATOIRE
+            },
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
-                        users: true,
+                        Agriculteur: true, // Majuscule (nom de la relation)
                     },
                 },
             },
@@ -26,16 +30,18 @@ export const regionRepository = {
     },
 
     /**
-     * Récupérer une région par ID
+     * Récupérer une région par ID (avec vérification tenant)
      */
-    async findById(id: string) {
-        return prisma.region.findUnique({
-            where: { id },
+    async findById(tenantId: string, id: string) {
+        return prisma.region.findFirst({
+            where: {
+                id,
+                tenantId, // Double vérification: ID + tenant
+            },
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
-                        users: true,
+                        Agriculteur: true, // Majuscule
                     },
                 },
             },
@@ -43,25 +49,36 @@ export const regionRepository = {
     },
 
     /**
-     * Récupérer une région par code
+     * Récupérer une région par code (dans le tenant)
      */
-    async findByCode(code: string) {
-        return prisma.region.findUnique({
-            where: { code },
+    async findByCode(tenantId: string, code: string) {
+        return prisma.region.findFirst({
+            where: {
+                code,
+                tenantId,
+            },
         });
     },
 
     /**
      * Créer une nouvelle région
+     * Le tenantId est injecté automatiquement
      */
-    async create(data: Prisma.RegionCreateInput) {
+    async create(
+        tenantId: string,
+        data: Omit<Prisma.RegionCreateInput, "Tenant">
+    ) {
         return prisma.region.create({
-            data,
+            data: {
+                ...data,
+                Tenant: {
+                    connect: { id: tenantId }, // Injection du tenant
+                },
+            },
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
-                        users: true,
+                        Agriculteur: true, // Majuscule
                     },
                 },
             },
@@ -70,16 +87,29 @@ export const regionRepository = {
 
     /**
      * Mettre à jour une région
+     * Vérifie que la région appartient au tenant
      */
-    async update(id: string, data: Prisma.RegionUpdateInput) {
+    async update(
+        tenantId: string,
+        id: string,
+        data: Prisma.RegionUpdateInput
+    ) {
+        // Vérifier d'abord que la région appartient au tenant
+        const existing = await prisma.region.findFirst({
+            where: { id, tenantId },
+        });
+
+        if (!existing) {
+            throw new Error("Région introuvable ou n'appartient pas à ce tenant");
+        }
+
         return prisma.region.update({
             where: { id },
             data,
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
-                        users: true,
+                        Agriculteur: true, // Majuscule
                     },
                 },
             },
@@ -88,30 +118,42 @@ export const regionRepository = {
 
     /**
      * Supprimer une région
+     * Vérifie que la région appartient au tenant
      */
-    async delete(id: string) {
+    async delete(tenantId: string, id: string) {
+        // Vérifier d'abord que la région appartient au tenant
+        const existing = await prisma.region.findFirst({
+            where: { id, tenantId },
+        });
+
+        if (!existing) {
+            throw new Error("Région introuvable ou n'appartient pas à ce tenant");
+        }
+
         return prisma.region.delete({
             where: { id },
         });
     },
 
     /**
-     * Vérifier si une région a des agriculteurs associés
+     * Vérifier si une région a des agriculteurs associés (dans le tenant)
      */
-    async hasAgriculteurs(id: string): Promise<boolean> {
+    async hasAgriculteurs(tenantId: string, id: string): Promise<boolean> {
         const count = await prisma.agriculteur.count({
-            where: { regionId: id },
+            where: {
+                regionId: id,
+                tenantId, // Vérifier aussi le tenant des agriculteurs
+            },
         });
         return count > 0;
     },
 
     /**
-     * Vérifier si une région a des utilisateurs associés
+     * Compter les régions (dans le tenant)
      */
-    async hasUsers(id: string): Promise<boolean> {
-        const count = await prisma.user.count({
-            where: { regionId: id },
+    async count(tenantId: string): Promise<number> {
+        return prisma.region.count({
+            where: { tenantId },
         });
-        return count > 0;
     },
 };
