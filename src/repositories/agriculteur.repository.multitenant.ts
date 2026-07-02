@@ -17,7 +17,7 @@ export const agriculteurRepository = {
                 tenantId, // FILTRAGE OBLIGATOIRE
             },
             include: {
-                region: {
+                Region: { // PascalCase (nom de la relation)
                     select: {
                         id: true,
                         nom: true,
@@ -26,8 +26,8 @@ export const agriculteurRepository = {
                 },
                 _count: {
                     select: {
-                        livraisons: true,
-                        pretCaisses: true,
+                        Livraison: true, // PascalCase (nom de la relation)
+                        PretCaisse: true, // PascalCase (nom de la relation)
                     },
                 },
             },
@@ -47,7 +47,7 @@ export const agriculteurRepository = {
                 tenantId, // Double vérification: ID + tenant
             },
             include: {
-                region: {
+                Region: { // PascalCase
                     select: {
                         id: true,
                         nom: true,
@@ -56,8 +56,8 @@ export const agriculteurRepository = {
                 },
                 _count: {
                     select: {
-                        livraisons: true,
-                        pretCaisses: true,
+                        Livraison: true, // PascalCase
+                        PretCaisse: true, // PascalCase
                     },
                 },
             },
@@ -98,7 +98,7 @@ export const agriculteurRepository = {
                 tenantId, // Vérifier que la région appartient aussi au tenant
             },
             include: {
-                region: {
+                Region: { // PascalCase
                     select: {
                         id: true,
                         nom: true,
@@ -107,8 +107,8 @@ export const agriculteurRepository = {
                 },
                 _count: {
                     select: {
-                        livraisons: true,
-                        pretCaisses: true,
+                        Livraison: true, // PascalCase
+                        PretCaisse: true, // PascalCase
                     },
                 },
             },
@@ -124,17 +124,17 @@ export const agriculteurRepository = {
      */
     async create(
         tenantId: string,
-        data: Omit<Prisma.AgriculteurCreateInput, "tenant">
+        data: Omit<Prisma.AgriculteurCreateInput, "Tenant">
     ) {
         return prisma.agriculteur.create({
             data: {
                 ...data,
-                tenant: {
+                Tenant: { // PascalCase
                     connect: { id: tenantId }, // Injection du tenant
                 },
             },
             include: {
-                region: {
+                Region: { // PascalCase
                     select: {
                         id: true,
                         nom: true,
@@ -167,7 +167,7 @@ export const agriculteurRepository = {
             where: { id },
             data,
             include: {
-                region: {
+                Region: { // PascalCase
                     select: {
                         id: true,
                         nom: true,

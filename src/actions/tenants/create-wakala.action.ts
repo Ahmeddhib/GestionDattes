@@ -50,8 +50,10 @@ export async function createWakalaAction(data: CreateWakalaData) {
             if (!adminRole) {
                 adminRole = await tx.role.create({
                     data: {
+                        id: createId(),
                         name: "ADMIN",
                         description: "Administrateur système",
+                        updatedAt: new Date(),
                     },
                 });
             }

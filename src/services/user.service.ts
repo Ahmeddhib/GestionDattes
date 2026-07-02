@@ -59,16 +59,23 @@ export const userService = {
         const hashedPassword = await bcrypt.hash(data.password, 10);
         console.log("✅ Mot de passe hashé");
 
+        // Générer un ID unique
+        const { createId } = await import("@paralleldrive/cuid2");
+        const userId = createId();
+
         const user = await userRepository.create({
-            ...data,
+            id: userId,
+            name: data.name,
+            email: data.email,
             password: hashedPassword,
         });
         console.log("✅ Utilisateur créé en DB:", user.id);
 
         // Log audit
         const session = await auth();
-        if (session?.user?.id) {
+        if (session?.user?.id && session?.user?.tenantId) {
             await auditService.log({
+                tenantId: session.user.tenantId, // MULTI-TENANT: Audit par tenant
                 actorId: session.user.id,
                 action: "CREATE_USER",
                 description: `Création de l'utilisateur "${data.name}" (${data.email})`,
@@ -110,8 +117,9 @@ export const userService = {
 
         // Log audit
         const session = await auth();
-        if (session?.user?.id) {
+        if (session?.user?.id && session?.user?.tenantId) {
             await auditService.log({
+                tenantId: session.user.tenantId, // MULTI-TENANT: Audit par tenant
                 actorId: session.user.id,
                 action: "UPDATE_USER",
                 description: `Modification de l'utilisateur "${user.name}"`,
@@ -129,8 +137,9 @@ export const userService = {
 
         // Log audit
         const session = await auth();
-        if (session?.user?.id) {
+        if (session?.user?.id && session?.user?.tenantId) {
             await auditService.log({
+                tenantId: session.user.tenantId, // MULTI-TENANT: Audit par tenant
                 actorId: session.user.id,
                 action: "ACTIVATE_USER",
                 description: `Activation de l'utilisateur "${user.name}"`,
@@ -153,8 +162,9 @@ export const userService = {
         const user = await userRepository.update(id, { active: false });
 
         // Log audit
-        if (session?.user?.id) {
+        if (session?.user?.id && session?.user?.tenantId) {
             await auditService.log({
+                tenantId: session.user.tenantId, // MULTI-TENANT: Audit par tenant
                 actorId: session.user.id,
                 action: "DEACTIVATE_USER",
                 description: `Désactivation de l'utilisateur "${user.name}"`,
@@ -177,8 +187,9 @@ export const userService = {
         const user = await userRepository.delete(id);
 
         // Log audit (après suppression)
-        if (session?.user?.id) {
+        if (session?.user?.id && session?.user?.tenantId) {
             await auditService.log({
+                tenantId: session.user.tenantId, // MULTI-TENANT: Audit par tenant
                 actorId: session.user.id,
                 action: "UPDATE_USER",
                 description: `Suppression de l'utilisateur "${user.name}"`,
@@ -189,15 +200,23 @@ export const userService = {
         return user;
     },
 
+    /**
+     * @deprecated Cette méthode est obsolète dans le système multi-tenant.
+     * Utilisez TenantUser pour gérer les rôles par tenant.
+     */
     async changeUserRole(userId: string, roleId: string) {
+        throw new Error("Cette fonctionnalité n'est pas disponible dans le système multi-tenant. Utilisez la gestion des TenantUser.");
+
+        /* OBSOLÈTE - CODE COMMENTÉ
         await requirePermission("users:update");
 
         const user = await userRepository.update(userId, { roleId });
 
         // Log audit
         const session = await auth();
-        if (session?.user?.id) {
+        if (session?.user?.id && session?.user?.tenantId) {
             await auditService.log({
+                tenantId: session.user.tenantId, // MULTI-TENANT: Audit par tenant
                 actorId: session.user.id,
                 action: "CHANGE_ROLE",
                 description: `Changement de rôle pour "${user.name}" vers "${user.role.name}"`,
@@ -206,6 +225,7 @@ export const userService = {
         }
 
         return user;
+        */
     },
 
     async getUsersCount(options?: { active?: boolean }) {

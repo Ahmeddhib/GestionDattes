@@ -19,7 +19,7 @@ export const regionRepository = {
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
+                        Agriculteur: true, // PascalCase (nom de la relation)
                     },
                 },
             },
@@ -41,7 +41,7 @@ export const regionRepository = {
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
+                        Agriculteur: true, // PascalCase
                     },
                 },
             },
@@ -66,19 +66,19 @@ export const regionRepository = {
      */
     async create(
         tenantId: string,
-        data: Omit<Prisma.RegionCreateInput, "tenant">
+        data: Omit<Prisma.RegionCreateInput, "Tenant">
     ) {
         return prisma.region.create({
             data: {
                 ...data,
-                tenant: {
+                Tenant: { // PascalCase
                     connect: { id: tenantId }, // Injection du tenant
                 },
             },
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
+                        Agriculteur: true, // PascalCase
                     },
                 },
             },
@@ -109,7 +109,7 @@ export const regionRepository = {
             include: {
                 _count: {
                     select: {
-                        agriculteurs: true,
+                        Agriculteur: true, // PascalCase
                     },
                 },
             },

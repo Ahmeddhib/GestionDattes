@@ -1,51 +1,22 @@
+/**
+ * ⚠️ CE SCRIPT EST OBSOLÈTE - UTILISER prisma/seed.ts
+ * 
+ * Ce script utilise l'ancien modèle non multi-tenant avec roleId direct.
+ * Pour le système multi-tenant actuel, utilisez:
+ * 
+ * bun prisma db seed
+ * 
+ * Le script correct se trouve dans prisma/seed.ts
+ */
+
 import { prisma } from '../src/lib/prisma';
-import bcrypt from 'bcryptjs';
 
 async function main() {
-    console.log("Seeding database...");
-
-    const roleAdmin = await prisma.role.upsert({
-        where: { name: 'ADMIN' },
-        update: {},
-        create: {
-            name: 'ADMIN',
-            description: 'Administrateur principal',
-        },
-    });
-
-    await prisma.role.upsert({
-        where: { name: 'AGENT' },
-        update: {},
-        create: {
-            name: 'AGENT',
-            description: 'Agent de saisie',
-        },
-    });
-
-    await prisma.role.upsert({
-        where: { name: 'LABORANTIN' },
-        update: {},
-        create: {
-            name: 'LABORANTIN',
-            description: 'Responsable du laboratoire',
-        },
-    });
-
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    
-    await prisma.user.upsert({
-        where: { email: 'admin@gestion-dattes.com' },
-        update: {},
-        create: {
-            name: 'Administrateur',
-            email: 'admin@gestion-dattes.com',
-            password: hashedPassword,
-            roleId: roleAdmin.id,
-            active: true,
-        },
-    });
-
-    console.log("Seed completed. Admin email: admin@gestion-dattes.com, password: admin123");
+    console.log('⚠️  Ce script est obsolète pour le système multi-tenant.');
+    console.log('Utilisez à la place:');
+    console.log('  bun prisma db seed');
+    console.log('');
+    console.log('Le script actif se trouve dans: prisma/seed.ts');
 }
 
 main()

@@ -27,15 +27,8 @@ declare module "next-auth" {
     }
 }
 
-declare module "next-auth/jwt" {
-    interface JWT {
-        id: string;
-        role: string;
-        tenantId?: string;
-        tenantName?: string;
-        tenantCode?: string;
-    }
-}
+// Note: NextAuth v5 beta gère JWT automatiquement via le token callback
+// Pas besoin de declare module "next-auth/jwt"
 
 export const {
     handlers,

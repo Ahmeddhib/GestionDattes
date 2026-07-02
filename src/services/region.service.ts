@@ -16,7 +16,17 @@ export const regionService = {
     async getAll(tenantId: string, userId: string) {
         await requirePermission("region:read");
 
-        return regionRepository.findAll(tenantId);
+        const regions = await regionRepository.findAll(tenantId);
+
+        // Transformer les données pour le format attendu par le composant
+        return regions.map((region: any) => ({
+            ...region,
+            // Transformer _count.Agriculteur → _count.agriculteurs
+            _count: region._count ? {
+                agriculteurs: region._count.Agriculteur || 0,
+                users: 0, // TODO: Ajouter le compteur des utilisateurs par région si nécessaire
+            } : undefined,
+        }));
     },
 
     /**

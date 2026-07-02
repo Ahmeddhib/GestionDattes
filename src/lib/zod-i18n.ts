@@ -65,24 +65,23 @@ export const zodMessages = {
     },
 };
 
-export function getZodErrorMap(locale: Locale = "fr"): z.ZodErrorMap {
+export function getZodErrorMap(locale: Locale = "fr") {
     const messages = zodMessages[locale];
 
-    return (issue, ctx) => {
+    // Zod v4 compatible error map - using any to avoid type issues
+    const errorMap: any = (issue: any, _ctx: any) => {
         switch (issue.code) {
             case z.ZodIssueCode.invalid_type:
                 if (issue.received === "undefined" || issue.received === "null") {
                     return { message: messages.required };
                 }
                 break;
-            case z.ZodIssueCode.invalid_string:
-                if (issue.validation === "email") {
+            case z.ZodIssueCode.invalid_format:
+                // In Zod v4, email validation uses invalid_format
+                if (issue.validation === "email" || issue.expected === "email") {
                     return { message: messages.invalid_email };
                 }
-                if (issue.validation === "regex") {
-                    return { message: messages.regex };
-                }
-                break;
+                return { message: messages.regex };
             case z.ZodIssueCode.too_small:
                 if (issue.type === "string") {
                     return { message: messages.min_string(issue.minimum as number) };
@@ -98,8 +97,10 @@ export function getZodErrorMap(locale: Locale = "fr"): z.ZodErrorMap {
                 break;
         }
 
-        return { message: ctx.defaultError };
+        return { message: _ctx.defaultError };
     };
+
+    return errorMap as z.ZodErrorMap;
 }
 
 // Helper pour définir l'error map globalement

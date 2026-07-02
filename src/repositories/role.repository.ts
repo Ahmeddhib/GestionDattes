@@ -73,8 +73,14 @@ export const roleRepository = {
     },
 
     async create(data: { name: string; description?: string | null }) {
+        const { createId } = await import("@paralleldrive/cuid2");
         return prisma.role.create({
-            data,
+            data: {
+                id: createId(),
+                name: data.name,
+                description: data.description,
+                updatedAt: new Date(),
+            },
             select: {
                 id: true,
                 name: true,
