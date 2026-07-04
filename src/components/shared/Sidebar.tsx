@@ -11,6 +11,8 @@ import {
     LogOut,
     MapPin,
     Sprout,
+    Package,
+    Grape,
 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
@@ -50,6 +52,16 @@ export function Sidebar({ user }: SidebarProps) {
                     href: "/dashboard/agriculteurs",
                     label: t("nav.agriculteurs"),
                     icon: Sprout,
+                },
+                {
+                    href: "/dashboard/types-caisses",
+                    label: t("nav.typesCaisses"),
+                    icon: Package,
+                },
+                {
+                    href: "/dashboard/types-dates",
+                    label: t("nav.typesDates"),
+                    icon: Grape,
                 },
             ],
         },

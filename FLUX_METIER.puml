@@ -1,0 +1,115 @@
+@startuml Flux Métier - Gestion Dattes
+
+!theme plain
+skinparam backgroundColor #FAF0DC
+skinparam actorBackgroundColor #C17A2B
+skinparam actorBorderColor #3D1C00
+skinparam participantBackgroundColor #FFFFFF
+skinparam participantBorderColor #C17A2B
+skinparam sequenceArrowColor #3D1C00
+
+title Flux Métier Principal - Système de Gestion des Dattes
+
+actor "Agriculteur" as AGR
+participant "Agent\nRéception" as AGENT
+participant "Pesée" as PESEE
+participant "Laborantin" as LAB
+participant "Responsable\nStock" as STOCK
+database "Système" as SYS
+
+== Phase 1: Prêt de Caisses (optionnel) ==
+
+AGR -> AGENT: Demande de caisses
+AGENT -> SYS: Créer PretCaisse
+note right
+  - Type de caisse
+  - Nombre de caisses
+  - Date retour prévue
+end note
+SYS --> AGENT: Bon de prêt
+AGENT --> AGR: Remise des caisses
+
+== Phase 2: Livraison des Dattes ==
+
+AGR -> AGENT: Livraison de dattes
+AGENT -> SYS: Créer Livraison
+note right
+  - Agriculteur
+  - Type de datte
+  - Nombre de caisses
+  - Type de caisse
+  - Observations
+end note
+
+== Phase 3: Pesée ==
+
+AGENT -> PESEE: Demande de pesée
+PESEE -> SYS: Créer Pesée
+note right
+  - Poids brut
+  - Tare
+  - Poids net
+end note
+SYS -> SYS: Calculer quantité nette
+SYS --> PESEE: Confirmation
+PESEE --> AGENT: Résultats pesée
+
+== Phase 4: Échantillonnage ==
+
+AGENT -> LAB: Prélèvement échantillon
+LAB -> SYS: Créer Échantillon
+note right
+  - Code échantillon
+  - Poids
+  - Date prélèvement
+end note
+
+== Phase 5: Analyse Laboratoire ==
+
+LAB -> SYS: Effectuer Analyse
+note right
+  - Taux humidité
+  - Taux impuretés
+  - Calibre
+  - Couleur
+  - Qualité finale
+end note
+SYS --> LAB: Résultats analyse
+
+== Phase 6: Mise en Stock ==
+
+LAB -> STOCK: Validation qualité
+STOCK -> SYS: Créer StockDate
+note right
+  - Type de datte
+  - Quantité
+  - Emplacement
+  - Date entrée
+  - Statut (disponible)
+end note
+SYS --> STOCK: Confirmation stock
+
+== Phase 7: Retour Caisses (si prêt) ==
+
+AGR -> AGENT: Retour des caisses
+AGENT -> SYS: Mettre à jour PretCaisse
+note right
+  - Nombre retourné
+  - Date retour effectif
+  - Statut (retourné)
+end note
+SYS --> AGENT: Confirmation retour
+
+== Phase 8: Sortie de Stock ==
+
+STOCK -> SYS: Créer BonSortie
+note right
+  - Stock source
+  - Quantité
+  - Type de caisse
+  - Destination
+end note
+SYS -> SYS: Décrémenter stock
+SYS --> STOCK: Bon de sortie généré
+
+@enduml

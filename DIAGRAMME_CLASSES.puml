@@ -1,0 +1,430 @@
+@startuml Gestion Dattes - Diagramme de Classes
+
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FAF0DC
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #C17A2B
+skinparam arrowColor #3D1C00
+
+' ==================== MULTI-TENANT & AUTH ====================
+
+package "Multi-tenant & Authentication" #E8D5B7 {
+    class Tenant {
+        +String id
+        +String name
+        +String code
+        +Boolean active
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +TenantUser[] TenantUsers
+        +Region[] Regions
+        +Agriculteur[] Agriculteurs
+        +Livraison[] Livraisons
+        +StockDate[] StocksDates
+        +AuditLog[] AuditLogs
+    }
+
+    class User {
+        +String id
+        +String name
+        +String email
+        +String password
+        +Boolean active
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +TenantUser[] TenantUsers
+        +AuditLog[] AuditLogs
+    }
+
+    class Role {
+        +String id
+        +String name (UNIQUE)
+        +String description
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +TenantUser[] TenantUsers
+    }
+
+    class TenantUser {
+        +String id
+        +String userId
+        +String tenantId
+        +String roleId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +User User
+        +Tenant Tenant
+        +Role Role
+    }
+
+    class AuditLog {
+        +String id
+        +String actorId
+        +String tenantId
+        +AuditAction action
+        +String description
+        +String targetId
+        +Json details
+        +DateTime timestamp
+        ---
+        Relations
+        +User User
+        +Tenant Tenant
+    }
+}
+
+' ==================== DONNÉES DE RÉFÉRENCE ====================
+
+package "Données de Référence" #D4E8D4 {
+    class Region {
+        +String id
+        +String nom
+        +String code
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Tenant Tenant
+        +Agriculteur[] Agriculteurs
+        +User[] Users
+    }
+
+    class TypeCaisse {
+        +String id
+        +String nom
+        +Float poidsKg
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Tenant Tenant
+        +Livraison[] Livraisons
+        +PretCaisse[] PretsCaisses
+        +BonSortie[] BonsSortie
+    }
+
+    class TypeDate {
+        +String id
+        +String nom
+        +String description
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Tenant Tenant
+        +Livraison[] Livraisons
+        +StockDate[] StocksDates
+    }
+}
+
+' ==================== AGRICULTEURS ====================
+
+package "Gestion Agriculteurs" #E8D4F8 {
+    class Agriculteur {
+        +String id
+        +String code (UNIQUE par tenant)
+        +String cin
+        +String nom
+        +String prenom
+        +String telephone
+        +String adresse
+        +Int nbPalmiers
+        +Float superficie
+        +Float productionEstimee
+        +String regionId
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Region Region
+        +Tenant Tenant
+        +Livraison[] Livraisons
+        +PretCaisse[] PretsCaisses
+    }
+}
+
+' ==================== LIVRAISONS & RÉCEPTION ====================
+
+package "Livraisons & Réception" #F8E8D4 {
+    class Livraison {
+        +String id
+        +String numeroLot (UNIQUE par tenant)
+        +DateTime dateLivraison
+        +String agriculteurId
+        +String typeDateId
+        +String typeCaisseId
+        +Int nombreCaisses
+        +Float quantiteBrute
+        +Float quantiteNette
+        +Float tauxHumidite
+        +String statut
+        +String observations
+        +String tenantId
+        +String createdById
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Agriculteur Agriculteur
+        +TypeDate TypeDate
+        +TypeCaisse TypeCaisse
+        +Tenant Tenant
+        +User CreatedBy
+        +Pesee[] Pesees
+        +Echantillon[] Echantillons
+    }
+
+    class Pesee {
+        +String id
+        +Float poidsBrut
+        +Float poidsNet
+        +Float tare
+        +DateTime datePesee
+        +String livraisonId
+        +String tenantId
+        +DateTime createdAt
+        ---
+        Relations
+        +Livraison Livraison
+        +Tenant Tenant
+    }
+
+    class Echantillon {
+        +String id
+        +String code (UNIQUE par tenant)
+        +String livraisonId
+        +Float poids
+        +DateTime datePrelevement
+        +String statut
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Livraison Livraison
+        +Tenant Tenant
+        +Analyse[] Analyses
+    }
+
+    class Analyse {
+        +String id
+        +String echantillonId
+        +Float tauxHumidite
+        +Float tauxImpuretes
+        +String calibre
+        +String couleur
+        +String qualite
+        +String observations
+        +DateTime dateAnalyse
+        +String analysteId
+        +String tenantId
+        +DateTime createdAt
+        ---
+        Relations
+        +Echantillon Echantillon
+        +User Analyste
+        +Tenant Tenant
+    }
+}
+
+' ==================== PRÊT DE CAISSES ====================
+
+package "Gestion Prêt Caisses" #D4E8F8 {
+    class PretCaisse {
+        +String id
+        +Int nombrePrete
+        +Int nombreRetourne
+        +DateTime datePret
+        +DateTime dateRetourPrevu
+        +DateTime dateRetourEffectif
+        +String statut
+        +String agriculteurId
+        +String typeCaisseId
+        +String tenantId
+        +String createdById
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Agriculteur Agriculteur
+        +TypeCaisse TypeCaisse
+        +Tenant Tenant
+        +User CreatedBy
+    }
+}
+
+' ==================== STOCK ====================
+
+package "Gestion Stock" #F8D4E8 {
+    class StockDate {
+        +String id
+        +Float quantite
+        +String typeDateId
+        +String emplacement
+        +DateTime dateEntree
+        +String statut
+        +String observations
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +TypeDate TypeDate
+        +Tenant Tenant
+        +BonSortie[] BonsSortie
+    }
+
+    class BonSortie {
+        +String id
+        +String numero (UNIQUE par tenant)
+        +DateTime dateSortie
+        +Float quantiteTotale
+        +String stockId
+        +String typeCaisseId
+        +String tenantId
+        +String createdById
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +StockDate StockDate
+        +TypeCaisse TypeCaisse
+        +Tenant Tenant
+        +User CreatedBy
+    }
+}
+
+' ==================== VENTES (OPTIONNEL) ====================
+
+package "Ventes" #E8F8D4 {
+    class Client {
+        +String id
+        +String nom
+        +String telephone
+        +String adresse
+        +String email
+        +String tenantId
+        +DateTime createdAt
+        +DateTime updatedAt
+        ---
+        Relations
+        +Tenant Tenant
+        +Vente[] Ventes
+    }
+
+    class Vente {
+        +String id
+        +DateTime date
+        +Float montantTotal
+        +String clientId
+        +String tenantId
+        +DateTime createdAt
+        ---
+        Relations
+        +Client Client
+        +Tenant Tenant
+    }
+
+    class BonAchat {
+        +String id
+        +String numero (UNIQUE par tenant)
+        +DateTime dateAchat
+        +Float quantite
+        +Float prixUnitaire
+        +Float montantTotal
+        +String fournisseur
+        +String tenantId
+        +DateTime createdAt
+        ---
+        Relations
+        +Tenant Tenant
+    }
+}
+
+' ==================== RELATIONS ====================
+
+' Multi-tenant
+Tenant "1" -- "0..*" TenantUser : has
+User "1" -- "0..*" TenantUser : has
+Role "1" -- "0..*" TenantUser : has
+Tenant "1" -- "0..*" AuditLog : tracks
+User "1" -- "0..*" AuditLog : performs
+
+' Référence
+Tenant "1" -- "0..*" Region : owns
+Tenant "1" -- "0..*" TypeCaisse : owns
+Tenant "1" -- "0..*" TypeDate : owns
+
+' Agriculteurs
+Tenant "1" -- "0..*" Agriculteur : owns
+Region "1" -- "0..*" Agriculteur : contains
+
+' Livraisons
+Tenant "1" -- "0..*" Livraison : owns
+Agriculteur "1" -- "0..*" Livraison : delivers
+TypeDate "1" -- "0..*" Livraison : specifies
+TypeCaisse "1" -- "0..*" Livraison : uses
+User "1" -- "0..*" Livraison : creates
+Livraison "1" -- "0..*" Pesee : has
+Livraison "1" -- "0..*" Echantillon : has
+Echantillon "1" -- "0..*" Analyse : analyzed_by
+User "1" -- "0..*" Analyse : performs
+
+' Prêt caisses
+Tenant "1" -- "0..*" PretCaisse : owns
+Agriculteur "1" -- "0..*" PretCaisse : borrows
+TypeCaisse "1" -- "0..*" PretCaisse : used_in
+User "1" -- "0..*" PretCaisse : creates
+
+' Stock
+Tenant "1" -- "0..*" StockDate : owns
+TypeDate "1" -- "0..*" StockDate : stocks
+StockDate "1" -- "0..*" BonSortie : issues
+TypeCaisse "1" -- "0..*" BonSortie : uses
+User "1" -- "0..*" BonSortie : creates
+
+' Ventes
+Tenant "1" -- "0..*" Client : owns
+Client "1" -- "0..*" Vente : purchases
+Tenant "1" -- "0..*" Vente : owns
+Tenant "1" -- "0..*" BonAchat : owns
+
+note right of Tenant
+  **Multi-tenant central**
+  Toutes les entités métier
+  sont isolées par Wakala
+end note
+
+note right of Livraison
+  **Flux principal**
+  Livraison → Pesée → 
+  Échantillon → Analyse → 
+  Stock
+end note
+
+note right of PretCaisse
+  **Gestion des caisses**
+  Prêt → Utilisation → 
+  Retour
+end note
+
+note right of StockDate
+  **Inventaire**
+  Entrée (Livraison) →
+  Stock → Sortie
+end note
+
+@enduml

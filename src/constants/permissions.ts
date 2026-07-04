@@ -25,6 +25,18 @@ export const PERMISSIONS = {
     "agriculteur:update": [ROLES.ADMIN, ROLES.AGENT],
     "agriculteur:delete": [ROLES.ADMIN],
 
+    // Types de Caisses
+    "type-caisse:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "type-caisse:create": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
+    "type-caisse:update": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
+    "type-caisse:delete": [ROLES.ADMIN],
+
+    // Types de Dattes
+    "types_dates:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.LABORANTIN, ROLES.DIRECTION],
+    "types_dates:create": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
+    "types_dates:update": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
+    "types_dates:delete": [ROLES.ADMIN],
+
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],
 } as const;
