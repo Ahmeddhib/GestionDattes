@@ -37,6 +37,12 @@ export const PERMISSIONS = {
     "types_dates:update": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
     "types_dates:delete": [ROLES.ADMIN],
 
+    // Livraisons
+    "livraison:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.LABORANTIN, ROLES.DIRECTION],
+    "livraison:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
+    "livraison:update": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
+    "livraison:delete": [ROLES.ADMIN],
+
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],
 } as const;

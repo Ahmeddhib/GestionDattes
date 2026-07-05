@@ -19,7 +19,7 @@ export const typeCaisseRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         PretCaisse: true,
                         BonSortie: true,
                         Conditionnement: true,
@@ -44,7 +44,7 @@ export const typeCaisseRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         PretCaisse: true,
                         BonSortie: true,
                         Conditionnement: true,
@@ -88,7 +88,7 @@ export const typeCaisseRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         PretCaisse: true,
                         BonSortie: true,
                         Conditionnement: true,
@@ -125,7 +125,7 @@ export const typeCaisseRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         PretCaisse: true,
                         BonSortie: true,
                         Conditionnement: true,
@@ -163,7 +163,7 @@ export const typeCaisseRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         PretCaisse: true,
                         BonSortie: true,
                         Conditionnement: true,
@@ -175,10 +175,10 @@ export const typeCaisseRepository = {
         if (!typeCaisse) return false;
 
         const totalUsage =
-            typeCaisse._count.Livraison +
-            typeCaisse._count.PretCaisse +
-            typeCaisse._count.BonSortie +
-            typeCaisse._count.Conditionnement;
+            (typeCaisse._count?.LivraisonTypeCaisse || 0) +
+            (typeCaisse._count?.PretCaisse || 0) +
+            (typeCaisse._count?.BonSortie || 0) +
+            (typeCaisse._count?.Conditionnement || 0);
 
         return totalUsage > 0;
     },

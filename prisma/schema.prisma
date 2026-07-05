@@ -171,25 +171,23 @@ model Echantillon {
 }
 
 model Livraison {
-  id            String        @id
-  numeroLot     String
-  dateLivraison DateTime
-  quantiteKg    Float
-  agriculteurId String
-  typeDateId    String
-  typeCaisseId  String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime
-  tenantId      String
-  BonAchat      BonAchat?
-  Echantillon   Echantillon[]
-  Agriculteur   Agriculteur   @relation(fields: [agriculteurId], references: [id])
-  Tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  TypeCaisse    TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
-  TypeDate      TypeDate      @relation(fields: [typeDateId], references: [id])
-  Pesee         Pesee?
-  PretCaisse    PretCaisse[]
-  StockDate     StockDate[]
+  id                  String                @id
+  numeroLot           String
+  dateLivraison       DateTime
+  agriculteurId       String
+  typeDateId          String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  tenantId            String
+  BonAchat            BonAchat?
+  Echantillon         Echantillon[]
+  LivraisonTypeCaisse LivraisonTypeCaisse[]
+  Agriculteur         Agriculteur           @relation(fields: [agriculteurId], references: [id])
+  Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeDate            TypeDate              @relation(fields: [typeDateId], references: [id])
+  Pesee               Pesee?
+  PretCaisse          PretCaisse[]
+  StockDate           StockDate[]
 
   @@unique([tenantId, numeroLot])
   @@index([agriculteurId])
@@ -198,6 +196,20 @@ model Livraison {
   @@index([numeroLot])
   @@index([tenantId])
   @@index([typeDateId])
+}
+
+model LivraisonTypeCaisse {
+  id           String     @id @default(cuid())
+  livraisonId  String
+  typeCaisseId String
+  quantite     Int
+  createdAt    DateTime   @default(now())
+  Livraison    Livraison  @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
+  TypeCaisse   TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+
+  @@unique([livraisonId, typeCaisseId])
+  @@index([livraisonId])
+  @@index([typeCaisseId])
 }
 
 model Pesee {
@@ -342,17 +354,17 @@ model TenantUser {
 }
 
 model TypeCaisse {
-  id              String            @id
-  nom             String
-  poidsKg         Float
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime
-  tenantId        String
-  BonSortie       BonSortie[]
-  Conditionnement Conditionnement[]
-  Livraison       Livraison[]
-  PretCaisse      PretCaisse[]
-  Tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                  String                @id
+  nom                 String
+  poidsKg             Float
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  tenantId            String
+  BonSortie           BonSortie[]
+  Conditionnement     Conditionnement[]
+  LivraisonTypeCaisse LivraisonTypeCaisse[]
+  PretCaisse          PretCaisse[]
+  Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, nom])
   @@index([tenantId])

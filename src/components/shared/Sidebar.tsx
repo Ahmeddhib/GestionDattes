@@ -13,6 +13,7 @@ import {
     Sprout,
     Package,
     Grape,
+    Truck,
 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
@@ -62,6 +63,11 @@ export function Sidebar({ user }: SidebarProps) {
                     href: "/dashboard/types-dates",
                     label: t("nav.typesDates"),
                     icon: Grape,
+                },
+                {
+                    href: "/dashboard/livraisons",
+                    label: t("nav.livraisons"),
+                    icon: Truck,
                 },
             ],
         },

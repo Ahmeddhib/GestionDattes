@@ -22,7 +22,7 @@ export const typeCaisseService = {
         return typesCaisses.map((type: any) => ({
             ...type,
             _count: {
-                livraisons: type._count?.Livraison || 0,
+                livraisons: type._count?.LivraisonTypeCaisse || 0,
                 pretsCaisses: type._count?.PretCaisse || 0,
                 bonsSortie: type._count?.BonSortie || 0,
                 conditionnements: type._count?.Conditionnement || 0,
