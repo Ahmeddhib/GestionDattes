@@ -357,6 +357,7 @@ model TypeCaisse {
   id                  String                @id
   nom                 String
   poidsKg             Float
+  stockDisponible     Int                   @default(0)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   tenantId            String
@@ -368,6 +369,7 @@ model TypeCaisse {
 
   @@unique([tenantId, nom])
   @@index([tenantId])
+  @@index([stockDisponible])
 }
 
 model TypeDate {

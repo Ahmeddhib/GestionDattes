@@ -72,7 +72,7 @@ export const typeCaisseRepository = {
      */
     async create(
         tenantId: string,
-        data: { nom: string; poidsKg: number }
+        data: { nom: string; poidsKg: number; stockDisponible?: number }
     ) {
         const { createId } = await import("@paralleldrive/cuid2");
         return prisma.typeCaisse.create({
@@ -80,6 +80,7 @@ export const typeCaisseRepository = {
                 id: createId(),
                 nom: data.nom,
                 poidsKg: data.poidsKg,
+                stockDisponible: data.stockDisponible ?? 0,
                 updatedAt: new Date(),
                 Tenant: {
                     connect: { id: tenantId }, // Injection du tenant

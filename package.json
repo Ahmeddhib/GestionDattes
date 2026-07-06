@@ -28,6 +28,8 @@
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "jose": "^6.2.3",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.18.0",
     "next": "16.2.9",
     "next-auth": "^5.0.0-beta.31",
@@ -45,6 +47,7 @@
     "uuid": "^14.0.0",
     "vaul": "^1.1.2",
     "ws": "^8.21.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {

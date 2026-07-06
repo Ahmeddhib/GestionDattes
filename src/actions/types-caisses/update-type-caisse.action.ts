@@ -20,6 +20,7 @@ export async function updateTypeCaisseAction(formData: FormData) {
             id: formData.get("id") as string,
             nom: formData.get("nom") || undefined,
             poidsKg: formData.get("poidsKg") ? Number(formData.get("poidsKg")) : undefined,
+            stockDisponible: formData.get("stockDisponible") ? Number(formData.get("stockDisponible")) : undefined,
         };
 
         const parsed = updateTypeCaisseSchema.safeParse(rawData);

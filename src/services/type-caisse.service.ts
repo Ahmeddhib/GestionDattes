@@ -61,6 +61,7 @@ export const typeCaisseService = {
         const typeCaisse = await typeCaisseRepository.create(tenantId, {
             nom: data.nom,
             poidsKg: data.poidsKg,
+            stockDisponible: data.stockDisponible ?? 0,
         });
 
         // Audit
@@ -69,10 +70,11 @@ export const typeCaisseService = {
             actorId: userId,
             action: "CREATE_TYPE_CAISSE",
             targetId: typeCaisse.id,
-            description: `Type de caisse créé: ${typeCaisse.nom} (${typeCaisse.poidsKg} kg)`,
+            description: `Type de caisse créé: ${typeCaisse.nom} (${typeCaisse.poidsKg} kg, stock: ${typeCaisse.stockDisponible})`,
             details: {
                 nom: typeCaisse.nom,
                 poidsKg: typeCaisse.poidsKg,
+                stockDisponible: typeCaisse.stockDisponible,
             },
         });
 
@@ -102,6 +104,7 @@ export const typeCaisseService = {
         const updateData: any = {};
         if (data.nom !== undefined) updateData.nom = data.nom;
         if (data.poidsKg !== undefined) updateData.poidsKg = data.poidsKg;
+        if (data.stockDisponible !== undefined) updateData.stockDisponible = data.stockDisponible;
 
         const typeCaisse = await typeCaisseRepository.update(tenantId, data.id, updateData);
 
@@ -115,6 +118,7 @@ export const typeCaisseService = {
             details: {
                 nom: typeCaisse.nom,
                 poidsKg: typeCaisse.poidsKg,
+                stockDisponible: typeCaisse.stockDisponible,
             },
         });
 
