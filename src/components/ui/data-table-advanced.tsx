@@ -78,6 +78,7 @@ interface DataTableProps<TData, TValue> {
     enableRowSelection?: boolean;
     enableDragDrop?: boolean;
     onDataChange?: (data: TData[]) => void;
+    onSearchChange?: (value: string) => void;
 }
 
 // Drag Handle Component
@@ -140,6 +141,7 @@ export function DataTableAdvanced<TData, TValue>({
     enableRowSelection = true,
     enableDragDrop = false,
     onDataChange,
+    onSearchChange,
 }: DataTableProps<TData, TValue>) {
     const { t, messages } = useClientTranslations();
     const [data, setData] = React.useState(initialData);
@@ -147,6 +149,7 @@ export function DataTableAdvanced<TData, TValue>({
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [searchValue, setSearchValue] = React.useState("");
 
     // Sync data with parent
     React.useEffect(() => {
@@ -240,13 +243,18 @@ export function DataTableAdvanced<TData, TValue>({
             {/* Toolbar */}
             <div className="flex items-center justify-between gap-4">
                 {/* Search */}
-                {searchKey && (
+                {(searchKey || onSearchChange) && (
                     <Input
                         placeholder={searchPlaceholder || t("common.search")}
-                        value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-                        onChange={(event) =>
-                            table.getColumn(searchKey)?.setFilterValue(event.target.value)
-                        }
+                        value={searchKey ? (table.getColumn(searchKey)?.getFilterValue() as string) ?? "" : searchValue}
+                        onChange={(event) => {
+                            const value = event.target.value;
+                            setSearchValue(value);
+                            if (searchKey) {
+                                table.getColumn(searchKey)?.setFilterValue(value);
+                            }
+                            onSearchChange?.(value);
+                        }}
                         className="max-w-sm rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                     />
                 )}

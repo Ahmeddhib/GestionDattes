@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { logoutAction } from "@/actions/auth/logout.action";
 
 interface SidebarProps {
     user?: {
@@ -158,8 +159,14 @@ export function Sidebar({ user }: SidebarProps) {
                     </div>
                     <button
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-[9px] bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
-                        onClick={() => {
-                            window.location.href = "/api/auth/signout?callbackUrl=/";
+                        onClick={async () => {
+                            // Nettoyer les données de wakala côté client
+                            sessionStorage.removeItem("selectedWakalaId");
+                            sessionStorage.removeItem("selectedWakalaCode");
+                            sessionStorage.removeItem("userEmail");
+
+                            // Appeler l'action serveur pour nettoyer les cookies et se déconnecter
+                            await logoutAction();
                         }}
                     >
                         <LogOut className="w-4 h-4" />

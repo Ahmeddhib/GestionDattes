@@ -129,7 +129,7 @@ export const createPretsColumns = (
             cell: ({ row }) => {
                 const pret = row.original;
                 if (pret.statut === "RETOURNE") {
-                    return <span className="text-xs text-gray-400">Clôturé</span>;
+                    return <span className="text-xs text-gray-400">{t("pretsCaisses.pretCloture")}</span>;
                 }
                 return <RetourDialog pret={pret} />;
             },

@@ -2,25 +2,10 @@
 
 import { LoginForm } from "@/components/auth/login-form";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { useEffect, useState } from "react";
 import { Building2 } from "lucide-react";
 
 export function LoginPageContent() {
     const { t } = useClientTranslations();
-    const [selectedWakala, setSelectedWakala] = useState<{
-        id: string;
-        code: string;
-    } | null>(null);
-
-    useEffect(() => {
-        // Récupérer la Wakala sélectionnée depuis sessionStorage
-        const wakalaId = sessionStorage.getItem("selectedWakalaId");
-        const wakalaCode = sessionStorage.getItem("selectedWakalaCode");
-
-        if (wakalaId && wakalaCode) {
-            setSelectedWakala({ id: wakalaId, code: wakalaCode });
-        }
-    }, []);
 
     return (
         <div className="min-h-screen bg-[#FAF0DC] flex items-center justify-center p-4">
@@ -57,32 +42,6 @@ export function LoginPageContent() {
                                 </p>
                             </div>
                         </div>
-
-                        {/* Wakala Sélectionnée */}
-                        {selectedWakala && (
-                            <div
-                                className="mb-6 p-4 rounded-xl"
-                                style={{
-                                    background: "rgba(193,122,43,0.15)",
-                                    border: "1px solid rgba(193,122,43,0.3)",
-                                }}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <Building2 className="w-5 h-5" style={{ color: "#C17A2B" }} />
-                                    <div>
-                                        <p className="text-xs" style={{ color: "rgba(245,230,200,0.6)" }}>
-                                            Wakala sélectionnée
-                                        </p>
-                                        <p
-                                            className="text-sm font-semibold font-mono"
-                                            style={{ color: "#F5E6C8" }}
-                                        >
-                                            {selectedWakala.code}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                         <p
                             className="text-xl font-medium leading-relaxed mb-3"
@@ -165,7 +124,7 @@ export function LoginPageContent() {
                                 {t("auth.welcomeBack")}
                             </p>
                         </div>
-                        <LoginForm selectedWakalaId={selectedWakala?.id} />
+                        <LoginForm />
                     </div>
                 </div>
             </div>

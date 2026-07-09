@@ -19,11 +19,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-interface LoginFormProps {
-    selectedWakalaId?: string;
-}
-
-export function LoginForm({ selectedWakalaId }: LoginFormProps) {
+export function LoginForm() {
     const router = useRouter();
     const { t } = useClientTranslations();
     const [showPwd, setShowPwd] = useState(false);
@@ -39,10 +35,14 @@ export function LoginForm({ selectedWakalaId }: LoginFormProps) {
         setLoading(true);
         setError(null);
 
-        const res = await signIn("credentials", {
+        // Préparer les credentials sans tenantId (on sélectionnera après)
+        const credentials: Record<string, string> = {
             email: data.email,
             password: data.password,
-            tenantId: selectedWakalaId, // Passer le tenantId sélectionné
+        };
+
+        const res = await signIn("credentials", {
+            ...credentials,
             redirect: false,
         });
 
@@ -61,8 +61,8 @@ export function LoginForm({ selectedWakalaId }: LoginFormProps) {
             }
         } else {
             setSuccess(true);
-            // Rediriger vers dashboard
-            router.push(ROUTES.DASHBOARD);
+            // Toujours rediriger vers select-wakala après login
+            router.push("/select-wakala");
             router.refresh();
         }
     };

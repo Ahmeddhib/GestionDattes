@@ -2,6 +2,7 @@ import { agriculteurRepository } from "@/repositories/agriculteur.repository";
 import { regionRepository } from "@/repositories/region.repository";
 import { auditService } from "@/services/audit.service";
 import { requirePermission } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
 import type { CreateAgriculteurInput, UpdateAgriculteurInput } from "@/validators/agriculteur.validator";
 
 /**
@@ -77,14 +78,52 @@ export const agriculteurService = {
     },
 
     /**
+     * Générer un code unique pour un agriculteur
+     * Format: AGR-XXXX (où XXXX est un numéro séquentiel)
+     */
+    async generateUniqueCode(tenantId: string): Promise<string> {
+        const prefix = "AGR";
+        let counter = 1;
+        let code = "";
+        let exists = true;
+
+        // Récupérer le dernier code pour ce tenant
+        const lastAgriculteur = await prisma.agriculteur.findFirst({
+            where: { tenantId },
+            orderBy: { code: "desc" },
+            select: { code: true },
+        });
+
+        if (lastAgriculteur && lastAgriculteur.code.startsWith(prefix)) {
+            // Extraire le numéro du dernier code (ex: AGR-0045 -> 45)
+            const lastNumber = parseInt(lastAgriculteur.code.substring(prefix.length + 1));
+            if (!isNaN(lastNumber)) {
+                counter = lastNumber + 1;
+            }
+        }
+
+        // Chercher un code disponible
+        while (exists) {
+            code = `${prefix}-${counter.toString().padStart(4, "0")}`;
+            exists = await agriculteurRepository.findByCode(tenantId, code) !== null;
+            if (exists) counter++;
+        }
+
+        return code;
+    },
+
+    /**
      * Créer un nouvel agriculteur (dans le tenant)
      * Permission: ADMIN, AGENT
      */
     async create(tenantId: string, userId: string, data: CreateAgriculteurInput) {
         await requirePermission("agriculteur:create");
 
+        // Générer automatiquement le code si non fourni
+        const code = data.code || (await this.generateUniqueCode(tenantId));
+
         // Vérifier que le code n'existe pas déjà dans ce tenant
-        const codeExists = await agriculteurRepository.findByCode(tenantId, data.code);
+        const codeExists = await agriculteurRepository.findByCode(tenantId, code);
         if (codeExists) {
             throw new Error("Un agriculteur avec ce code existe déjà dans cette Wakala");
         }
@@ -102,7 +141,7 @@ export const agriculteurService = {
         }
 
         const agriculteur = await agriculteurRepository.create(tenantId, {
-            code: data.code,
+            code: code,
             cin: data.cin,
             nom: data.nom,
             prenom: data.prenom,

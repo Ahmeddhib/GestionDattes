@@ -18,21 +18,9 @@ export default async function SelectWakalaPage() {
     // Récupérer les Wakalas de l'utilisateur
     const tenants = await getUserTenants(session.user.id);
 
-    // Si aucun tenant, afficher erreur
+    // Si aucun tenant, permettre à l'utilisateur de créer une wakala
     if (tenants.length === 0) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#FAF0DC]">
-                <div className="bg-white p-8 rounded-[14px] shadow-lg max-w-md w-full text-center">
-                    <h1 className="text-2xl font-bold text-red-600 mb-4">
-                        Aucune Wakala Assignée
-                    </h1>
-                    <p className="text-gray-600 mb-6">
-                        Votre compte n'est associé à aucune Wakala. Veuillez contacter
-                        l'administrateur système.
-                    </p>
-                </div>
-            </div>
-        );
+        return <WakalaSelectorContent tenants={[]} user={session.user} />;
     }
 
     // Si un seul tenant, rediriger automatiquement

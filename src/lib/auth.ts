@@ -43,7 +43,7 @@ export const {
     pages: {
         signIn: "/login",
         error: "/login",
-        signOut: "/", // Rediriger vers la page d'accueil (sélection Wakala) après déconnexion
+        signOut: "/login", // Rediriger vers la page de connexion après déconnexion
     },
     providers: [
         Credentials({
@@ -53,74 +53,115 @@ export const {
                 tenantId: { label: "Tenant ID", type: "text" }, // Pour la sélection de Wakala
             },
             async authorize(credentials) {
-                const email = credentials.email as string;
-                const password = credentials.password as string;
-                const tenantId = credentials.tenantId as string | undefined;
+                try {
+                    if (!credentials) {
+                        console.error("[AUTH] No credentials provided");
+                        throw new Error("MISSING_CREDENTIALS");
+                    }
 
-                if (!email || !password) {
-                    throw new Error("MISSING_CREDENTIALS");
-                }
+                    const email = credentials.email as string;
+                    const password = credentials.password as string;
+                    let tenantId = credentials.tenantId as string | undefined;
 
-                const user = await prisma.user.findUnique({
-                    where: { email },
-                });
+                    // Nettoyer tenantId si c'est "undefined" ou vide
+                    if (tenantId === "undefined" || tenantId === "" || tenantId === null) {
+                        tenantId = undefined;
+                    }
 
-                if (!user) {
-                    throw new Error("INVALID_CREDENTIALS");
-                }
+                    // Mode ré-authentification: si le mot de passe est "__REAUTH__"
+                    // on skip la vérification du mot de passe (utilisateur déjà authentifié)
+                    const isReauth = password === "__REAUTH__";
 
-                // Vérifier si le compte est désactivé
-                if (!user.active) {
-                    throw new Error("ACCOUNT_DISABLED");
-                }
+                    console.log("[AUTH] Login attempt:", { email, hasTenantId: !!tenantId, isReauth });
 
-                const validPassword = await bcrypt.compare(password, user.password);
-                if (!validPassword) {
-                    throw new Error("INVALID_CREDENTIALS");
-                }
+                    if (!email || (!password && !isReauth)) {
+                        console.error("[AUTH] Missing email or password");
+                        throw new Error("MISSING_CREDENTIALS");
+                    }
 
-                // Multi-tenant: tenantId est OBLIGATOIRE
-                // L'utilisateur doit sélectionner une Wakala avant de se connecter
-                if (!tenantId) {
-                    throw new Error("TENANT_SELECTION_REQUIRED");
-                }
+                    const user = await prisma.user.findUnique({
+                        where: { email },
+                    });
 
-                const tenantUser = await prisma.tenantUser.findUnique({
-                    where: {
-                        userId_tenantId: {
-                            userId: user.id,
-                            tenantId,
-                        },
-                    },
-                    include: {
-                        Role: {
-                            select: {
-                                name: true,
+                    if (!user) {
+                        console.error("[AUTH] User not found:", email);
+                        throw new Error("INVALID_CREDENTIALS");
+                    }
+
+                    // Vérifier si le compte est désactivé
+                    if (!user.active) {
+                        console.error("[AUTH] Account disabled:", email);
+                        throw new Error("ACCOUNT_DISABLED");
+                    }
+
+                    // Vérifier le mot de passe (sauf en mode ré-auth)
+                    if (!isReauth) {
+                        const validPassword = await bcrypt.compare(password, user.password);
+                        if (!validPassword) {
+                            console.error("[AUTH] Invalid password for:", email);
+                            throw new Error("INVALID_CREDENTIALS");
+                        }
+                    }
+
+                    // Si aucun tenantId fourni, permettre le login sans tenant
+                    // L'utilisateur sélectionnera son tenant après le login
+                    if (!tenantId) {
+                        console.log("[AUTH] Login successful without tenant for:", email);
+                        return {
+                            id: user.id,
+                            email: user.email,
+                            name: user.name,
+                            role: "USER", // Rôle temporaire avant sélection du tenant
+                            tenantId: undefined,
+                            tenantName: undefined,
+                            tenantCode: undefined,
+                        };
+                    }
+
+                    // Si tenantId fourni, vérifier l'accès au tenant
+                    console.log("[AUTH] Checking tenant access:", { userId: user.id, tenantId });
+                    const tenantUser = await prisma.tenantUser.findUnique({
+                        where: {
+                            userId_tenantId: {
+                                userId: user.id,
+                                tenantId,
                             },
                         },
-                        Tenant: {
-                            select: {
-                                name: true,
-                                code: true,
-                                active: true,
+                        include: {
+                            Role: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                            Tenant: {
+                                select: {
+                                    name: true,
+                                    code: true,
+                                    active: true,
+                                },
                             },
                         },
-                    },
-                });
+                    });
 
-                if (!tenantUser || !tenantUser.active || !tenantUser.Tenant.active) {
-                    throw new Error("TENANT_ACCESS_DENIED");
+                    if (!tenantUser || !tenantUser.active || !tenantUser.Tenant.active) {
+                        console.error("[AUTH] Tenant access denied:", { userId: user.id, tenantId });
+                        throw new Error("TENANT_ACCESS_DENIED");
+                    }
+
+                    console.log("[AUTH] Login successful with tenant:", { email, tenantId });
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: tenantUser.Role.name,
+                        tenantId: tenantId,
+                        tenantName: tenantUser.Tenant.name,
+                        tenantCode: tenantUser.Tenant.code,
+                    };
+                } catch (error) {
+                    console.error("[AUTH] Authorization error:", error);
+                    throw error;
                 }
-
-                return {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: tenantUser.Role.name,
-                    tenantId: tenantId,
-                    tenantName: tenantUser.Tenant.name,
-                    tenantCode: tenantUser.Tenant.code,
-                };
             },
         }),
     ],

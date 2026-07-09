@@ -54,7 +54,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
     const form = useForm<CreateAgriculteurInput>({
         resolver: zodResolver(createAgriculteurSchema),
         defaultValues: {
-            code: "",
+            // code auto-généré côté serveur
             cin: "",
             nom: "",
             prenom: "",
@@ -114,46 +114,33 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 {t("agriculteurs.personalInfo")}
                             </h3>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="code"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.code")} *</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="AGR001"
-                                                    {...field}
-                                                    disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="cin"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.cin")} *</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="12345678"
-                                                    maxLength={8}
-                                                    {...field}
-                                                    disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                            {/* Info banner: code auto-généré */}
+                            <div className="bg-[#C17A2B]/10 border border-[#C17A2B]/20 rounded-[7px] p-3 flex items-start gap-2">
+                                <span className="text-[#C17A2B] text-lg">💡</span>
+                                <p className="text-sm text-[#3D1C00]/80">
+                                    <strong className="text-[#C17A2B]">{t("agriculteurs.code")}</strong> : Un code unique sera généré automatiquement (ex: AGR-0001)
+                                </p>
                             </div>
+
+                            <FormField
+                                control={form.control}
+                                name="cin"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[#3D1C00]">{t("agriculteurs.cin")} *</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="12345678"
+                                                maxLength={8}
+                                                {...field}
+                                                disabled={isLoading}
+                                                className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField

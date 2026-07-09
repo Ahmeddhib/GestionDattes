@@ -3,17 +3,17 @@
 import { auth } from "@/lib/auth";
 import { verifyUserBelongsToTenant } from "@/lib/tenant/get-tenant";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 /**
  * Action pour sélectionner une Wakala après login
- * Met à jour la session en récupérant les infos du tenant
+ * Stocke le tenant pour la ré-authentification
  */
 export async function selectWakalaAction(tenantId: string) {
     try {
         const session = await auth();
 
-        if (!session?.user?.id) {
+        if (!session?.user?.id || !session?.user?.email) {
             return { error: "Non authentifié" };
         }
 
@@ -24,7 +24,7 @@ export async function selectWakalaAction(tenantId: string) {
             return { error: "Accès refusé à cette Wakala" };
         }
 
-        // Récupérer les infos du tenant et le rôle de l'utilisateur
+        // Récupérer les infos du tenant
         const tenantUser = await prisma.tenantUser.findUnique({
             where: {
                 userId_tenantId: {
@@ -43,7 +43,6 @@ export async function selectWakalaAction(tenantId: string) {
                 },
                 Role: {
                     select: {
-                        id: true,
                         name: true,
                     },
                 },
@@ -54,16 +53,19 @@ export async function selectWakalaAction(tenantId: string) {
             return { error: "Wakala inactive" };
         }
 
-        // Note: Dans NextAuth v5, on ne peut pas simplement mettre à jour la session
-        // L'utilisateur devra se reconnecter avec le tenantId
-        // Pour l'instant, on retourne les données et on laisse le client gérer
+        // Stocker les infos pour la ré-authentification
+        const cookieStore = await cookies();
+        cookieStore.set("selected-tenant-id", tenantId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 60 * 5, // 5 minutes
+        });
 
-        // Invalider les caches
-        revalidatePath("/dashboard");
-        revalidatePath("/select-wakala");
-
+        // Retourner les données pour que le client puisse ré-authentifier
         return {
             success: true,
+            email: session.user.email,
             tenant: {
                 id: tenantUser.Tenant.id,
                 name: tenantUser.Tenant.name,

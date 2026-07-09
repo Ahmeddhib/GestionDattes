@@ -49,6 +49,10 @@ export function TopBar({ user }: TopBarProps) {
         "/dashboard/audit-logs": "nav.auditLogs",
         "/dashboard/regions": "nav.regions",
         "/dashboard/agriculteurs": "nav.agriculteurs",
+        "/dashboard/types-caisses": "nav.typesCaisses",
+        "/dashboard/types-dates": "nav.typesDates",
+        "/dashboard/livraisons": "nav.livraisons",
+        "/dashboard/stock-caisses": "nav.stockCaisses",
     };
 
     const pageName = t(routeTranslationKeys[pathname] || "nav.dashboard");
@@ -57,8 +61,9 @@ export function TopBar({ user }: TopBarProps) {
     const segments = pathname.split("/").filter(Boolean);
     const breadcrumbs = segments.map((segment, index) => {
         const path = "/" + segments.slice(0, index + 1).join("/");
+        const translationKey = routeTranslationKeys[path];
         return {
-            label: t(routeTranslationKeys[path] || "common.loading"),
+            label: translationKey ? t(translationKey) : segment,
             path,
             isLast: index === segments.length - 1,
         };

@@ -8,7 +8,8 @@ export const createAgriculteurValidators = (t: (key: string) => string) => {
         code: z
             .string()
             .min(3, t("validation.minLength").replace("{min}", "3"))
-            .max(20, t("validation.maxLength").replace("{max}", "20")),
+            .max(20, t("validation.maxLength").replace("{max}", "20"))
+            .optional(),
         cin: z
             .string()
             .length(8, t("validation.cinExact")),
@@ -50,7 +51,7 @@ export const createAgriculteurValidators = (t: (key: string) => string) => {
  * Schémas par défaut (français) pour compatibilité
  */
 export const createAgriculteurSchema = z.object({
-    code: z.string().min(3, "Le code doit contenir au moins 3 caractères").max(20, "Le code ne peut pas dépasser 20 caractères"),
+    code: z.string().min(3, "Le code doit contenir au moins 3 caractères").max(20, "Le code ne peut pas dépasser 20 caractères").optional(),
     cin: z.string().min(8, "Le CIN doit contenir 8 caractères").max(8, "Le CIN doit contenir 8 caractères"),
     nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
     prenom: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),

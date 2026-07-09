@@ -1,6 +1,7 @@
 "use client";
 
 import { Package, TrendingUp, Clock } from "lucide-react";
+import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 type StatsCardsProps = {
     stats: {
@@ -12,6 +13,8 @@ type StatsCardsProps = {
 };
 
 export function StatsCards({ stats }: StatsCardsProps) {
+    const { t } = useClientTranslations();
+
     return (
         <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-[14px] bg-white p-6 shadow-sm border border-[#C17A2B]/20">
@@ -20,7 +23,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                         <Package className="h-6 w-6 text-[#C17A2B]" />
                     </div>
                     <div>
-                        <p className="text-sm text-[#3D1C00]/60">Total Prêté</p>
+                        <p className="text-sm text-[#3D1C00]/60">{t('pretsCaisses.totalPrete')}</p>
                         <p className="text-2xl font-bold text-[#3D1C00]">{stats.totalPrete}</p>
                     </div>
                 </div>
@@ -32,7 +35,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                         <TrendingUp className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-[#3D1C00]/60">Total Retourné</p>
+                        <p className="text-sm text-[#3D1C00]/60">{t('pretsCaisses.totalRetourne')}</p>
                         <p className="text-2xl font-bold text-[#3D1C00]">{stats.totalRetourne}</p>
                     </div>
                 </div>
@@ -44,7 +47,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                         <Clock className="h-6 w-6 text-orange-600" />
                     </div>
                     <div>
-                        <p className="text-sm text-[#3D1C00]/60">Prêts En Cours</p>
+                        <p className="text-sm text-[#3D1C00]/60">{t('pretsCaisses.pretEnCours')}</p>
                         <p className="text-2xl font-bold text-[#3D1C00]">{stats.pretsEnCours}</p>
                     </div>
                 </div>

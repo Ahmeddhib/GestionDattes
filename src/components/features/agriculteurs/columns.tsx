@@ -102,25 +102,29 @@ export const createAgricultureursColumns = (
         },
         {
             accessorKey: "superficie",
-            header: t("agriculteurs.superficie"),
+            header: ({ column }) => (
+                <div className="text-right">{t("agriculteurs.superficie")}</div>
+            ),
             cell: ({ row }) => {
                 const superficie = row.getValue("superficie") as number | null;
                 return superficie ? (
                     <div className="text-right font-mono">{superficie.toFixed(1)} ha</div>
                 ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <div className="text-right text-muted-foreground">—</div>
                 );
             },
         },
         {
             accessorKey: "productionEstimee",
-            header: t("agriculteurs.production"),
+            header: ({ column }) => (
+                <div className="text-right">{t("agriculteurs.production")}</div>
+            ),
             cell: ({ row }) => {
                 const production = row.getValue("productionEstimee") as number | null;
                 return production ? (
                     <div className="text-right font-mono">{production.toLocaleString()} kg</div>
                 ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <div className="text-right text-muted-foreground">—</div>
                 );
             },
         },
