@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/shared/Button";
@@ -50,17 +51,21 @@ export function LoginForm() {
 
         if (res?.error) {
             // Gérer les différents types d'erreurs
+            let errorMessage = "Email ou mot de passe incorrect.";
+
             if (res.error === "ACCOUNT_DISABLED") {
-                setError("Ce compte est désactivé. Contactez l'administrateur.");
+                errorMessage = "Ce compte est désactivé. Contactez l'administrateur.";
             } else if (res.error === "MISSING_CREDENTIALS") {
-                setError("Email et mot de passe requis.");
+                errorMessage = "Email et mot de passe requis.";
             } else if (res.error === "TENANT_ACCESS_DENIED") {
-                setError("Vous n'avez pas accès à cette Wakala.");
-            } else {
-                setError("Email ou mot de passe incorrect.");
+                errorMessage = "Vous n'avez pas accès à cette Wakala.";
             }
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         } else {
             setSuccess(true);
+            toast.success("Connexion réussie!");
             // Toujours rediriger vers select-wakala après login
             router.push("/select-wakala");
             router.refresh();

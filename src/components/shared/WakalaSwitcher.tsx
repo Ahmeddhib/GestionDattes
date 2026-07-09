@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Building2, Check, ChevronDown, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -49,6 +50,7 @@ export default function WakalaSwitcher({ currentTenant, availableTenants }: Prop
 
                 if (result.error) {
                     setError(result.error);
+                    toast.error(result.error);
                 } else if (result.success && result.tenant && result.email) {
                     // Stocker dans sessionStorage
                     sessionStorage.setItem("selectedWakalaId", result.tenant.id);
@@ -63,16 +65,21 @@ export default function WakalaSwitcher({ currentTenant, availableTenants }: Prop
                         redirect: false,
                     }).then((res) => {
                         if (res?.ok) {
+                            toast.success(`Wakala changée: ${result.tenant.name}`);
                             // Recharger complètement la page pour mettre à jour toutes les données
                             router.refresh(); // Force le rechargement des Server Components
                             window.location.href = "/dashboard";
                         } else {
-                            setError("Erreur lors du changement de Wakala");
+                            const errorMsg = "Erreur lors du changement de Wakala";
+                            setError(errorMsg);
+                            toast.error(errorMsg);
                         }
                     });
                 }
             } catch (err) {
-                setError("Erreur lors du changement de Wakala");
+                const errorMsg = "Erreur lors du changement de Wakala";
+                setError(errorMsg);
+                toast.error(errorMsg);
             }
         });
     };

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Building2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import {
     Dialog,
     DialogContent,
@@ -60,12 +61,16 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
 
             if (result.error) {
                 setError(result.error);
+                toast.error(result.error);
             } else {
+                toast.success("Wakala créée avec succès!");
                 reset();
                 onSuccess();
             }
         } catch (err) {
-            setError("Une erreur est survenue");
+            const errorMsg = "Une erreur est survenue";
+            setError(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }

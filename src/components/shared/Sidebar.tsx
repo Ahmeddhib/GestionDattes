@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
     LayoutDashboard,
     Users,
@@ -165,7 +166,11 @@ export function Sidebar({ user }: SidebarProps) {
                             sessionStorage.removeItem("selectedWakalaCode");
                             sessionStorage.removeItem("userEmail");
 
+                            // Afficher le toast AVANT la redirection
+                            toast.success("Déconnexion en cours...");
+
                             // Appeler l'action serveur pour nettoyer les cookies et se déconnecter
+                            // Note: signOut va rediriger, donc le code après ne sera pas exécuté
                             await logoutAction();
                         }}
                     >
