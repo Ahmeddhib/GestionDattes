@@ -26,7 +26,11 @@
         "exportExcel": "تصدير Excel",
         "dateDebut": "تاريخ البدء",
         "dateFin": "تاريخ الانتهاء",
-        "resetFilters": "إعادة تعيين"
+        "resetFilters": "إعادة تعيين",
+        "close": "إغلاق",
+        "update": "تحديث",
+        "actionIrreversible": "هذا الإجراء لا رجعة فيه.",
+        "appName": "إدارة التمور"
     },
     "validation": {
         "required": "هذا الحقل مطلوب",
@@ -51,6 +55,7 @@
         "typesDates": "أصناف التمور",
         "livraisons": "التسليمات",
         "stockCaisses": "مخزون الصناديق",
+        "clients": "العملاء",
         "users": "المستخدمون",
         "roles": "الأدوار",
         "auditLogs": "سجل التدقيق"
@@ -347,5 +352,32 @@
         "faible": "منخفض",
         "moyen": "متوسط",
         "bon": "جيد"
+    },
+    "clients": {
+        "title": "العملاء",
+        "description": "إدارة العملاء لمبيعات التمور",
+        "nom": "اسم العميل",
+        "nomPlaceholder": "مثال: شركة ABC، مؤسسة XYZ...",
+        "telephone": "الهاتف",
+        "telephonePlaceholder": "رقم الهاتف",
+        "email": "البريد الإلكتروني",
+        "emailPlaceholder": "email@example.com",
+        "adresse": "العنوان",
+        "adressePlaceholder": "العنوان الكامل",
+        "nbVentes": "المبيعات",
+        "addNew": "عميل جديد",
+        "addNewDescription": "أضف عميلاً جديداً للمبيعات",
+        "edit": "تعديل العميل",
+        "editDescription": "عدل معلومات العميل",
+        "delete": "حذف العميل",
+        "deleteConfirm": "هل أنت متأكد من حذف العميل",
+        "cannotDelete": "لا يمكن حذف هذا العميل",
+        "hasVentes": "هذا العميل لديه {count} عملية بيع مرتبطة",
+        "searchPlaceholder": "البحث عن عميل...",
+        "stats": {
+            "total": "إجمالي العملاء",
+            "withSales": "عملاء لديهم مبيعات",
+            "totalSales": "إجمالي المبيعات"
+        }
     }
 }

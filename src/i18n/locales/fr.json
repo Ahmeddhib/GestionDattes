@@ -26,7 +26,11 @@
         "exportExcel": "Exporter Excel",
         "dateDebut": "Date de début",
         "dateFin": "Date de fin",
-        "resetFilters": "Réinitialiser"
+        "resetFilters": "Réinitialiser",
+        "close": "Fermer",
+        "update": "Mettre à jour",
+        "actionIrreversible": "Cette action est irréversible.",
+        "appName": "Gestion des Dattes"
     },
     "validation": {
         "required": "Ce champ est requis",
@@ -51,6 +55,7 @@
         "typesDates": "Types de Dattes",
         "livraisons": "Livraisons",
         "stockCaisses": "Stock de Caisses",
+        "clients": "Clients",
         "users": "Utilisateurs",
         "roles": "Rôles",
         "auditLogs": "Journal d'audit"
@@ -347,5 +352,32 @@
         "faible": "Faible",
         "moyen": "Moyen",
         "bon": "Bon"
+    },
+    "clients": {
+        "title": "Clients",
+        "description": "Gestion des clients pour les ventes de dattes",
+        "nom": "Nom du client",
+        "nomPlaceholder": "Ex: Entreprise ABC, Société XYZ...",
+        "telephone": "Téléphone",
+        "telephonePlaceholder": "Numéro de téléphone",
+        "email": "Email",
+        "emailPlaceholder": "email@example.com",
+        "adresse": "Adresse",
+        "adressePlaceholder": "Adresse complète",
+        "nbVentes": "Ventes",
+        "addNew": "Nouveau Client",
+        "addNewDescription": "Ajoutez un nouveau client pour les ventes",
+        "edit": "Modifier le Client",
+        "editDescription": "Modifiez les informations du client",
+        "delete": "Supprimer le client",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer le client",
+        "cannotDelete": "Impossible de supprimer ce client",
+        "hasVentes": "Ce client a {count} vente(s) associée(s)",
+        "searchPlaceholder": "Rechercher un client...",
+        "stats": {
+            "total": "Total Clients",
+            "withSales": "Clients avec ventes",
+            "totalSales": "Total des ventes"
+        }
     }
 }

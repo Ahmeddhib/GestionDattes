@@ -48,6 +48,12 @@ export const PERMISSIONS = {
     "pret-caisse:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
     "pret-caisse:update": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
 
+    // Clients
+    "client:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "client:create": [ROLES.ADMIN, ROLES.AGENT],
+    "client:update": [ROLES.ADMIN, ROLES.AGENT],
+    "client:delete": [ROLES.ADMIN],
+
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],
 } as const;

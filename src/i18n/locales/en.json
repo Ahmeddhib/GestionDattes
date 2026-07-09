@@ -26,7 +26,11 @@
         "exportExcel": "Export Excel",
         "dateDebut": "Start date",
         "dateFin": "End date",
-        "resetFilters": "Reset"
+        "resetFilters": "Reset",
+        "close": "Close",
+        "update": "Update",
+        "actionIrreversible": "This action is irreversible.",
+        "appName": "Date Management"
     },
     "validation": {
         "required": "This field is required",
@@ -51,6 +55,7 @@
         "typesDates": "Date Varieties",
         "livraisons": "Deliveries",
         "stockCaisses": "Crate Stock",
+        "clients": "Clients",
         "users": "Users",
         "roles": "Roles",
         "auditLogs": "Audit Logs"
@@ -347,5 +352,32 @@
         "faible": "Low",
         "moyen": "Medium",
         "bon": "Good"
+    },
+    "clients": {
+        "title": "Clients",
+        "description": "Client management for date sales",
+        "nom": "Client name",
+        "nomPlaceholder": "E.g., ABC Company, XYZ Corporation...",
+        "telephone": "Phone",
+        "telephonePlaceholder": "Phone number",
+        "email": "Email",
+        "emailPlaceholder": "email@example.com",
+        "adresse": "Address",
+        "adressePlaceholder": "Full address",
+        "nbVentes": "Sales",
+        "addNew": "New Client",
+        "addNewDescription": "Add a new client for sales",
+        "edit": "Edit Client",
+        "editDescription": "Edit client information",
+        "delete": "Delete client",
+        "deleteConfirm": "Are you sure you want to delete client",
+        "cannotDelete": "Cannot delete this client",
+        "hasVentes": "This client has {count} associated sale(s)",
+        "searchPlaceholder": "Search for a client...",
+        "stats": {
+            "total": "Total Clients",
+            "withSales": "Clients with sales",
+            "totalSales": "Total sales"
+        }
     }
 }
