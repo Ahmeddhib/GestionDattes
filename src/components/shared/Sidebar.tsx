@@ -17,6 +17,7 @@ import {
     Truck,
     PackageCheck,
     UserCircle,
+    Scale,
 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
@@ -72,6 +73,11 @@ export function Sidebar({ user }: SidebarProps) {
                     href: "/dashboard/livraisons",
                     label: t("nav.livraisons"),
                     icon: Truck,
+                },
+                {
+                    href: "/dashboard/pesees",
+                    label: t("nav.pesees"),
+                    icon: Scale,
                 },
                 {
                     href: "/dashboard/stock-caisses",

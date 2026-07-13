@@ -55,6 +55,7 @@
         "typesDates": "Date Varieties",
         "livraisons": "Deliveries",
         "stockCaisses": "Crate Stock",
+        "pesees": "Weighing",
         "clients": "Clients",
         "users": "Users",
         "roles": "Roles",
@@ -352,6 +353,34 @@
         "faible": "Low",
         "moyen": "Medium",
         "bon": "Good"
+    },
+    "pesees": {
+        "title": "Weighing",
+        "description": "Management of date delivery weighing",
+        "numeroLot": "Lot No.",
+        "agriculteur": "Farmer",
+        "typeDate": "Date type",
+        "poidsBrut": "Gross weight",
+        "tare": "Tare",
+        "poidsNet": "Net weight",
+        "datePesee": "Weighing date",
+        "addNew": "New Weighing",
+        "addNewDescription": "Record a new weighing for a delivery",
+        "update": "Edit Weighing",
+        "updateDescription": "Edit weighing information",
+        "delete": "Delete weighing",
+        "deleteConfirm": "Are you sure you want to delete the weighing for lot",
+        "selectLivraison": "Select a delivery",
+        "selectLivraisonPlaceholder": "Choose a delivery...",
+        "noLivraisonsAvailable": "No deliveries available without weighing",
+        "poidsNetMustBePositive": "Net weight must be positive",
+        "searchPlaceholder": "Search for a weighing...",
+        "stats": {
+            "total": "Total Weighings",
+            "poidsBrutTotal": "Total gross weight",
+            "poidsNetTotal": "Total net weight",
+            "pourcentageTare": "Average tare"
+        }
     },
     "clients": {
         "title": "Clients",

@@ -54,6 +54,12 @@ export const PERMISSIONS = {
     "client:update": [ROLES.ADMIN, ROLES.AGENT],
     "client:delete": [ROLES.ADMIN],
 
+    // Pesée
+    "pesee:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "pesee:create": [ROLES.ADMIN, ROLES.AGENT],
+    "pesee:update": [ROLES.ADMIN, ROLES.AGENT],
+    "pesee:delete": [ROLES.ADMIN],
+
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],
 } as const;

@@ -166,17 +166,35 @@ export const {
         }),
     ],
     callbacks: {
+        /**
+         * JWT Callback
+         * Appelé chaque fois qu'un JWT est créé ou mis à jour
+         * Utilisé pour ajouter des données personnalisées au token
+         */
         async jwt({ token, user, trigger, session }) {
+            // Premier login : ajouter les infos utilisateur au token
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
                 token.tenantId = user.tenantId;
                 token.tenantName = user.tenantName;
                 token.tenantCode = user.tenantCode;
+
+                console.log("[JWT] Token créé pour:", {
+                    userId: user.id,
+                    email: user.email,
+                    role: user.role,
+                    tenantId: user.tenantId,
+                });
             }
 
-            // Support pour update du tenant via session update
+            // Mise à jour du tenant (changement de Wakala)
             if (trigger === "update" && session) {
+                console.log("[JWT] Mise à jour tenant:", {
+                    ancien: token.tenantId,
+                    nouveau: session.tenantId,
+                });
+
                 token.tenantId = session.tenantId;
                 token.tenantName = session.tenantName;
                 token.tenantCode = session.tenantCode;
@@ -185,6 +203,12 @@ export const {
 
             return token;
         },
+
+        /**
+         * Session Callback
+         * Appelé chaque fois qu'une session est vérifiée
+         * Utilisé pour exposer les données du token à la session côté client
+         */
         async session({ session, token }) {
             if (token && session.user) {
                 session.user.id = token.id as string;
@@ -194,6 +218,85 @@ export const {
                 session.user.tenantCode = token.tenantCode as string | undefined;
             }
             return session;
+        },
+
+        /**
+         * SignIn Callback
+         * Appelé après l'authentification réussie
+         * Retourne false pour bloquer la connexion
+         */
+        async signIn({ user, account, profile, email, credentials }) {
+            try {
+                // Vérifier que l'utilisateur est actif
+                if (user.id) {
+                    const dbUser = await prisma.user.findUnique({
+                        where: { id: user.id },
+                        select: { active: true },
+                    });
+
+                    if (!dbUser || !dbUser.active) {
+                        console.error("[SIGNIN] Compte désactivé:", user.email);
+                        return false;
+                    }
+                }
+
+                // Si un tenantId est présent, vérifier l'accès
+                if (user.tenantId) {
+                    const tenantUser = await prisma.tenantUser.findUnique({
+                        where: {
+                            userId_tenantId: {
+                                userId: user.id,
+                                tenantId: user.tenantId,
+                            },
+                        },
+                        include: {
+                            Tenant: {
+                                select: { active: true },
+                            },
+                        },
+                    });
+
+                    if (!tenantUser || !tenantUser.active || !tenantUser.Tenant.active) {
+                        console.error("[SIGNIN] Accès tenant refusé:", {
+                            userId: user.id,
+                            tenantId: user.tenantId,
+                        });
+                        return false;
+                    }
+                }
+
+                console.log("[SIGNIN] Connexion autorisée pour:", user.email);
+                return true;
+            } catch (error) {
+                console.error("[SIGNIN] Erreur lors de la vérification:", error);
+                return false;
+            }
+        },
+
+        /**
+         * Redirect Callback
+         * Appelé lors des redirections (login, logout, callbacks)
+         * Permet de personnaliser les redirections
+         */
+        async redirect({ url, baseUrl }) {
+            console.log("[REDIRECT] Redirection demandée:", { url, baseUrl });
+
+            // Si l'URL est relative, la préfixer avec baseUrl
+            if (url.startsWith("/")) {
+                const redirectUrl = `${baseUrl}${url}`;
+                console.log("[REDIRECT] Redirection relative:", redirectUrl);
+                return redirectUrl;
+            }
+
+            // Si l'URL contient baseUrl, la retourner telle quelle
+            if (url.startsWith(baseUrl)) {
+                console.log("[REDIRECT] Redirection absolue (même domaine):", url);
+                return url;
+            }
+
+            // Par défaut, rediriger vers le dashboard ou select-wakala
+            console.log("[REDIRECT] Redirection par défaut vers:", `${baseUrl}/dashboard`);
+            return `${baseUrl}/dashboard`;
         },
     },
     debug: process.env.NODE_ENV === "development",

@@ -55,6 +55,7 @@
         "typesDates": "Types de Dattes",
         "livraisons": "Livraisons",
         "stockCaisses": "Stock de Caisses",
+        "pesees": "Pesées",
         "clients": "Clients",
         "users": "Utilisateurs",
         "roles": "Rôles",
@@ -352,6 +353,34 @@
         "faible": "Faible",
         "moyen": "Moyen",
         "bon": "Bon"
+    },
+    "pesees": {
+        "title": "Pesées",
+        "description": "Gestion des pesées de livraisons de dattes",
+        "numeroLot": "N° Lot",
+        "agriculteur": "Agriculteur",
+        "typeDate": "Type de datte",
+        "poidsBrut": "Poids brut",
+        "tare": "Tare",
+        "poidsNet": "Poids net",
+        "datePesee": "Date de pesée",
+        "addNew": "Nouvelle Pesée",
+        "addNewDescription": "Enregistrez une nouvelle pesée pour une livraison",
+        "update": "Modifier la Pesée",
+        "updateDescription": "Modifiez les informations de la pesée",
+        "delete": "Supprimer la pesée",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la pesée pour le lot",
+        "selectLivraison": "Sélectionner une livraison",
+        "selectLivraisonPlaceholder": "Choisir une livraison...",
+        "noLivraisonsAvailable": "Aucune livraison disponible sans pesée",
+        "poidsNetMustBePositive": "Le poids net doit être positif",
+        "searchPlaceholder": "Rechercher une pesée...",
+        "stats": {
+            "total": "Total Pesées",
+            "poidsBrutTotal": "Poids brut total",
+            "poidsNetTotal": "Poids net total",
+            "pourcentageTare": "Tare moyenne"
+        }
     },
     "clients": {
         "title": "Clients",

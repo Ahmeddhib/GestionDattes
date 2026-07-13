@@ -15,6 +15,11 @@ export default async function DashboardLayout({
         redirect(ROUTES.LOGIN);
     }
 
+    // Si pas de tenant, rediriger vers select-wakala
+    if (!session.user.tenantId) {
+        redirect("/select-wakala");
+    }
+
     return (
         <div className="flex min-h-screen">
             <Sidebar

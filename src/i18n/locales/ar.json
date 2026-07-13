@@ -55,6 +55,7 @@
         "typesDates": "أصناف التمور",
         "livraisons": "التسليمات",
         "stockCaisses": "مخزون الصناديق",
+        "pesees": "الوزن",
         "clients": "العملاء",
         "users": "المستخدمون",
         "roles": "الأدوار",
@@ -352,6 +353,34 @@
         "faible": "منخفض",
         "moyen": "متوسط",
         "bon": "جيد"
+    },
+    "pesees": {
+        "title": "الوزن",
+        "description": "إدارة وزن تسليمات التمور",
+        "numeroLot": "رقم الدفعة",
+        "agriculteur": "المزارع",
+        "typeDate": "نوع التمر",
+        "poidsBrut": "الوزن الإجمالي",
+        "tare": "وزن الحاوية",
+        "poidsNet": "الوزن الصافي",
+        "datePesee": "تاريخ الوزن",
+        "addNew": "وزن جديد",
+        "addNewDescription": "سجل وزناً جديداً لتسليم",
+        "update": "تعديل الوزن",
+        "updateDescription": "عدل معلومات الوزن",
+        "delete": "حذف الوزن",
+        "deleteConfirm": "هل أنت متأكد من حذف الوزن للدفعة",
+        "selectLivraison": "اختر تسليماً",
+        "selectLivraisonPlaceholder": "اختر تسليماً...",
+        "noLivraisonsAvailable": "لا توجد تسليمات متاحة بدون وزن",
+        "poidsNetMustBePositive": "يجب أن يكون الوزن الصافي موجباً",
+        "searchPlaceholder": "البحث عن وزن...",
+        "stats": {
+            "total": "إجمالي الأوزان",
+            "poidsBrutTotal": "الوزن الإجمالي الكلي",
+            "poidsNetTotal": "الوزن الصافي الكلي",
+            "pourcentageTare": "متوسط وزن الحاوية"
+        }
     },
     "clients": {
         "title": "العملاء",

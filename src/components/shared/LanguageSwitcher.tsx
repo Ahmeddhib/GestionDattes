@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,33 +9,14 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { locales, localeNames, localeFlags, type Locale } from "@/i18n/config";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export function LanguageSwitcher() {
-    const [currentLocale, setCurrentLocale] = useState<Locale>("fr");
-
-    useEffect(() => {
-        // Récupérer la langue sauvegardée au chargement
-        const saved = localStorage.getItem("preferred-locale") as Locale;
-        if (saved && locales.includes(saved)) {
-            setCurrentLocale(saved);
-        }
-    }, []);
+    const { locale: currentLocale, setLocale } = useLocale();
 
     const handleLocaleChange = (newLocale: Locale) => {
-        setCurrentLocale(newLocale);
-
-        // Store preference in localStorage
-        localStorage.setItem("preferred-locale", newLocale);
-
-        // Update document direction for RTL
-        document.documentElement.dir = newLocale === "ar" ? "rtl" : "ltr";
-        document.documentElement.lang = newLocale;
-
-        // Déclencher un événement personnalisé
-        window.dispatchEvent(new Event("localeChange"));
-
-        // Reload page to apply changes
-        window.location.reload();
+        setLocale(newLocale);
+        // Plus besoin de reload ! Le contexte gère tout 🎉
     };
 
     return (
