@@ -2,7 +2,7 @@
 
 import { Truck } from "lucide-react";
 import { LivraisonsTableAdvanced } from "@/components/features/livraisons/LivraisonsTableAdvanced";
-import { CreateLivraisonDialog } from "@/components/features/livraisons/CreateLivraisonDialog";
+import { NouvellePeseeWizard } from "@/components/features/livraisons/NouvellePeseeWizard";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 type Livraison = {
@@ -10,6 +10,8 @@ type Livraison = {
     numeroLot: string;
     dateLivraison: Date;
     quantiteKg: number;
+    quantiteLivree: number;
+    quantiteAcceptee: number;
     agriculteur?: {
         id: string;
         code: string;
@@ -17,27 +19,20 @@ type Livraison = {
         prenom: string;
         cin: string;
     };
-    typeDate?: {
-        id: string;
-        nom: string;
-    };
-    typeCaisse?: {
-        id: string;
-        nom: string;
-        poidsKg: number;
-    };
     _count?: {
         echantillons: number;
         pretsCaisses: number;
         stocksDates: number;
+        pesees: number;
     };
 };
 
 type LivraisonsPageContentProps = {
     livraisons: Livraison[];
+    canEditAcceptedQuantity: boolean;
 };
 
-export function LivraisonsPageContent({ livraisons }: LivraisonsPageContentProps) {
+export function LivraisonsPageContent({ livraisons, canEditAcceptedQuantity }: LivraisonsPageContentProps) {
     const { t } = useClientTranslations();
 
     // Calculer les statistiques
@@ -74,7 +69,7 @@ export function LivraisonsPageContent({ livraisons }: LivraisonsPageContentProps
                         </div>
                     </div>
                 </div>
-                <CreateLivraisonDialog />
+                <NouvellePeseeWizard />
             </div>
 
             {/* Stats Cards */}
@@ -141,7 +136,10 @@ export function LivraisonsPageContent({ livraisons }: LivraisonsPageContentProps
             </div>
 
             {/* Table */}
-            <LivraisonsTableAdvanced livraisons={livraisons} />
+            <LivraisonsTableAdvanced
+                livraisons={livraisons}
+                canEditAcceptedQuantity={canEditAcceptedQuantity}
+            />
         </div>
     );
 }

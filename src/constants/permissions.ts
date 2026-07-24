@@ -43,6 +43,12 @@ export const PERMISSIONS = {
     "livraison:update": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
     "livraison:delete": [ROLES.ADMIN],
 
+    // Livreurs
+    "livreur:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "livreur:create": [ROLES.ADMIN, ROLES.AGENT],
+    "livreur:update": [ROLES.ADMIN, ROLES.AGENT],
+    "livreur:delete": [ROLES.ADMIN],
+
     // Prêts de Caisses
     "pret-caisse:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
     "pret-caisse:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
@@ -59,6 +65,10 @@ export const PERMISSIONS = {
     "pesee:create": [ROLES.ADMIN, ROLES.AGENT],
     "pesee:update": [ROLES.ADMIN, ROLES.AGENT],
     "pesee:delete": [ROLES.ADMIN],
+
+    // Bons d'achat
+    "bon-achat:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "bon-achat:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
 
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],

@@ -1,11 +1,33 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma";
 import type { CreatePretCaisseInput } from "@/validators/pret-caisse.validator";
+
+type DbClient = typeof prisma | Prisma.TransactionClient;
 
 /**
  * Repository MULTI-TENANT pour les prêts de caisses
  * Toutes les méthodes filtrent automatiquement par tenantId
  */
 export const pretCaisseRepository = {
+    /**
+     * Récupérer le prêt en cours (le plus ancien) d'un agriculteur pour un type de caisse donné
+     */
+    async findEnCoursByAgriculteurEtType(
+        agriculteurId: string,
+        typeCaisseId: string,
+        tenantId: string,
+        client: DbClient = prisma
+    ) {
+        return client.pretCaisse.findFirst({
+            where: {
+                agriculteurId,
+                typeCaisseId,
+                tenantId,
+                statut: "EN_COURS",
+            },
+            orderBy: { datePreT: "asc" },
+        });
+    },
     /**
      * Récupérer tous les prêts de caisses d'un tenant
      */
@@ -216,10 +238,11 @@ export const pretCaisseRepository = {
         pretId: string,
         nombreRetourne: number,
         tenantId: string,
-        observations?: string
+        observations?: string,
+        client: DbClient = prisma
     ) {
         // Récupérer le prêt actuel
-        const pret = await prisma.pretCaisse.findFirst({
+        const pret = await client.pretCaisse.findFirst({
             where: { id: pretId, tenantId },
         });
 
@@ -242,7 +265,7 @@ export const pretCaisseRepository = {
         const nouveauStatut = estComplet ? "RETOURNE" : "EN_COURS";
 
         // Mettre à jour le prêt
-        return prisma.pretCaisse.update({
+        return client.pretCaisse.update({
             where: { id: pretId },
             data: {
                 nombreRetourne: nouveauNombreRetourne,

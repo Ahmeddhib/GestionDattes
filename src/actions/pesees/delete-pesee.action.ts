@@ -19,6 +19,7 @@ export async function deletePeseeAction(id: string) {
         await peseeService.delete(tenantId, session.user.id, id);
 
         revalidatePath("/dashboard/pesees");
+        revalidatePath("/dashboard/livraisons");
 
         return { success: true };
     } catch (error) {

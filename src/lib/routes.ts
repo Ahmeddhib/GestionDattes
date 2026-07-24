@@ -6,5 +6,6 @@ export const ROUTES = {
     ROLES: "/dashboard/roles",
     ROLE: (id: string) => `/dashboard/roles/${id}`,
     AUDIT_LOGS: "/dashboard/audit-logs",
+    LIVREURS: "/dashboard/livreurs",
     UNAUTHORIZED: "/unauthorized",
 } as const;

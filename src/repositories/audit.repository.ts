@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { PAGINATION } from "@/constants/pagination";
-import type { AuditAction } from "@/generated/prisma";
+import type { AuditAction, Prisma } from "@/generated/prisma";
+
+type DbClient = typeof prisma | Prisma.TransactionClient;
 
 /**
  * Repository MULTI-TENANT pour les logs d'audit
@@ -61,17 +63,20 @@ export const auditRepository = {
         return { data, total, page, pageSize };
     },
 
-    async create(data: {
-        tenantId: string;
-        actorId: string;
-        action: AuditAction;
-        description?: string;
-        targetId?: string;
-        details?: any;
-    }) {
+    async create(
+        data: {
+            tenantId: string;
+            actorId: string;
+            action: AuditAction;
+            description?: string;
+            targetId?: string;
+            details?: any;
+        },
+        client: DbClient = prisma
+    ) {
         const { createId } = await import("@paralleldrive/cuid2");
 
-        return prisma.auditLog.create({
+        return client.auditLog.create({
             data: {
                 id: createId(), // ⚠️ Générer l'ID manuellement
                 tenantId: data.tenantId,

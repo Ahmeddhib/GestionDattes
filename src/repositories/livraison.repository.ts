@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma";
 import type { CreateLivraisonInput, UpdateLivraisonInput } from "@/validators/livraison.validator";
+
+type DbClient = typeof prisma | Prisma.TransactionClient;
 
 /**
  * Repository pour la gestion des livraisons (multi-tenant)
@@ -21,12 +24,6 @@ export const livraisonRepository = {
                         cin: true,
                     },
                 },
-                TypeDate: {
-                    select: {
-                        id: true,
-                        nom: true,
-                    },
-                },
                 LivraisonTypeCaisse: {
                     include: {
                         TypeCaisse: {
@@ -36,6 +33,20 @@ export const livraisonRepository = {
                                 poidsKg: true,
                             },
                         },
+                        TypeDate: {
+                            select: {
+                                id: true,
+                                nom: true,
+                            },
+                        },
+                    },
+                },
+                BonAchat: {
+                    select: {
+                        id: true,
+                        numero: true,
+                        prixKg: true,
+                        montant: true,
                     },
                 },
                 _count: {
@@ -43,6 +54,7 @@ export const livraisonRepository = {
                         Echantillon: true,
                         PretCaisse: true,
                         StockDate: true,
+                        Pesee: true,
                     },
                 },
             },
@@ -73,10 +85,10 @@ export const livraisonRepository = {
                         },
                     },
                 },
-                TypeDate: true,
                 LivraisonTypeCaisse: {
                     include: {
                         TypeCaisse: true,
+                        TypeDate: true,
                     },
                 },
                 Pesee: true,
@@ -87,6 +99,7 @@ export const livraisonRepository = {
                 },
                 PretCaisse: true,
                 StockDate: true,
+                BonAchat: true,
             },
         });
     },
@@ -128,25 +141,47 @@ export const livraisonRepository = {
     },
 
     /**
-     * Crée une nouvelle livraison avec plusieurs types de caisses
+     * Crée une nouvelle livraison avec plusieurs types de caisses/dattes.
+     * `stockGroups` doit contenir une entrée par typeDateId distinct présent
+     * dans `data.caisses`, avec la quantité nette réelle de ce groupe (déjà
+     * calculée par l'appelant, ex. à partir des pesées).
      */
-    async create(data: CreateLivraisonInput, tenantId: string, numeroLot: string) {
-        return prisma.livraison.create({
+    async create(
+        data: CreateLivraisonInput,
+        tenantId: string,
+        numeroLot: string,
+        stockGroups: { typeDateId: string; quantite: number }[],
+        client: DbClient = prisma
+    ) {
+        return client.livraison.create({
             data: {
                 id: `livraison_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
                 numeroLot,
                 dateLivraison: new Date(data.dateLivraison),
+                quantiteLivree: data.quantiteLivree,
+                quantiteAcceptee: data.quantiteAcceptee,
                 agriculteurId: data.agriculteurId,
-                typeDateId: data.typeDateId,
                 tenantId,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 LivraisonTypeCaisse: {
-                    create: data.caisses.map((caisse) => ({
-                        id: `ltc_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                    create: data.caisses.map((caisse, i) => ({
+                        id: `ltc_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 9)}`,
                         typeCaisseId: caisse.typeCaisseId,
+                        typeDateId: caisse.typeDateId,
                         quantite: caisse.quantite,
                         createdAt: new Date(),
+                    })),
+                },
+                StockDate: {
+                    create: stockGroups.map((group, i) => ({
+                        id: `stock_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 9)}`,
+                        quantite: group.quantite,
+                        quantiteDisponible: group.quantite,
+                        dateEntree: new Date(data.dateLivraison),
+                        typeDateId: group.typeDateId,
+                        tenantId,
+                        updatedAt: new Date(),
                     })),
                 },
             },
@@ -157,14 +192,10 @@ export const livraisonRepository = {
                         prenom: true,
                     },
                 },
-                TypeDate: {
-                    select: {
-                        nom: true,
-                    },
-                },
                 LivraisonTypeCaisse: {
                     include: {
                         TypeCaisse: true,
+                        TypeDate: true,
                     },
                 },
             },
@@ -179,16 +210,18 @@ export const livraisonRepository = {
         const updateData: any = {
             ...(data.dateLivraison && { dateLivraison: new Date(data.dateLivraison) }),
             ...(data.agriculteurId && { agriculteurId: data.agriculteurId }),
-            ...(data.typeDateId && { typeDateId: data.typeDateId }),
+            ...(data.quantiteLivree !== undefined && { quantiteLivree: data.quantiteLivree }),
+            ...(data.quantiteAcceptee !== undefined && { quantiteAcceptee: data.quantiteAcceptee }),
             updatedAt: new Date(),
         };
 
         if (data.caisses) {
             updateData.LivraisonTypeCaisse = {
                 deleteMany: {}, // Supprimer toutes les anciennes caisses
-                create: data.caisses.map((caisse) => ({
-                    id: `ltc_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                create: data.caisses.map((caisse, i) => ({
+                    id: `ltc_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 9)}`,
                     typeCaisseId: caisse.typeCaisseId,
+                    typeDateId: caisse.typeDateId,
                     quantite: caisse.quantite,
                     createdAt: new Date(),
                 })),
@@ -202,6 +235,7 @@ export const livraisonRepository = {
                 LivraisonTypeCaisse: {
                     include: {
                         TypeCaisse: true,
+                        TypeDate: true,
                     },
                 },
             },
@@ -229,16 +263,16 @@ export const livraisonRepository = {
                         Echantillon: true,
                         PretCaisse: true,
                         StockDate: true,
+                        Pesee: true,
                     },
                 },
-                Pesee: true,
             },
         });
 
         if (!livraison) return false;
 
         return (
-            !!livraison.Pesee ||
+            livraison._count.Pesee > 0 ||
             livraison._count.Echantillon > 0 ||
             livraison._count.PretCaisse > 0 ||
             livraison._count.StockDate > 0
@@ -301,10 +335,10 @@ export const livraisonRepository = {
                 tenantId,
             },
             include: {
-                TypeDate: true,
                 LivraisonTypeCaisse: {
                     include: {
                         TypeCaisse: true,
+                        TypeDate: true,
                     },
                 },
             },

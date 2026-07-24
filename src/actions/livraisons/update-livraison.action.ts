@@ -31,8 +31,9 @@ export async function updateLivraisonAction(formData: FormData) {
         const rawData = {
             id: formData.get("id") as string,
             agriculteurId: formData.get("agriculteurId") || undefined,
-            typeDateId: formData.get("typeDateId") || undefined,
             dateLivraison: formData.get("dateLivraison") || undefined,
+            quantiteLivree: formData.get("quantiteLivree") || undefined,
+            quantiteAcceptee: formData.get("quantiteAcceptee") || undefined,
             caisses,
         };
 

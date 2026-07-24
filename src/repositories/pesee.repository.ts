@@ -1,160 +1,168 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma";
 import { createId } from "@paralleldrive/cuid2";
-import type { CreatePeseeInput, UpdatePeseeInput } from "@/validators/pesee.validator";
+
+type DbClient = typeof prisma | Prisma.TransactionClient;
+
+export interface PeseeTotals {
+    nombreCaisses: number;
+    poidsBrutTotal: Prisma.Decimal;
+    poidsTareTotal: Prisma.Decimal;
+    poidsNetTotal: Prisma.Decimal;
+    poidsBrutMoyen: Prisma.Decimal;
+    poidsNetMoyen: Prisma.Decimal;
+}
+
+const peseeInclude = {
+    Livraison: {
+        select: {
+            id: true,
+            numeroLot: true,
+            dateLivraison: true,
+            Agriculteur: {
+                select: { id: true, code: true, nom: true, prenom: true },
+            },
+        },
+    },
+    TypeCaisse: {
+        select: { id: true, nom: true },
+    },
+    TypeDate: {
+        select: { id: true, nom: true },
+    },
+    Caisses: {
+        orderBy: { ordre: "asc" as const },
+    },
+};
 
 /**
- * Repository pour gérer les pesées
+ * Repository pour gérer les pesées par type de caisse (une session de pesée par
+ * type de caisse et par livraison, avec le détail de chaque caisse individuelle)
  */
 export const peseeRepository = {
-    /**
-     * Récupérer toutes les pesées d'un tenant
-     */
     async findAll(tenantId: string) {
         return prisma.pesee.findMany({
             where: { tenantId },
-            include: {
-                Livraison: {
-                    select: {
-                        id: true,
-                        numeroLot: true,
-                        dateLivraison: true,
-                        Agriculteur: {
-                            select: {
-                                id: true,
-                                code: true,
-                                nom: true,
-                                prenom: true,
-                            },
-                        },
-                        TypeDate: {
-                            select: {
-                                id: true,
-                                nom: true,
-                            },
-                        },
-                    },
-                },
-            },
+            include: peseeInclude,
             orderBy: { createdAt: "desc" },
         });
     },
 
-    /**
-     * Récupérer une pesée par ID avec vérification du tenant
-     */
     async findById(tenantId: string, id: string) {
         return prisma.pesee.findFirst({
-            where: {
-                id,
-                tenantId,
-            },
-            include: {
-                Livraison: {
-                    select: {
-                        id: true,
-                        numeroLot: true,
-                        dateLivraison: true,
-                        Agriculteur: {
-                            select: {
-                                code: true,
-                                nom: true,
-                                prenom: true,
-                            },
-                        },
-                    },
-                },
-            },
+            where: { id, tenantId },
+            include: peseeInclude,
         });
     },
 
-    /**
-     * Récupérer une pesée par livraisonId
-     */
     async findByLivraisonId(tenantId: string, livraisonId: string) {
+        return prisma.pesee.findMany({
+            where: { livraisonId, tenantId },
+            include: peseeInclude,
+            orderBy: { createdAt: "asc" },
+        });
+    },
+
+    async findByLivraisonTypeCaisseAndTypeDate(
+        tenantId: string,
+        livraisonId: string,
+        typeCaisseId: string,
+        typeDateId: string
+    ) {
         return prisma.pesee.findFirst({
-            where: {
-                livraisonId,
-                tenantId,
-            },
+            where: { livraisonId, typeCaisseId, typeDateId, tenantId },
         });
     },
 
     /**
-     * Créer une nouvelle pesée
+     * Crée une session de pesée avec toutes ses caisses en une seule écriture atomique
      */
-    async create(tenantId: string, data: CreatePeseeInput) {
-        const tare = data.tare ?? 0;
-        const poidsNet = data.poidsBrut - tare;
-
-        return prisma.pesee.create({
+    async create(
+        tenantId: string,
+        livraisonId: string,
+        typeCaisseId: string,
+        typeDateId: string,
+        tareKg: number,
+        grossWeights: number[],
+        totals: PeseeTotals,
+        client: DbClient = prisma
+    ) {
+        return client.pesee.create({
             data: {
                 id: createId(),
                 tenantId,
-                livraisonId: data.livraisonId,
-                poidsBrut: data.poidsBrut,
-                tare: tare,
-                poidsNet: poidsNet,
+                livraisonId,
+                typeCaisseId,
+                typeDateId,
+                tareKg,
+                nombreCaisses: totals.nombreCaisses,
+                poidsBrutTotal: totals.poidsBrutTotal,
+                poidsTareTotal: totals.poidsTareTotal,
+                poidsNetTotal: totals.poidsNetTotal,
+                poidsBrutMoyen: totals.poidsBrutMoyen,
+                poidsNetMoyen: totals.poidsNetMoyen,
                 createdAt: new Date(),
+                Caisses: {
+                    create: grossWeights.map((poidsBrut, index) => ({
+                        id: createId(),
+                        poidsBrut,
+                        ordre: index + 1,
+                    })),
+                },
             },
+            include: peseeInclude,
         });
     },
 
     /**
-     * Mettre à jour une pesée avec vérification du tenant
+     * Remplace les caisses d'une session de pesée existante et recalcule ses totaux
      */
-    async update(tenantId: string, data: UpdatePeseeInput) {
-        // Vérifier que la pesée appartient au tenant
-        const existing = await prisma.pesee.findFirst({
-            where: {
-                id: data.id,
-                tenantId,
-            },
-        });
-
+    async update(
+        tenantId: string,
+        id: string,
+        tareKg: number,
+        grossWeights: number[],
+        totals: PeseeTotals,
+        client: DbClient = prisma
+    ) {
+        const existing = await client.pesee.findFirst({ where: { id, tenantId } });
         if (!existing) {
             throw new Error("Pesée introuvable dans cette Wakala");
         }
 
-        const tare = data.tare ?? 0;
-        const poidsNet = data.poidsBrut - tare;
-
-        return prisma.pesee.update({
-            where: { id: data.id },
-            data: {
-                poidsBrut: data.poidsBrut,
-                tare: tare,
-                poidsNet: poidsNet,
-            },
-        });
-    },
-
-    /**
-     * Supprimer une pesée avec vérification du tenant
-     */
-    async delete(tenantId: string, id: string) {
-        // Vérifier que la pesée appartient au tenant
-        const existing = await prisma.pesee.findFirst({
-            where: {
-                id,
-                tenantId,
-            },
-        });
-
-        if (!existing) {
-            throw new Error("Pesée introuvable dans cette Wakala");
-        }
-
-        return prisma.pesee.delete({
+        return client.pesee.update({
             where: { id },
+            data: {
+                tareKg,
+                nombreCaisses: totals.nombreCaisses,
+                poidsBrutTotal: totals.poidsBrutTotal,
+                poidsTareTotal: totals.poidsTareTotal,
+                poidsNetTotal: totals.poidsNetTotal,
+                poidsBrutMoyen: totals.poidsBrutMoyen,
+                poidsNetMoyen: totals.poidsNetMoyen,
+                Caisses: {
+                    deleteMany: {},
+                    create: grossWeights.map((poidsBrut, index) => ({
+                        id: createId(),
+                        poidsBrut,
+                        ordre: index + 1,
+                    })),
+                },
+            },
+            include: peseeInclude,
         });
     },
 
-    /**
-     * Compter le nombre de pesées d'un tenant
-     */
+    async delete(tenantId: string, id: string, client: DbClient = prisma) {
+        const existing = await client.pesee.findFirst({ where: { id, tenantId } });
+        if (!existing) {
+            throw new Error("Pesée introuvable dans cette Wakala");
+        }
+
+        return client.pesee.delete({ where: { id } });
+    },
+
     async count(tenantId: string) {
-        return prisma.pesee.count({
-            where: { tenantId },
-        });
+        return prisma.pesee.count({ where: { tenantId } });
     },
 };

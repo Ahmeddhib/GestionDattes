@@ -19,7 +19,7 @@ export const typeDateService = {
         return typesDates.map((type) => ({
             ...type,
             _count: type._count ? {
-                livraisons: type._count.Livraison,
+                livraisons: type._count.LivraisonTypeCaisse,
                 stocksDates: type._count.StockDate,
             } : undefined,
         }));
@@ -40,7 +40,7 @@ export const typeDateService = {
         return {
             ...typeDate,
             _count: typeDate._count ? {
-                livraisons: typeDate._count.Livraison,
+                livraisons: typeDate._count.LivraisonTypeCaisse,
                 stocksDates: typeDate._count.StockDate,
             } : undefined,
         };

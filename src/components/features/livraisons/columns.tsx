@@ -12,6 +12,8 @@ export type Livraison = {
     numeroLot: string;
     dateLivraison: Date;
     quantiteKg: number;
+    quantiteLivree?: number;
+    quantiteAcceptee?: number;
     agriculteur?: {
         id: string;
         code: string;
@@ -19,31 +21,40 @@ export type Livraison = {
         prenom: string;
         cin: string;
     };
-    typeDate?: {
-        id: string;
-        nom: string;
-    };
     caisses?: Array<{
         id: string;
         typeCaisseId: string;
+        typeDateId: string;
         quantite: number;
         typeCaisse: {
             id: string;
             nom: string;
             poidsKg: number;
         };
+        typeDate?: {
+            id: string;
+            nom: string;
+        };
     }>;
+    bonAchat?: {
+        id: string;
+        numero: string;
+        prixKg: number;
+        montant: number;
+    } | null;
     _count?: {
         echantillons: number;
         pretsCaisses: number;
         stocksDates: number;
+        pesees: number;
     };
 };
 
 export const createLivraisonsColumns = (
     onUpdate: (livraison: Livraison) => void,
     onDelete: (livraison: Livraison) => void,
-    t: (key: string) => string
+    t: (key: string) => string,
+    canEditAcceptedQuantity: boolean
 ): ColumnDef<Livraison>[] => [
         {
             accessorKey: "numeroLot",
@@ -82,20 +93,6 @@ export const createLivraisonsColumns = (
             },
         },
         {
-            accessorKey: "typeDate",
-            header: t("livraisons.typeDate"),
-            cell: ({ row }) => {
-                const typeDate = row.original.typeDate;
-                return typeDate ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        {typeDate.nom}
-                    </Badge>
-                ) : (
-                    <span className="text-muted-foreground">—</span>
-                );
-            },
-        },
-        {
             accessorKey: "caisses",
             header: t("livraisons.caisses"),
             cell: ({ row }) => {
@@ -105,7 +102,7 @@ export const createLivraisonsColumns = (
                 }
 
                 return (
-                    <div className="space-y-1 max-w-[250px]">
+                    <div className="space-y-1 max-w-[280px]">
                         {caisses.map((caisse, index) => {
                             const totalKg = caisse.quantite * caisse.typeCaisse.poidsKg;
                             return (
@@ -116,6 +113,9 @@ export const createLivraisonsColumns = (
                                     <span className="text-[#3D1C00]">
                                         {caisse.typeCaisse.nom}
                                     </span>{" "}
+                                    {caisse.typeDate && (
+                                        <span className="text-green-700">· {caisse.typeDate.nom}</span>
+                                    )}{" "}
                                     <span className="text-[#3D1C00]/60">
                                         ({totalKg.toFixed(2)} kg)
                                     </span>
@@ -144,6 +144,61 @@ export const createLivraisonsColumns = (
             },
         },
         {
+            accessorKey: "quantiteAcceptee",
+            header: "Acceptée",
+            cell: ({ row }) => (
+                <div className="font-medium text-green-700">
+                    {(row.original.quantiteAcceptee ?? row.original.quantiteKg).toFixed(2)} kg
+                </div>
+            ),
+        },
+        {
+            id: "peseeProgress",
+            header: t("livraisons.peseeProgress"),
+            cell: ({ row }) => {
+                const nbTypesCaisses = row.original.caisses?.length ?? 0;
+                const nbPesees = row.original._count?.pesees ?? 0;
+
+                if (nbTypesCaisses === 0) {
+                    return <span className="text-muted-foreground">—</span>;
+                }
+
+                const complete = nbPesees >= nbTypesCaisses;
+                return (
+                    <Badge
+                        variant="outline"
+                        className={
+                            complete
+                                ? "bg-green-50 text-green-700 border-green-300"
+                                : "bg-amber-50 text-amber-700 border-amber-300"
+                        }
+                    >
+                        {nbPesees}/{nbTypesCaisses} {t("livraisons.typesPeses")}
+                    </Badge>
+                );
+            },
+        },
+        {
+            id: "bonAchat",
+            header: t("bonAchat.title"),
+            cell: ({ row }) => {
+                const bonAchat = row.original.bonAchat;
+                if (!bonAchat) {
+                    return <span className="text-muted-foreground">—</span>;
+                }
+                return (
+                    <div className="text-xs">
+                        <Badge variant="outline" className="bg-[#C17A2B]/10 text-[#C17A2B] border-[#C17A2B]/30 font-mono">
+                            {bonAchat.numero}
+                        </Badge>
+                        <div className="font-semibold text-[#3D1C00] mt-1">
+                            {bonAchat.montant.toFixed(2)}
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
             id: "actions",
             header: t("common.actions"),
             cell: ({ row }) => {
@@ -151,7 +206,10 @@ export const createLivraisonsColumns = (
 
                 return (
                     <div className="flex items-center gap-2">
-                        <UpdateLivraisonDialog livraison={livraison} />
+                        <UpdateLivraisonDialog
+                            livraison={livraison}
+                            canEditAcceptedQuantity={canEditAcceptedQuantity}
+                        />
                         <DeleteLivraisonDialog livraison={livraison} />
                     </div>
                 );

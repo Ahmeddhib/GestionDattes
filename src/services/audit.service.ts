@@ -1,21 +1,25 @@
 import { auditRepository } from "@/repositories/audit.repository";
 import { requirePermission } from "@/lib/permissions";
-import type { AuditAction } from "@/generated/prisma";
+import type { AuditAction, Prisma } from "@/generated/prisma";
+import type { prisma } from "@/lib/prisma";
 
 /**
  * Service d'audit (MULTI-TENANT)
  * Tous les logs sont filtrés par tenantId
  */
 export const auditService = {
-    async log(data: {
-        tenantId: string;
-        actorId: string;
-        action: AuditAction;
-        description?: string;
-        targetId?: string;
-        details?: any
-    }) {
-        return auditRepository.create(data);
+    async log(
+        data: {
+            tenantId: string;
+            actorId: string;
+            action: AuditAction;
+            description?: string;
+            targetId?: string;
+            details?: any
+        },
+        client?: typeof prisma | Prisma.TransactionClient
+    ) {
+        return auditRepository.create(data, client);
     },
 
     async getAuditLogs(

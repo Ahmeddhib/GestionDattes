@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updatePeseeSchema, type UpdatePeseeInput } from "@/validators/pesee.validator";
+import { buildUpdatePeseeSchema, type UpdatePeseeInput } from "@/validators/pesee.validator";
 import { updatePeseeAction } from "@/actions/pesees/update-pesee.action";
 import { toast } from "sonner";
 import type { Pesee } from "./columns";
@@ -28,7 +28,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, Scale } from "lucide-react";
+import { Loader2, Scale, Plus, Trash2 } from "lucide-react";
 
 interface UpdatePeseeDialogProps {
     pesee: Pesee | null;
@@ -40,47 +40,63 @@ export function UpdatePeseeDialog({ pesee, open, onOpenChange }: UpdatePeseeDial
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { t } = useClientTranslations();
+    const tareRef = useRef(pesee?.tareKg ?? 0);
 
-    const form = useForm<{ poidsBrut: number; tare: number | null | undefined }>({
+    type FormValues = Omit<UpdatePeseeInput, "id">;
+
+    const form = useForm<FormValues>({
+        resolver: async (values, context, options) => {
+            const merged = { ...values, id: pesee?.id ?? "" } as unknown as FormValues;
+            const resolver = zodResolver(buildUpdatePeseeSchema(tareRef.current)) as unknown as Resolver<FormValues>;
+            return resolver(merged, context, options);
+        },
         defaultValues: {
-            poidsBrut: 0,
-            tare: 0,
+            caisses: [],
         },
     });
 
-    const poidsBrut = form.watch("poidsBrut");
-    const tare = form.watch("tare");
-    const poidsNet = poidsBrut - (tare || 0);
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "caisses",
+    });
 
-    // Pré-remplir le formulaire quand pesee change
+    const caisses = form.watch("caisses");
+    const tare = pesee?.tareKg ?? 0;
+
+    const totals = useMemo(() => {
+        const poids = (caisses ?? []).map((c) => Number(c?.poidsBrut) || 0);
+        const nombreCaisses = poids.length;
+        const poidsBrutTotal = poids.reduce((sum, p) => sum + p, 0);
+        const poidsTareTotal = tare * nombreCaisses;
+        const poidsNetTotal = poidsBrutTotal - poidsTareTotal;
+        return {
+            nombreCaisses,
+            poidsBrutTotal,
+            poidsTareTotal,
+            poidsNetTotal,
+            poidsBrutMoyen: nombreCaisses > 0 ? poidsBrutTotal / nombreCaisses : 0,
+            poidsNetMoyen: nombreCaisses > 0 ? poidsNetTotal / nombreCaisses : 0,
+        };
+    }, [caisses, tare]);
+
     useEffect(() => {
         if (pesee) {
+            tareRef.current = pesee.tareKg;
             form.reset({
-                poidsBrut: pesee.poidsBrut,
-                tare: pesee.tare || 0,
+                caisses: pesee.caisses?.length
+                    ? [...pesee.caisses]
+                          .sort((a, b) => a.ordre - b.ordre)
+                          .map((c) => ({ poidsBrut: c.poidsBrut }))
+                    : [{ poidsBrut: 0 }],
             });
         }
     }, [pesee, form]);
 
     if (!pesee) return null;
 
-    const onSubmit = async (data: { poidsBrut: number; tare: number | null | undefined }) => {
+    const onSubmit = async (data: Omit<UpdatePeseeInput, "id">) => {
         try {
             setIsLoading(true);
-
-            // Validation manuelle
-            if (!data.poidsBrut || data.poidsBrut <= 0) {
-                toast.error(t("validation.positive"));
-                return;
-            }
-
-            const tare = data.tare ?? 0;
-            const poidsNet = data.poidsBrut - tare;
-
-            if (poidsNet <= 0) {
-                toast.error(t("pesees.poidsNetMustBePositive"));
-                return;
-            }
 
             const result = await updatePeseeAction(pesee.id, data);
 
@@ -102,14 +118,14 @@ export function UpdatePeseeDialog({ pesee, open, onOpenChange }: UpdatePeseeDial
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[550px] bg-white rounded-[14px]">
+            <DialogContent className="sm:max-w-[600px] bg-white rounded-[14px] max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
                         <Scale className="h-5 w-5 text-[#C17A2B]" />
                         {t("pesees.update")}
                     </DialogTitle>
                     <DialogDescription>
-                        {t("pesees.updateDescription")} - <strong>{pesee.Livraison.numeroLot}</strong>
+                        {t("pesees.updateDescription")} - <strong>{pesee.livraison.numeroLot}</strong> ({pesee.typeCaisse?.nom} / {pesee.typeDate?.nom})
                     </DialogDescription>
                 </DialogHeader>
 
@@ -121,77 +137,110 @@ export function UpdatePeseeDialog({ pesee, open, onOpenChange }: UpdatePeseeDial
                                 <div>
                                     <span className="text-gray-600">{t("pesees.numeroLot")}:</span>
                                     <p className="font-medium text-[#3D1C00]">
-                                        {pesee.Livraison.numeroLot}
+                                        {pesee.livraison.numeroLot}
                                     </p>
                                 </div>
                                 <div>
                                     <span className="text-gray-600">{t("pesees.agriculteur")}:</span>
                                     <p className="font-medium text-[#3D1C00]">
-                                        {pesee.Livraison.Agriculteur.nom} {pesee.Livraison.Agriculteur.prenom}
+                                        {pesee.livraison.Agriculteur.nom} {pesee.livraison.Agriculteur.prenom}
                                     </p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-600">{t("pesees.typeCaisse")}:</span>
+                                    <p className="font-medium text-[#3D1C00]">{pesee.typeCaisse?.nom}</p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-600">{t("pesees.typeDate")}:</span>
+                                    <p className="font-medium text-[#3D1C00]">{pesee.typeDate?.nom}</p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-600">{t("pesees.tare")}:</span>
+                                    <p className="font-medium text-[#3D1C00]">{tare.toFixed(2)} kg</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="poidsBrut"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t("pesees.poidsBrut")} (kg) *</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="500.00"
-                                                className="rounded-[7px]"
-                                                disabled={isLoading}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage className="text-red-600" />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="tare"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t("pesees.tare")} (kg)</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="50.00"
-                                                className="rounded-[7px]"
-                                                disabled={isLoading}
-                                                value={field.value || ""}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage className="text-red-600" />
-                                    </FormItem>
-                                )}
-                            />
+                        <div className="space-y-2">
+                            {fields.map((caisseField, index) => (
+                                <div key={caisseField.id} className="flex items-start gap-2">
+                                    <FormField
+                                        control={form.control}
+                                        name={`caisses.${index}.poidsBrut`}
+                                        render={({ field }) => (
+                                            <FormItem className="flex-1">
+                                                <FormLabel className="text-xs text-gray-600">
+                                                    {t("pesees.caisseLabel", { n: String(index + 1) })}
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        type="number"
+                                                        step="0.01"
+                                                        placeholder={t("pesees.grossWeightLabel")}
+                                                        className="rounded-[7px]"
+                                                        disabled={isLoading}
+                                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage className="text-red-600 text-xs" />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => remove(index)}
+                                        disabled={isLoading || fields.length <= 1}
+                                        className="h-9 w-9 p-0 mt-6 hover:bg-red-50"
+                                    >
+                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                    </Button>
+                                </div>
+                            ))}
                         </div>
 
-                        {/* Affichage du poids net calculé */}
-                        <div className="rounded-[7px] bg-[#FAF0DC] border border-[#C17A2B] p-4">
-                            <div className="flex items-center justify-between">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => append({ poidsBrut: 0 })}
+                            disabled={isLoading}
+                            className="w-full rounded-[9px] border-[#C17A2B] text-[#C17A2B]"
+                        >
+                            <Plus className="mr-2 h-4 w-4" />
+                            {t("pesees.addCaisse")}
+                        </Button>
+
+                        <div className="rounded-[7px] bg-[#FAF0DC] border border-[#C17A2B] p-4 space-y-2">
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span className="text-[#3D1C00]/70">{t("pesees.nombreCaisses")}:</span>{" "}
+                                    <span className="font-medium text-[#3D1C00]">{totals.nombreCaisses}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[#3D1C00]/70">{t("pesees.poidsBrutTotal")}:</span>{" "}
+                                    <span className="font-medium text-[#3D1C00]">{totals.poidsBrutTotal.toFixed(2)} kg</span>
+                                </div>
+                                <div>
+                                    <span className="text-[#3D1C00]/70">{t("pesees.poidsTareTotal")}:</span>{" "}
+                                    <span className="font-medium text-[#3D1C00]">{totals.poidsTareTotal.toFixed(2)} kg</span>
+                                </div>
+                                <div>
+                                    <span className="text-[#3D1C00]/70">{t("pesees.poidsBrutMoyen")}:</span>{" "}
+                                    <span className="font-medium text-[#3D1C00]">{totals.poidsBrutMoyen.toFixed(2)} kg</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-2 border-t border-[#C17A2B]/30">
                                 <span className="text-sm font-medium text-[#3D1C00]">
-                                    {t("pesees.poidsNet")} :
+                                    {t("pesees.poidsNetTotal")} :
                                 </span>
                                 <span className="text-2xl font-bold text-[#C17A2B]">
-                                    {poidsNet.toFixed(2)} kg
+                                    {totals.poidsNetTotal.toFixed(2)} kg
                                 </span>
                             </div>
-                            {poidsNet <= 0 && poidsBrut > 0 && (
-                                <p className="text-xs text-red-600 mt-2">
+                            {totals.poidsNetTotal <= 0 && totals.poidsBrutTotal > 0 && (
+                                <p className="text-xs text-red-600">
                                     ⚠️ {t("pesees.poidsNetMustBePositive")}
                                 </p>
                             )}
@@ -209,7 +258,7 @@ export function UpdatePeseeDialog({ pesee, open, onOpenChange }: UpdatePeseeDial
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading || poidsNet <= 0}
+                                disabled={isLoading || fields.length === 0 || totals.poidsNetTotal <= 0}
                                 className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
                             >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

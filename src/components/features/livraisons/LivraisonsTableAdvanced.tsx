@@ -6,9 +6,10 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 interface LivraisonsTableAdvancedProps {
     livraisons: Livraison[];
+    canEditAcceptedQuantity: boolean;
 }
 
-export function LivraisonsTableAdvanced({ livraisons }: LivraisonsTableAdvancedProps) {
+export function LivraisonsTableAdvanced({ livraisons, canEditAcceptedQuantity }: LivraisonsTableAdvancedProps) {
     const { t } = useClientTranslations();
 
     const columns = createLivraisonsColumns(
@@ -18,7 +19,8 @@ export function LivraisonsTableAdvanced({ livraisons }: LivraisonsTableAdvancedP
         (livraison) => {
             // Dialog handles its own state
         },
-        t
+        t,
+        canEditAcceptedQuantity
     );
 
     return (

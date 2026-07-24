@@ -14,7 +14,7 @@ export const typeDateRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         StockDate: true,
                     },
                 },
@@ -32,7 +32,7 @@ export const typeDateRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         StockDate: true,
                     },
                 },
@@ -100,7 +100,7 @@ export const typeDateRepository = {
             include: {
                 _count: {
                     select: {
-                        Livraison: true,
+                        LivraisonTypeCaisse: true,
                         StockDate: true,
                     },
                 },
@@ -109,6 +109,6 @@ export const typeDateRepository = {
 
         if (!typeDate) return false;
 
-        return (typeDate._count.Livraison > 0 || typeDate._count.StockDate > 0);
+        return (typeDate._count.LivraisonTypeCaisse > 0 || typeDate._count.StockDate > 0);
     },
 };

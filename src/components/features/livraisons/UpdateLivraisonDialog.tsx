@@ -29,6 +29,7 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 
 type CaisseItem = {
     typeCaisseId: string;
+    typeDateId: string;
     quantite: number;
 };
 
@@ -38,8 +39,9 @@ type UpdateLivraisonDialogProps = {
         numeroLot: string;
         dateLivraison: Date;
         quantiteKg: number;
+        quantiteLivree?: number;
+        quantiteAcceptee?: number;
         agriculteurId?: string;
-        typeDateId?: string;
         agriculteur?: {
             id: string;
             code: string;
@@ -47,24 +49,26 @@ type UpdateLivraisonDialogProps = {
             prenom: string;
             cin: string;
         };
-        typeDate?: {
-            id: string;
-            nom: string;
-        };
         caisses?: Array<{
             id: string;
             typeCaisseId: string;
+            typeDateId: string;
             quantite: number;
             typeCaisse: {
                 id: string;
                 nom: string;
                 poidsKg: number;
             };
+            typeDate?: {
+                id: string;
+                nom: string;
+            };
         }>;
     };
+    canEditAcceptedQuantity: boolean;
 };
 
-export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps) {
+export function UpdateLivraisonDialog({ livraison, canEditAcceptedQuantity }: UpdateLivraisonDialogProps) {
     const { t } = useClientTranslations();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -76,18 +80,18 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
     const [selectedAgriculteur, setSelectedAgriculteur] = useState(
         livraison.agriculteurId || livraison.agriculteur?.id || ""
     );
-    const [selectedTypeDate, setSelectedTypeDate] = useState(
-        livraison.typeDateId || livraison.typeDate?.id || ""
-    );
+    const [quantiteLivree, setQuantiteLivree] = useState(livraison.quantiteLivree ?? livraison.quantiteKg);
+    const [quantiteAcceptee, setQuantiteAcceptee] = useState(livraison.quantiteAcceptee ?? livraison.quantiteLivree ?? livraison.quantiteKg);
 
     // État pour gérer les caisses - initialiser avec les caisses existantes
     const [caisses, setCaisses] = useState<CaisseItem[]>(
         livraison.caisses && livraison.caisses.length > 0
             ? livraison.caisses.map(c => ({
                 typeCaisseId: c.typeCaisseId,
+                typeDateId: c.typeDateId,
                 quantite: c.quantite
             }))
-            : [{ typeCaisseId: "", quantite: 1 }]
+            : [{ typeCaisseId: "", typeDateId: "", quantite: 1 }]
     );
 
     useEffect(() => {
@@ -97,9 +101,12 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
             if (livraison.caisses && livraison.caisses.length > 0) {
                 setCaisses(livraison.caisses.map(c => ({
                     typeCaisseId: c.typeCaisseId,
+                    typeDateId: c.typeDateId,
                     quantite: c.quantite
                 })));
             }
+            setQuantiteLivree(livraison.quantiteLivree ?? livraison.quantiteKg);
+            setQuantiteAcceptee(livraison.quantiteAcceptee ?? livraison.quantiteLivree ?? livraison.quantiteKg);
         }
     }, [open]);
 
@@ -117,7 +124,7 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
 
     // Ajouter une ligne de caisse
     const addCaisse = () => {
-        setCaisses([...caisses, { typeCaisseId: "", quantite: 1 }]);
+        setCaisses([...caisses, { typeCaisseId: "", typeDateId: "", quantite: 1 }]);
     };
 
     // Retirer une ligne de caisse
@@ -243,27 +250,23 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
                         <input type="hidden" name="agriculteurId" value={selectedAgriculteur} />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="typeDateId" className="text-[#3D1C00]">
-                            {t("livraisons.typeDate")}
-                        </Label>
-                        <Select
-                            value={selectedTypeDate}
-                            onValueChange={setSelectedTypeDate}
-                            required
-                        >
-                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
-                                <SelectValue placeholder={t("livraisons.selectTypeDate")} />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {typesDates.map((td) => (
-                                    <SelectItem key={td.id} value={td.id}>
-                                        {td.nom}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="typeDateId" value={selectedTypeDate} />
+                    <div className="grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="quantiteLivree">Quantité livrée (kg)</Label>
+                            <Input id="quantiteLivree" name="quantiteLivree" type="number" min="0" step="0.01" required value={quantiteLivree}
+                                onChange={(event) => {
+                                    const value = Math.max(0, Number(event.target.value));
+                                    const acceptedMatchesDelivered = quantiteAcceptee === quantiteLivree;
+                                    setQuantiteLivree(value);
+                                    if (!canEditAcceptedQuantity || acceptedMatchesDelivered) setQuantiteAcceptee(value);
+                                }} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="quantiteAcceptee">Quantité acceptée (kg)</Label>
+                            <Input id="quantiteAcceptee" name="quantiteAcceptee" type="number" min="0" max={quantiteLivree} step="0.01" required value={quantiteAcceptee}
+                                disabled={!canEditAcceptedQuantity}
+                                onChange={(event) => setQuantiteAcceptee(Math.min(quantiteLivree, Math.max(0, Number(event.target.value))))} />
+                        </div>
                     </div>
 
                     {/* Section Caisses */}
@@ -286,6 +289,23 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
                         <div className="space-y-2">
                             {caisses.map((caisse, index) => (
                                 <div key={index} className="flex gap-2 items-start">
+                                    <div className="flex-1">
+                                        <Select
+                                            value={caisse.typeDateId}
+                                            onValueChange={(value) => updateCaisse(index, "typeDateId", value)}
+                                        >
+                                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                                <SelectValue placeholder={t("livraisons.selectTypeDate")} />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-white">
+                                                {typesDates.map((td) => (
+                                                    <SelectItem key={td.id} value={td.id}>
+                                                        {td.nom}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     <div className="flex-1">
                                         <Select
                                             value={caisse.typeCaisseId}

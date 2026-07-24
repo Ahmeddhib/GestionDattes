@@ -3,11 +3,11 @@
 import { auth } from "@/lib/auth";
 import { peseeService } from "@/services/pesee.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
-import { createPeseeSchema, type CreatePeseeInput } from "@/validators/pesee.validator";
+import type { CreatePeseeInput } from "@/validators/pesee.validator";
 import { revalidatePath } from "next/cache";
 
 /**
- * Action pour créer une nouvelle pesée
+ * Action pour créer une nouvelle session de pesée par type de caisse
  */
 export async function createPeseeAction(data: CreatePeseeInput) {
     try {
@@ -16,13 +16,11 @@ export async function createPeseeAction(data: CreatePeseeInput) {
             return { success: false, error: "Non authentifié" };
         }
 
-        // Validation avec Zod
-        const validatedData = createPeseeSchema.parse(data);
-
         const tenantId = await getTenantId();
-        const pesee = await peseeService.create(tenantId, session.user.id, validatedData);
+        const pesee = await peseeService.create(tenantId, session.user.id, data);
 
         revalidatePath("/dashboard/pesees");
+        revalidatePath("/dashboard/livraisons");
 
         return { success: true, data: pesee };
     } catch (error) {

@@ -66,7 +66,7 @@ export function DeletePeseeDialog({ pesee, open, onOpenChange }: DeletePeseeDial
                                 {t("pesees.delete")}
                             </DialogTitle>
                             <DialogDescription className="text-[#3D1C00]/60 mt-2">
-                                {t("pesees.deleteConfirm")} <strong>{pesee.Livraison.numeroLot}</strong> ?
+                                {t("pesees.deleteConfirm")} <strong>{pesee.livraison.numeroLot}</strong> ({pesee.typeCaisse?.nom}) ?
                             </DialogDescription>
                         </div>
                     </div>
@@ -79,13 +79,13 @@ export function DeletePeseeDialog({ pesee, open, onOpenChange }: DeletePeseeDial
                             <div>
                                 <span className="text-gray-600">{t("pesees.agriculteur")}:</span>
                                 <p className="font-medium text-[#3D1C00]">
-                                    {pesee.Livraison.Agriculteur.nom} {pesee.Livraison.Agriculteur.prenom}
+                                    {pesee.livraison.Agriculteur.nom} {pesee.livraison.Agriculteur.prenom}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-gray-600">{t("pesees.poidsNet")}:</span>
+                                <span className="text-gray-600">{t("pesees.poidsNetTotal")}:</span>
                                 <p className="font-medium text-[#C17A2B]">
-                                    {pesee.poidsNet.toFixed(2)} kg
+                                    {pesee.poidsNetTotal.toFixed(2)} kg
                                 </p>
                             </div>
                         </div>

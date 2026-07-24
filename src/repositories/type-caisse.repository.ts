@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
+type DbClient = typeof prisma | Prisma.TransactionClient;
+
 /**
  * Repository MULTI-TENANT pour les types de caisses
  * Toutes les méthodes filtrent automatiquement par tenantId
@@ -35,8 +37,8 @@ export const typeCaisseRepository = {
     /**
      * Récupérer un type de caisse par ID (avec vérification tenant)
      */
-    async findById(tenantId: string, id: string) {
-        return prisma.typeCaisse.findFirst({
+    async findById(tenantId: string, id: string, client: DbClient = prisma) {
+        return client.typeCaisse.findFirst({
             where: {
                 id,
                 tenantId, // Double vérification: ID + tenant
@@ -106,10 +108,11 @@ export const typeCaisseRepository = {
     async update(
         tenantId: string,
         id: string,
-        data: Prisma.TypeCaisseUpdateInput
+        data: Prisma.TypeCaisseUpdateInput,
+        client: DbClient = prisma
     ) {
         // Vérifier d'abord que le type de caisse appartient au tenant
-        const existing = await prisma.typeCaisse.findFirst({
+        const existing = await client.typeCaisse.findFirst({
             where: { id, tenantId },
         });
 
@@ -117,7 +120,7 @@ export const typeCaisseRepository = {
             throw new Error("Type de caisse introuvable ou n'appartient pas à ce tenant");
         }
 
-        return prisma.typeCaisse.update({
+        return client.typeCaisse.update({
             where: { id },
             data: {
                 ...data,

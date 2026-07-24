@@ -7,7 +7,13 @@ neonConfig.webSocketConstructor = ws;
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
+    prismaSchemaVersion: string | undefined;
 };
+
+// Increment this value whenever the generated Prisma client gains a new model.
+// It prevents Next.js development hot reload from reusing a client created with
+// an older schema (whose delegates would otherwise be undefined).
+const PRISMA_SCHEMA_VERSION = "20260722063107";
 
 function createPrismaClient() {
     const connectionString = process.env.DATABASE_URL;
@@ -44,6 +50,15 @@ function createPrismaClient() {
     return client;
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+const hasCurrentPrismaClient =
+    globalForPrisma.prisma !== undefined &&
+    globalForPrisma.prismaSchemaVersion === PRISMA_SCHEMA_VERSION;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = hasCurrentPrismaClient
+    ? globalForPrisma.prisma!
+    : createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = prisma;
+    globalForPrisma.prismaSchemaVersion = PRISMA_SCHEMA_VERSION;
+}

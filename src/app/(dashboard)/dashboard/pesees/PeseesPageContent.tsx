@@ -14,9 +14,9 @@ export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
     const { t } = useClientTranslations();
 
     const totalPesees = pesees.length;
-    const poidsBrutTotal = pesees.reduce((sum, p) => sum + p.poidsBrut, 0);
-    const poidsNetTotal = pesees.reduce((sum, p) => sum + p.poidsNet, 0);
-    const tareTotal = pesees.reduce((sum, p) => sum + (p.tare || 0), 0);
+    const poidsBrutTotal = pesees.reduce((sum, p) => sum + p.poidsBrutTotal, 0);
+    const poidsNetTotal = pesees.reduce((sum, p) => sum + p.poidsNetTotal, 0);
+    const tareTotal = pesees.reduce((sum, p) => sum + p.poidsTareTotal, 0);
     const pourcentageTare = poidsBrutTotal > 0 ? (tareTotal / poidsBrutTotal) * 100 : 0;
 
     return (

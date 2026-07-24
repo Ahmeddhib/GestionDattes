@@ -77,18 +77,19 @@ model AuditLog {
 }
 
 model BonAchat {
-  id          String    @id
-  numero      String
-  prixKg      Float
-  montant     Float
-  livraisonId String    @unique
-  createdById String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime
-  tenantId    String
-  User        User      @relation(fields: [createdById], references: [id])
-  Livraison   Livraison @relation(fields: [livraisonId], references: [id])
-  Tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String    @id
+  numero       String
+  prixKg       Float
+  montant      Float
+  observations String?
+  livraisonId  String    @unique
+  createdById  String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime
+  tenantId     String
+  User         User      @relation(fields: [createdById], references: [id])
+  Livraison    Livraison @relation(fields: [livraisonId], references: [id])
+  Tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, numero])
   @@index([createdById])
@@ -136,6 +137,23 @@ model Client {
   @@index([tenantId])
 }
 
+model Livreur {
+  id        String   @id @default(cuid())
+  nom       String
+  telephone String?
+  cin       String?
+  vehicule  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  Tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, cin])
+  @@index([tenantId])
+  @@index([nom])
+}
+
 model Conditionnement {
   id            String     @id
   nombreCaisses Int
@@ -174,8 +192,9 @@ model Livraison {
   id                  String                @id
   numeroLot           String
   dateLivraison       DateTime
+  quantiteLivree      Float
+  quantiteAcceptee    Float
   agriculteurId       String
-  typeDateId          String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   tenantId            String
@@ -184,8 +203,7 @@ model Livraison {
   LivraisonTypeCaisse LivraisonTypeCaisse[]
   Agriculteur         Agriculteur           @relation(fields: [agriculteurId], references: [id])
   Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  TypeDate            TypeDate              @relation(fields: [typeDateId], references: [id])
-  Pesee               Pesee?
+  Pesee               Pesee[]
   PretCaisse          PretCaisse[]
   StockDate           StockDate[]
 
@@ -195,35 +213,60 @@ model Livraison {
   @@index([dateLivraison])
   @@index([numeroLot])
   @@index([tenantId])
-  @@index([typeDateId])
 }
 
 model LivraisonTypeCaisse {
   id           String     @id @default(cuid())
   livraisonId  String
   typeCaisseId String
+  typeDateId   String
   quantite     Int
   createdAt    DateTime   @default(now())
   Livraison    Livraison  @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
   TypeCaisse   TypeCaisse @relation(fields: [typeCaisseId], references: [id])
+  TypeDate     TypeDate   @relation(fields: [typeDateId], references: [id])
 
-  @@unique([livraisonId, typeCaisseId])
+  @@unique([livraisonId, typeCaisseId, typeDateId])
   @@index([livraisonId])
   @@index([typeCaisseId])
+  @@index([typeDateId])
 }
 
 model Pesee {
-  id          String    @id
-  poidsBrut   Float
-  poidsNet    Float
-  tare        Float?
-  livraisonId String    @unique
-  createdAt   DateTime  @default(now())
-  tenantId    String
-  Livraison   Livraison @relation(fields: [livraisonId], references: [id])
-  Tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id             String        @id @default(cuid())
+  livraisonId    String
+  typeCaisseId   String
+  typeDateId     String
+  tareKg         Decimal       @db.Decimal(6, 2)
+  nombreCaisses  Int
+  poidsBrutTotal Decimal       @db.Decimal(8, 2)
+  poidsTareTotal Decimal       @db.Decimal(8, 2)
+  poidsNetTotal  Decimal       @db.Decimal(8, 2)
+  poidsBrutMoyen Decimal       @db.Decimal(6, 2)
+  poidsNetMoyen  Decimal       @db.Decimal(6, 2)
+  createdAt      DateTime      @default(now())
+  tenantId       String
+  Caisses        PeseeCaisse[]
+  Livraison      Livraison     @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
+  TypeCaisse     TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
+  TypeDate       TypeDate      @relation(fields: [typeDateId], references: [id])
+  Tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([livraisonId, typeCaisseId, typeDateId])
+  @@index([livraisonId])
+  @@index([typeCaisseId])
+  @@index([typeDateId])
   @@index([tenantId])
+}
+
+model PeseeCaisse {
+  id        String  @id @default(cuid())
+  peseeId   String
+  poidsBrut Decimal @db.Decimal(6, 2)
+  ordre     Int
+  Pesee     Pesee   @relation(fields: [peseeId], references: [id], onDelete: Cascade)
+
+  @@index([peseeId])
 }
 
 model PretCaisse {
@@ -296,6 +339,7 @@ model StockDate {
   TypeDate           TypeDate          @relation(fields: [typeDateId], references: [id])
   Vente              Vente[]
 
+  @@unique([livraisonId, typeDateId])
   @@index([dateEntree])
   @@index([livraisonId])
   @@index([tenantId])
@@ -322,6 +366,7 @@ model Tenant {
   Conditionnement Conditionnement[]
   Echantillon     Echantillon[]
   Livraison       Livraison[]
+  Livreur         Livreur[]
   Pesee           Pesee[]
   PretCaisse      PretCaisse[]
   Region          Region[]
@@ -364,6 +409,7 @@ model TypeCaisse {
   BonSortie           BonSortie[]
   Conditionnement     Conditionnement[]
   LivraisonTypeCaisse LivraisonTypeCaisse[]
+  Pesee               Pesee[]
   PretCaisse          PretCaisse[]
   Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -373,15 +419,16 @@ model TypeCaisse {
 }
 
 model TypeDate {
-  id          String      @id
-  nom         String
-  description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime
-  tenantId    String
-  Livraison   Livraison[]
-  StockDate   StockDate[]
-  Tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                  String                @id
+  nom                 String
+  description         String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  tenantId            String
+  LivraisonTypeCaisse LivraisonTypeCaisse[]
+  Pesee               Pesee[]
+  StockDate           StockDate[]
+  Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, nom])
   @@index([tenantId])
@@ -452,6 +499,9 @@ enum AuditAction {
   CREATE_LIVRAISON
   UPDATE_LIVRAISON
   DELETE_LIVRAISON
+  CREATE_LIVREUR
+  UPDATE_LIVREUR
+  DELETE_LIVREUR
   CREATE_PRET_CAISSE
   RETOUR_PRET_CAISSE
   CREATE_BON_ACHAT

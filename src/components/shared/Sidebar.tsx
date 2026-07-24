@@ -17,6 +17,7 @@ import {
     Truck,
     PackageCheck,
     UserCircle,
+    Contact,
     Scale,
 } from "lucide-react";
 import { Avatar } from "./Avatar";
@@ -88,6 +89,11 @@ export function Sidebar({ user }: SidebarProps) {
                     href: "/dashboard/clients",
                     label: t("nav.clients"),
                     icon: UserCircle,
+                },
+                {
+                    href: "/dashboard/livreurs",
+                    label: t("nav.livreurs"),
+                    icon: Contact,
                 },
             ],
         },

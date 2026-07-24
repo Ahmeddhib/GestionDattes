@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createPeseeSchema, type CreatePeseeInput } from "@/validators/pesee.validator";
+import { buildCreatePeseeSchema, type CreatePeseeInput } from "@/validators/pesee.validator";
 import { createPeseeAction } from "@/actions/pesees/create-pesee.action";
 import { getLivraisonsAction } from "@/actions/livraisons/get-livraisons.action";
+import { getPeseesByLivraisonAction } from "@/actions/pesees/get-pesees-by-livraison.action";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -36,45 +37,86 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2, Scale } from "lucide-react";
+import { Plus, Loader2, Scale, Trash2 } from "lucide-react";
+
+type LivraisonCaisse = {
+    typeCaisseId: string;
+    typeDateId: string;
+    quantite: number;
+    typeCaisse: { id: string; nom: string; poidsKg: number };
+    typeDate?: { id: string; nom: string };
+};
 
 type Livraison = {
     id: string;
     numeroLot: string;
-    Agriculteur: {
-        nom: string;
-        prenom: string;
-    };
-    TypeDate: {
-        nom: string;
-    };
+    agriculteur?: { nom: string; prenom: string };
+    caisses: LivraisonCaisse[];
 };
+
+function ligneKey(typeCaisseId: string, typeDateId: string) {
+    return `${typeCaisseId}::${typeDateId}`;
+}
 
 export function CreatePeseeDialog() {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [livraisons, setLivraisons] = useState<any[]>([]);
+    const [livraisons, setLivraisons] = useState<Livraison[]>([]);
     const [loadingLivraisons, setLoadingLivraisons] = useState(false);
+    const [weighedLigneKeys, setWeighedLigneKeys] = useState<Set<string>>(new Set());
+    const [tare, setTare] = useState(0);
+    const tareRef = useRef(0);
     const router = useRouter();
     const { t } = useClientTranslations();
 
     const form = useForm<CreatePeseeInput>({
-        resolver: zodResolver(createPeseeSchema),
+        resolver: ((values, context, options) =>
+            zodResolver(buildCreatePeseeSchema(tareRef.current))(values, context, options)) as Resolver<CreatePeseeInput>,
         defaultValues: {
             livraisonId: "",
-            poidsBrut: 0,
-            tare: 0,
+            typeCaisseId: "",
+            typeDateId: "",
+            caisses: [],
         },
     });
 
-    const poidsBrut = form.watch("poidsBrut");
-    const tare = form.watch("tare");
-    const poidsNet = poidsBrut - (tare || 0);
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "caisses",
+    });
 
-    // Charger les livraisons quand le dialog s'ouvre
+    const livraisonId = form.watch("livraisonId");
+    const typeCaisseId = form.watch("typeCaisseId");
+    const typeDateId = form.watch("typeDateId");
+    const caisses = form.watch("caisses");
+
+    const selectedLivraison = livraisons.find((l) => l.id === livraisonId);
+    const availableCaisses = selectedLivraison?.caisses ?? [];
+
+    const totals = useMemo(() => {
+        const poids = (caisses ?? []).map((c) => Number(c?.poidsBrut) || 0);
+        const nombreCaisses = poids.length;
+        const poidsBrutTotal = poids.reduce((sum, p) => sum + p, 0);
+        const poidsTareTotal = tare * nombreCaisses;
+        const poidsNetTotal = poidsBrutTotal - poidsTareTotal;
+        return {
+            nombreCaisses,
+            poidsBrutTotal,
+            poidsTareTotal,
+            poidsNetTotal,
+            poidsBrutMoyen: nombreCaisses > 0 ? poidsBrutTotal / nombreCaisses : 0,
+            poidsNetMoyen: nombreCaisses > 0 ? poidsNetTotal / nombreCaisses : 0,
+        };
+    }, [caisses, tare]);
+
     useEffect(() => {
         if (open) {
             loadLivraisons();
+        } else {
+            form.reset({ livraisonId: "", typeCaisseId: "", typeDateId: "", caisses: [] });
+            setTare(0);
+            tareRef.current = 0;
+            setWeighedLigneKeys(new Set());
         }
     }, [open]);
 
@@ -83,11 +125,7 @@ export function CreatePeseeDialog() {
             setLoadingLivraisons(true);
             const result = await getLivraisonsAction();
             if (result.success && result.data) {
-                // Filtrer les livraisons qui n'ont pas encore de pesée
-                const livraisonsSansPesee = result.data.filter(
-                    (liv: any) => !liv.Pesee
-                );
-                setLivraisons(livraisonsSansPesee);
+                setLivraisons(result.data as unknown as Livraison[]);
             }
         } catch (error) {
             console.error("Erreur chargement livraisons:", error);
@@ -96,6 +134,49 @@ export function CreatePeseeDialog() {
             setLoadingLivraisons(false);
         }
     };
+
+    const handleLivraisonChange = async (value: string) => {
+        form.setValue("livraisonId", value);
+        form.setValue("typeCaisseId", "");
+        form.setValue("typeDateId", "");
+        form.setValue("caisses", []);
+        setTare(0);
+        tareRef.current = 0;
+
+        const result = await getPeseesByLivraisonAction(value);
+        if (result.success && result.data) {
+            setWeighedLigneKeys(
+                new Set(
+                    result.data.map((p: { typeCaisseId: string; typeDateId: string }) =>
+                        ligneKey(p.typeCaisseId, p.typeDateId)
+                    )
+                )
+            );
+        } else {
+            setWeighedLigneKeys(new Set());
+        }
+    };
+
+    const handleLigneChange = (value: string) => {
+        const caisse = availableCaisses.find((c) => ligneKey(c.typeCaisseId, c.typeDateId) === value);
+        form.setValue("typeCaisseId", caisse?.typeCaisseId ?? "");
+        form.setValue("typeDateId", caisse?.typeDateId ?? "");
+        const nextTare = caisse?.typeCaisse.poidsKg ?? 0;
+        setTare(nextTare);
+        tareRef.current = nextTare;
+        form.setValue("caisses", [{ poidsBrut: 0 }]);
+    };
+
+    const selectedLigneKey = typeCaisseId && typeDateId ? ligneKey(typeCaisseId, typeDateId) : "";
+    const selectedCaisseDeclaree = availableCaisses.find(
+        (c) => c.typeCaisseId === typeCaisseId && c.typeDateId === typeDateId
+    );
+    const estimationKg = selectedCaisseDeclaree
+        ? selectedCaisseDeclaree.quantite * selectedCaisseDeclaree.typeCaisse.poidsKg
+        : 0;
+    const ecartPourcentage =
+        estimationKg > 0 ? ((totals.poidsNetTotal - estimationKg) / estimationKg) * 100 : 0;
+    const ecartImportant = estimationKg > 0 && Math.abs(ecartPourcentage) > 15;
 
     const onSubmit = async (data: CreatePeseeInput) => {
         try {
@@ -109,7 +190,6 @@ export function CreatePeseeDialog() {
             }
 
             toast.success(t("messages.success.created", { entity: t("pesees.title") }));
-            form.reset();
             setOpen(false);
             router.refresh();
         } catch (error) {
@@ -128,7 +208,7 @@ export function CreatePeseeDialog() {
                     {t("pesees.addNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px] bg-white rounded-[14px]">
+            <DialogContent className="sm:max-w-[600px] bg-white rounded-[14px] max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
                         <Scale className="h-5 w-5 text-[#C17A2B]" />
@@ -148,12 +228,12 @@ export function CreatePeseeDialog() {
                                 <FormItem>
                                     <FormLabel>{t("pesees.selectLivraison")} *</FormLabel>
                                     <Select
-                                        onValueChange={field.onChange}
+                                        onValueChange={handleLivraisonChange}
                                         value={field.value}
                                         disabled={isLoading || loadingLivraisons}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="rounded-[7px]">
+                                            <SelectTrigger className="rounded-[7px] bg-white">
                                                 <SelectValue
                                                     placeholder={
                                                         loadingLivraisons
@@ -163,7 +243,7 @@ export function CreatePeseeDialog() {
                                                 />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent className="bg-white">
                                             {livraisons.length === 0 ? (
                                                 <div className="p-2 text-sm text-gray-500">
                                                     {t("pesees.noLivraisonsAvailable")}
@@ -176,7 +256,7 @@ export function CreatePeseeDialog() {
                                                                 {livraison.numeroLot}
                                                             </span>
                                                             <span className="text-xs text-gray-500">
-                                                                {livraison.agriculteur?.nom} {livraison.agriculteur?.prenom} - {livraison.typeDate?.nom}
+                                                                {livraison.agriculteur?.nom} {livraison.agriculteur?.prenom}
                                                             </span>
                                                         </div>
                                                     </SelectItem>
@@ -189,69 +269,155 @@ export function CreatePeseeDialog() {
                             )}
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="poidsBrut"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t("pesees.poidsBrut")} (kg) *</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="500.00"
-                                                className="rounded-[7px]"
-                                                disabled={isLoading}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage className="text-red-600" />
-                                    </FormItem>
-                                )}
-                            />
+                        {livraisonId && (
+                            <FormItem>
+                                <FormLabel>{t("pesees.selectTypeCaisse")} *</FormLabel>
+                                <Select
+                                    onValueChange={handleLigneChange}
+                                    value={selectedLigneKey}
+                                    disabled={isLoading}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger className="rounded-[7px] bg-white">
+                                            <SelectValue placeholder={t("pesees.selectTypeCaissePlaceholder")} />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-white">
+                                        {availableCaisses.length === 0 ? (
+                                            <div className="p-2 text-sm text-gray-500">
+                                                {t("pesees.noTypeCaisseAvailable")}
+                                            </div>
+                                        ) : (
+                                            availableCaisses.map((c) => {
+                                                const key = ligneKey(c.typeCaisseId, c.typeDateId);
+                                                const dejaPesee = weighedLigneKeys.has(key);
+                                                return (
+                                                    <SelectItem key={key} value={key} disabled={dejaPesee}>
+                                                        {c.typeCaisse.nom} — {c.typeDate?.nom} — {t("pesees.tare")}: {c.typeCaisse.poidsKg} kg
+                                                        {dejaPesee ? ` (${t("pesees.alreadyWeighed")})` : ""}
+                                                    </SelectItem>
+                                                );
+                                            })
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage className="text-red-600" />
+                            </FormItem>
+                        )}
 
-                            <FormField
-                                control={form.control}
-                                name="tare"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t("pesees.tare")} (kg)</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="50.00"
-                                                className="rounded-[7px]"
-                                                disabled={isLoading}
-                                                value={field.value || ""}
-                                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage className="text-red-600" />
-                                    </FormItem>
+                        {typeCaisseId && typeDateId && (
+                            <>
+                                {selectedCaisseDeclaree && (
+                                    <p className="text-xs text-[#3D1C00]/60">
+                                        {t("pesees.quantiteDeclaree", { n: String(selectedCaisseDeclaree.quantite) })}
+                                    </p>
                                 )}
-                            />
-                        </div>
 
-                        {/* Affichage du poids net calculé */}
-                        <div className="rounded-[7px] bg-[#FAF0DC] border border-[#C17A2B] p-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium text-[#3D1C00]">
-                                    {t("pesees.poidsNet")} :
-                                </span>
-                                <span className="text-2xl font-bold text-[#C17A2B]">
-                                    {poidsNet.toFixed(2)} kg
-                                </span>
-                            </div>
-                            {poidsNet <= 0 && poidsBrut > 0 && (
-                                <p className="text-xs text-red-600 mt-2">
-                                    ⚠️ {t("pesees.poidsNetMustBePositive")}
-                                </p>
-                            )}
-                        </div>
+                                <div className="space-y-2">
+                                    {fields.map((caisseField, index) => {
+                                        const currentPoids = Number(caisses?.[index]?.poidsBrut) || 0;
+                                        const previousPoids = index > 0 ? Number(caisses?.[index - 1]?.poidsBrut) || 0 : 0;
+                                        const doublonSuspect = index > 0 && currentPoids > 0 && currentPoids === previousPoids;
+
+                                        return (
+                                            <div key={caisseField.id} className="flex items-start gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`caisses.${index}.poidsBrut`}
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex-1">
+                                                            <FormLabel className="text-xs text-gray-600">
+                                                                {t("pesees.caisseLabel", { n: String(index + 1) })}
+                                                            </FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    type="number"
+                                                                    step="0.01"
+                                                                    placeholder={t("pesees.grossWeightLabel")}
+                                                                    className="rounded-[7px]"
+                                                                    disabled={isLoading}
+                                                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage className="text-red-600 text-xs" />
+                                                            {doublonSuspect && (
+                                                                <p className="text-xs text-amber-600">
+                                                                    ⚠️ {t("pesees.doublonSuspect")}
+                                                                </p>
+                                                            )}
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => remove(index)}
+                                                    disabled={isLoading || fields.length <= 1}
+                                                    className="h-9 w-9 p-0 mt-6 hover:bg-red-50"
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => append({ poidsBrut: 0 })}
+                                    disabled={isLoading}
+                                    className="w-full rounded-[9px] border-[#C17A2B] text-[#C17A2B]"
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    {t("pesees.addCaisse")}
+                                </Button>
+
+                                <div className="rounded-[7px] bg-[#FAF0DC] border border-[#C17A2B] p-4 space-y-2">
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <div>
+                                            <span className="text-[#3D1C00]/70">{t("pesees.nombreCaisses")}:</span>{" "}
+                                            <span className="font-medium text-[#3D1C00]">{totals.nombreCaisses}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[#3D1C00]/70">{t("pesees.poidsBrutTotal")}:</span>{" "}
+                                            <span className="font-medium text-[#3D1C00]">{totals.poidsBrutTotal.toFixed(2)} kg</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[#3D1C00]/70">{t("pesees.poidsTareTotal")}:</span>{" "}
+                                            <span className="font-medium text-[#3D1C00]">{totals.poidsTareTotal.toFixed(2)} kg</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[#3D1C00]/70">{t("pesees.poidsBrutMoyen")}:</span>{" "}
+                                            <span className="font-medium text-[#3D1C00]">{totals.poidsBrutMoyen.toFixed(2)} kg</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-2 border-t border-[#C17A2B]/30">
+                                        <span className="text-sm font-medium text-[#3D1C00]">
+                                            {t("pesees.poidsNetTotal")} :
+                                        </span>
+                                        <span className="text-2xl font-bold text-[#C17A2B]">
+                                            {totals.poidsNetTotal.toFixed(2)} kg
+                                        </span>
+                                    </div>
+                                    {totals.poidsNetTotal <= 0 && totals.poidsBrutTotal > 0 && (
+                                        <p className="text-xs text-red-600">
+                                            ⚠️ {t("pesees.poidsNetMustBePositive")}
+                                        </p>
+                                    )}
+                                    {ecartImportant && (
+                                        <p className="text-xs text-amber-700 bg-amber-100 rounded-[7px] p-2">
+                                            ⚠️ {t("pesees.ecartImportant", {
+                                                pourcentage: ecartPourcentage.toFixed(0),
+                                                estimation: estimationKg.toFixed(2),
+                                            })}
+                                        </p>
+                                    )}
+                                </div>
+                            </>
+                        )}
 
                         <DialogFooter>
                             <Button
@@ -265,7 +431,7 @@ export function CreatePeseeDialog() {
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading || poidsNet <= 0}
+                                disabled={isLoading || fields.length === 0 || totals.poidsNetTotal <= 0}
                                 className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
                             >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

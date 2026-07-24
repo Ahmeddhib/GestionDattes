@@ -9,11 +9,21 @@ import { fr } from "date-fns/locale";
 
 export type Pesee = {
     id: string;
-    poidsBrut: number;
-    poidsNet: number;
-    tare: number | null;
+    livraisonId: string;
+    typeCaisseId: string;
+    typeCaisse: { id: string; nom: string } | null;
+    typeDateId: string;
+    typeDate: { id: string; nom: string } | null;
+    tareKg: number;
+    nombreCaisses: number;
+    poidsBrutTotal: number;
+    poidsTareTotal: number;
+    poidsNetTotal: number;
+    poidsBrutMoyen: number;
+    poidsNetMoyen: number;
+    caisses: { id: string; ordre: number; poidsBrut: number }[];
     createdAt: Date;
-    Livraison: {
+    livraison: {
         id: string;
         numeroLot: string;
         dateLivraison: Date;
@@ -22,10 +32,6 @@ export type Pesee = {
             code: string;
             nom: string;
             prenom: string;
-        };
-        TypeDate: {
-            id: string;
-            nom: string;
         };
     };
 };
@@ -36,19 +42,19 @@ export const createColumns = (
     onDelete: (pesee: Pesee) => void
 ): ColumnDef<Pesee>[] => [
         {
-            accessorKey: "Livraison.numeroLot",
+            accessorKey: "livraison.numeroLot",
             header: t("pesees.numeroLot"),
             cell: ({ row }) => (
                 <div className="font-medium text-[#3D1C00]">
-                    {row.original.Livraison.numeroLot}
+                    {row.original.livraison.numeroLot}
                 </div>
             ),
         },
         {
-            accessorKey: "Livraison.Agriculteur",
+            accessorKey: "livraison.Agriculteur",
             header: t("pesees.agriculteur"),
             cell: ({ row }) => {
-                const agriculteur = row.original.Livraison.Agriculteur;
+                const agriculteur = row.original.livraison.Agriculteur;
                 return (
                     <div className="flex flex-col">
                         <span className="font-medium text-[#3D1C00]">
@@ -62,41 +68,56 @@ export const createColumns = (
             },
         },
         {
-            accessorKey: "Livraison.TypeDate.nom",
-            header: t("pesees.typeDate"),
+            accessorKey: "typeCaisse.nom",
+            header: t("pesees.typeCaisse"),
             cell: ({ row }) => (
                 <Badge variant="outline" className="border-[#C17A2B] text-[#C17A2B]">
-                    {row.original.Livraison.TypeDate.nom}
+                    {row.original.typeCaisse?.nom}
                 </Badge>
             ),
         },
         {
-            accessorKey: "poidsBrut",
-            header: t("pesees.poidsBrut"),
+            accessorKey: "typeDate.nom",
+            header: t("pesees.typeDate"),
             cell: ({ row }) => (
-                <div className="text-right font-medium">
-                    {row.getValue<number>("poidsBrut").toFixed(2)} kg
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    {row.original.typeDate?.nom}
+                </Badge>
+            ),
+        },
+        {
+            accessorKey: "nombreCaisses",
+            header: t("pesees.nombreCaisses"),
+            cell: ({ row }) => (
+                <div className="text-center font-medium">
+                    {row.getValue<number>("nombreCaisses")}
                 </div>
             ),
         },
         {
-            accessorKey: "tare",
-            header: t("pesees.tare"),
-            cell: ({ row }) => {
-                const tare = row.getValue<number | null>("tare");
-                return (
-                    <div className="text-right">
-                        {tare !== null ? `${tare.toFixed(2)} kg` : <span className="text-gray-400">—</span>}
-                    </div>
-                );
-            },
+            accessorKey: "poidsBrutTotal",
+            header: t("pesees.poidsBrutTotal"),
+            cell: ({ row }) => (
+                <div className="text-right font-medium">
+                    {row.getValue<number>("poidsBrutTotal").toFixed(2)} kg
+                </div>
+            ),
         },
         {
-            accessorKey: "poidsNet",
-            header: t("pesees.poidsNet"),
+            accessorKey: "poidsTareTotal",
+            header: t("pesees.poidsTareTotal"),
+            cell: ({ row }) => (
+                <div className="text-right text-gray-500">
+                    {row.getValue<number>("poidsTareTotal").toFixed(2)} kg
+                </div>
+            ),
+        },
+        {
+            accessorKey: "poidsNetTotal",
+            header: t("pesees.poidsNetTotal"),
             cell: ({ row }) => (
                 <div className="text-right font-bold text-[#C17A2B]">
-                    {row.getValue<number>("poidsNet").toFixed(2)} kg
+                    {row.getValue<number>("poidsNetTotal").toFixed(2)} kg
                 </div>
             ),
         },

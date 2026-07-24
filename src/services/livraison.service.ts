@@ -2,9 +2,11 @@ import { livraisonRepository } from "@/repositories/livraison.repository";
 import { agriculteurRepository } from "@/repositories/agriculteur.repository";
 import { typeDateRepository } from "@/repositories/type-date.repository";
 import { typeCaisseRepository } from "@/repositories/type-caisse.repository";
-import { pretCaisseRepository } from "@/repositories/pret-caisse.repository";
 import { auditService } from "./audit.service";
 import { checkPermission } from "@/lib/permissions";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { ROLES } from "@/constants/roles";
 import type { CreateLivraisonInput, UpdateLivraisonInput } from "@/validators/livraison.validator";
 
 /**
@@ -22,34 +24,38 @@ export const livraisonService = {
         // Transformation PascalCase → camelCase
         return livraisons.map((livraison) => {
             // Calculer la quantité totale en kg
-            const quantiteKg = livraison.LivraisonTypeCaisse.reduce((total, ltc) => {
-                return total + (ltc.quantite * ltc.TypeCaisse.poidsKg);
-            }, 0);
+            const quantiteKg = livraison.quantiteLivree ?? livraison.LivraisonTypeCaisse.reduce(
+                (total, ltc) => total + (ltc.quantite * ltc.TypeCaisse.poidsKg),
+                0
+            );
 
             return {
                 ...livraison,
                 agriculteur: livraison.Agriculteur,
-                typeDate: livraison.TypeDate,
                 caisses: livraison.LivraisonTypeCaisse.map((ltc) => ({
                     id: ltc.id,
                     typeCaisseId: ltc.typeCaisseId,
+                    typeDateId: ltc.typeDateId,
                     quantite: ltc.quantite,
                     typeCaisse: {
                         id: ltc.TypeCaisse.id,
                         nom: ltc.TypeCaisse.nom,
                         poidsKg: ltc.TypeCaisse.poidsKg,
                     },
+                    typeDate: ltc.TypeDate,
                 })),
+                bonAchat: livraison.BonAchat,
                 quantiteKg, // Quantité totale calculée
                 _count: livraison._count ? {
                     echantillons: livraison._count.Echantillon,
                     pretsCaisses: livraison._count.PretCaisse,
                     stocksDates: livraison._count.StockDate,
+                    pesees: livraison._count.Pesee,
                 } : undefined,
                 // Supprimer les versions PascalCase
                 Agriculteur: undefined,
-                TypeDate: undefined,
                 LivraisonTypeCaisse: undefined,
+                BonAchat: undefined,
             };
         });
     },
@@ -66,9 +72,10 @@ export const livraisonService = {
         }
 
         // Calculer la quantité totale en kg
-        const quantiteKg = livraison.LivraisonTypeCaisse.reduce((total, ltc) => {
-            return total + (ltc.quantite * ltc.TypeCaisse.poidsKg);
-        }, 0);
+        const quantiteKg = livraison.quantiteLivree ?? livraison.LivraisonTypeCaisse.reduce(
+            (total, ltc) => total + (ltc.quantite * ltc.TypeCaisse.poidsKg),
+            0
+        );
 
         // Transformation PascalCase → camelCase
         return {
@@ -78,15 +85,29 @@ export const livraisonService = {
                 region: livraison.Agriculteur.Region,
                 Region: undefined,
             } : undefined,
-            typeDate: livraison.TypeDate,
             caisses: livraison.LivraisonTypeCaisse.map((ltc) => ({
                 id: ltc.id,
                 typeCaisseId: ltc.typeCaisseId,
+                typeDateId: ltc.typeDateId,
                 quantite: ltc.quantite,
                 typeCaisse: ltc.TypeCaisse,
+                typeDate: ltc.TypeDate,
             })),
+            bonAchat: livraison.BonAchat,
             quantiteKg, // Quantité totale calculée
-            pesee: livraison.Pesee,
+            pesees: livraison.Pesee.map((p) => ({
+                id: p.id,
+                typeCaisseId: p.typeCaisseId,
+                typeDateId: p.typeDateId,
+                tareKg: p.tareKg.toNumber(),
+                nombreCaisses: p.nombreCaisses,
+                poidsBrutTotal: p.poidsBrutTotal.toNumber(),
+                poidsTareTotal: p.poidsTareTotal.toNumber(),
+                poidsNetTotal: p.poidsNetTotal.toNumber(),
+                poidsBrutMoyen: p.poidsBrutMoyen.toNumber(),
+                poidsNetMoyen: p.poidsNetMoyen.toNumber(),
+                createdAt: p.createdAt,
+            })),
             echantillons: livraison.Echantillon?.map(e => ({
                 ...e,
                 analyses: e.Analyse,
@@ -96,12 +117,12 @@ export const livraisonService = {
             stocksDates: livraison.StockDate,
             // Supprimer les versions PascalCase
             Agriculteur: undefined,
-            TypeDate: undefined,
             LivraisonTypeCaisse: undefined,
             Pesee: undefined,
             Echantillon: undefined,
             PretCaisse: undefined,
             StockDate: undefined,
+            BonAchat: undefined,
         };
     },
 
@@ -111,76 +132,53 @@ export const livraisonService = {
     async create(tenantId: string, userId: string, data: CreateLivraisonInput) {
         await checkPermission(userId, "livraison:create");
 
+        const session = await auth();
+        const canNegotiate = session?.user.role === ROLES.ADMIN || session?.user.role === ROLES.DIRECTION;
+        if (!canNegotiate) {
+            data = { ...data, quantiteAcceptee: data.quantiteLivree };
+        }
+
         // Vérifier que l'agriculteur existe dans ce tenant
         const agriculteur = await agriculteurRepository.findById(tenantId, data.agriculteurId);
         if (!agriculteur) {
             throw new Error("Agriculteur introuvable");
         }
 
-        // Vérifier que le type de datte existe dans ce tenant
-        const typeDate = await typeDateRepository.findById(data.typeDateId, tenantId);
-        if (!typeDate) {
-            throw new Error("Type de datte introuvable");
-        }
-
-        // Vérifier que tous les types de caisses existent dans ce tenant
+        // Vérifier que chaque type de datte et type de caisse déclarés existent dans ce tenant
+        const typeCaisses: Record<string, { poidsKg: number }> = {};
         for (const caisse of data.caisses) {
+            const typeDate = await typeDateRepository.findById(caisse.typeDateId, tenantId);
+            if (!typeDate) {
+                throw new Error(`Type de datte introuvable: ${caisse.typeDateId}`);
+            }
             const typeCaisse = await typeCaisseRepository.findById(tenantId, caisse.typeCaisseId);
             if (!typeCaisse) {
                 throw new Error(`Type de caisse introuvable: ${caisse.typeCaisseId}`);
             }
+            typeCaisses[caisse.typeCaisseId] = { poidsKg: typeCaisse.poidsKg };
         }
 
         // Générer le numéro de lot
         const numeroLot = await livraisonRepository.generateNumeroLot(tenantId);
 
-        // Créer la livraison
-        const livraison = await livraisonRepository.create(data, tenantId, numeroLot);
-
-        // ===== RETOUR AUTOMATIQUE DES CAISSES =====
-        // Pour chaque type de caisse dans la livraison, retourner automatiquement
-        // les caisses si l'agriculteur a un prêt en cours
+        // Une ligne de StockDate par typeDateId distinct, basée sur la quantité déclarée
+        // (cette voie standalone n'a pas de pesée réelle en amont, contrairement au wizard).
+        const stockGroups = new Map<string, number>();
         for (const caisse of data.caisses) {
-            try {
-                // Trouver les prêts en cours de cet agriculteur pour ce type de caisse
-                const pretsEnCours = await pretCaisseRepository.findByAgriculteur(data.agriculteurId, tenantId);
-                const pretEnCours = pretsEnCours.find(
-                    p => p.typeCaisseId === caisse.typeCaisseId &&
-                        p.statut === "EN_COURS" &&
-                        (p.nombrePrete - p.nombreRetourne) > 0
-                );
-
-                if (pretEnCours) {
-                    const nombreRestant = pretEnCours.nombrePrete - pretEnCours.nombreRetourne;
-                    // Calculer combien on peut retourner (min entre quantité livrée et quantité restante)
-                    const quantiteARetourner = Math.min(caisse.quantite, nombreRestant);
-
-                    if (quantiteARetourner > 0) {
-                        // Retourner les caisses
-                        await pretCaisseRepository.retournerCaisses(
-                            pretEnCours.id,
-                            quantiteARetourner,
-                            tenantId,
-                            `Retour automatique lors de la livraison ${numeroLot}`
-                        );
-
-                        // Ajouter le stock au TypeCaisse
-                        const typeCaisse = await typeCaisseRepository.findById(tenantId, caisse.typeCaisseId);
-                        if (typeCaisse) {
-                            await typeCaisseRepository.update(tenantId, caisse.typeCaisseId, {
-                                stockDisponible: typeCaisse.stockDisponible + quantiteARetourner,
-                            });
-                        }
-
-                        console.log(`✅ Retour automatique: ${quantiteARetourner} caisses (${typeCaisse?.nom}) retournées pour la livraison ${numeroLot}`);
-                    }
-                }
-            } catch (error) {
-                // Ne pas bloquer la création de livraison si le retour automatique échoue
-                console.error(`❌ Erreur lors du retour automatique de caisses:`, error);
-                console.warn(`⚠️ Erreur lors du retour automatique de caisses:`, error);
-            }
+            const quantiteKg = caisse.quantite * typeCaisses[caisse.typeCaisseId].poidsKg;
+            stockGroups.set(caisse.typeDateId, (stockGroups.get(caisse.typeDateId) ?? 0) + quantiteKg);
         }
+
+        // Créer la livraison
+        // Note: le retour automatique des caisses prêtées se fait désormais au moment
+        // de la pesée (nombre réel de caisses), pas ici sur la quantité déclarée —
+        // voir peseeService.create.
+        const livraison = await livraisonRepository.create(
+            data,
+            tenantId,
+            numeroLot,
+            Array.from(stockGroups, ([typeDateId, quantite]) => ({ typeDateId, quantite }))
+        );
 
         // Calculer la quantité totale pour l'audit log
         const totalQuantityKg = await livraisonRepository.calculateTotalQuantityKg(livraison.id);
@@ -195,7 +193,6 @@ export const livraisonService = {
             details: {
                 numeroLot,
                 agriculteur: `${agriculteur.nom} ${agriculteur.prenom}`,
-                typeDate: typeDate.nom,
                 caisses: data.caisses.length,
                 totalQuantityKg,
             },
@@ -215,6 +212,19 @@ export const livraisonService = {
             throw new Error("Livraison introuvable");
         }
 
+        const session = await auth();
+        const canNegotiate = session?.user.role === ROLES.ADMIN || session?.user.role === ROLES.DIRECTION;
+        const quantiteLivree = data.quantiteLivree ?? existing.quantiteLivree;
+        const quantiteAcceptee = canNegotiate
+            ? (data.quantiteAcceptee ?? existing.quantiteAcceptee)
+            : quantiteLivree;
+
+        if (quantiteAcceptee > quantiteLivree) {
+            throw new Error("La quantité acceptée ne peut pas dépasser la quantité livrée");
+        }
+
+        data = { ...data, quantiteLivree, quantiteAcceptee };
+
         // Vérifications des FK si modifiés
         if (data.agriculteurId && data.agriculteurId !== existing.agriculteurId) {
             const agriculteur = await agriculteurRepository.findById(tenantId, data.agriculteurId);
@@ -223,16 +233,13 @@ export const livraisonService = {
             }
         }
 
-        if (data.typeDateId && data.typeDateId !== existing.typeDateId) {
-            const typeDate = await typeDateRepository.findById(data.typeDateId, tenantId);
-            if (!typeDate) {
-                throw new Error("Type de datte introuvable");
-            }
-        }
-
-        // Vérifier tous les types de caisses si les caisses sont modifiées
+        // Vérifier tous les types de dattes/caisses si les caisses sont modifiées
         if (data.caisses) {
             for (const caisse of data.caisses) {
+                const typeDate = await typeDateRepository.findById(caisse.typeDateId, tenantId);
+                if (!typeDate) {
+                    throw new Error(`Type de datte introuvable: ${caisse.typeDateId}`);
+                }
                 const typeCaisse = await typeCaisseRepository.findById(tenantId, caisse.typeCaisseId);
                 if (!typeCaisse) {
                     throw new Error(`Type de caisse introuvable: ${caisse.typeCaisseId}`);
@@ -241,6 +248,19 @@ export const livraisonService = {
         }
 
         const livraison = await livraisonRepository.update(data.id, data, tenantId);
+
+        const stock = existing.StockDate[0];
+        if (stock && quantiteLivree !== existing.quantiteLivree) {
+            const difference = quantiteLivree - existing.quantiteLivree;
+            await prisma.stockDate.update({
+                where: { id: stock.id },
+                data: {
+                    quantite: quantiteLivree,
+                    quantiteDisponible: stock.quantiteDisponible + difference,
+                    updatedAt: new Date(),
+                },
+            });
+        }
 
         // Audit log
         await auditService.log({
@@ -311,21 +331,22 @@ export const livraisonService = {
         const livraisons = await livraisonRepository.findByAgriculteur(agriculteurId, tenantId);
 
         return livraisons.map((l) => {
-            const quantiteKg = l.LivraisonTypeCaisse.reduce((total, ltc) => {
-                return total + (ltc.quantite * ltc.TypeCaisse.poidsKg);
-            }, 0);
+            const quantiteKg = l.quantiteLivree ?? l.LivraisonTypeCaisse.reduce(
+                (total, ltc) => total + (ltc.quantite * ltc.TypeCaisse.poidsKg),
+                0
+            );
 
             return {
                 ...l,
-                typeDate: l.TypeDate,
                 caisses: l.LivraisonTypeCaisse.map((ltc) => ({
                     id: ltc.id,
                     typeCaisseId: ltc.typeCaisseId,
+                    typeDateId: ltc.typeDateId,
                     quantite: ltc.quantite,
                     typeCaisse: ltc.TypeCaisse,
+                    typeDate: ltc.TypeDate,
                 })),
                 quantiteKg,
-                TypeDate: undefined,
                 LivraisonTypeCaisse: undefined,
             };
         });
