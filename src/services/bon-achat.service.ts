@@ -6,9 +6,34 @@ import { prisma } from "@/lib/prisma";
 import type { CreateBonAchatInput } from "@/validators/bon-achat.validator";
 
 export const bonAchatService = {
+    async getTenantInfo(tenantId: string) {
+        const tenant = await prisma.tenant.findUniqueOrThrow({
+            where: { id: tenantId },
+            select: { name: true, address: true, phone: true, email: true },
+        });
+        return tenant;
+    },
+
     async getAll(tenantId: string) {
         await requirePermission("bon-achat:read");
-        return bonAchatRepository.findAll(tenantId);
+        const bonsAchat = await bonAchatRepository.findAll(tenantId);
+
+        // Convertit les Decimal Prisma en number : ces objets ne sont pas
+        // sérialisables lorsqu'ils traversent la frontière Server → Client Component.
+        return bonsAchat.map((ba) => ({
+            ...ba,
+            Livraison: {
+                ...ba.Livraison,
+                Pesee: ba.Livraison.Pesee.map((p) => ({
+                    id: p.id,
+                    prixKg: p.prixKg,
+                    quantiteAcceptee: p.quantiteAcceptee.toNumber(),
+                    poidsNetTotal: p.poidsNetTotal.toNumber(),
+                    typeDate: p.TypeDate,
+                    typeCaisse: p.TypeCaisse,
+                })),
+            },
+        }));
     },
 
     async getById(tenantId: string, id: string) {

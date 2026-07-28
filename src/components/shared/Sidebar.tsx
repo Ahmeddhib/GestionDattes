@@ -19,6 +19,8 @@ import {
     UserCircle,
     Contact,
     Scale,
+    Receipt,
+    Warehouse,
 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
@@ -84,6 +86,16 @@ export function Sidebar({ user }: SidebarProps) {
                     href: "/dashboard/stock-caisses",
                     label: t("nav.stockCaisses"),
                     icon: PackageCheck,
+                },
+                {
+                    href: "/dashboard/stock-dattes",
+                    label: t("nav.stockDattes"),
+                    icon: Warehouse,
+                },
+                {
+                    href: "/dashboard/bons-achat",
+                    label: t("nav.bonsAchat"),
+                    icon: Receipt,
                 },
                 {
                     href: "/dashboard/clients",

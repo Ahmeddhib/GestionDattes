@@ -106,6 +106,8 @@ export const livraisonService = {
                 poidsNetTotal: p.poidsNetTotal.toNumber(),
                 poidsBrutMoyen: p.poidsBrutMoyen.toNumber(),
                 poidsNetMoyen: p.poidsNetMoyen.toNumber(),
+                prixKg: p.prixKg,
+                quantiteAcceptee: p.quantiteAcceptee.toNumber(),
                 createdAt: p.createdAt,
             })),
             echantillons: livraison.Echantillon?.map(e => ({

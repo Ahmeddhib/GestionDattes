@@ -2,8 +2,8 @@
 
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { PeseesTableAdvanced } from "@/components/features/pesees/PeseesTableAdvanced";
-import { CreatePeseeDialog } from "@/components/features/pesees/CreatePeseeDialog";
 import type { Pesee } from "@/components/features/pesees/columns";
+import { PageContainer } from "@/components/shared/PageContainer";
 import { Scale, Weight, TrendingUp } from "lucide-react";
 
 interface PeseesPageContentProps {
@@ -20,7 +20,7 @@ export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
     const pourcentageTare = poidsBrutTotal > 0 ? (tareTotal / poidsBrutTotal) * 100 : 0;
 
     return (
-        <div className="space-y-6">
+        <PageContainer>
             {/* En-tête */}
             <div className="flex items-center justify-between">
                 <div>
@@ -30,7 +30,6 @@ export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
                     </h1>
                     <p className="text-gray-600 mt-2">{t("pesees.description")}</p>
                 </div>
-                <CreatePeseeDialog />
             </div>
 
             {/* Stats Cards */}
@@ -109,6 +108,6 @@ export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
             <div className="bg-white rounded-[14px] border border-gray-200 shadow-sm">
                 <PeseesTableAdvanced data={pesees} />
             </div>
-        </div>
+        </PageContainer>
     );
 }

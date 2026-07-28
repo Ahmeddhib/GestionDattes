@@ -40,6 +40,8 @@ type LigneWizard = {
     typeCaisseId: string;
     nombreCaisses: number;
     poidsBrutTotal: number; // poids brut total apporté par l'agriculteur pour cette ligne
+    prixKg: number; // prix au kg propre à cette ligne (type de datte)
+    quantiteAcceptee: number | null; // négociée ; null = suit automatiquement le poids net mesuré
 };
 
 function nextClientId() {
@@ -47,7 +49,15 @@ function nextClientId() {
 }
 
 function ligneVierge(): LigneWizard {
-    return { clientId: nextClientId(), typeDateId: "", typeCaisseId: "", nombreCaisses: 1, poidsBrutTotal: 0 };
+    return {
+        clientId: nextClientId(),
+        typeDateId: "",
+        typeCaisseId: "",
+        nombreCaisses: 1,
+        poidsBrutTotal: 0,
+        prixKg: 0,
+        quantiteAcceptee: null,
+    };
 }
 
 export function NouvellePeseeWizard() {
@@ -63,9 +73,6 @@ export function NouvellePeseeWizard() {
     const [agriculteurId, setAgriculteurId] = useState("");
     const [dateLivraison, setDateLivraison] = useState(new Date().toISOString().split("T")[0]);
     const [lignes, setLignes] = useState<LigneWizard[]>([ligneVierge()]);
-    const [prixKg, setPrixKg] = useState(0);
-    const [quantiteAcceptee, setQuantiteAcceptee] = useState(0);
-    const [quantiteAccepteeTouched, setQuantiteAccepteeTouched] = useState(false);
     const [observations, setObservations] = useState("");
 
     const [pretsEnCours, setPretsEnCours] = useState<
@@ -88,9 +95,6 @@ export function NouvellePeseeWizard() {
         setAgriculteurId("");
         setDateLivraison(new Date().toISOString().split("T")[0]);
         setLignes([ligneVierge()]);
-        setPrixKg(0);
-        setQuantiteAcceptee(0);
-        setQuantiteAccepteeTouched(false);
         setObservations("");
     }
 
@@ -140,23 +144,21 @@ export function NouvellePeseeWizard() {
             const poidsBrutTotal = Number(ligne.poidsBrutTotal) || 0;
             const poidsTareTotal = tare * nombreCaisses;
             const poidsNetTotal = poidsBrutTotal - poidsTareTotal;
-            return { poidsBrutTotal, poidsTareTotal, poidsNetTotal, tare };
+            const prixKg = Number(ligne.prixKg) || 0;
+            // Quantité acceptée (négociable) : suit automatiquement le poids net
+            // mesuré tant qu'elle n'a pas été modifiée manuellement pour cette ligne.
+            const quantiteAcceptee =
+                ligne.quantiteAcceptee !== null && Number.isFinite(ligne.quantiteAcceptee)
+                    ? ligne.quantiteAcceptee
+                    : Math.max(poidsNetTotal, 0);
+            const montant = quantiteAcceptee > 0 ? quantiteAcceptee * prixKg : 0;
+            return { poidsBrutTotal, poidsTareTotal, poidsNetTotal, tare, quantiteAcceptee, montant };
         });
     }, [lignes, typesCaisses]);
 
     const grandTotalNet = ligneTotals.reduce((sum, lt) => sum + lt.poidsNetTotal, 0);
-    const montant = prixKg * quantiteAcceptee;
-
-    useEffect(() => {
-        if (!quantiteAccepteeTouched) {
-            setQuantiteAcceptee(grandTotalNet);
-        }
-    }, [grandTotalNet, quantiteAccepteeTouched]);
-
-    function handleQuantiteAccepteeChange(value: number) {
-        setQuantiteAcceptee(value);
-        setQuantiteAccepteeTouched(true);
-    }
+    const grandTotalAcceptee = ligneTotals.reduce((sum, lt) => sum + lt.quantiteAcceptee, 0);
+    const montant = ligneTotals.reduce((sum, lt) => sum + lt.montant, 0);
 
     const hasDuplicatePairs = useMemo(() => {
         const keys = lignes.map((l) => `${l.typeCaisseId}::${l.typeDateId}`);
@@ -189,20 +191,20 @@ export function NouvellePeseeWizard() {
                 toast.error(t("pesees.grossMustExceedTare", { tare: String(tare) }));
                 return;
             }
+            if (!Number.isFinite(ligne.prixKg) || ligne.prixKg <= 0) {
+                toast.error(t("nouvellePesee.prixKgLigneRequired"));
+                return;
+            }
+            const poidsNetTotal = ligne.poidsBrutTotal - tare * ligne.nombreCaisses;
+            const quantiteAcceptee = ligne.quantiteAcceptee ?? poidsNetTotal;
+            if (!Number.isFinite(quantiteAcceptee) || quantiteAcceptee <= 0 || quantiteAcceptee > poidsNetTotal) {
+                toast.error(t("nouvellePesee.quantiteAccepteeRequired"));
+                return;
+            }
         }
 
         if (hasDuplicatePairs) {
             toast.error(t("nouvellePesee.duplicateLigne"));
-            return;
-        }
-
-        if (prixKg <= 0) {
-            toast.error(t("nouvellePesee.prixKgRequired"));
-            return;
-        }
-
-        if (!Number.isFinite(quantiteAcceptee) || quantiteAcceptee <= 0) {
-            toast.error(t("nouvellePesee.quantiteAccepteeRequired"));
             return;
         }
 
@@ -215,12 +217,12 @@ export function NouvellePeseeWizard() {
                 typeDateId: l.typeDateId,
                 typeCaisseId: l.typeCaisseId,
                 quantiteDeclaree: l.nombreCaisses,
+                prixKg: l.prixKg,
+                quantiteAcceptee: l.quantiteAcceptee ?? undefined,
                 caisses: Array.from({ length: l.nombreCaisses }, () => ({
                     poidsBrut: l.poidsBrutTotal / l.nombreCaisses,
                 })),
             })),
-            prixKg,
-            quantiteAcceptee,
             observations: observations || undefined,
         };
 
@@ -382,26 +384,82 @@ export function NouvellePeseeWizard() {
                                         )}
                                     </div>
 
-                                    <div className="space-y-2 pl-1">
-                                        <div className="text-xs font-medium text-[#3D1C00]/70">
-                                            {t("pesees.grossWeightLabel")}
+                                    <div className="grid grid-cols-1 gap-2 pl-1 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <div className="text-xs font-medium text-[#3D1C00]/70">
+                                                {t("pesees.grossWeightLabel")}
+                                            </div>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                value={ligne.poidsBrutTotal || ""}
+                                                onChange={(e) =>
+                                                    updateLigne(ligne.clientId, { poidsBrutTotal: parseFloat(e.target.value) || 0 })
+                                                }
+                                                placeholder={t("pesees.grossWeightLabel")}
+                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            />
                                         </div>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            value={ligne.poidsBrutTotal || ""}
-                                            onChange={(e) =>
-                                                updateLigne(ligne.clientId, { poidsBrutTotal: parseFloat(e.target.value) || 0 })
-                                            }
-                                            placeholder={t("pesees.grossWeightLabel")}
-                                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
-                                        />
+                                        <div className="space-y-2">
+                                            <div className="text-xs font-medium text-[#3D1C00]/70">
+                                                {t("nouvellePesee.prixKgLigne")}
+                                            </div>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={ligne.prixKg || ""}
+                                                onChange={(e) =>
+                                                    updateLigne(ligne.clientId, { prixKg: parseFloat(e.target.value) || 0 })
+                                                }
+                                                placeholder={t("nouvellePesee.prixKgLigne")}
+                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="flex justify-between items-center rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
+                                    <div className="flex items-center justify-between gap-2 rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
                                         <span className="text-[#3D1C00]/70">{t("pesees.poidsNetTotal")}:</span>
                                         <span className="font-semibold text-[#C17A2B]">
                                             {totals.poidsNetTotal.toFixed(2)} kg
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2 pl-1">
+                                        <div className="text-xs font-medium text-[#3D1C00]/70">
+                                            {t("nouvellePesee.quantiteAcceptee")}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={ligne.quantiteAcceptee ?? (totals.poidsNetTotal > 0 ? totals.poidsNetTotal.toFixed(2) : "")}
+                                                onChange={(e) =>
+                                                    updateLigne(ligne.clientId, {
+                                                        quantiteAcceptee: e.target.value === "" ? null : parseFloat(e.target.value) || 0,
+                                                    })
+                                                }
+                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            />
+                                            {ligne.quantiteAcceptee !== null && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => updateLigne(ligne.clientId, { quantiteAcceptee: null })}
+                                                    className="h-9 shrink-0 rounded-[7px] text-[#C17A2B] hover:bg-[#C17A2B]/10"
+                                                >
+                                                    {t("common.reset")}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-2 rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
+                                        <span className="text-[#3D1C00]/70">{t("nouvellePesee.montantLigne")}:</span>
+                                        <span className="font-semibold text-[#C17A2B]">
+                                            {totals.montant.toFixed(2)}
                                         </span>
                                     </div>
                                 </div>
@@ -422,49 +480,17 @@ export function NouvellePeseeWizard() {
                                 {grandTotalNet.toFixed(2)} kg
                             </span>
                         </div>
-                        <div className="flex items-center justify-between gap-3 border-t border-[#C17A2B]/20 pt-3">
-                            <Label className="text-[#3D1C00] shrink-0">
+                        <div className="flex items-center justify-between border-t border-[#C17A2B]/20 pt-3">
+                            <span className="text-sm font-medium text-[#3D1C00]">
                                 {t("nouvellePesee.quantiteAcceptee")}
-                            </Label>
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={quantiteAcceptee || ""}
-                                    onChange={(e) => handleQuantiteAccepteeChange(parseFloat(e.target.value) || 0)}
-                                    className="w-32 rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white text-right"
-                                />
-                                {quantiteAccepteeTouched && (
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                            setQuantiteAccepteeTouched(false);
-                                            setQuantiteAcceptee(grandTotalNet);
-                                        }}
-                                        className="h-9 rounded-[7px] text-[#C17A2B] hover:bg-[#C17A2B]/10"
-                                    >
-                                        {t("common.reset")}
-                                    </Button>
-                                )}
-                            </div>
+                            </span>
+                            <span className="text-xl font-bold text-[#C17A2B]">
+                                {grandTotalAcceptee.toFixed(2)} kg
+                            </span>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label className="text-[#3D1C00]">{t("nouvellePesee.prixKg")}</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={prixKg || ""}
-                                onChange={(e) => setPrixKg(parseFloat(e.target.value) || 0)}
-                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
-                            />
-                        </div>
+                    <div className="border-t pt-4">
                         <div className="space-y-2">
                             <Label className="text-[#3D1C00]">{t("nouvellePesee.montant")}</Label>
                             <div className="rounded-[7px] border border-[#C17A2B]/20 bg-white px-3 py-2 text-sm font-semibold text-[#3D1C00]">

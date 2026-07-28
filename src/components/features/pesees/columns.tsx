@@ -1,11 +1,9 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { LignesDetailDialog } from "./LignesDetailDialog";
 
 export type Pesee = {
     id: string;
@@ -21,6 +19,8 @@ export type Pesee = {
     poidsNetTotal: number;
     poidsBrutMoyen: number;
     poidsNetMoyen: number;
+    prixKg: number;
+    quantiteAcceptee: number;
     caisses: { id: string; ordre: number; poidsBrut: number }[];
     createdAt: Date;
     livraison: {
@@ -36,25 +36,87 @@ export type Pesee = {
     };
 };
 
-export const createColumns = (
-    t: (key: string) => string,
-    onEdit: (pesee: Pesee) => void,
-    onDelete: (pesee: Pesee) => void
-): ColumnDef<Pesee>[] => [
+/**
+ * Une livraison peut contenir plusieurs Pesee (une par combinaison type de
+ * datte / type de caisse). Pour l'affichage, elles sont regroupées en une
+ * seule ligne de tableau par livraison.
+ */
+export type PeseeGroupee = {
+    livraisonId: string;
+    numeroLot: string;
+    dateLivraison: Date;
+    agriculteur: { id: string; code: string; nom: string; prenom: string };
+    lignes: Pesee[];
+    nombreCaisses: number;
+    poidsBrutTotal: number;
+    poidsTareTotal: number;
+    poidsNetTotal: number;
+    quantiteAcceptee: number;
+    montant: number;
+    createdAt: Date;
+};
+
+export function groupPeseesByLivraison(pesees: Pesee[]): PeseeGroupee[] {
+    const groups = new Map<string, PeseeGroupee>();
+
+    for (const p of pesees) {
+        const existing = groups.get(p.livraisonId);
+        if (existing) {
+            existing.lignes.push(p);
+            existing.nombreCaisses += p.nombreCaisses;
+            existing.poidsBrutTotal += p.poidsBrutTotal;
+            existing.poidsTareTotal += p.poidsTareTotal;
+            existing.poidsNetTotal += p.poidsNetTotal;
+            existing.quantiteAcceptee += p.quantiteAcceptee;
+            existing.montant += p.prixKg * p.quantiteAcceptee;
+            if (p.createdAt > existing.createdAt) {
+                existing.createdAt = p.createdAt;
+            }
+        } else {
+            groups.set(p.livraisonId, {
+                livraisonId: p.livraisonId,
+                numeroLot: p.livraison.numeroLot,
+                dateLivraison: p.livraison.dateLivraison,
+                agriculteur: p.livraison.Agriculteur,
+                lignes: [p],
+                nombreCaisses: p.nombreCaisses,
+                poidsBrutTotal: p.poidsBrutTotal,
+                poidsTareTotal: p.poidsTareTotal,
+                poidsNetTotal: p.poidsNetTotal,
+                quantiteAcceptee: p.quantiteAcceptee,
+                montant: p.prixKg * p.quantiteAcceptee,
+                createdAt: p.createdAt,
+            });
+        }
+    }
+
+    return Array.from(groups.values()).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+}
+
+/**
+ * Table Pesée en lecture seule : les Pesee sont toujours générées automatiquement
+ * à partir d'une Livraison (voir NouvellePeseeWizard / UpdateLivraisonDialog) et
+ * ne peuvent plus être créées, modifiées ou supprimées manuellement ici.
+ * Une livraison peut avoir plusieurs lignes (types de datte/caisse) : elles
+ * sont regroupées en une seule ligne de tableau (voir groupPeseesByLivraison).
+ */
+export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupee>[] => [
         {
-            accessorKey: "livraison.numeroLot",
+            accessorKey: "numeroLot",
             header: t("pesees.numeroLot"),
             cell: ({ row }) => (
                 <div className="font-medium text-[#3D1C00]">
-                    {row.original.livraison.numeroLot}
+                    {row.original.numeroLot}
                 </div>
             ),
         },
         {
-            accessorKey: "livraison.Agriculteur",
+            accessorKey: "agriculteur",
             header: t("pesees.agriculteur"),
             cell: ({ row }) => {
-                const agriculteur = row.original.livraison.Agriculteur;
+                const agriculteur = row.original.agriculteur;
                 return (
                     <div className="flex flex-col">
                         <span className="font-medium text-[#3D1C00]">
@@ -68,21 +130,10 @@ export const createColumns = (
             },
         },
         {
-            accessorKey: "typeCaisse.nom",
-            header: t("pesees.typeCaisse"),
+            id: "lignes",
+            header: t("nouvellePesee.lignes"),
             cell: ({ row }) => (
-                <Badge variant="outline" className="border-[#C17A2B] text-[#C17A2B]">
-                    {row.original.typeCaisse?.nom}
-                </Badge>
-            ),
-        },
-        {
-            accessorKey: "typeDate.nom",
-            header: t("pesees.typeDate"),
-            cell: ({ row }) => (
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    {row.original.typeDate?.nom}
-                </Badge>
+                <LignesDetailDialog numeroLot={row.original.numeroLot} lignes={row.original.lignes} />
             ),
         },
         {
@@ -122,6 +173,15 @@ export const createColumns = (
             ),
         },
         {
+            accessorKey: "montant",
+            header: t("bonAchat.montant"),
+            cell: ({ row }) => (
+                <div className="text-right font-bold text-[#C17A2B]">
+                    {row.getValue<number>("montant").toFixed(2)}
+                </div>
+            ),
+        },
+        {
             accessorKey: "createdAt",
             header: t("pesees.datePesee"),
             cell: ({ row }) => {
@@ -130,34 +190,6 @@ export const createColumns = (
                     <span className="text-sm text-gray-600">
                         {format(new Date(date), "dd MMM yyyy HH:mm", { locale: fr })}
                     </span>
-                );
-            },
-        },
-        {
-            id: "actions",
-            header: t("common.actions"),
-            cell: ({ row }) => {
-                const pesee = row.original;
-
-                return (
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(pesee)}
-                            className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
-                        >
-                            <Edit className="h-4 w-4 text-[#C17A2B]" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onDelete(pesee)}
-                            className="h-8 w-8 p-0 hover:bg-red-50"
-                        >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
-                    </div>
                 );
             },
         },

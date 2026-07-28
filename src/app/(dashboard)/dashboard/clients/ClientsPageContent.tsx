@@ -4,6 +4,7 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { ClientsTableAdvanced } from "@/components/features/clients/ClientsTableAdvanced";
 import { CreateClientDialog } from "@/components/features/clients/CreateClientDialog";
 import type { Client } from "@/components/features/clients/columns";
+import { PageContainer } from "@/components/shared/PageContainer";
 import { Users } from "lucide-react";
 
 interface ClientsPageContentProps {
@@ -18,7 +19,7 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
     const clientsAvecVentes = clients.filter((c) => (c._count?.Vente || 0) > 0).length;
 
     return (
-        <div className="space-y-6">
+        <PageContainer>
             {/* En-tête */}
             <div className="flex items-center justify-between">
                 <div>
@@ -86,6 +87,6 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
             <div className="bg-white rounded-[14px] border border-gray-200 shadow-sm">
                 <ClientsTableAdvanced data={clients} />
             </div>
-        </div>
+        </PageContainer>
     );
 }

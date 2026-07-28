@@ -25,6 +25,7 @@ model Agriculteur {
   Region            Region       @relation(fields: [regionId], references: [id])
   Tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Livraison         Livraison[]
+  Pesee             Pesee[]
   PretCaisse        PretCaisse[]
 
   @@unique([tenantId, cin])
@@ -235,6 +236,7 @@ model LivraisonTypeCaisse {
 model Pesee {
   id             String        @id @default(cuid())
   livraisonId    String
+  agriculteurId  String
   typeCaisseId   String
   typeDateId     String
   tareKg         Decimal       @db.Decimal(6, 2)
@@ -244,16 +246,20 @@ model Pesee {
   poidsNetTotal  Decimal       @db.Decimal(8, 2)
   poidsBrutMoyen Decimal       @db.Decimal(6, 2)
   poidsNetMoyen  Decimal       @db.Decimal(6, 2)
+  prixKg         Float         @default(0)
+  quantiteAcceptee Decimal     @db.Decimal(8, 2) @default(0)
   createdAt      DateTime      @default(now())
   tenantId       String
   Caisses        PeseeCaisse[]
   Livraison      Livraison     @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
+  Agriculteur    Agriculteur   @relation(fields: [agriculteurId], references: [id])
   TypeCaisse     TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
   TypeDate       TypeDate      @relation(fields: [typeDateId], references: [id])
   Tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([livraisonId, typeCaisseId, typeDateId])
   @@index([livraisonId])
+  @@index([agriculteurId])
   @@index([typeCaisseId])
   @@index([typeDateId])
   @@index([tenantId])

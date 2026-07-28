@@ -3,13 +3,13 @@ import { livraisonRepository } from "@/repositories/livraison.repository";
 import { peseeRepository } from "@/repositories/pesee.repository";
 import { bonAchatRepository } from "@/repositories/bon-achat.repository";
 import { agriculteurRepository } from "@/repositories/agriculteur.repository";
-import { typeDateRepository } from "@/repositories/type-date.repository";
-import { typeCaisseRepository } from "@/repositories/type-caisse.repository";
 import { auditService } from "./audit.service";
-import { computeTotals, retournerCaissesAutomatiquement } from "./pesee.service";
+import { resolveLignesPesee, retournerCaissesAutomatiquement, syncLivraisonWithPesees } from "./pesee.service";
 import { requirePermission } from "@/lib/permissions";
-import { buildPeseeCaisseSchema } from "@/validators/pesee.validator";
-import type { CreerLivraisonAvecPeseesInput } from "@/validators/livraison-pesee.validator";
+import type {
+    CreerLivraisonAvecPeseesInput,
+    MettreAJourLivraisonAvecPeseesInput,
+} from "@/validators/livraison-pesee.validator";
 
 export const livraisonPeseeService = {
     /**
@@ -29,40 +29,24 @@ export const livraisonPeseeService = {
         }
 
         // Revalider chaque ligne contre les vraies données serveur (jamais confiance au client)
-        const resolved = await Promise.all(
-            data.lignes.map(async (ligne) => {
-                const typeDate = await typeDateRepository.findById(ligne.typeDateId, tenantId);
-                if (!typeDate) {
-                    throw new Error(`Type de datte introuvable: ${ligne.typeDateId}`);
-                }
-                const typeCaisse = await typeCaisseRepository.findById(tenantId, ligne.typeCaisseId);
-                if (!typeCaisse) {
-                    throw new Error(`Type de caisse introuvable: ${ligne.typeCaisseId}`);
-                }
-
-                const caisseSchema = buildPeseeCaisseSchema(typeCaisse.poidsKg);
-                const validatedCaisses = ligne.caisses.map((c) => caisseSchema.parse(c));
-                const grossWeights = validatedCaisses.map((c) => c.poidsBrut);
-                const totals = computeTotals(typeCaisse.poidsKg, grossWeights);
-
-                return {
-                    typeDateId: ligne.typeDateId,
-                    typeCaisseId: ligne.typeCaisseId,
-                    quantiteDeclaree: ligne.quantiteDeclaree,
-                    typeCaisse,
-                    typeDate,
-                    grossWeights,
-                    totals,
-                };
-            })
-        );
+        const resolved = await resolveLignesPesee(tenantId, data.lignes);
 
         const numeroLot = await livraisonRepository.generateNumeroLot(tenantId);
+        // Le stock (quantiteLivree/StockDate) se base toujours sur le poids net
+        // réellement mesuré — jamais sur la quantité acceptée négociée.
         const quantiteLivreeTotal = resolved.reduce(
             (sum, r) => sum + r.totals.poidsNetTotal.toNumber(),
             0
         );
-        const quantiteAcceptee = data.quantiteAcceptee ?? quantiteLivreeTotal;
+        // La quantité acceptée globale n'est qu'une somme d'information : chaque
+        // ligne porte sa propre quantité acceptée (négociée), utilisée pour le
+        // montant du bon d'achat.
+        const quantiteAcceptee = resolved.reduce((sum, r) => sum + r.quantiteAcceptee, 0);
+        const montantTotal = resolved.reduce(
+            (sum, r) => sum + r.prixKg * r.quantiteAcceptee,
+            0
+        );
+        const prixKgMoyen = quantiteAcceptee > 0 ? montantTotal / quantiteAcceptee : 0;
 
         const result = await prisma.$transaction(async (tx) => {
             const stockGroups = new Map<string, number>();
@@ -95,11 +79,14 @@ export const livraisonPeseeService = {
                 const pesee = await peseeRepository.create(
                     tenantId,
                     livraison.id,
+                    data.agriculteurId,
                     r.typeCaisseId,
                     r.typeDateId,
                     r.typeCaisse.poidsKg,
                     r.grossWeights,
                     r.totals,
+                    r.prixKg,
+                    r.quantiteAcceptee,
                     tx
                 );
 
@@ -131,12 +118,11 @@ export const livraisonPeseeService = {
             }
 
             const numeroBonAchat = await bonAchatRepository.generateNumeroBonAchat(tenantId, tx);
-            const montant = data.prixKg * quantiteAcceptee;
             const bonAchat = await bonAchatRepository.create(
                 {
                     numero: numeroBonAchat,
-                    prixKg: data.prixKg,
-                    montant,
+                    prixKg: prixKgMoyen,
+                    montant: montantTotal,
                     observations: data.observations,
                     livraisonId: livraison.id,
                     createdById: userId,
@@ -152,7 +138,7 @@ export const livraisonPeseeService = {
                     action: "CREATE_BON_ACHAT",
                     targetId: bonAchat.id,
                     description: `Bon d'achat ${numeroBonAchat} généré pour la livraison ${numeroLot}`,
-                    details: { numero: numeroBonAchat, prixKg: data.prixKg, montant },
+                    details: { numero: numeroBonAchat, prixKgMoyen, montant: montantTotal },
                 },
                 tx
             );
@@ -175,6 +161,138 @@ export const livraisonPeseeService = {
             );
 
             return { livraison, bonAchat };
+        }, { timeout: 20000, maxWait: 10000 });
+
+        return result;
+    },
+
+    /**
+     * Resynchronise une livraison déjà pesée : les lignes (type datte/caisse +
+     * poids réels) sont revalidées et recalculées avec la même logique que la
+     * création (resolveLignesPesee), puis répercutées sur les Pesee associées,
+     * le StockDate et le montant du BonAchat. Une Pesee n'est jamais éditée
+     * manuellement — seule cette resynchronisation automatique la modifie.
+     */
+    async mettreAJour(
+        tenantId: string,
+        userId: string,
+        livraisonId: string,
+        data: MettreAJourLivraisonAvecPeseesInput
+    ) {
+        await requirePermission("livraison:update");
+        await requirePermission("pesee:update");
+
+        const existing = await livraisonRepository.findById(livraisonId, tenantId);
+        if (!existing) {
+            throw new Error("Livraison introuvable dans cette Wakala");
+        }
+
+        const agriculteurId = data.agriculteurId ?? existing.agriculteurId;
+        const agriculteur = await agriculteurRepository.findById(tenantId, agriculteurId);
+        if (!agriculteur) {
+            throw new Error("Agriculteur introuvable");
+        }
+
+        const resolved = await resolveLignesPesee(tenantId, data.lignes);
+
+        const result = await prisma.$transaction(async (tx) => {
+            await livraisonRepository.update(
+                livraisonId,
+                {
+                    dateLivraison: data.dateLivraison,
+                    agriculteurId,
+                    // Recalculés juste après par syncLivraisonWithPesees à partir des Pesee réelles.
+                    quantiteLivree: existing.quantiteLivree,
+                    quantiteAcceptee: existing.quantiteAcceptee,
+                    caisses: resolved.map((r) => ({
+                        typeCaisseId: r.typeCaisseId,
+                        typeDateId: r.typeDateId,
+                        quantite: r.quantiteDeclaree,
+                    })),
+                },
+                tenantId,
+                tx
+            );
+
+            for (const r of resolved) {
+                await peseeRepository.upsertForLigne(
+                    tenantId,
+                    livraisonId,
+                    agriculteurId,
+                    r.typeCaisseId,
+                    r.typeDateId,
+                    r.typeCaisse.poidsKg,
+                    r.grossWeights,
+                    r.totals,
+                    r.prixKg,
+                    r.quantiteAcceptee,
+                    tx
+                );
+            }
+
+            await peseeRepository.deleteObsoleteLignes(
+                tenantId,
+                livraisonId,
+                resolved.map((r) => ({ typeCaisseId: r.typeCaisseId, typeDateId: r.typeDateId })),
+                tx
+            );
+
+            // Recalcule Livraison.quantiteLivree/quantiteAcceptee et StockDate
+            // (par type de datte) à partir des Pesee désormais à jour — logique
+            // déjà utilisée par la pesée manuelle historique, ici réutilisée telle quelle.
+            await syncLivraisonWithPesees(tx, tenantId, livraisonId);
+
+            const livraisonAJour = await tx.livraison.findFirst({
+                where: { id: livraisonId, tenantId },
+                select: { quantiteAcceptee: true, numeroLot: true },
+            });
+            if (!livraisonAJour) {
+                throw new Error("Livraison introuvable après resynchronisation");
+            }
+
+            const bonAchat = await bonAchatRepository.findByLivraisonId(livraisonId, tenantId, tx);
+            if (bonAchat) {
+                const quantiteAccepteeTotal = resolved.reduce((sum, r) => sum + r.quantiteAcceptee, 0);
+                const montant = resolved.reduce(
+                    (sum, r) => sum + r.prixKg * r.quantiteAcceptee,
+                    0
+                );
+                const prixKg = quantiteAccepteeTotal > 0 ? montant / quantiteAccepteeTotal : bonAchat.prixKg;
+                await bonAchatRepository.update(
+                    bonAchat.id,
+                    { prixKg, montant, observations: data.observations ?? bonAchat.observations ?? undefined },
+                    tx
+                );
+
+                await auditService.log(
+                    {
+                        tenantId,
+                        actorId: userId,
+                        action: "UPDATE_BON_ACHAT",
+                        targetId: bonAchat.id,
+                        description: `Bon d'achat ${bonAchat.numero} recalculé après modification de la livraison ${livraisonAJour.numeroLot}`,
+                        details: { prixKg, montant },
+                    },
+                    tx
+                );
+            }
+
+            await auditService.log(
+                {
+                    tenantId,
+                    actorId: userId,
+                    action: "UPDATE_LIVRAISON",
+                    targetId: livraisonId,
+                    description: `Livraison ${livraisonAJour.numeroLot} modifiée via l'assistant de pesée (${agriculteur.nom} ${agriculteur.prenom})`,
+                    details: {
+                        numeroLot: livraisonAJour.numeroLot,
+                        lignes: resolved.length,
+                    },
+                },
+                tx
+            );
+
+            return { id: livraisonId, numeroLot: livraisonAJour.numeroLot };
         }, { timeout: 20000, maxWait: 10000 });
 
         return result;

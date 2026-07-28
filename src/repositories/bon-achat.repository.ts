@@ -34,7 +34,24 @@ export const bonAchatRepository = {
         return prisma.bonAchat.findMany({
             where: { tenantId },
             include: {
-                Livraison: { select: { id: true, numeroLot: true, dateLivraison: true } },
+                Livraison: {
+                    select: {
+                        id: true,
+                        numeroLot: true,
+                        dateLivraison: true,
+                        Agriculteur: { select: { id: true, code: true, nom: true, prenom: true } },
+                        Pesee: {
+                            select: {
+                                id: true,
+                                prixKg: true,
+                                quantiteAcceptee: true,
+                                poidsNetTotal: true,
+                                TypeDate: { select: { id: true, nom: true } },
+                                TypeCaisse: { select: { id: true, nom: true } },
+                            },
+                        },
+                    },
+                },
                 User: { select: { id: true, name: true } },
             },
             orderBy: { createdAt: "desc" },
@@ -45,7 +62,14 @@ export const bonAchatRepository = {
         return prisma.bonAchat.findFirst({
             where: { id, tenantId },
             include: {
-                Livraison: { select: { id: true, numeroLot: true, dateLivraison: true } },
+                Livraison: {
+                    select: {
+                        id: true,
+                        numeroLot: true,
+                        dateLivraison: true,
+                        Agriculteur: { select: { id: true, code: true, nom: true, prenom: true } },
+                    },
+                },
                 User: { select: { id: true, name: true } },
             },
         });
@@ -73,6 +97,26 @@ export const bonAchatRepository = {
                 livraisonId: data.livraisonId,
                 createdById: data.createdById,
                 tenantId: data.tenantId,
+                updatedAt: new Date(),
+            },
+        });
+    },
+
+    /**
+     * Recalcule prixKg/montant/observations d'un bon d'achat existant, appelé
+     * automatiquement lors de la resynchronisation d'une livraison modifiée.
+     */
+    async update(
+        id: string,
+        data: { prixKg?: number; montant: number; observations?: string },
+        client: DbClient = prisma
+    ) {
+        return client.bonAchat.update({
+            where: { id },
+            data: {
+                ...(data.prixKg !== undefined && { prixKg: data.prixKg }),
+                montant: data.montant,
+                ...(data.observations !== undefined && { observations: data.observations }),
                 updatedAt: new Date(),
             },
         });

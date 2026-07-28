@@ -206,10 +206,7 @@ export const createLivraisonsColumns = (
 
                 return (
                     <div className="flex items-center gap-2">
-                        <UpdateLivraisonDialog
-                            livraison={livraison}
-                            canEditAcceptedQuantity={canEditAcceptedQuantity}
-                        />
+                        <UpdateLivraisonDialog livraison={livraison} />
                         <DeleteLivraisonDialog livraison={livraison} />
                     </div>
                 );

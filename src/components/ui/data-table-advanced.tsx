@@ -120,7 +120,7 @@ function DraggableRow<TData>({
             className={isDragging ? "opacity-50" : ""}
         >
             {enableDragDrop && (
-                <TableCell className="w-[40px]">
+                <TableCell className="w-10">
                     <DragHandle id={row.id} />
                 </TableCell>
             )}
@@ -171,7 +171,7 @@ export function DataTableAdvanced<TData, TValue>({
                             }
                             onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                             aria-label="Tout sélectionner"
-                            className="border-[#F0E0C0]"
+                            className="border-border"
                         />
                     </div>
                 ),
@@ -181,7 +181,7 @@ export function DataTableAdvanced<TData, TValue>({
                             checked={row.getIsSelected()}
                             onCheckedChange={(value) => row.toggleSelected(!!value)}
                             aria-label="Sélectionner la ligne"
-                            className="border-[#F0E0C0]"
+                            className="border-border"
                         />
                     </div>
                 ),
@@ -255,7 +255,7 @@ export function DataTableAdvanced<TData, TValue>({
                             }
                             onSearchChange?.(value);
                         }}
-                        className="max-w-sm rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                        className="max-w-sm rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                     />
                 )}
 
@@ -265,14 +265,14 @@ export function DataTableAdvanced<TData, TValue>({
                         <Button
                             variant="outline"
                             size="sm"
-                            className="ml-auto rounded-[9px] border-[#F0E0C0]"
+                            className="ml-auto rounded-md border-border"
                         >
                             <Settings2 className="mr-2 h-4 w-4" />
                             {t("common.columns")}
                             <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[200px] bg-white">
+                    <DropdownMenuContent align="end" className="w-50 bg-white">
                         {table
                             .getAllColumns()
                             .filter(
@@ -296,7 +296,7 @@ export function DataTableAdvanced<TData, TValue>({
             </div>
 
             {/* Table */}
-            <div className="rounded-[14px] border border-[#F0E0C0] bg-white overflow-hidden">
+            <div className="rounded-lg border border-border bg-white overflow-hidden">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -307,7 +307,7 @@ export function DataTableAdvanced<TData, TValue>({
                         <TableHeader className="bg-[#FAF0DC]">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
-                                    {enableDragDrop && <TableHead className="w-[40px]"></TableHead>}
+                                    {enableDragDrop && <TableHead className="w-10"></TableHead>}
                                     {headerGroup.headers.map((header) => {
                                         return (
                                             <TableHead
@@ -372,7 +372,7 @@ export function DataTableAdvanced<TData, TValue>({
                                 table.setPageSize(Number(value));
                             }}
                         >
-                            <SelectTrigger className="h-8 w-[70px] rounded-[7px] border-[#F0E0C0]">
+                            <SelectTrigger className="h-8 w-17.5 rounded-sm border-border">
                                 <SelectValue placeholder={table.getState().pagination.pageSize} />
                             </SelectTrigger>
                             <SelectContent side="top">
@@ -384,14 +384,14 @@ export function DataTableAdvanced<TData, TValue>({
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex w-[100px] items-center justify-center text-sm font-medium text-[#3D1C00]">
+                    <div className="flex w-25 items-center justify-center text-sm font-medium text-[#3D1C00]">
                         {t("common.page")} {table.getState().pagination.pageIndex + 1} {t("common.of")}{" "}
                         {table.getPageCount()}
                     </div>
                     <div className="flex items-center space-x-2">
                         <Button
                             variant="outline"
-                            className="hidden h-8 w-8 p-0 lg:flex rounded-[9px] border-[#F0E0C0]"
+                            className="hidden h-8 w-8 p-0 lg:flex rounded-md border-border"
                             onClick={() => table.setPageIndex(0)}
                             disabled={!table.getCanPreviousPage()}
                         >
@@ -400,7 +400,7 @@ export function DataTableAdvanced<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 rounded-[9px] border-[#F0E0C0]"
+                            className="h-8 w-8 p-0 rounded-md border-border"
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
                         >
@@ -409,7 +409,7 @@ export function DataTableAdvanced<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 rounded-[9px] border-[#F0E0C0]"
+                            className="h-8 w-8 p-0 rounded-md border-border"
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
                         >
@@ -418,7 +418,7 @@ export function DataTableAdvanced<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="hidden h-8 w-8 p-0 lg:flex rounded-[9px] border-[#F0E0C0]"
+                            className="hidden h-8 w-8 p-0 lg:flex rounded-md border-border"
                             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                             disabled={!table.getCanNextPage()}
                         >

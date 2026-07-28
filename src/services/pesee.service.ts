@@ -1,6 +1,7 @@
 import { peseeRepository, type PeseeTotals } from "@/repositories/pesee.repository";
 import { pretCaisseRepository } from "@/repositories/pret-caisse.repository";
 import { typeCaisseRepository } from "@/repositories/type-caisse.repository";
+import { typeDateRepository } from "@/repositories/type-date.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -8,6 +9,7 @@ import { Prisma } from "@/generated/prisma";
 import {
     buildCreatePeseeSchema,
     buildUpdatePeseeSchema,
+    buildPeseeCaisseSchema,
     type CreatePeseeInput,
     type UpdatePeseeInput,
 } from "@/validators/pesee.validator";
@@ -33,6 +35,66 @@ export function computeTotals(tareKg: number, grossWeights: number[]): PeseeTota
     };
 }
 
+export type LignePeseeInput = {
+    typeDateId: string;
+    typeCaisseId: string;
+    quantiteDeclaree: number;
+    prixKg: number;
+    quantiteAcceptee?: number;
+    caisses: { poidsBrut: number }[];
+};
+
+/**
+ * Résout et revalide chaque ligne déclarée (type datte + type caisse + poids
+ * pesés) contre les vraies données serveur, puis calcule ses totaux. Point
+ * d'entrée UNIQUE partagé par la création d'une livraison (assistant de
+ * pesée) et par sa resynchronisation lors d'une modification — le calcul du
+ * poids (tare, net, moyennes) ne doit jamais être dupliqué ailleurs.
+ */
+export async function resolveLignesPesee(tenantId: string, lignes: LignePeseeInput[]) {
+    return Promise.all(
+        lignes.map(async (ligne) => {
+            const typeDate = await typeDateRepository.findById(ligne.typeDateId, tenantId);
+            if (!typeDate) {
+                throw new Error(`Type de datte introuvable: ${ligne.typeDateId}`);
+            }
+            const typeCaisse = await typeCaisseRepository.findById(tenantId, ligne.typeCaisseId);
+            if (!typeCaisse) {
+                throw new Error(`Type de caisse introuvable: ${ligne.typeCaisseId}`);
+            }
+
+            const caisseSchema = buildPeseeCaisseSchema(typeCaisse.poidsKg);
+            const validatedCaisses = ligne.caisses.map((c) => caisseSchema.parse(c));
+            const grossWeights = validatedCaisses.map((c) => c.poidsBrut);
+            const totals = computeTotals(typeCaisse.poidsKg, grossWeights);
+
+            // La quantité acceptée (négociable) ne sert qu'au calcul du montant —
+            // elle ne peut jamais dépasser le poids net réellement mesuré, et
+            // retombe sur celui-ci si absente ou invalide.
+            const poidsNetTotal = totals.poidsNetTotal.toNumber();
+            const quantiteAcceptee =
+                ligne.quantiteAcceptee !== undefined &&
+                Number.isFinite(ligne.quantiteAcceptee) &&
+                ligne.quantiteAcceptee > 0 &&
+                ligne.quantiteAcceptee <= poidsNetTotal
+                    ? ligne.quantiteAcceptee
+                    : poidsNetTotal;
+
+            return {
+                typeDateId: ligne.typeDateId,
+                typeCaisseId: ligne.typeCaisseId,
+                quantiteDeclaree: ligne.quantiteDeclaree,
+                prixKg: ligne.prixKg,
+                quantiteAcceptee,
+                typeCaisse,
+                typeDate,
+                grossWeights,
+                totals,
+            };
+        })
+    );
+}
+
 function toNumber(value: Prisma.Decimal | number): number {
     return typeof value === "number" ? value : value.toNumber();
 }
@@ -54,6 +116,8 @@ function reshape(pesee: PeseeWithRelations) {
         poidsNetTotal: toNumber(pesee.poidsNetTotal),
         poidsBrutMoyen: toNumber(pesee.poidsBrutMoyen),
         poidsNetMoyen: toNumber(pesee.poidsNetMoyen),
+        prixKg: pesee.prixKg,
+        quantiteAcceptee: toNumber(pesee.quantiteAcceptee),
         caisses: pesee.Caisses?.map((c) => ({
             id: c.id,
             ordre: c.ordre,
@@ -69,7 +133,7 @@ function reshape(pesee: PeseeWithRelations) {
  * sessions de pesée, et répercute la différence sur le stock daté associé.
  * Doit toujours être appelé à l'intérieur de la même transaction que la pesée.
  */
-async function syncLivraisonWithPesees(
+export async function syncLivraisonWithPesees(
     tx: Prisma.TransactionClient,
     tenantId: string,
     livraisonId: string
@@ -92,10 +156,14 @@ async function syncLivraisonWithPesees(
     );
     const nouvelleQuantiteLivree = totalNet.toNumber();
 
-    const etaitNonNegociee = livraison.quantiteAcceptee === livraison.quantiteLivree;
-    const nouvelleQuantiteAcceptee = etaitNonNegociee
-        ? nouvelleQuantiteLivree
-        : Math.min(livraison.quantiteAcceptee, nouvelleQuantiteLivree);
+    // La quantité acceptée globale n'est qu'une somme d'information : la vraie
+    // négociation vit au niveau de chaque Pesee.quantiteAcceptee (utilisée pour
+    // le montant du bon d'achat). Le stock, lui, reste basé sur poidsNetTotal.
+    const totalAcceptee = pesees.reduce(
+        (sum, p) => sum.add(p.quantiteAcceptee as unknown as Prisma.Decimal),
+        new Prisma.Decimal(0)
+    );
+    const nouvelleQuantiteAcceptee = totalAcceptee.toNumber();
 
     await tx.livraison.update({
         where: { id: livraisonId },
@@ -269,11 +337,14 @@ export const peseeService = {
             const created = await peseeRepository.create(
                 tenantId,
                 data.livraisonId,
+                livraisonTypeCaisse.Livraison.agriculteurId,
                 data.typeCaisseId,
                 data.typeDateId,
                 tareKg,
                 grossWeights,
                 totals,
+                0,
+                totals.poidsNetTotal.toNumber(),
                 tx
             );
 
@@ -341,6 +412,8 @@ export const peseeService = {
                 tareKg,
                 grossWeights,
                 totals,
+                existing.prixKg,
+                toNumber(existing.quantiteAcceptee),
                 tx
             );
 

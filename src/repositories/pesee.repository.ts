@@ -75,16 +75,21 @@ export const peseeRepository = {
     },
 
     /**
-     * Crée une session de pesée avec toutes ses caisses en une seule écriture atomique
+     * Crée une session de pesée avec toutes ses caisses en une seule écriture atomique.
+     * Les Pesee ne sont jamais créées manuellement par un utilisateur : elles sont
+     * toujours générées automatiquement à partir d'une Livraison (voir livraison-pesee.service.ts).
      */
     async create(
         tenantId: string,
         livraisonId: string,
+        agriculteurId: string,
         typeCaisseId: string,
         typeDateId: string,
         tareKg: number,
         grossWeights: number[],
         totals: PeseeTotals,
+        prixKg: number,
+        quantiteAcceptee: number,
         client: DbClient = prisma
     ) {
         return client.pesee.create({
@@ -92,6 +97,7 @@ export const peseeRepository = {
                 id: createId(),
                 tenantId,
                 livraisonId,
+                agriculteurId,
                 typeCaisseId,
                 typeDateId,
                 tareKg,
@@ -101,6 +107,8 @@ export const peseeRepository = {
                 poidsNetTotal: totals.poidsNetTotal,
                 poidsBrutMoyen: totals.poidsBrutMoyen,
                 poidsNetMoyen: totals.poidsNetMoyen,
+                prixKg,
+                quantiteAcceptee,
                 createdAt: new Date(),
                 Caisses: {
                     create: grossWeights.map((poidsBrut, index) => ({
@@ -115,7 +123,8 @@ export const peseeRepository = {
     },
 
     /**
-     * Remplace les caisses d'une session de pesée existante et recalcule ses totaux
+     * Remplace les caisses d'une session de pesée existante et recalcule ses totaux.
+     * Utilisé uniquement par la resynchronisation automatique depuis une Livraison modifiée.
      */
     async update(
         tenantId: string,
@@ -123,6 +132,8 @@ export const peseeRepository = {
         tareKg: number,
         grossWeights: number[],
         totals: PeseeTotals,
+        prixKg: number,
+        quantiteAcceptee: number,
         client: DbClient = prisma
     ) {
         const existing = await client.pesee.findFirst({ where: { id, tenantId } });
@@ -140,6 +151,8 @@ export const peseeRepository = {
                 poidsNetTotal: totals.poidsNetTotal,
                 poidsBrutMoyen: totals.poidsBrutMoyen,
                 poidsNetMoyen: totals.poidsNetMoyen,
+                prixKg,
+                quantiteAcceptee,
                 Caisses: {
                     deleteMany: {},
                     create: grossWeights.map((poidsBrut, index) => ({
@@ -150,6 +163,73 @@ export const peseeRepository = {
                 },
             },
             include: peseeInclude,
+        });
+    },
+
+    /**
+     * Crée ou met à jour la Pesee d'une ligne (livraisonId, typeCaisseId, typeDateId).
+     * Point d'entrée unique utilisé par la resynchronisation automatique lors de la
+     * modification d'une livraison.
+     */
+    async upsertForLigne(
+        tenantId: string,
+        livraisonId: string,
+        agriculteurId: string,
+        typeCaisseId: string,
+        typeDateId: string,
+        tareKg: number,
+        grossWeights: number[],
+        totals: PeseeTotals,
+        prixKg: number,
+        quantiteAcceptee: number,
+        client: DbClient = prisma
+    ) {
+        const existing = await client.pesee.findFirst({
+            where: { tenantId, livraisonId, typeCaisseId, typeDateId },
+        });
+
+        if (existing) {
+            return this.update(tenantId, existing.id, tareKg, grossWeights, totals, prixKg, quantiteAcceptee, client);
+        }
+
+        return this.create(
+            tenantId,
+            livraisonId,
+            agriculteurId,
+            typeCaisseId,
+            typeDateId,
+            tareKg,
+            grossWeights,
+            totals,
+            prixKg,
+            quantiteAcceptee,
+            client
+        );
+    },
+
+    /**
+     * Supprime les Pesee d'une livraison dont la combinaison (typeCaisseId, typeDateId)
+     * n'est plus présente dans les lignes conservées — utilisé lors d'une modification
+     * de livraison qui retire des lignes.
+     */
+    async deleteObsoleteLignes(
+        tenantId: string,
+        livraisonId: string,
+        keepKeys: { typeCaisseId: string; typeDateId: string }[],
+        client: DbClient = prisma
+    ) {
+        const existing = await client.pesee.findMany({
+            where: { tenantId, livraisonId },
+            select: { id: true, typeCaisseId: true, typeDateId: true },
+        });
+
+        const keepSet = new Set(keepKeys.map((k) => `${k.typeCaisseId}::${k.typeDateId}`));
+        const toDelete = existing.filter((p) => !keepSet.has(`${p.typeCaisseId}::${p.typeDateId}`));
+
+        if (toDelete.length === 0) return;
+
+        await client.pesee.deleteMany({
+            where: { id: { in: toDelete.map((p) => p.id) } },
         });
     },
 

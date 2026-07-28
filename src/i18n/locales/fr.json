@@ -56,7 +56,9 @@
         "typesDates": "Types de Dattes",
         "livraisons": "Livraisons",
         "stockCaisses": "Stock de Caisses",
+        "stockDattes": "Stock de Dattes",
         "pesees": "Pesées",
+        "bonsAchat": "Bons d'achat",
         "clients": "Clients",
         "livreurs": "Livreurs",
         "users": "Utilisateurs",
@@ -289,15 +291,48 @@
         "grandTotal": "Total net (toutes lignes)",
         "quantiteAcceptee": "Quantité acceptée (négociable)",
         "prixKg": "Prix au kg",
-        "montant": "Montant du bon d'achat",
+        "prixKgLigne": "Prix au kg (cette ligne)",
+        "prixKgLigneRequired": "Le prix au kg est requis pour chaque ligne",
+        "montantLigne": "Montant",
+        "montant": "Montant total du bon d'achat",
         "observations": "Observations"
     },
     "bonAchat": {
-        "title": "Bon d'achat",
+        "title": "Bons d'achat",
+        "pageDescription": "Historique des bons d'achat générés automatiquement lors des pesées",
+        "searchPlaceholder": "Rechercher un bon d'achat...",
         "numero": "N° Bon",
         "montant": "Montant",
         "prixKg": "Prix au kg",
-        "observations": "Observations"
+        "prixKgMoyen": "Prix moyen/kg",
+        "detailLignes": "Détail par ligne",
+        "voirDetail": "Voir détail",
+        "observations": "Observations",
+        "periode": "Période",
+        "imprimer": "Imprimer",
+        "telechargerPdf": "Télécharger en PDF",
+        "stats": {
+            "total": "Total bons",
+            "montantTotal": "Montant total"
+        }
+    },
+    "stockDattes": {
+        "title": "Stock de Dattes",
+        "description": "Stock disponible par type de datte, avec le détail des lots entrés",
+        "searchPlaceholder": "Rechercher un type de datte...",
+        "typeDate": "Type de datte",
+        "quantiteTotale": "Quantité totale",
+        "quantiteDisponible": "Quantité disponible",
+        "nombreLots": "Lots",
+        "voirLots": "Voir les lots",
+        "detailLots": "Détail des lots entrés pour ce type de datte",
+        "dateEntree": "Date d'entrée",
+        "empty": "Aucun stock de dattes pour le moment",
+        "stats": {
+            "types": "Types de dattes",
+            "quantiteTotale": "Quantité totale",
+            "quantiteDisponible": "Quantité disponible"
+        }
     },
     "auth": {
         "login": "Connexion",

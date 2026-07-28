@@ -69,6 +69,10 @@ export const PERMISSIONS = {
     // Bons d'achat
     "bon-achat:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
     "bon-achat:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
+    "bon-achat:update": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
+
+    // Stock de dattes (par type)
+    "stock-date:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.LABORANTIN, ROLES.DIRECTION],
 
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],

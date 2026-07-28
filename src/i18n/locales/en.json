@@ -56,7 +56,9 @@
         "typesDates": "Date Varieties",
         "livraisons": "Deliveries",
         "stockCaisses": "Crate Stock",
+        "stockDattes": "Date Stock",
         "pesees": "Weighing",
+        "bonsAchat": "Purchase Orders",
         "clients": "Clients",
         "livreurs": "Delivery staff",
         "users": "Users",
@@ -289,15 +291,48 @@
         "grandTotal": "Total net (all lines)",
         "quantiteAcceptee": "Accepted quantity (negotiable)",
         "prixKg": "Price per kg",
-        "montant": "Purchase order amount",
+        "prixKgLigne": "Price per kg (this line)",
+        "prixKgLigneRequired": "The price per kg is required for each line",
+        "montantLigne": "Amount",
+        "montant": "Total purchase order amount",
         "observations": "Observations"
     },
     "bonAchat": {
-        "title": "Purchase Order",
+        "title": "Purchase Orders",
+        "pageDescription": "History of purchase orders automatically generated during weighing",
+        "searchPlaceholder": "Search a purchase order...",
         "numero": "Order No.",
         "montant": "Amount",
         "prixKg": "Price per kg",
-        "observations": "Observations"
+        "prixKgMoyen": "Avg. price/kg",
+        "detailLignes": "Detail by line",
+        "voirDetail": "View detail",
+        "observations": "Observations",
+        "periode": "Period",
+        "imprimer": "Print",
+        "telechargerPdf": "Download PDF",
+        "stats": {
+            "total": "Total orders",
+            "montantTotal": "Total amount"
+        }
+    },
+    "stockDattes": {
+        "title": "Date Stock",
+        "description": "Available stock by date type, with the detail of received lots",
+        "searchPlaceholder": "Search a date type...",
+        "typeDate": "Date type",
+        "quantiteTotale": "Total quantity",
+        "quantiteDisponible": "Available quantity",
+        "nombreLots": "Lots",
+        "voirLots": "View lots",
+        "detailLots": "Detail of received lots for this date type",
+        "dateEntree": "Entry date",
+        "empty": "No date stock yet",
+        "stats": {
+            "types": "Date types",
+            "quantiteTotale": "Total quantity",
+            "quantiteDisponible": "Available quantity"
+        }
     },
     "auth": {
         "login": "Login",

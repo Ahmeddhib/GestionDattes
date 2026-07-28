@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
@@ -21,174 +23,242 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { updateLivraisonAction } from "@/actions/livraisons/update-livraison.action";
+import { updateLivraisonAvecPeseesAction } from "@/actions/livraisons/update-livraison-avec-pesees.action";
+import { getLivraisonByIdAction } from "@/actions/livraisons/get-livraison-by-id.action";
 import { getAgricultureursSimpleAction } from "@/actions/agriculteurs/get-agriculteurs-simple.action";
 import { getTypesDatesAction } from "@/actions/types-dates/get-types-dates.action";
 import { getTypesCaissesAction } from "@/actions/types-caisses/get-types-caisses.action";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 
-type CaisseItem = {
-    typeCaisseId: string;
+type Agriculteur = { id: string; label: string };
+type TypeDate = { id: string; nom: string };
+type TypeCaisse = { id: string; nom: string; poidsKg: number };
+
+type LigneWizard = {
+    clientId: string;
     typeDateId: string;
-    quantite: number;
+    typeCaisseId: string;
+    nombreCaisses: number;
+    poidsBrutTotal: number;
+    prixKg: number;
+    quantiteAcceptee: number | null;
 };
 
 type UpdateLivraisonDialogProps = {
     livraison: {
         id: string;
-        numeroLot: string;
         dateLivraison: Date;
-        quantiteKg: number;
-        quantiteLivree?: number;
-        quantiteAcceptee?: number;
-        agriculteurId?: string;
-        agriculteur?: {
-            id: string;
-            code: string;
-            nom: string;
-            prenom: string;
-            cin: string;
-        };
-        caisses?: Array<{
-            id: string;
-            typeCaisseId: string;
-            typeDateId: string;
-            quantite: number;
-            typeCaisse: {
-                id: string;
-                nom: string;
-                poidsKg: number;
-            };
-            typeDate?: {
-                id: string;
-                nom: string;
-            };
-        }>;
     };
-    canEditAcceptedQuantity: boolean;
 };
 
-export function UpdateLivraisonDialog({ livraison, canEditAcceptedQuantity }: UpdateLivraisonDialogProps) {
+function nextClientId() {
+    return Math.random().toString(36).substring(2, 9);
+}
+
+function ligneVierge(defaultPrixKg = 0): LigneWizard {
+    return {
+        clientId: nextClientId(),
+        typeDateId: "",
+        typeCaisseId: "",
+        nombreCaisses: 1,
+        poidsBrutTotal: 0,
+        prixKg: defaultPrixKg,
+        quantiteAcceptee: null,
+    };
+}
+
+export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps) {
     const { t } = useClientTranslations();
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loadingLivraison, setLoadingLivraison] = useState(false);
 
-    const [agriculteurs, setAgriculteurs] = useState<any[]>([]);
-    const [typesDates, setTypesDates] = useState<any[]>([]);
-    const [typesCaisses, setTypesCaisses] = useState<any[]>([]);
+    const [agriculteurs, setAgriculteurs] = useState<Agriculteur[]>([]);
+    const [typesDates, setTypesDates] = useState<TypeDate[]>([]);
+    const [typesCaisses, setTypesCaisses] = useState<TypeCaisse[]>([]);
 
-    const [selectedAgriculteur, setSelectedAgriculteur] = useState(
-        livraison.agriculteurId || livraison.agriculteur?.id || ""
+    const [agriculteurId, setAgriculteurId] = useState("");
+    const [dateLivraison, setDateLivraison] = useState(
+        livraison.dateLivraison.toISOString().split("T")[0]
     );
-    const [quantiteLivree, setQuantiteLivree] = useState(livraison.quantiteLivree ?? livraison.quantiteKg);
-    const [quantiteAcceptee, setQuantiteAcceptee] = useState(livraison.quantiteAcceptee ?? livraison.quantiteLivree ?? livraison.quantiteKg);
+    const [lignes, setLignes] = useState<LigneWizard[]>([ligneVierge()]);
+    const [observations, setObservations] = useState("");
 
-    // État pour gérer les caisses - initialiser avec les caisses existantes
-    const [caisses, setCaisses] = useState<CaisseItem[]>(
-        livraison.caisses && livraison.caisses.length > 0
-            ? livraison.caisses.map(c => ({
-                typeCaisseId: c.typeCaisseId,
-                typeDateId: c.typeDateId,
-                quantite: c.quantite
-            }))
-            : [{ typeCaisseId: "", typeDateId: "", quantite: 1 }]
-    );
-
-    useEffect(() => {
-        if (open) {
-            loadData();
-            // Réinitialiser les caisses avec les données actuelles
-            if (livraison.caisses && livraison.caisses.length > 0) {
-                setCaisses(livraison.caisses.map(c => ({
-                    typeCaisseId: c.typeCaisseId,
-                    typeDateId: c.typeDateId,
-                    quantite: c.quantite
-                })));
-            }
-            setQuantiteLivree(livraison.quantiteLivree ?? livraison.quantiteKg);
-            setQuantiteAcceptee(livraison.quantiteAcceptee ?? livraison.quantiteLivree ?? livraison.quantiteKg);
-        }
-    }, [open]);
-
-    async function loadData() {
+    async function loadReferenceData() {
         const [agriResult, datesResult, caissesResult] = await Promise.all([
             getAgricultureursSimpleAction(),
             getTypesDatesAction(),
             getTypesCaissesAction(),
         ]);
-
         if (agriResult.success) setAgriculteurs(agriResult.data || []);
         if (datesResult.success) setTypesDates(datesResult.data || []);
         if (caissesResult.success) setTypesCaisses(caissesResult.data || []);
     }
 
-    // Ajouter une ligne de caisse
-    const addCaisse = () => {
-        setCaisses([...caisses, { typeCaisseId: "", typeDateId: "", quantite: 1 }]);
-    };
+    async function loadLivraison() {
+        setLoadingLivraison(true);
+        const result = await getLivraisonByIdAction(livraison.id);
+        setLoadingLivraison(false);
 
-    // Retirer une ligne de caisse
-    const removeCaisse = (index: number) => {
-        if (caisses.length > 1) {
-            const newCaisses = caisses.filter((_, i) => i !== index);
-            setCaisses(newCaisses);
+        if (!result.success || !result.data) {
+            toast.error(result.error || t("messages.error.generic"));
+            return;
         }
-    };
 
-    // Mettre à jour une caisse
-    const updateCaisse = (index: number, field: keyof CaisseItem, value: string | number) => {
-        const newCaisses = [...caisses];
-        newCaisses[index] = {
-            ...newCaisses[index],
-            [field]: field === "quantite" ? Number(value) : value,
-        };
-        setCaisses(newCaisses);
-    };
+        const data = result.data as any;
+        setAgriculteurId(data.agriculteurId || data.agriculteur?.id || "");
+        setDateLivraison(new Date(data.dateLivraison).toISOString().split("T")[0]);
+        setObservations(data.bonAchat?.observations ?? "");
 
-    // Calculer le total en kg
-    const calculateTotal = () => {
-        return caisses.reduce((total, caisse) => {
-            const typeCaisse = typesCaisses.find(tc => tc.id === caisse.typeCaisseId);
-            if (typeCaisse && caisse.quantite) {
-                return total + (caisse.quantite * typeCaisse.poidsKg);
-            }
-            return total;
-        }, 0);
-    };
+        const prixKgMoyenExistant = data.bonAchat?.prixKg ?? 0;
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        const pesees = (data.pesees || []) as Array<{
+            typeCaisseId: string;
+            typeDateId: string;
+            nombreCaisses: number;
+            poidsBrutTotal: number;
+            prixKg: number;
+            quantiteAcceptee: number;
+        }>;
+
+        setLignes(
+            pesees.length > 0
+                ? pesees.map((p) => ({
+                    clientId: nextClientId(),
+                    typeDateId: p.typeDateId,
+                    typeCaisseId: p.typeCaisseId,
+                    nombreCaisses: p.nombreCaisses,
+                    poidsBrutTotal: p.poidsBrutTotal,
+                    prixKg: p.prixKg > 0 ? p.prixKg : prixKgMoyenExistant,
+                    quantiteAcceptee: p.quantiteAcceptee,
+                }))
+                : [ligneVierge()]
+        );
+    }
+
+    useEffect(() => {
+        if (open) {
+            loadReferenceData();
+            loadLivraison();
+        }
+    }, [open]);
+
+    function tareFor(typeCaisseId: string) {
+        return typesCaisses.find((tc) => tc.id === typeCaisseId)?.poidsKg ?? 0;
+    }
+
+    function updateLigne(clientId: string, patch: Partial<LigneWizard>) {
+        setLignes((prev) => prev.map((l) => (l.clientId === clientId ? { ...l, ...patch } : l)));
+    }
+
+    function addLigne() {
+        setLignes((prev) => [...prev, ligneVierge()]);
+    }
+
+    function removeLigne(clientId: string) {
+        setLignes((prev) => (prev.length > 1 ? prev.filter((l) => l.clientId !== clientId) : prev));
+    }
+
+    const ligneTotals = useMemo(() => {
+        return lignes.map((ligne) => {
+            const tare = typesCaisses.find((tc) => tc.id === ligne.typeCaisseId)?.poidsKg ?? 0;
+            const nombreCaisses = Number(ligne.nombreCaisses) || 0;
+            const poidsBrutTotal = Number(ligne.poidsBrutTotal) || 0;
+            const poidsTareTotal = tare * nombreCaisses;
+            const poidsNetTotal = poidsBrutTotal - poidsTareTotal;
+            const prixKg = Number(ligne.prixKg) || 0;
+            const quantiteAcceptee =
+                ligne.quantiteAcceptee !== null && Number.isFinite(ligne.quantiteAcceptee)
+                    ? ligne.quantiteAcceptee
+                    : Math.max(poidsNetTotal, 0);
+            const montant = quantiteAcceptee > 0 ? quantiteAcceptee * prixKg : 0;
+            return { poidsBrutTotal, poidsTareTotal, poidsNetTotal, tare, quantiteAcceptee, montant };
+        });
+    }, [lignes, typesCaisses]);
+
+    const grandTotalNet = ligneTotals.reduce((sum, lt) => sum + lt.poidsNetTotal, 0);
+    const grandTotalAcceptee = ligneTotals.reduce((sum, lt) => sum + lt.quantiteAcceptee, 0);
+    const montant = ligneTotals.reduce((sum, lt) => sum + lt.montant, 0);
+
+    const hasDuplicatePairs = useMemo(() => {
+        const keys = lignes.map((l) => `${l.typeCaisseId}::${l.typeDateId}`);
+        return new Set(keys).size !== keys.length;
+    }, [lignes]);
+
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        // Validation des caisses
-        const validCaisses = caisses.filter(c => c.typeCaisseId && c.quantite > 0);
-        if (validCaisses.length === 0) {
-            toast.error(t("livraisons.atLeastOneCaisse") || "Au moins une caisse est requise");
+        if (!agriculteurId) {
+            toast.error(t("nouvellePesee.agriculteurRequired"));
+            return;
+        }
+
+        for (const ligne of lignes) {
+            if (
+                !ligne.typeDateId ||
+                !ligne.typeCaisseId ||
+                !Number.isFinite(ligne.nombreCaisses) ||
+                ligne.nombreCaisses <= 0 ||
+                !Number.isFinite(ligne.poidsBrutTotal) ||
+                ligne.poidsBrutTotal <= 0
+            ) {
+                toast.error(t("nouvellePesee.ligneIncomplete"));
+                return;
+            }
+            const tare = tareFor(ligne.typeCaisseId);
+            const poidsBrutMoyen = ligne.poidsBrutTotal / ligne.nombreCaisses;
+            if (poidsBrutMoyen <= tare) {
+                toast.error(t("pesees.grossMustExceedTare", { tare: String(tare) }));
+                return;
+            }
+            if (!Number.isFinite(ligne.prixKg) || ligne.prixKg <= 0) {
+                toast.error(t("nouvellePesee.prixKgLigneRequired"));
+                return;
+            }
+            const poidsNetTotal = ligne.poidsBrutTotal - tare * ligne.nombreCaisses;
+            const quantiteAcceptee = ligne.quantiteAcceptee ?? poidsNetTotal;
+            if (!Number.isFinite(quantiteAcceptee) || quantiteAcceptee <= 0 || quantiteAcceptee > poidsNetTotal) {
+                toast.error(t("nouvellePesee.quantiteAccepteeRequired"));
+                return;
+            }
+        }
+
+        if (hasDuplicatePairs) {
+            toast.error(t("nouvellePesee.duplicateLigne"));
             return;
         }
 
         setLoading(true);
 
-        const formData = new FormData(e.currentTarget);
+        const payload = {
+            agriculteurId,
+            dateLivraison,
+            lignes: lignes.map((l) => ({
+                typeDateId: l.typeDateId,
+                typeCaisseId: l.typeCaisseId,
+                quantiteDeclaree: l.nombreCaisses,
+                prixKg: l.prixKg,
+                quantiteAcceptee: l.quantiteAcceptee ?? undefined,
+                caisses: Array.from({ length: l.nombreCaisses }, () => ({
+                    poidsBrut: l.poidsBrutTotal / l.nombreCaisses,
+                })),
+            })),
+            observations: observations || undefined,
+        };
 
-        // Ajouter les caisses en JSON
-        formData.append("caisses", JSON.stringify(validCaisses));
-
-        const result = await updateLivraisonAction(formData);
+        const result = await updateLivraisonAvecPeseesAction(livraison.id, payload);
 
         setLoading(false);
 
         if (result.success) {
             toast.success(t("messages.success.updated").replace("{entity}", t("livraisons.title")));
             setOpen(false);
+            router.refresh();
         } else {
             toast.error(result.error || t("messages.error.generic"));
         }
     }
-
-    // Format date for input type="date" (YYYY-MM-DD)
-    const formattedDate = livraison.dateLivraison instanceof Date
-        ? livraison.dateLivraison.toISOString().split("T")[0]
-        : new Date(livraison.dateLivraison).toISOString().split("T")[0];
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -201,7 +271,7 @@ export function UpdateLivraisonDialog({ livraison, canEditAcceptedQuantity }: Up
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[600px] bg-white max-h-[90vh] overflow-y-auto">
+            <DialogContent className="rounded-[14px] sm:max-w-[760px] bg-white max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("livraisons.updateDialog")}
@@ -210,174 +280,265 @@ export function UpdateLivraisonDialog({ livraison, canEditAcceptedQuantity }: Up
                         {t("livraisons.updateDescription")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input type="hidden" name="id" value={livraison.id} />
 
-                    <div className="space-y-2">
-                        <Label htmlFor="dateLivraison" className="text-[#3D1C00]">
-                            {t("livraisons.dateLivraison")}
-                        </Label>
-                        <Input
-                            id="dateLivraison"
-                            name="dateLivraison"
-                            type="date"
-                            required
-                            defaultValue={formattedDate}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
-                        />
+                {loadingLivraison ? (
+                    <div className="flex items-center justify-center py-10 text-[#3D1C00]/60">
+                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                        {t("common.loading")}
                     </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="agriculteurId" className="text-[#3D1C00]">
-                            {t("livraisons.agriculteur")}
-                        </Label>
-                        <Select
-                            value={selectedAgriculteur}
-                            onValueChange={setSelectedAgriculteur}
-                            required
-                        >
-                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
-                                <SelectValue placeholder={t("livraisons.selectAgriculteur")} />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {agriculteurs.map((a) => (
-                                    <SelectItem key={a.id} value={a.id}>
-                                        {a.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="agriculteurId" value={selectedAgriculteur} />
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="quantiteLivree">Quantité livrée (kg)</Label>
-                            <Input id="quantiteLivree" name="quantiteLivree" type="number" min="0" step="0.01" required value={quantiteLivree}
-                                onChange={(event) => {
-                                    const value = Math.max(0, Number(event.target.value));
-                                    const acceptedMatchesDelivered = quantiteAcceptee === quantiteLivree;
-                                    setQuantiteLivree(value);
-                                    if (!canEditAcceptedQuantity || acceptedMatchesDelivered) setQuantiteAcceptee(value);
-                                }} />
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-[#3D1C00]">{t("livraisons.agriculteur")}</Label>
+                                <Select value={agriculteurId} onValueChange={setAgriculteurId}>
+                                    <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                        <SelectValue placeholder={t("livraisons.selectAgriculteur")} />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white">
+                                        {agriculteurs.map((a) => (
+                                            <SelectItem key={a.id} value={a.id}>
+                                                {a.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[#3D1C00]">{t("livraisons.dateLivraison")}</Label>
+                                <Input
+                                    type="date"
+                                    value={dateLivraison}
+                                    onChange={(e) => setDateLivraison(e.target.value)}
+                                    className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="quantiteAcceptee">Quantité acceptée (kg)</Label>
-                            <Input id="quantiteAcceptee" name="quantiteAcceptee" type="number" min="0" max={quantiteLivree} step="0.01" required value={quantiteAcceptee}
-                                disabled={!canEditAcceptedQuantity}
-                                onChange={(event) => setQuantiteAcceptee(Math.min(quantiteLivree, Math.max(0, Number(event.target.value))))} />
-                        </div>
-                    </div>
 
-                    {/* Section Caisses */}
-                    <div className="space-y-3 border-t pt-4">
-                        <div className="flex justify-between items-center">
-                            <Label className="text-[#3D1C00] text-base font-semibold">
-                                {t("livraisons.caisses") || "Caisses"}
-                            </Label>
+                        <div className="space-y-3 border-t pt-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-[#3D1C00] text-base font-semibold">
+                                    {t("nouvellePesee.lignes")}
+                                </Label>
+                                <Button
+                                    type="button"
+                                    onClick={addLigne}
+                                    size="sm"
+                                    className="gap-1 rounded-[7px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                                >
+                                    <Plus className="h-3 w-3" />
+                                    {t("nouvellePesee.addLigne")}
+                                </Button>
+                            </div>
+
+                            {lignes.map((ligne, ligneIndex) => {
+                                const totals = ligneTotals[ligneIndex];
+                                return (
+                                    <div
+                                        key={ligne.clientId}
+                                        className="rounded-[9px] border border-[#C17A2B]/20 p-3 space-y-3"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 flex-1">
+                                                <Select
+                                                    value={ligne.typeDateId}
+                                                    onValueChange={(value) => updateLigne(ligne.clientId, { typeDateId: value })}
+                                                >
+                                                    <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                                        <SelectValue placeholder={t("livraisons.selectTypeDate")} />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white">
+                                                        {typesDates.map((td) => (
+                                                            <SelectItem key={td.id} value={td.id}>
+                                                                {td.nom}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Select
+                                                    value={ligne.typeCaisseId}
+                                                    onValueChange={(value) => updateLigne(ligne.clientId, { typeCaisseId: value })}
+                                                >
+                                                    <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                                        <SelectValue placeholder={t("livraisons.selectTypeCaisse")} />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-white">
+                                                        {typesCaisses.map((tc) => (
+                                                            <SelectItem key={tc.id} value={tc.id}>
+                                                                {tc.nom} ({t("pesees.tare")}: {tc.poidsKg} kg)
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Input
+                                                    type="number"
+                                                    min="1"
+                                                    value={ligne.nombreCaisses}
+                                                    onChange={(e) =>
+                                                        updateLigne(ligne.clientId, { nombreCaisses: Number(e.target.value) || 0 })
+                                                    }
+                                                    placeholder={t("nouvellePesee.quantiteDeclaree")}
+                                                    className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                />
+                                            </div>
+                                            {lignes.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => removeLigne(ligne.clientId)}
+                                                    className="h-9 w-9 rounded-[7px] text-red-600 hover:bg-red-50 hover:text-red-700"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-2 pl-1 sm:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <div className="text-xs font-medium text-[#3D1C00]/70">
+                                                    {t("pesees.grossWeightLabel")}
+                                                </div>
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={ligne.poidsBrutTotal || ""}
+                                                    onChange={(e) =>
+                                                        updateLigne(ligne.clientId, { poidsBrutTotal: parseFloat(e.target.value) || 0 })
+                                                    }
+                                                    placeholder={t("pesees.grossWeightLabel")}
+                                                    className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <div className="text-xs font-medium text-[#3D1C00]/70">
+                                                    {t("nouvellePesee.prixKgLigne")}
+                                                </div>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={ligne.prixKg || ""}
+                                                    onChange={(e) =>
+                                                        updateLigne(ligne.clientId, { prixKg: parseFloat(e.target.value) || 0 })
+                                                    }
+                                                    placeholder={t("nouvellePesee.prixKgLigne")}
+                                                    className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between gap-2 rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
+                                            <span className="text-[#3D1C00]/70">{t("pesees.poidsNetTotal")}:</span>
+                                            <span className="font-semibold text-[#C17A2B]">
+                                                {totals.poidsNetTotal.toFixed(2)} kg
+                                            </span>
+                                        </div>
+
+                                        <div className="space-y-2 pl-1">
+                                            <div className="text-xs font-medium text-[#3D1C00]/70">
+                                                {t("nouvellePesee.quantiteAcceptee")}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={ligne.quantiteAcceptee ?? (totals.poidsNetTotal > 0 ? totals.poidsNetTotal.toFixed(2) : "")}
+                                                    onChange={(e) =>
+                                                        updateLigne(ligne.clientId, {
+                                                            quantiteAcceptee: e.target.value === "" ? null : parseFloat(e.target.value) || 0,
+                                                        })
+                                                    }
+                                                    className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                />
+                                                {ligne.quantiteAcceptee !== null && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => updateLigne(ligne.clientId, { quantiteAcceptee: null })}
+                                                        className="h-9 shrink-0 rounded-[7px] text-[#C17A2B] hover:bg-[#C17A2B]/10"
+                                                    >
+                                                        {t("common.reset")}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between gap-2 rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
+                                            <span className="text-[#3D1C00]/70">{t("nouvellePesee.montantLigne")}:</span>
+                                            <span className="font-semibold text-[#C17A2B]">
+                                                {totals.montant.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {hasDuplicatePairs && (
+                                <p className="text-xs text-red-600">{t("nouvellePesee.duplicateLigne")}</p>
+                            )}
+                        </div>
+
+                        <div className="rounded-[9px] bg-[#FAF0DC] border border-[#C17A2B] p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-[#3D1C00]">
+                                    {t("nouvellePesee.grandTotal")}
+                                </span>
+                                <span className="text-xl font-bold text-[#C17A2B]">
+                                    {grandTotalNet.toFixed(2)} kg
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-[#C17A2B]/20 pt-3">
+                                <span className="text-sm font-medium text-[#3D1C00]">
+                                    {t("nouvellePesee.quantiteAcceptee")}
+                                </span>
+                                <span className="text-xl font-bold text-[#C17A2B]">
+                                    {grandTotalAcceptee.toFixed(2)} kg
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="border-t pt-4">
+                            <div className="space-y-2">
+                                <Label className="text-[#3D1C00]">{t("nouvellePesee.montant")}</Label>
+                                <div className="rounded-[7px] border border-[#C17A2B]/20 bg-white px-3 py-2 text-sm font-semibold text-[#3D1C00]">
+                                    {montant.toFixed(2)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-[#3D1C00]">{t("nouvellePesee.observations")}</Label>
+                            <Textarea
+                                value={observations}
+                                onChange={(e) => setObservations(e.target.value)}
+                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-4">
                             <Button
                                 type="button"
-                                onClick={addCaisse}
-                                size="sm"
-                                className="gap-1 rounded-[7px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                                variant="outline"
+                                onClick={() => setOpen(false)}
+                                className="rounded-[9px]"
+                                disabled={loading}
                             >
-                                <Plus className="h-3 w-3" />
-                                {t("livraisons.addCaisse") || "Ajouter"}
+                                {t("common.cancel")}
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                            >
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {loading ? t("livraisons.updating") : t("common.save")}
                             </Button>
                         </div>
-
-                        <div className="space-y-2">
-                            {caisses.map((caisse, index) => (
-                                <div key={index} className="flex gap-2 items-start">
-                                    <div className="flex-1">
-                                        <Select
-                                            value={caisse.typeDateId}
-                                            onValueChange={(value) => updateCaisse(index, "typeDateId", value)}
-                                        >
-                                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
-                                                <SelectValue placeholder={t("livraisons.selectTypeDate")} />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white">
-                                                {typesDates.map((td) => (
-                                                    <SelectItem key={td.id} value={td.id}>
-                                                        {td.nom}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="flex-1">
-                                        <Select
-                                            value={caisse.typeCaisseId}
-                                            onValueChange={(value) => updateCaisse(index, "typeCaisseId", value)}
-                                        >
-                                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
-                                                <SelectValue placeholder={t("livraisons.selectTypeCaisse")} />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-white">
-                                                {typesCaisses.map((tc) => (
-                                                    <SelectItem key={tc.id} value={tc.id}>
-                                                        {tc.nom} ({tc.poidsKg} kg)
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="w-24">
-                                        <Input
-                                            type="number"
-                                            min="1"
-                                            value={caisse.quantite}
-                                            onChange={(e) => updateCaisse(index, "quantite", e.target.value)}
-                                            placeholder="Qté"
-                                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
-                                        />
-                                    </div>
-                                    {caisses.length > 1 && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => removeCaisse(index)}
-                                            className="h-10 w-10 rounded-[7px] text-red-600 hover:bg-red-50 hover:text-red-700"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Affichage du total */}
-                        <div className="bg-[#FAF0DC] rounded-[7px] p-3 flex justify-between items-center">
-                            <span className="text-sm text-[#3D1C00] font-medium">
-                                {t("livraisons.totalKg") || "Total"}:
-                            </span>
-                            <span className="text-lg font-bold text-[#C17A2B]">
-                                {calculateTotal().toFixed(2)} kg
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpen(false)}
-                            className="rounded-[9px]"
-                            disabled={loading}
-                        >
-                            {t("common.cancel")}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
-                        >
-                            {loading ? t("livraisons.updating") : t("common.save")}
-                        </Button>
-                    </div>
-                </form>
+                    </form>
+                )}
             </DialogContent>
         </Dialog>
     );

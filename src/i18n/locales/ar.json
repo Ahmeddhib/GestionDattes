@@ -56,7 +56,9 @@
         "typesDates": "أصناف التمور",
         "livraisons": "التسليمات",
         "stockCaisses": "مخزون الصناديق",
+        "stockDattes": "مخزون التمور",
         "pesees": "الوزن",
+        "bonsAchat": "سندات الشراء",
         "clients": "العملاء",
         "livreurs": "الموصلون",
         "users": "المستخدمون",
@@ -289,15 +291,48 @@
         "grandTotal": "المجموع الصافي (كل السطور)",
         "quantiteAcceptee": "الكمية المقبولة (قابلة للتفاوض)",
         "prixKg": "سعر الكلغ",
-        "montant": "مبلغ سند الشراء",
+        "prixKgLigne": "سعر الكلغ (لهذا السطر)",
+        "prixKgLigneRequired": "سعر الكلغ مطلوب لكل سطر",
+        "montantLigne": "المبلغ",
+        "montant": "المبلغ الإجمالي لسند الشراء",
         "observations": "ملاحظات"
     },
     "bonAchat": {
-        "title": "سند الشراء",
+        "title": "سندات الشراء",
+        "pageDescription": "سجل سندات الشراء المُنشأة تلقائياً أثناء عمليات الوزن",
+        "searchPlaceholder": "البحث عن سند شراء...",
         "numero": "رقم السند",
         "montant": "المبلغ",
         "prixKg": "سعر الكلغ",
-        "observations": "ملاحظات"
+        "prixKgMoyen": "متوسط سعر الكلغ",
+        "detailLignes": "تفاصيل حسب السطر",
+        "voirDetail": "عرض التفاصيل",
+        "observations": "ملاحظات",
+        "periode": "الفترة",
+        "imprimer": "طباعة",
+        "telechargerPdf": "تحميل PDF",
+        "stats": {
+            "total": "إجمالي السندات",
+            "montantTotal": "المبلغ الإجمالي"
+        }
+    },
+    "stockDattes": {
+        "title": "مخزون التمور",
+        "description": "المخزون المتاح حسب صنف التمر، مع تفاصيل الدفعات المستلمة",
+        "searchPlaceholder": "البحث عن صنف تمر...",
+        "typeDate": "صنف التمر",
+        "quantiteTotale": "الكمية الإجمالية",
+        "quantiteDisponible": "الكمية المتاحة",
+        "nombreLots": "الدفعات",
+        "voirLots": "عرض الدفعات",
+        "detailLots": "تفاصيل الدفعات المستلمة لهذا الصنف",
+        "dateEntree": "تاريخ الدخول",
+        "empty": "لا يوجد مخزون تمور بعد",
+        "stats": {
+            "types": "أصناف التمور",
+            "quantiteTotale": "الكمية الإجمالية",
+            "quantiteDisponible": "الكمية المتاحة"
+        }
     },
     "auth": {
         "login": "تسجيل الدخول",

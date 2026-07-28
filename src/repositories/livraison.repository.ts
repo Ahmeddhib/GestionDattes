@@ -58,7 +58,7 @@ export const livraisonRepository = {
                     },
                 },
             },
-            orderBy: { dateLivraison: "desc" },
+            orderBy: { createdAt: "desc" },
         });
     },
 
@@ -205,7 +205,12 @@ export const livraisonRepository = {
     /**
      * Met à jour une livraison existante avec plusieurs types de caisses
      */
-    async update(id: string, data: Partial<UpdateLivraisonInput>, tenantId: string) {
+    async update(
+        id: string,
+        data: Partial<UpdateLivraisonInput>,
+        tenantId: string,
+        client: DbClient = prisma
+    ) {
         // Si les caisses sont mises à jour, on supprime les anciennes et on crée les nouvelles
         const updateData: any = {
             ...(data.dateLivraison && { dateLivraison: new Date(data.dateLivraison) }),
@@ -228,7 +233,7 @@ export const livraisonRepository = {
             };
         }
 
-        return prisma.livraison.update({
+        return client.livraison.update({
             where: { id },
             data: updateData,
             include: {
@@ -258,6 +263,7 @@ export const livraisonRepository = {
         const livraison = await prisma.livraison.findFirst({
             where: { id, tenantId },
             include: {
+                BonAchat: { select: { id: true } },
                 _count: {
                     select: {
                         Echantillon: true,
@@ -275,7 +281,8 @@ export const livraisonRepository = {
             livraison._count.Pesee > 0 ||
             livraison._count.Echantillon > 0 ||
             livraison._count.PretCaisse > 0 ||
-            livraison._count.StockDate > 0
+            livraison._count.StockDate > 0 ||
+            livraison.BonAchat !== null
         );
     },
 

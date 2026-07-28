@@ -8,6 +8,7 @@ import { LowStockAlert } from "@/components/features/stock-caisses/LowStockAlert
 import { StockCaissesContent } from "./StockCaissesContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getServerTranslations } from "@/i18n/server";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 export default async function StockCaissesPage() {
     const t = await getServerTranslations();
@@ -23,7 +24,7 @@ export default async function StockCaissesPage() {
     const typesCaisses = typesCaissesResult.success ? (typesCaissesResult.data || []) : [];
 
     return (
-        <div className="space-y-4 md:space-y-6 p-2 md:p-0">
+        <PageContainer>
             {/* Header - Mobile Responsive */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
@@ -52,6 +53,6 @@ export default async function StockCaissesPage() {
                     <PretsTable prets={prets} />
                 </div>
             </Suspense>
-        </div>
+        </PageContainer>
     );
 }

@@ -240,6 +240,7 @@ export function CreatePretDialog() {
                                             placeholder={t("pretsCaisses.nombrePreterPlaceholder")}
                                             className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             {...field}
+                                            value={field.value ?? ""}
                                             onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
                                         />
                                     </FormControl>
