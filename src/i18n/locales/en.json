@@ -31,7 +31,8 @@
         "close": "Close",
         "update": "Update",
         "actionIrreversible": "This action is irreversible.",
-        "appName": "Date Management"
+        "appName": "Date Management",
+        "optional": "optional"
     },
     "validation": {
         "required": "This field is required",
@@ -383,6 +384,9 @@
         "selectTypeCaisse": "Select a crate type",
         "agriculteur": "Farmer",
         "typeCaisse": "Crate Type",
+        "livreur": "Delivery person",
+        "selectLivreur": "Select a delivery person",
+        "remiseParAgriculteur": "Handed over directly by the farmer",
         "pretEnCours": "Loans in progress",
         "historiquePrets": "Loan history",
         "aucunPret": "No loans",

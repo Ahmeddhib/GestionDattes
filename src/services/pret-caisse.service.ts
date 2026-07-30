@@ -1,6 +1,7 @@
 import { pretCaisseRepository } from "@/repositories/pret-caisse.repository";
 import { typeCaisseRepository } from "@/repositories/type-caisse.repository";
 import { agriculteurRepository } from "@/repositories/agriculteur.repository";
+import { livreurRepository } from "@/repositories/livreur.repository";
 import { auditService } from "./audit.service";
 import { checkPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -25,12 +26,14 @@ export const pretCaisseService = {
             typeCaisse: pret.TypeCaisse,
             createdBy: pret.User,
             livraison: pret.Livraison,
+            livreur: pret.Livreur,
             nombreRestant: pret.nombrePrete - pret.nombreRetourne,
             // Supprimer les versions PascalCase
             Agriculteur: undefined,
             TypeCaisse: undefined,
             User: undefined,
             Livraison: undefined,
+            Livreur: undefined,
         }));
     },
 
@@ -51,11 +54,13 @@ export const pretCaisseService = {
             typeCaisse: pret.TypeCaisse,
             createdBy: pret.User,
             livraison: pret.Livraison,
+            livreur: pret.Livreur,
             nombreRestant: pret.nombrePrete - pret.nombreRetourne,
             Agriculteur: undefined,
             TypeCaisse: undefined,
             User: undefined,
             Livraison: undefined,
+            Livreur: undefined,
         };
     },
 
@@ -120,6 +125,15 @@ export const pretCaisseService = {
             );
         }
 
+        // Vérifier que le livreur (facultatif) appartient bien au tenant
+        let livreur = null;
+        if (data.livreurId) {
+            livreur = await livreurRepository.findById(tenantId, data.livreurId);
+            if (!livreur) {
+                throw new Error("Livreur introuvable dans cette Wakala");
+            }
+        }
+
         // Transaction: créer le prêt ET déduire du stock
         const pret = await prisma.$transaction(async (tx) => {
             // Créer le prêt
@@ -151,6 +165,7 @@ export const pretCaisseService = {
                 typeCaisse: typeCaisse.nom,
                 nombrePrete: data.nombrePrete,
                 stockRestant: typeCaisse.stockDisponible - data.nombrePrete,
+                livreur: livreur?.nom ?? null,
             },
         });
 

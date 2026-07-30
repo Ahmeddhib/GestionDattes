@@ -31,7 +31,8 @@
         "close": "إغلاق",
         "update": "تحديث",
         "actionIrreversible": "هذا الإجراء لا رجعة فيه.",
-        "appName": "إدارة التمور"
+        "appName": "إدارة التمور",
+        "optional": "اختياري"
     },
     "validation": {
         "required": "هذا الحقل مطلوب",
@@ -383,6 +384,9 @@
         "selectTypeCaisse": "اختر نوع الصندوق",
         "agriculteur": "الفلاح",
         "typeCaisse": "نوع الصندوق",
+        "livreur": "الموصل",
+        "selectLivreur": "اختر موصلاً",
+        "remiseParAgriculteur": "تسليم مباشر من طرف الفلاح",
         "pretEnCours": "الإعارات الجارية",
         "historiquePrets": "سجل الإعارات",
         "aucunPret": "لا توجد إعارات",

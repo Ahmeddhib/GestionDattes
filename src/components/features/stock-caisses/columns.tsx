@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { Truck } from "lucide-react";
 import { RetourDialog } from "./RetourDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -26,6 +27,11 @@ export type PretCaisse = {
         nom: string;
         poidsKg: number;
     };
+    livreur?: {
+        id: string;
+        nom: string;
+        telephone: string | null;
+    } | null;
 };
 
 export const createPretsColumns = (
@@ -119,6 +125,22 @@ export const createPretsColumns = (
                 return (
                     <div className="text-sm text-[#3D1C00]">
                         {format(date, "dd/MM/yyyy", { locale: fr })}
+                    </div>
+                );
+            },
+        },
+        {
+            id: "livreur",
+            header: t("pretsCaisses.livreur"),
+            cell: ({ row }) => {
+                const livreur = row.original.livreur;
+                if (!livreur) {
+                    return <span className="text-xs text-gray-400">—</span>;
+                }
+                return (
+                    <div className="flex items-center gap-1.5 text-sm text-[#3D1C00]">
+                        <Truck className="h-3.5 w-3.5 text-[#C17A2B]" />
+                        {livreur.nom}
                     </div>
                 );
             },

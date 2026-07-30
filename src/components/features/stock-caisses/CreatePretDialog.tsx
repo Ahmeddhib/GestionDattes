@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,14 +36,19 @@ import { toast } from "sonner";
 import { createPretAction } from "@/actions/prets-caisses/create-pret.action";
 import { getAgricultureursSimpleAction } from "@/actions/agriculteurs/get-agriculteurs-simple.action";
 import { getTypesCaissesAction } from "@/actions/types-caisses/get-types-caisses.action";
+import { getLivreursAction } from "@/actions/livreurs/get-livreurs.action";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+
+const AUCUN_LIVREUR = "none";
 
 export function CreatePretDialog() {
     const { t } = useClientTranslations();
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [agriculteurs, setAgriculteurs] = useState<any[]>([]);
     const [typesCaisses, setTypesCaisses] = useState<any[]>([]);
+    const [livreurs, setLivreurs] = useState<any[]>([]);
     const [stockMax, setStockMax] = useState(0);
 
     // Schéma de validation dynamique
@@ -62,6 +68,7 @@ export function CreatePretDialog() {
                 )
         ),
         observations: z.string().optional(),
+        livreurId: z.string().optional(),
     });
 
     type FormData = {
@@ -69,6 +76,7 @@ export function CreatePretDialog() {
         typeCaisseId: string;
         nombrePrete: number;
         observations?: string;
+        livreurId?: string;
     };
 
     const form = useForm<FormData>({
@@ -78,6 +86,7 @@ export function CreatePretDialog() {
             typeCaisseId: "",
             nombrePrete: undefined as any,
             observations: "",
+            livreurId: AUCUN_LIVREUR,
         },
     });
 
@@ -102,12 +111,14 @@ export function CreatePretDialog() {
     }, [watchTypeCaisse, typesCaisses, form]);
 
     async function loadData() {
-        const [agriResult, caissesResult] = await Promise.all([
+        const [agriResult, caissesResult, livreursResult] = await Promise.all([
             getAgricultureursSimpleAction(),
             getTypesCaissesAction(),
+            getLivreursAction(),
         ]);
         if (agriResult.success) setAgriculteurs(agriResult.data || []);
         if (caissesResult.success) setTypesCaisses(caissesResult.data || []);
+        if (livreursResult.success) setLivreurs((livreursResult.data || []).filter((l: any) => l.active));
     }
 
     async function onSubmit(data: FormData) {
@@ -121,6 +132,9 @@ export function CreatePretDialog() {
         if (data.observations) {
             formData.append("observations", data.observations);
         }
+        if (data.livreurId && data.livreurId !== AUCUN_LIVREUR) {
+            formData.append("livreurId", data.livreurId);
+        }
 
         const result = await createPretAction(formData);
         setLoading(false);
@@ -130,8 +144,8 @@ export function CreatePretDialog() {
             setOpen(false);
             form.reset();
             setStockMax(0);
-            // Recharger la page pour voir les changements
-            window.location.reload();
+            // Rafraîchir les données de la page sans recharger tout le navigateur
+            router.refresh();
         } else {
             toast.error(result.error || t("messages.error.generic"));
         }
@@ -148,12 +162,12 @@ export function CreatePretDialog() {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button className="gap-2 rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]">
+                <Button className="gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F]">
                     <Plus className="h-4 w-4" />
                     {t("pretsCaisses.nouveauPret")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[500px] bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("pretsCaisses.preterCaisses")}
@@ -176,7 +190,7 @@ export function CreatePretDialog() {
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
                                                 <SelectValue placeholder={t("pretsCaisses.selectAgriculteur")} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -204,7 +218,7 @@ export function CreatePretDialog() {
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
                                                 <SelectValue placeholder={t("pretsCaisses.selectTypeCaisse")} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -212,6 +226,40 @@ export function CreatePretDialog() {
                                             {typesCaisses.map((tc) => (
                                                 <SelectItem key={tc.id} value={tc.id}>
                                                     {tc.nom} ({tc.poidsKg} kg) - Stock: {tc.stockDisponible || 0}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage className="text-red-600 text-xs" />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Livreur (facultatif) */}
+                        <FormField
+                            control={form.control}
+                            name="livreurId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[#3D1C00]">
+                                        {t("pretsCaisses.livreur")}
+                                        <span className="text-[#3D1C00]/40 ml-1 font-normal">
+                                            ({t("common.optional")})
+                                        </span>
+                                    </FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value || AUCUN_LIVREUR}>
+                                        <FormControl>
+                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                                <SelectValue placeholder={t("pretsCaisses.selectLivreur")} />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent className="bg-white">
+                                            <SelectItem value={AUCUN_LIVREUR}>
+                                                {t("pretsCaisses.remiseParAgriculteur")}
+                                            </SelectItem>
+                                            {livreurs.map((l) => (
+                                                <SelectItem key={l.id} value={l.id}>
+                                                    {l.nom}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -238,7 +286,7 @@ export function CreatePretDialog() {
                                             type="number"
                                             min="1"
                                             placeholder={t("pretsCaisses.nombrePreterPlaceholder")}
-                                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             {...field}
                                             value={field.value ?? ""}
                                             onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
@@ -266,7 +314,7 @@ export function CreatePretDialog() {
                                     <FormControl>
                                         <Textarea
                                             placeholder={t("pretsCaisses.notesOptionnelles")}
-                                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             {...field}
                                         />
                                     </FormControl>
@@ -280,7 +328,7 @@ export function CreatePretDialog() {
                                 type="button"
                                 variant="outline"
                                 onClick={() => handleOpenChange(false)}
-                                className="rounded-[9px]"
+                                className="rounded-md"
                                 disabled={loading}
                             >
                                 {t("common.cancel")}
@@ -288,7 +336,7 @@ export function CreatePretDialog() {
                             <Button
                                 type="submit"
                                 disabled={loading || stockMax === 0}
-                                className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                                className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
                             >
                                 {loading ? t("pretsCaisses.preting") : t("common.create")}
                             </Button>

@@ -149,6 +149,7 @@ model Livreur {
   updatedAt DateTime @updatedAt
   tenantId  String
   Tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  PretCaisse PretCaisse[]
 
   @@unique([tenantId, cin])
   @@index([tenantId])
@@ -286,6 +287,7 @@ model PretCaisse {
   agriculteurId  String
   typeCaisseId   String
   livraisonId    String?
+  livreurId      String?
   createdById    String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime
@@ -293,12 +295,14 @@ model PretCaisse {
   Agriculteur    Agriculteur @relation(fields: [agriculteurId], references: [id])
   User           User        @relation(fields: [createdById], references: [id])
   Livraison      Livraison?  @relation(fields: [livraisonId], references: [id])
+  Livreur        Livreur?    @relation(fields: [livreurId], references: [id])
   Tenant         Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   TypeCaisse     TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
 
   @@index([agriculteurId])
   @@index([createdById])
   @@index([livraisonId])
+  @@index([livreurId])
   @@index([statut])
   @@index([tenantId])
   @@index([typeCaisseId])

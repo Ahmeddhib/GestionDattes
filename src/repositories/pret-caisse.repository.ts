@@ -68,6 +68,13 @@ export const pretCaisseRepository = {
                         dateLivraison: true,
                     },
                 },
+                Livreur: {
+                    select: {
+                        id: true,
+                        nom: true,
+                        telephone: true,
+                    },
+                },
             },
             orderBy: {
                 createdAt: "desc",
@@ -114,6 +121,13 @@ export const pretCaisseRepository = {
                         id: true,
                         numeroLot: true,
                         dateLivraison: true,
+                    },
+                },
+                Livreur: {
+                    select: {
+                        id: true,
+                        nom: true,
+                        telephone: true,
                     },
                 },
             },
@@ -217,6 +231,11 @@ export const pretCaisseRepository = {
                         connect: { id: data.livraisonId },
                     },
                 }),
+                ...(data.livreurId && {
+                    Livreur: {
+                        connect: { id: data.livreurId },
+                    },
+                }),
             },
             include: {
                 Agriculteur: true,
@@ -225,6 +244,13 @@ export const pretCaisseRepository = {
                     select: {
                         id: true,
                         name: true,
+                    },
+                },
+                Livreur: {
+                    select: {
+                        id: true,
+                        nom: true,
+                        telephone: true,
                     },
                 },
             },

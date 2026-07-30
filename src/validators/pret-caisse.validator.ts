@@ -12,6 +12,7 @@ export const createPretCaisseSchema = z.object({
         .min(1, "Le nombre doit être au moins 1"),
     observations: z.string().optional(),
     livraisonId: z.string().optional(),
+    livreurId: z.string().optional(),
 });
 
 /**

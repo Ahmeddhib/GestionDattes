@@ -22,6 +22,7 @@ export async function createPretAction(formData: FormData) {
             nombrePrete: formData.get("nombrePrete"),
             observations: formData.get("observations") || undefined,
             livraisonId: formData.get("livraisonId") || undefined,
+            livreurId: formData.get("livreurId") || undefined,
         };
 
         const parsed = createPretCaisseSchema.safeParse(rawData);

@@ -31,7 +31,8 @@
         "close": "Fermer",
         "update": "Mettre à jour",
         "actionIrreversible": "Cette action est irréversible.",
-        "appName": "Gestion des Dattes"
+        "appName": "Gestion des Dattes",
+        "optional": "facultatif"
     },
     "validation": {
         "required": "Ce champ est requis",
@@ -383,6 +384,9 @@
         "selectTypeCaisse": "Sélectionner un type de caisse",
         "agriculteur": "Agriculteur",
         "typeCaisse": "Type de Caisse",
+        "livreur": "Livreur",
+        "selectLivreur": "Sélectionner un livreur",
+        "remiseParAgriculteur": "Remise directe par l'agriculteur",
         "pretEnCours": "Prêts en cours",
         "historiquePrets": "Historique des prêts",
         "aucunPret": "Aucun prêt",

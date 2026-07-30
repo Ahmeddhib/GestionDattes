@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowDownToLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -24,6 +25,7 @@ type RetourDialogProps = {
 
 export function RetourDialog({ pret }: RetourDialogProps) {
     const { t } = useClientTranslations();
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -37,6 +39,7 @@ export function RetourDialog({ pret }: RetourDialogProps) {
         if (result.success) {
             toast.success("Retour enregistré avec succès");
             setOpen(false);
+            router.refresh();
         } else {
             toast.error(result.error || "Erreur lors du retour");
         }
@@ -45,11 +48,11 @@ export function RetourDialog({ pret }: RetourDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-[7px] text-green-600">
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-green-600">
                     <ArrowDownToLine className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[450px] bg-white">
+            <DialogContent className="rounded-lg sm:max-w-112.5 bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("pretsCaisses.retournerCaisses")}
@@ -59,7 +62,7 @@ export function RetourDialog({ pret }: RetourDialogProps) {
                     <input type="hidden" name="pretId" value={pret.id} />
 
                     {/* Info Prêt */}
-                    <div className="rounded-[9px] bg-[#FAF0DC] p-4 space-y-2">
+                    <div className="rounded-md bg-[#FAF0DC] p-4 space-y-2">
                         <p className="text-sm font-medium text-[#3D1C00]">
                             {pret.agriculteur.nom} {pret.agriculteur.prenom}
                         </p>
@@ -91,21 +94,21 @@ export function RetourDialog({ pret }: RetourDialogProps) {
                             min="1"
                             max={pret.nombreRestant}
                             required
-                            className="rounded-[7px] bg-white"
+                            className="rounded-sm bg-white"
                         />
                     </div>
 
                     {/* Observations */}
                     <div className="space-y-2">
                         <Label className="text-[#3D1C00]">{t("pretsCaisses.observations")}</Label>
-                        <Textarea name="observations" className="rounded-[7px] bg-white" />
+                        <Textarea name="observations" className="rounded-sm bg-white" />
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-[9px]">
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-md">
                             {t("common.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading} className="rounded-[9px] bg-green-600 hover:bg-green-700">
+                        <Button type="submit" disabled={loading} className="rounded-md bg-green-600 hover:bg-green-700">
                             {loading ? t("pretsCaisses.returning") : t("pretsCaisses.enregistrerRetour")}
                         </Button>
                     </div>

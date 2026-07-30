@@ -110,7 +110,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
         dateFin;
 
     return (
-        <div className="rounded-[14px] bg-white p-6 shadow-sm border border-[#C17A2B]/20">
+        <div className="rounded-lg bg-white p-6 shadow-sm border border-[#C17A2B]/20">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-4">
                 <h2 className="text-xl font-semibold text-[#3D1C00]">
                     {t("pretsCaisses.pretsCaisses")} ({filteredPrets.length})
@@ -120,7 +120,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => exportPretsToPDF(filteredPrets)}
-                        className="rounded-[9px] border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                        className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
                     >
                         <FileDown className="h-4 w-4 mr-2" />
                         {t("common.exportPDF")}
@@ -129,7 +129,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => exportPretsToExcel(filteredPrets)}
-                        className="rounded-[9px] border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                        className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
                     >
                         <FileSpreadsheet className="h-4 w-4 mr-2" />
                         {t("common.exportExcel")}
@@ -138,7 +138,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
             </div>
 
             {/* Filtres */}
-            <div className="mb-4 space-y-3 p-4 rounded-[9px] bg-[#FAF0DC]/50 border border-[#C17A2B]/20">
+            <div className="mb-4 space-y-3 p-4 rounded-md bg-[#FAF0DC]/50 border border-[#C17A2B]/20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     {/* Recherche */}
                     <div className="relative">
@@ -147,13 +147,13 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                             placeholder={t("common.search")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 rounded-[7px] border-[#C17A2B]/40 bg-white"
+                            className="pl-9 rounded-sm border-[#C17A2B]/40 bg-white"
                         />
                     </div>
 
                     {/* Filtre Agriculteur */}
                     <Select value={selectedAgriculteur} onValueChange={setSelectedAgriculteur}>
-                        <SelectTrigger className="rounded-[7px] border-[#C17A2B]/40 bg-white">
+                        <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
                             <SelectValue placeholder={t("pretsCaisses.filterAgriculteur")} />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
@@ -168,7 +168,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
 
                     {/* Filtre Type de Caisse */}
                     <Select value={selectedTypeCaisse} onValueChange={setSelectedTypeCaisse}>
-                        <SelectTrigger className="rounded-[7px] border-[#C17A2B]/40 bg-white">
+                        <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
                             <SelectValue placeholder={t("pretsCaisses.filterTypeCaisse")} />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
@@ -183,7 +183,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
 
                     {/* Filtre Statut */}
                     <Select value={selectedStatut} onValueChange={setSelectedStatut}>
-                        <SelectTrigger className="rounded-[7px] border-[#C17A2B]/40 bg-white">
+                        <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
                             <SelectValue placeholder={t("pretsCaisses.filterStatut")} />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
@@ -205,7 +205,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                             type="date"
                             value={dateDebut}
                             onChange={(e) => setDateDebut(e.target.value)}
-                            className="rounded-[7px] border-[#C17A2B]/40 bg-white"
+                            className="rounded-sm border-[#C17A2B]/40 bg-white"
                         />
                     </div>
                     <div>
@@ -216,7 +216,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                             type="date"
                             value={dateFin}
                             onChange={(e) => setDateFin(e.target.value)}
-                            className="rounded-[7px] border-[#C17A2B]/40 bg-white"
+                            className="rounded-sm border-[#C17A2B]/40 bg-white"
                         />
                     </div>
                     {hasActiveFilters && (
@@ -224,7 +224,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                             variant="outline"
                             size="sm"
                             onClick={resetFilters}
-                            className="rounded-[9px] border-[#C17A2B]/40 hover:bg-white"
+                            className="rounded-md border-[#C17A2B]/40 hover:bg-white"
                         >
                             <X className="h-4 w-4 mr-2" />
                             {t("common.resetFilters")}
