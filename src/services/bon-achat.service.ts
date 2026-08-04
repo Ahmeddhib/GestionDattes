@@ -20,20 +20,26 @@ export const bonAchatService = {
 
         // Convertit les Decimal Prisma en number : ces objets ne sont pas
         // sérialisables lorsqu'ils traversent la frontière Server → Client Component.
-        return bonsAchat.map((ba) => ({
-            ...ba,
-            Livraison: {
-                ...ba.Livraison,
-                Pesee: ba.Livraison.Pesee.map((p) => ({
-                    id: p.id,
-                    prixKg: p.prixKg,
-                    quantiteAcceptee: p.quantiteAcceptee.toNumber(),
-                    poidsNetTotal: p.poidsNetTotal.toNumber(),
-                    typeDate: p.TypeDate,
-                    typeCaisse: p.TypeCaisse,
-                })),
-            },
-        }));
+        return bonsAchat.map((ba) => {
+            const montantPaye = ba.PaiementAgriculteur.reduce((sum, p) => sum + p.montant, 0);
+            return {
+                ...ba,
+                montantPaye,
+                montantRestant: ba.montant - montantPaye,
+                PaiementAgriculteur: undefined,
+                Livraison: {
+                    ...ba.Livraison,
+                    Pesee: ba.Livraison.Pesee.map((p) => ({
+                        id: p.id,
+                        prixKg: p.prixKg,
+                        quantiteAcceptee: p.quantiteAcceptee.toNumber(),
+                        poidsNetTotal: p.poidsNetTotal.toNumber(),
+                        typeDate: p.TypeDate,
+                        typeCaisse: p.TypeCaisse,
+                    })),
+                },
+            };
+        });
     },
 
     async getById(tenantId: string, id: string) {
@@ -42,7 +48,13 @@ export const bonAchatService = {
         if (!bonAchat) {
             throw new Error("Bon d'achat introuvable dans cette Wakala");
         }
-        return bonAchat;
+        const montantPaye = bonAchat.PaiementAgriculteur.reduce((sum, p) => sum + p.montant, 0);
+        return {
+            ...bonAchat,
+            montantPaye,
+            montantRestant: bonAchat.montant - montantPaye,
+            PaiementAgriculteur: undefined,
+        };
     },
 
     /**

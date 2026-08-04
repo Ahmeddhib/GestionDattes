@@ -12,6 +12,16 @@ const ACTION_CONFIG: Record<
     CREATE_ROLE: { label: "Création rôle", variant: "success" },
     UPDATE_ROLE: { label: "Modification rôle", variant: "warning" },
     DELETE_ROLE: { label: "Suppression rôle", variant: "danger" },
+    CREATE_SAISON: { label: "Création saison", variant: "success" },
+    UPDATE_SAISON: { label: "Modification saison", variant: "warning" },
+    DELETE_SAISON: { label: "Suppression saison", variant: "danger" },
+    CREATE_PAIEMENT_AGRICULTEUR: { label: "Paiement agriculteur", variant: "success" },
+    CREATE_ENCAISSEMENT_CLIENT: { label: "Encaissement client", variant: "success" },
+    CREATE_DEPENSE_AUTRE: { label: "Création dépense", variant: "success" },
+    UPDATE_DEPENSE_AUTRE: { label: "Modification dépense", variant: "warning" },
+    DELETE_DEPENSE_AUTRE: { label: "Suppression dépense", variant: "danger" },
+    CREATE_VENTE: { label: "Création vente", variant: "success" },
+    UPDATE_VENTE: { label: "Modification vente", variant: "warning" },
 };
 
 interface ActionBadgeProps {

@@ -141,3 +141,205 @@ function translateStatus(statut: string): string {
     };
     return translations[statut] || statut;
 }
+
+function translateStatutSolde(statut: string): string {
+    const translations: Record<string, string> = {
+        EN_ATTENTE: "En attente",
+        PARTIEL: "Partiel",
+        PAYE: "Payé",
+    };
+    return translations[statut] || statut;
+}
+
+type PaiementAgriculteurForExport = {
+    numero: string;
+    Livraison: { Agriculteur: { code: string; nom: string; prenom: string } };
+    montant: number;
+    montantPaye: number;
+    montantRestant: number;
+    statut: string;
+    createdAt: Date;
+};
+
+export function exportPaiementsAgriculteursToPDF(
+    bonsAchat: PaiementAgriculteurForExport[],
+    title: string = "Paiements Agriculteurs"
+) {
+    const doc = new jsPDF();
+    const primaryColor: [number, number, number] = [193, 122, 43];
+    const textColor: [number, number, number] = [61, 28, 0];
+
+    doc.setFontSize(20);
+    doc.setTextColor(...textColor);
+    doc.text(title, 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
+
+    const tableData = bonsAchat.map((ba) => [
+        ba.numero,
+        `${ba.Livraison.Agriculteur.nom} ${ba.Livraison.Agriculteur.prenom}`,
+        ba.montant.toFixed(2),
+        ba.montantPaye.toFixed(2),
+        ba.montantRestant.toFixed(2),
+        translateStatutSolde(ba.statut),
+        new Date(ba.createdAt).toLocaleDateString("fr-FR"),
+    ]);
+
+    autoTable(doc, {
+        head: [["N° Bon", "Agriculteur", "Montant", "Payé", "Restant", "Statut", "Date"]],
+        body: tableData,
+        startY: 35,
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [250, 240, 220] },
+        margin: { top: 35 },
+    });
+
+    doc.save(`paiements-agriculteurs-${new Date().getTime()}.pdf`);
+}
+
+export function exportPaiementsAgriculteursToExcel(
+    bonsAchat: PaiementAgriculteurForExport[],
+    fileName: string = "paiements-agriculteurs"
+) {
+    const excelData = bonsAchat.map((ba) => ({
+        "N° Bon": ba.numero,
+        Agriculteur: `${ba.Livraison.Agriculteur.nom} ${ba.Livraison.Agriculteur.prenom}`,
+        Code: ba.Livraison.Agriculteur.code,
+        Montant: ba.montant,
+        Payé: ba.montantPaye,
+        Restant: ba.montantRestant,
+        Statut: translateStatutSolde(ba.statut),
+        Date: new Date(ba.createdAt).toLocaleDateString("fr-FR"),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Paiements Agriculteurs");
+    XLSX.writeFile(workbook, `${fileName}-${new Date().getTime()}.xlsx`);
+}
+
+type VenteForExport = {
+    Client: { nom: string };
+    StockDate: { TypeDate: { nom: string }; Livraison: { numeroLot: string } };
+    quantite: number;
+    prixUnitaire: number;
+    montant: number;
+    montantEncaisse: number;
+    montantRestant: number;
+    statut: string;
+    createdAt: Date;
+};
+
+export function exportVentesToPDF(ventes: VenteForExport[], title: string = "Ventes") {
+    const doc = new jsPDF();
+    const primaryColor: [number, number, number] = [193, 122, 43];
+    const textColor: [number, number, number] = [61, 28, 0];
+
+    doc.setFontSize(20);
+    doc.setTextColor(...textColor);
+    doc.text(title, 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
+
+    const tableData = ventes.map((v) => [
+        v.Client.nom,
+        `${v.StockDate.TypeDate.nom} (Lot ${v.StockDate.Livraison.numeroLot})`,
+        `${v.quantite.toFixed(2)} kg`,
+        v.prixUnitaire.toFixed(3),
+        v.montant.toFixed(2),
+        v.montantRestant.toFixed(2),
+        translateStatutSolde(v.statut),
+        new Date(v.createdAt).toLocaleDateString("fr-FR"),
+    ]);
+
+    autoTable(doc, {
+        head: [["Client", "Lot", "Quantité", "Prix U.", "Montant", "Restant", "Statut", "Date"]],
+        body: tableData,
+        startY: 35,
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [250, 240, 220] },
+        margin: { top: 35 },
+    });
+
+    doc.save(`ventes-${new Date().getTime()}.pdf`);
+}
+
+export function exportVentesToExcel(ventes: VenteForExport[], fileName: string = "ventes") {
+    const excelData = ventes.map((v) => ({
+        Client: v.Client.nom,
+        "Type de datte": v.StockDate.TypeDate.nom,
+        Lot: v.StockDate.Livraison.numeroLot,
+        "Quantité (kg)": v.quantite,
+        "Prix unitaire": v.prixUnitaire,
+        Montant: v.montant,
+        Encaissé: v.montantEncaisse,
+        Restant: v.montantRestant,
+        Statut: translateStatutSolde(v.statut),
+        Date: new Date(v.createdAt).toLocaleDateString("fr-FR"),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Ventes");
+    XLSX.writeFile(workbook, `${fileName}-${new Date().getTime()}.xlsx`);
+}
+
+type DepenseForExport = {
+    libelle: string;
+    categorie: string | null;
+    montant: number;
+    dateDepense: Date;
+    observations: string | null;
+};
+
+export function exportDepensesToPDF(depenses: DepenseForExport[], title: string = "Autres Dépenses") {
+    const doc = new jsPDF();
+    const primaryColor: [number, number, number] = [193, 122, 43];
+    const textColor: [number, number, number] = [61, 28, 0];
+
+    doc.setFontSize(20);
+    doc.setTextColor(...textColor);
+    doc.text(title, 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
+
+    const tableData = depenses.map((d) => [
+        d.libelle,
+        d.categorie || "-",
+        d.montant.toFixed(2),
+        new Date(d.dateDepense).toLocaleDateString("fr-FR"),
+        d.observations || "-",
+    ]);
+
+    autoTable(doc, {
+        head: [["Libellé", "Catégorie", "Montant", "Date", "Observations"]],
+        body: tableData,
+        startY: 35,
+        styles: { fontSize: 8, cellPadding: 3 },
+        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [250, 240, 220] },
+        margin: { top: 35 },
+    });
+
+    doc.save(`depenses-${new Date().getTime()}.pdf`);
+}
+
+export function exportDepensesToExcel(depenses: DepenseForExport[], fileName: string = "depenses") {
+    const excelData = depenses.map((d) => ({
+        Libellé: d.libelle,
+        Catégorie: d.categorie || "-",
+        Montant: d.montant,
+        Date: new Date(d.dateDepense).toLocaleDateString("fr-FR"),
+        Observations: d.observations || "-",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Dépenses");
+    XLSX.writeFile(workbook, `${fileName}-${new Date().getTime()}.xlsx`);
+}

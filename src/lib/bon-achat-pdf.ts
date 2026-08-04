@@ -4,6 +4,7 @@ import autoTable from "jspdf-autotable";
 export type BonAchatForInvoice = {
     numero: string;
     montant: number;
+    montantRestant?: number;
     observations: string | null;
     createdAt: Date;
     Livraison: {
@@ -134,7 +135,20 @@ function buildBonAchatInvoiceDoc(bonAchat: BonAchatForInvoice, tenant: TenantFor
     doc.setTextColor(...PRIMARY);
     doc.text(`${bonAchat.montant.toFixed(2)} TND`, pageWidth - 14, finalY, { align: "right" });
 
-    let y = finalY + 12;
+    let y = finalY + 8;
+
+    // Reste à payer (uniquement si un solde est fourni et qu'il reste un montant dû)
+    if (bonAchat.montantRestant !== undefined && bonAchat.montantRestant > 0) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...MUTED);
+        doc.text("Reste à payer", pageWidth - 70, y);
+        doc.setTextColor(220, 38, 38);
+        doc.text(`${bonAchat.montantRestant.toFixed(2)} TND`, pageWidth - 14, y, { align: "right" });
+        y += 8;
+    }
+
+    y += 4;
 
     // Observations
     if (bonAchat.observations) {

@@ -32,7 +32,10 @@
         "update": "Update",
         "actionIrreversible": "This action is irreversible.",
         "appName": "Date Management",
-        "optional": "optional"
+        "optional": "optional",
+        "total": "Total",
+        "actif": "Active",
+        "inactif": "Inactive"
     },
     "validation": {
         "required": "This field is required",
@@ -64,13 +67,19 @@
         "livreurs": "Delivery staff",
         "users": "Users",
         "roles": "Roles",
-        "auditLogs": "Audit Logs"
+        "auditLogs": "Audit Logs",
+        "bilanFinancier": "Financial Overview",
+        "paiementsAgriculteurs": "Farmer Payments",
+        "ventes": "Sales",
+        "depensesAutres": "Other Expenses",
+        "saisons": "Seasons"
     },
     "dashboard": {
         "title": "Dashboard",
         "overview": "Overview",
         "management": "Management",
-        "administration": "Administration"
+        "administration": "Administration",
+        "finance": "Finance"
     },
     "regions": {
         "title": "Regions",
@@ -315,6 +324,84 @@
         "stats": {
             "total": "Total orders",
             "montantTotal": "Total amount"
+        }
+    },
+    "finance": {
+        "bilan": {
+            "title": "Financial Overview",
+            "description": "Overview of the Wakala's cash inflows, outflows and balances",
+            "totalEncaisse": "Total collected",
+            "totalSorti": "Total paid out",
+            "tresorerieNette": "Net treasury",
+            "chiffreAffaires": "Revenue",
+            "creancesClients": "Client receivables",
+            "dettesAgriculteurs": "Farmer debts",
+            "resultatNet": "Net result",
+            "periode": "Period",
+            "periodeJour": "Today",
+            "periodeMois": "This month",
+            "periodeSaison": "Season",
+            "periodeAnnee": "This year",
+            "periodePersonnalisee": "Custom",
+            "selectSaison": "Select a season",
+            "exportPdf": "Export PDF"
+        },
+        "paiements": {
+            "title": "Farmer Payments",
+            "description": "Record and track advances/settlements paid to farmers on their purchase orders",
+            "montantTotal": "Total amount",
+            "montantPaye": "Amount paid",
+            "montantRestant": "Remaining balance",
+            "statut": "Status",
+            "statutEnAttente": "Pending",
+            "statutPartiel": "Partial",
+            "statutPaye": "Paid",
+            "enregistrerPaiement": "Record a payment",
+            "nouveauPaiement": "New payment",
+            "montant": "Amount",
+            "modePaiement": "Payment method",
+            "historique": "Payment history",
+            "enregistrement": "Recording...",
+            "paiementEnregistre": "Payment recorded successfully"
+        },
+        "saisons": {
+            "title": "Seasons",
+            "description": "Manage agricultural seasons for filtering the financial overview",
+            "nom": "Season name",
+            "dateDebut": "Start date",
+            "dateFin": "End date",
+            "active": "Active",
+            "nouvelleSaison": "New Season",
+            "modifierSaison": "Edit Season",
+            "searchPlaceholder": "Search a season...",
+            "deleteConfirm": "Are you sure you want to delete the season",
+            "cannotDelete": "Cannot delete this season because it has associated sales"
+        },
+        "ventes": {
+            "title": "Sales",
+            "description": "Record sales to clients and track collections until fully paid",
+            "nouvelleVente": "New Sale",
+            "modifierVente": "Edit Sale",
+            "client": "Client",
+            "lotStock": "Stock lot",
+            "quantite": "Quantity (kg)",
+            "prixUnitaire": "Unit price",
+            "montantTotal": "Total amount",
+            "enregistrerEncaissement": "Record a collection",
+            "nouvelEncaissement": "New collection",
+            "historiqueEncaissements": "Collection history",
+            "encaissementEnregistre": "Collection recorded successfully"
+        },
+        "depenses": {
+            "title": "Other Expenses",
+            "description": "Track miscellaneous expenses of the Wakala (excluding farmer payments)",
+            "nouvelleDepense": "New Expense",
+            "modifierDepense": "Edit Expense",
+            "libelle": "Description",
+            "categorie": "Category",
+            "montant": "Amount",
+            "searchPlaceholder": "Search an expense...",
+            "deleteConfirm": "Are you sure you want to delete the expense"
         }
     },
     "stockDattes": {

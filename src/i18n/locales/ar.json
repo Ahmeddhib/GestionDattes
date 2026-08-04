@@ -32,7 +32,10 @@
         "update": "تحديث",
         "actionIrreversible": "هذا الإجراء لا رجعة فيه.",
         "appName": "إدارة التمور",
-        "optional": "اختياري"
+        "optional": "اختياري",
+        "total": "الإجمالي",
+        "actif": "نشط",
+        "inactif": "غير نشط"
     },
     "validation": {
         "required": "هذا الحقل مطلوب",
@@ -64,13 +67,19 @@
         "livreurs": "الموصلون",
         "users": "المستخدمون",
         "roles": "الأدوار",
-        "auditLogs": "سجل التدقيق"
+        "auditLogs": "سجل التدقيق",
+        "bilanFinancier": "الميزانية المالية",
+        "paiementsAgriculteurs": "مدفوعات الفلاحين",
+        "ventes": "المبيعات",
+        "depensesAutres": "مصاريف أخرى",
+        "saisons": "المواسم"
     },
     "dashboard": {
         "title": "لوحة التحكم",
         "overview": "نظرة عامة",
         "management": "الإدارة",
-        "administration": "الإدارة العامة"
+        "administration": "الإدارة العامة",
+        "finance": "المالية"
     },
     "regions": {
         "title": "المناطق",
@@ -315,6 +324,84 @@
         "stats": {
             "total": "إجمالي السندات",
             "montantTotal": "المبلغ الإجمالي"
+        }
+    },
+    "finance": {
+        "bilan": {
+            "title": "الميزانية المالية الشاملة",
+            "description": "نظرة عامة على المداخيل والمصاريف والأرصدة المالية للوكالة",
+            "totalEncaisse": "إجمالي المحصل",
+            "totalSorti": "إجمالي المصروف",
+            "tresorerieNette": "الخزينة الصافية",
+            "chiffreAffaires": "رقم الأعمال",
+            "creancesClients": "ديون العملاء",
+            "dettesAgriculteurs": "ديون الفلاحين",
+            "resultatNet": "النتيجة الصافية",
+            "periode": "الفترة",
+            "periodeJour": "اليوم",
+            "periodeMois": "هذا الشهر",
+            "periodeSaison": "الموسم",
+            "periodeAnnee": "هذه السنة",
+            "periodePersonnalisee": "مخصصة",
+            "selectSaison": "اختر موسماً",
+            "exportPdf": "تصدير PDF"
+        },
+        "paiements": {
+            "title": "مدفوعات الفلاحين",
+            "description": "تسجيل ومتابعة الدفعات المسددة للفلاحين على سندات الشراء الخاصة بهم",
+            "montantTotal": "المبلغ الإجمالي",
+            "montantPaye": "المبلغ المدفوع",
+            "montantRestant": "المبلغ المتبقي",
+            "statut": "الحالة",
+            "statutEnAttente": "في الانتظار",
+            "statutPartiel": "جزئي",
+            "statutPaye": "مدفوع",
+            "enregistrerPaiement": "تسجيل دفعة",
+            "nouveauPaiement": "دفعة جديدة",
+            "montant": "المبلغ",
+            "modePaiement": "طريقة الدفع",
+            "historique": "سجل المدفوعات",
+            "enregistrement": "جارٍ التسجيل...",
+            "paiementEnregistre": "تم تسجيل الدفعة بنجاح"
+        },
+        "saisons": {
+            "title": "المواسم",
+            "description": "إدارة المواسم الفلاحية لتصفية الميزانية المالية",
+            "nom": "اسم الموسم",
+            "dateDebut": "تاريخ البداية",
+            "dateFin": "تاريخ النهاية",
+            "active": "نشط",
+            "nouvelleSaison": "موسم جديد",
+            "modifierSaison": "تعديل الموسم",
+            "searchPlaceholder": "البحث عن موسم...",
+            "deleteConfirm": "هل أنت متأكد من حذف الموسم",
+            "cannotDelete": "لا يمكن حذف هذا الموسم لوجود مبيعات مرتبطة به"
+        },
+        "ventes": {
+            "title": "المبيعات",
+            "description": "تسجيل المبيعات للعملاء ومتابعة التحصيلات حتى السداد الكامل",
+            "nouvelleVente": "بيع جديد",
+            "modifierVente": "تعديل البيع",
+            "client": "العميل",
+            "lotStock": "دفعة المخزون",
+            "quantite": "الكمية (كلغ)",
+            "prixUnitaire": "سعر الوحدة",
+            "montantTotal": "المبلغ الإجمالي",
+            "enregistrerEncaissement": "تسجيل تحصيل",
+            "nouvelEncaissement": "تحصيل جديد",
+            "historiqueEncaissements": "سجل التحصيلات",
+            "encaissementEnregistre": "تم تسجيل التحصيل بنجاح"
+        },
+        "depenses": {
+            "title": "مصاريف أخرى",
+            "description": "متابعة المصاريف المتنوعة للوكالة (باستثناء مدفوعات الفلاحين)",
+            "nouvelleDepense": "مصروف جديد",
+            "modifierDepense": "تعديل المصروف",
+            "libelle": "البيان",
+            "categorie": "الفئة",
+            "montant": "المبلغ",
+            "searchPlaceholder": "البحث عن مصروف...",
+            "deleteConfirm": "هل أنت متأكد من حذف المصروف"
         }
     },
     "stockDattes": {

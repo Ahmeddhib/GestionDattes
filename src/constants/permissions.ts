@@ -76,6 +76,34 @@ export const PERMISSIONS = {
 
     // Audit
     "audit:read": [ROLES.ADMIN, ROLES.DIRECTION],
+
+    // Saisons
+    "saison:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "saison:create": [ROLES.ADMIN, ROLES.DIRECTION],
+    "saison:update": [ROLES.ADMIN, ROLES.DIRECTION],
+    "saison:delete": [ROLES.ADMIN],
+
+    // Ventes
+    "vente:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "vente:create": [ROLES.ADMIN, ROLES.AGENT],
+    "vente:update": [ROLES.ADMIN, ROLES.AGENT],
+
+    // Paiements agriculteurs (règlement des bons d'achat)
+    "paiement-agriculteur:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "paiement-agriculteur:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
+
+    // Encaissements clients (règlement des ventes)
+    "encaissement-client:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "encaissement-client:create": [ROLES.ADMIN, ROLES.AGENT],
+
+    // Autres dépenses
+    "depense:read": [ROLES.ADMIN, ROLES.DIRECTION],
+    "depense:create": [ROLES.ADMIN, ROLES.DIRECTION],
+    "depense:update": [ROLES.ADMIN, ROLES.DIRECTION],
+    "depense:delete": [ROLES.ADMIN],
+
+    // Bilan financier global
+    "finance:read": [ROLES.ADMIN, ROLES.DIRECTION],
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

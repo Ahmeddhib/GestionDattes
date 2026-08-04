@@ -78,24 +78,105 @@ model AuditLog {
 }
 
 model BonAchat {
-  id           String    @id
-  numero       String
-  prixKg       Float
-  montant      Float
-  observations String?
-  livraisonId  String    @unique
-  createdById  String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime
-  tenantId     String
-  User         User      @relation(fields: [createdById], references: [id])
-  Livraison    Livraison @relation(fields: [livraisonId], references: [id])
-  Tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                  String                @id
+  numero              String
+  prixKg              Float
+  montant             Float
+  statut              StatutBonAchat        @default(EN_ATTENTE)
+  observations        String?
+  livraisonId         String                @unique
+  createdById         String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  tenantId            String
+  User                User                  @relation(fields: [createdById], references: [id])
+  Livraison           Livraison             @relation(fields: [livraisonId], references: [id])
+  Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  PaiementAgriculteur PaiementAgriculteur[]
 
   @@unique([tenantId, numero])
   @@index([createdById])
   @@index([numero])
   @@index([tenantId])
+}
+
+model PaiementAgriculteur {
+  id           String   @id
+  montant      Float
+  datePaiement DateTime @default(now())
+  modePaiement String?
+  observations String?
+  bonAchatId   String
+  createdById  String
+  createdAt    DateTime @default(now())
+  tenantId     String
+  BonAchat     BonAchat @relation(fields: [bonAchatId], references: [id])
+  User         User     @relation(fields: [createdById], references: [id])
+  Tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([bonAchatId])
+  @@index([createdById])
+  @@index([tenantId])
+  @@index([datePaiement])
+}
+
+model EncaissementClient {
+  id               String   @id
+  montant          Float
+  dateEncaissement DateTime @default(now())
+  modePaiement     String?
+  observations     String?
+  venteId          String
+  createdById      String
+  createdAt        DateTime @default(now())
+  tenantId         String
+  Vente            Vente    @relation(fields: [venteId], references: [id])
+  User             User     @relation(fields: [createdById], references: [id])
+  Tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([venteId])
+  @@index([createdById])
+  @@index([tenantId])
+  @@index([dateEncaissement])
+}
+
+model Saison {
+  id          String   @id
+  nom         String
+  dateDebut   DateTime
+  dateFin     DateTime
+  active      Boolean  @default(true)
+  tenantId    String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  Tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  User        User     @relation(fields: [createdById], references: [id])
+  Vente       Vente[]
+
+  @@unique([tenantId, nom])
+  @@index([tenantId])
+  @@index([dateDebut])
+  @@index([dateFin])
+}
+
+model DepenseAutre {
+  id           String   @id
+  libelle      String
+  montant      Float
+  categorie    String?
+  dateDepense  DateTime @default(now())
+  observations String?
+  createdById  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+  tenantId     String
+  User         User     @relation(fields: [createdById], references: [id])
+  Tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([tenantId])
+  @@index([dateDepense])
 }
 
 model BonSortie {
@@ -139,16 +220,16 @@ model Client {
 }
 
 model Livreur {
-  id        String   @id @default(cuid())
-  nom       String
-  telephone String?
-  cin       String?
-  vehicule  String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tenantId  String
-  Tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id         String       @id @default(cuid())
+  nom        String
+  telephone  String?
+  cin        String?
+  vehicule   String?
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  tenantId   String
+  Tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   PretCaisse PretCaisse[]
 
   @@unique([tenantId, cin])
@@ -235,28 +316,28 @@ model LivraisonTypeCaisse {
 }
 
 model Pesee {
-  id             String        @id @default(cuid())
-  livraisonId    String
-  agriculteurId  String
-  typeCaisseId   String
-  typeDateId     String
-  tareKg         Decimal       @db.Decimal(6, 2)
-  nombreCaisses  Int
-  poidsBrutTotal Decimal       @db.Decimal(8, 2)
-  poidsTareTotal Decimal       @db.Decimal(8, 2)
-  poidsNetTotal  Decimal       @db.Decimal(8, 2)
-  poidsBrutMoyen Decimal       @db.Decimal(6, 2)
-  poidsNetMoyen  Decimal       @db.Decimal(6, 2)
-  prixKg         Float         @default(0)
-  quantiteAcceptee Decimal     @db.Decimal(8, 2) @default(0)
-  createdAt      DateTime      @default(now())
-  tenantId       String
-  Caisses        PeseeCaisse[]
-  Livraison      Livraison     @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
-  Agriculteur    Agriculteur   @relation(fields: [agriculteurId], references: [id])
-  TypeCaisse     TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
-  TypeDate       TypeDate      @relation(fields: [typeDateId], references: [id])
-  Tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id               String        @id @default(cuid())
+  livraisonId      String
+  agriculteurId    String
+  typeCaisseId     String
+  typeDateId       String
+  tareKg           Decimal       @db.Decimal(6, 2)
+  nombreCaisses    Int
+  poidsBrutTotal   Decimal       @db.Decimal(8, 2)
+  poidsTareTotal   Decimal       @db.Decimal(8, 2)
+  poidsNetTotal    Decimal       @db.Decimal(8, 2)
+  poidsBrutMoyen   Decimal       @db.Decimal(6, 2)
+  poidsNetMoyen    Decimal       @db.Decimal(6, 2)
+  prixKg           Float         @default(0)
+  quantiteAcceptee Decimal       @default(0) @db.Decimal(8, 2)
+  createdAt        DateTime      @default(now())
+  tenantId         String
+  Caisses          PeseeCaisse[]
+  Livraison        Livraison     @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
+  Agriculteur      Agriculteur   @relation(fields: [agriculteurId], references: [id])
+  TypeCaisse       TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
+  TypeDate         TypeDate      @relation(fields: [typeDateId], references: [id])
+  Tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([livraisonId, typeCaisseId, typeDateId])
   @@index([livraisonId])
@@ -357,34 +438,38 @@ model StockDate {
 }
 
 model Tenant {
-  id              String            @id @default(dbgenerated("(gen_random_uuid())::text"))
-  name            String
-  code            String            @unique
-  active          Boolean           @default(true)
-  address         String?
-  phone           String?
-  email           String?
-  settings        Json?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @default(now())
-  Agriculteur     Agriculteur[]
-  Analyse         Analyse[]
-  AuditLog        AuditLog[]
-  BonAchat        BonAchat[]
-  BonSortie       BonSortie[]
-  Client          Client[]
-  Conditionnement Conditionnement[]
-  Echantillon     Echantillon[]
-  Livraison       Livraison[]
-  Livreur         Livreur[]
-  Pesee           Pesee[]
-  PretCaisse      PretCaisse[]
-  Region          Region[]
-  StockDate       StockDate[]
-  TenantUser      TenantUser[]
-  TypeCaisse      TypeCaisse[]
-  TypeDate        TypeDate[]
-  Vente           Vente[]
+  id                  String                @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name                String
+  code                String                @unique
+  active              Boolean               @default(true)
+  address             String?
+  phone               String?
+  email               String?
+  settings            Json?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+  Agriculteur         Agriculteur[]
+  Analyse             Analyse[]
+  AuditLog            AuditLog[]
+  BonAchat            BonAchat[]
+  BonSortie           BonSortie[]
+  Client              Client[]
+  Conditionnement     Conditionnement[]
+  Echantillon         Echantillon[]
+  Livraison           Livraison[]
+  Livreur             Livreur[]
+  Pesee               Pesee[]
+  PretCaisse          PretCaisse[]
+  Region              Region[]
+  StockDate           StockDate[]
+  TenantUser          TenantUser[]
+  TypeCaisse          TypeCaisse[]
+  TypeDate            TypeDate[]
+  Vente               Vente[]
+  PaiementAgriculteur PaiementAgriculteur[]
+  EncaissementClient  EncaissementClient[]
+  Saison              Saison[]
+  DepenseAutre        DepenseAutre[]
 
   @@index([active])
   @@index([code])
@@ -445,43 +530,52 @@ model TypeDate {
 }
 
 model User {
-  id         String       @id
-  name       String
-  email      String       @unique
-  password   String
-  active     Boolean      @default(true)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  AuditLog   AuditLog[]
-  BonAchat   BonAchat[]
-  BonSortie  BonSortie[]
-  PretCaisse PretCaisse[]
-  TenantUser TenantUser[]
-  Vente      Vente[]
+  id                  String                @id
+  name                String
+  email               String                @unique
+  password            String
+  active              Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  AuditLog            AuditLog[]
+  BonAchat            BonAchat[]
+  BonSortie           BonSortie[]
+  PretCaisse          PretCaisse[]
+  TenantUser          TenantUser[]
+  Vente               Vente[]
+  PaiementAgriculteur PaiementAgriculteur[]
+  EncaissementClient  EncaissementClient[]
+  Saison              Saison[]
+  DepenseAutre        DepenseAutre[]
 
   @@index([email])
 }
 
 model Vente {
-  id           String    @id
-  date         DateTime  @default(now())
-  quantite     Float
-  prixUnitaire Float
-  montant      Float
-  clientId     String
-  stockId      String
-  createdById  String
-  createdAt    DateTime  @default(now())
-  tenantId     String
-  Client       Client    @relation(fields: [clientId], references: [id])
-  User         User      @relation(fields: [createdById], references: [id])
-  StockDate    StockDate @relation(fields: [stockId], references: [id])
-  Tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                 String               @id
+  date               DateTime             @default(now())
+  quantite           Float
+  prixUnitaire       Float
+  montant            Float
+  statut             StatutVente          @default(EN_ATTENTE)
+  clientId           String
+  stockId            String
+  saisonId           String?
+  createdById        String
+  createdAt          DateTime             @default(now())
+  tenantId           String
+  Client             Client               @relation(fields: [clientId], references: [id])
+  User               User                 @relation(fields: [createdById], references: [id])
+  StockDate          StockDate            @relation(fields: [stockId], references: [id])
+  Saison             Saison?              @relation(fields: [saisonId], references: [id])
+  Tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  EncaissementClient EncaissementClient[]
 
   @@index([clientId])
   @@index([createdById])
   @@index([date])
   @@index([stockId])
+  @@index([saisonId])
   @@index([tenantId])
 }
 
@@ -537,6 +631,26 @@ enum AuditAction {
   UPDATE_TENANT
   ACTIVATE_TENANT
   DEACTIVATE_TENANT
+  CREATE_SAISON
+  UPDATE_SAISON
+  DELETE_SAISON
+  CREATE_PAIEMENT_AGRICULTEUR
+  CREATE_ENCAISSEMENT_CLIENT
+  CREATE_DEPENSE_AUTRE
+  UPDATE_DEPENSE_AUTRE
+  DELETE_DEPENSE_AUTRE
+}
+
+enum StatutBonAchat {
+  EN_ATTENTE
+  PARTIEL
+  PAYE
+}
+
+enum StatutVente {
+  EN_ATTENTE
+  PARTIEL
+  PAYE
 }
 
 enum StatutPret {

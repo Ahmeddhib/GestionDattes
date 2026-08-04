@@ -32,7 +32,10 @@
         "update": "Mettre à jour",
         "actionIrreversible": "Cette action est irréversible.",
         "appName": "Gestion des Dattes",
-        "optional": "facultatif"
+        "optional": "facultatif",
+        "total": "Total",
+        "actif": "Actif",
+        "inactif": "Inactif"
     },
     "validation": {
         "required": "Ce champ est requis",
@@ -64,13 +67,19 @@
         "livreurs": "Livreurs",
         "users": "Utilisateurs",
         "roles": "Rôles",
-        "auditLogs": "Journal d'audit"
+        "auditLogs": "Journal d'audit",
+        "bilanFinancier": "Bilan Financier",
+        "paiementsAgriculteurs": "Paiements Agriculteurs",
+        "ventes": "Ventes",
+        "depensesAutres": "Autres Dépenses",
+        "saisons": "Saisons"
     },
     "dashboard": {
         "title": "Tableau de bord",
         "overview": "Vue d'ensemble",
         "management": "Gestion",
-        "administration": "Administration"
+        "administration": "Administration",
+        "finance": "Finance"
     },
     "regions": {
         "title": "Régions",
@@ -315,6 +324,84 @@
         "stats": {
             "total": "Total bons",
             "montantTotal": "Montant total"
+        }
+    },
+    "finance": {
+        "bilan": {
+            "title": "Bilan Financier Global",
+            "description": "Vue d'ensemble des entrées, sorties et soldes financiers de la Wakala",
+            "totalEncaisse": "Total encaissé",
+            "totalSorti": "Total sorti",
+            "tresorerieNette": "Trésorerie nette",
+            "chiffreAffaires": "Chiffre d'affaires",
+            "creancesClients": "Créances clients",
+            "dettesAgriculteurs": "Dettes agriculteurs",
+            "resultatNet": "Résultat net",
+            "periode": "Période",
+            "periodeJour": "Aujourd'hui",
+            "periodeMois": "Ce mois",
+            "periodeSaison": "Saison",
+            "periodeAnnee": "Cette année",
+            "periodePersonnalisee": "Personnalisée",
+            "selectSaison": "Sélectionner une saison",
+            "exportPdf": "Exporter PDF"
+        },
+        "paiements": {
+            "title": "Paiements Agriculteurs",
+            "description": "Enregistrer et suivre les avances/règlements versés aux agriculteurs sur leurs bons d'achat",
+            "montantTotal": "Montant total",
+            "montantPaye": "Montant payé",
+            "montantRestant": "Reste à payer",
+            "statut": "Statut",
+            "statutEnAttente": "En attente",
+            "statutPartiel": "Partiel",
+            "statutPaye": "Payé",
+            "enregistrerPaiement": "Enregistrer un paiement",
+            "nouveauPaiement": "Nouveau paiement",
+            "montant": "Montant",
+            "modePaiement": "Mode de paiement",
+            "historique": "Historique des paiements",
+            "enregistrement": "Enregistrement...",
+            "paiementEnregistre": "Paiement enregistré avec succès"
+        },
+        "saisons": {
+            "title": "Saisons",
+            "description": "Gestion des saisons agricoles pour le filtrage du bilan financier",
+            "nom": "Nom de la saison",
+            "dateDebut": "Date de début",
+            "dateFin": "Date de fin",
+            "active": "Active",
+            "nouvelleSaison": "Nouvelle Saison",
+            "modifierSaison": "Modifier la Saison",
+            "searchPlaceholder": "Rechercher une saison...",
+            "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la saison",
+            "cannotDelete": "Impossible de supprimer cette saison car elle a des ventes associées"
+        },
+        "ventes": {
+            "title": "Ventes",
+            "description": "Enregistrer les ventes aux clients et suivre les encaissements jusqu'au paiement complet",
+            "nouvelleVente": "Nouvelle Vente",
+            "modifierVente": "Modifier la Vente",
+            "client": "Client",
+            "lotStock": "Lot de stock",
+            "quantite": "Quantité (kg)",
+            "prixUnitaire": "Prix unitaire",
+            "montantTotal": "Montant total",
+            "enregistrerEncaissement": "Enregistrer un encaissement",
+            "nouvelEncaissement": "Nouvel encaissement",
+            "historiqueEncaissements": "Historique des encaissements",
+            "encaissementEnregistre": "Encaissement enregistré avec succès"
+        },
+        "depenses": {
+            "title": "Autres Dépenses",
+            "description": "Suivi des dépenses diverses de la Wakala (hors paiements agriculteurs)",
+            "nouvelleDepense": "Nouvelle Dépense",
+            "modifierDepense": "Modifier la Dépense",
+            "libelle": "Libellé",
+            "categorie": "Catégorie",
+            "montant": "Montant",
+            "searchPlaceholder": "Rechercher une dépense...",
+            "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la dépense"
         }
     },
     "stockDattes": {

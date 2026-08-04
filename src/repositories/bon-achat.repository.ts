@@ -53,6 +53,7 @@ export const bonAchatRepository = {
                     },
                 },
                 User: { select: { id: true, name: true } },
+                PaiementAgriculteur: { select: { montant: true } },
             },
             orderBy: { createdAt: "desc" },
         });
@@ -71,6 +72,7 @@ export const bonAchatRepository = {
                     },
                 },
                 User: { select: { id: true, name: true } },
+                PaiementAgriculteur: { select: { montant: true } },
             },
         });
     },

@@ -21,6 +21,11 @@ import {
     Scale,
     Receipt,
     Warehouse,
+    CalendarRange,
+    HandCoins,
+    ShoppingCart,
+    Wallet2,
+    Wallet,
 } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
@@ -110,6 +115,36 @@ export function Sidebar({ user }: SidebarProps) {
             ],
         },
         {
+            title: t("dashboard.finance"),
+            items: [
+                {
+                    href: "/dashboard/finance",
+                    label: t("nav.bilanFinancier"),
+                    icon: Wallet,
+                },
+                {
+                    href: "/dashboard/finance/paiements-agriculteurs",
+                    label: t("nav.paiementsAgriculteurs"),
+                    icon: HandCoins,
+                },
+                {
+                    href: "/dashboard/finance/ventes",
+                    label: t("nav.ventes"),
+                    icon: ShoppingCart,
+                },
+                {
+                    href: "/dashboard/finance/depenses",
+                    label: t("nav.depensesAutres"),
+                    icon: Wallet2,
+                },
+                {
+                    href: "/dashboard/finance/saisons",
+                    label: t("nav.saisons"),
+                    icon: CalendarRange,
+                },
+            ],
+        },
+        {
             title: t("dashboard.administration"),
             items: [
                 {
@@ -163,7 +198,7 @@ export function Sidebar({ user }: SidebarProps) {
                                         key={item.href}
                                         href={item.href}
                                         className={cn(
-                                            "flex items-center gap-3 px-4 py-3 rounded-[9px] transition-all",
+                                            "flex items-center gap-3 px-4 py-3 rounded-md transition-all",
                                             "hover:bg-white/10",
                                             isActive && "bg-dattes-600 text-white shadow-lg"
                                         )}
@@ -189,7 +224,7 @@ export function Sidebar({ user }: SidebarProps) {
                         </div>
                     </div>
                     <button
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-[9px] bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
                         onClick={async () => {
                             // Nettoyer les données de wakala côté client
                             sessionStorage.removeItem("selectedWakalaId");

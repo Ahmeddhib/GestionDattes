@@ -13,6 +13,9 @@ export type BonAchat = {
     numero: string;
     prixKg: number;
     montant: number;
+    montantPaye?: number;
+    montantRestant?: number;
+    statut?: "EN_ATTENTE" | "PARTIEL" | "PAYE";
     observations: string | null;
     createdAt: Date;
     Livraison: {
@@ -99,6 +102,20 @@ export const createBonsAchatColumns = (
                 {row.getValue<number>("montant").toFixed(2)}
             </div>
         ),
+    },
+    {
+        accessorKey: "statut",
+        header: t("finance.paiements.statut"),
+        cell: ({ row }) => {
+            const statut = row.original.statut ?? "EN_ATTENTE";
+            const config: Record<string, { labelKey: string; className: string }> = {
+                EN_ATTENTE: { labelKey: "finance.paiements.statutEnAttente", className: "bg-gray-200 text-gray-700" },
+                PARTIEL: { labelKey: "finance.paiements.statutPartiel", className: "bg-amber-500 hover:bg-amber-600" },
+                PAYE: { labelKey: "finance.paiements.statutPaye", className: "bg-green-600 hover:bg-green-700" },
+            };
+            const c = config[statut];
+            return <Badge className={c.className}>{t(c.labelKey)}</Badge>;
+        },
     },
     {
         accessorKey: "createdAt",
