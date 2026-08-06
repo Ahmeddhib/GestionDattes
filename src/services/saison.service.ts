@@ -12,9 +12,9 @@ export const saisonService = {
         return saisonRepository.findAll(tenantId);
     },
 
-    async getActive(tenantId: string) {
+    async getOuverte(tenantId: string) {
         await requirePermission("saison:read");
-        return saisonRepository.findActive(tenantId);
+        return saisonRepository.findOuverte(tenantId);
     },
 
     async getById(tenantId: string, id: string) {
@@ -31,6 +31,15 @@ export const saisonService = {
     async create(tenantId: string, userId: string, data: CreateSaisonInput) {
         await requirePermission("saison:create");
 
+        if (data.statut === "OUVERTE") {
+            const dejaOuverte = await saisonRepository.findOuverte(tenantId);
+            if (dejaOuverte) {
+                throw new Error(
+                    `Impossible de créer une saison OUVERTE : "${dejaOuverte.nom}" est déjà ouverte. Clôturez-la d'abord.`
+                );
+            }
+        }
+
         const saison = await saisonRepository.create(tenantId, userId, data);
 
         await auditService.log({
@@ -45,6 +54,10 @@ export const saisonService = {
         return saison;
     },
 
+    /**
+     * Corrige le nom/les dates d'une saison — le statut ne se change jamais
+     * ici (seule la transaction de clôture peut passer une saison à CLOTUREE).
+     */
     async update(tenantId: string, userId: string, data: UpdateSaisonInput) {
         await requirePermission("saison:update");
 
@@ -74,6 +87,10 @@ export const saisonService = {
             throw new Error(
                 `Impossible de supprimer cette saison car elle a ${saison._count.Vente} vente(s) associée(s)`
             );
+        }
+
+        if (saison.statut === "OUVERTE") {
+            throw new Error("Impossible de supprimer la saison ouverte");
         }
 
         await saisonRepository.delete(tenantId, id);

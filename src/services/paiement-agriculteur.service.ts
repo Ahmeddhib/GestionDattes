@@ -2,6 +2,7 @@ import { paiementAgriculteurRepository } from "@/repositories/paiement-agriculte
 import { bonAchatRepository } from "@/repositories/bon-achat.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
+import { getSaisonOuverte } from "@/lib/saison-guard";
 import { prisma } from "@/lib/prisma";
 import type { CreatePaiementAgriculteurInput } from "@/validators/paiement-agriculteur.validator";
 
@@ -57,8 +58,10 @@ export const paiementAgriculteurService = {
     async enregistrerPaiement(tenantId: string, userId: string, data: CreatePaiementAgriculteurInput) {
         await requirePermission("paiement-agriculteur:create");
 
+        const saison = await getSaisonOuverte(tenantId);
+
         const result = await prisma.$transaction(async (tx) => {
-            return paiementAgriculteurRepository.enregistrer(data, tenantId, userId, tx);
+            return paiementAgriculteurRepository.enregistrer(data, tenantId, userId, saison.id, tx);
         });
 
         await auditService.log({

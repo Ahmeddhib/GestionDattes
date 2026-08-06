@@ -151,6 +151,7 @@ export const livraisonRepository = {
         tenantId: string,
         numeroLot: string,
         stockGroups: { typeDateId: string; quantite: number }[],
+        saisonId: string,
         client: DbClient = prisma
     ) {
         return client.livraison.create({
@@ -161,6 +162,7 @@ export const livraisonRepository = {
                 quantiteLivree: data.quantiteLivree,
                 quantiteAcceptee: data.quantiteAcceptee,
                 agriculteurId: data.agriculteurId,
+                saisonId,
                 tenantId,
                 createdAt: new Date(),
                 updatedAt: new Date(),

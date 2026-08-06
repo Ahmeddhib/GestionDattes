@@ -54,6 +54,7 @@ export const encaissementClientRepository = {
         data: CreateEncaissementClientInput,
         tenantId: string,
         createdById: string,
+        saisonId: string,
         client: DbClient
     ) {
         const vente = await client.vente.findFirst({
@@ -84,6 +85,7 @@ export const encaissementClientRepository = {
                 modePaiement: data.modePaiement || null,
                 observations: data.observations || null,
                 venteId: data.venteId,
+                saisonId,
                 createdById,
                 tenantId,
             },

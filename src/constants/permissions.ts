@@ -82,6 +82,7 @@ export const PERMISSIONS = {
     "saison:create": [ROLES.ADMIN, ROLES.DIRECTION],
     "saison:update": [ROLES.ADMIN, ROLES.DIRECTION],
     "saison:delete": [ROLES.ADMIN],
+    "saison:cloturer": [ROLES.ADMIN],
 
     // Ventes
     "vente:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],

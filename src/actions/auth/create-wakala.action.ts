@@ -70,7 +70,24 @@ export async function createWakalaAction(data: { name: string; code: string }) {
                 },
             });
 
-            // 3. Créer un log d'audit
+            // 3. Créer la saison ouverte par défaut — toute nouvelle Wakala doit
+            // avoir immédiatement une saison OUVERTE pour que ses premières
+            // opérations (livraisons, ventes...) puissent s'y rattacher.
+            const now = new Date();
+            await tx.saison.create({
+                data: {
+                    id: createId(),
+                    nom: `Saison ${now.getFullYear()}-${now.getFullYear() + 1}`,
+                    dateDebut: new Date(now.getFullYear(), 0, 1),
+                    dateFin: new Date(now.getFullYear(), 11, 31),
+                    statut: "OUVERTE",
+                    tenantId: tenant.id,
+                    createdById: session.user.id,
+                    updatedAt: now,
+                },
+            });
+
+            // 4. Créer un log d'audit
             await tx.auditLog.create({
                 data: {
                     id: createId(),

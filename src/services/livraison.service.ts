@@ -7,6 +7,7 @@ import { checkPermission } from "@/lib/permissions";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ROLES } from "@/constants/roles";
+import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import type { CreateLivraisonInput, UpdateLivraisonInput } from "@/validators/livraison.validator";
 
 /**
@@ -162,6 +163,7 @@ export const livraisonService = {
 
         // Générer le numéro de lot
         const numeroLot = await livraisonRepository.generateNumeroLot(tenantId);
+        const saison = await getSaisonOuverte(tenantId);
 
         // Une ligne de StockDate par typeDateId distinct, basée sur la quantité déclarée
         // (cette voie standalone n'a pas de pesée réelle en amont, contrairement au wizard).
@@ -179,7 +181,8 @@ export const livraisonService = {
             data,
             tenantId,
             numeroLot,
-            Array.from(stockGroups, ([typeDateId, quantite]) => ({ typeDateId, quantite }))
+            Array.from(stockGroups, ([typeDateId, quantite]) => ({ typeDateId, quantite })),
+            saison.id
         );
 
         // Calculer la quantité totale pour l'audit log
@@ -213,6 +216,8 @@ export const livraisonService = {
         if (!existing) {
             throw new Error("Livraison introuvable");
         }
+
+        await assertSaisonOuverte(tenantId, existing.saisonId);
 
         const session = await auth();
         const canNegotiate = session?.user.role === ROLES.ADMIN || session?.user.role === ROLES.DIRECTION;

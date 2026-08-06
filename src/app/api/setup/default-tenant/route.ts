@@ -55,6 +55,22 @@ export async function GET() {
                         active: true,
                     },
                 });
+
+                // Toute nouvelle Wakala doit avoir immédiatement une saison
+                // OUVERTE pour que ses premières opérations puissent s'y rattacher.
+                const now = new Date();
+                await prisma.saison.create({
+                    data: {
+                        id: `saison_${Date.now()}`,
+                        nom: `Saison ${now.getFullYear()}-${now.getFullYear() + 1}`,
+                        dateDebut: new Date(now.getFullYear(), 0, 1),
+                        dateFin: new Date(now.getFullYear(), 11, 31),
+                        statut: "OUVERTE",
+                        tenantId: defaultTenant.id,
+                        createdById: adminUser.id,
+                        updatedAt: now,
+                    },
+                });
             }
         }
 

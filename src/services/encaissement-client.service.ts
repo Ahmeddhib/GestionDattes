@@ -2,6 +2,7 @@ import { encaissementClientRepository } from "@/repositories/encaissement-client
 import { venteRepository } from "@/repositories/vente.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
+import { getSaisonOuverte } from "@/lib/saison-guard";
 import { prisma } from "@/lib/prisma";
 import type { CreateEncaissementClientInput } from "@/validators/encaissement-client.validator";
 
@@ -54,8 +55,10 @@ export const encaissementClientService = {
     ) {
         await requirePermission("encaissement-client:create");
 
+        const saison = await getSaisonOuverte(tenantId);
+
         const result = await prisma.$transaction(async (tx) => {
-            return encaissementClientRepository.enregistrer(data, tenantId, userId, tx);
+            return encaissementClientRepository.enregistrer(data, tenantId, userId, saison.id, tx);
         });
 
         await auditService.log({

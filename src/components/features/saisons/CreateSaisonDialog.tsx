@@ -36,7 +36,7 @@ const formSchema = z
         nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
         dateDebut: z.string().min(1, "La date de début est requise"),
         dateFin: z.string().min(1, "La date de fin est requise"),
-        active: z.boolean(),
+        ouverte: z.boolean(),
     })
     .refine((data) => new Date(data.dateFin) > new Date(data.dateDebut), {
         message: "La date de fin doit être après la date de début",
@@ -53,14 +53,19 @@ export function CreateSaisonDialog() {
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
-        defaultValues: { nom: "", dateDebut: "", dateFin: "", active: true },
+        defaultValues: { nom: "", dateDebut: "", dateFin: "", ouverte: false },
     });
 
     const onSubmit = async (data: FormData) => {
         try {
             setIsLoading(true);
 
-            const result = await createSaisonAction(data);
+            const result = await createSaisonAction({
+                nom: data.nom,
+                dateDebut: data.dateDebut,
+                dateFin: data.dateFin,
+                statut: data.ouverte ? "OUVERTE" : "CLOTUREE",
+            });
 
             if (!result.success) {
                 toast.error(result.error || t("messages.error.generic"));
@@ -158,7 +163,7 @@ export function CreateSaisonDialog() {
 
                         <FormField
                             control={form.control}
-                            name="active"
+                            name="ouverte"
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-center gap-2 space-y-0">
                                     <FormControl>
@@ -168,7 +173,7 @@ export function CreateSaisonDialog() {
                                             disabled={isLoading}
                                         />
                                     </FormControl>
-                                    <FormLabel className="!mt-0">{t("finance.saisons.active")}</FormLabel>
+                                    <FormLabel className="!mt-0">{t("finance.saisons.creerOuverte")}</FormLabel>
                                 </FormItem>
                             )}
                         />

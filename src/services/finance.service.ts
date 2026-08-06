@@ -6,7 +6,7 @@ import {
     startOfYear,
     endOfYear,
 } from "date-fns";
-import { financeRepository, type DateRangeFilter } from "@/repositories/finance.repository";
+import { financeRepository, type PeriodFilter } from "@/repositories/finance.repository";
 import { saisonRepository } from "@/repositories/saison.repository";
 import { requirePermission } from "@/lib/permissions";
 
@@ -20,18 +20,20 @@ export interface BilanFilters {
 }
 
 /**
- * Résout un filtre de période en plage de dates concrète {gte, lte}.
- * Fonction pure, testable indépendamment de la couche HTTP/DB.
+ * Résout un filtre de période en filtre concret pour les agrégats du bilan :
+ * soit un saisonId exact (jamais déduit de dates — le métier veut un
+ * rattachement direct), soit une plage de dates pour jour/mois/année/
+ * personnalisée. Fonction pure, testable indépendamment de la couche HTTP/DB.
  */
-export async function resolvePeriodRange(
+export async function resolvePeriodFilter(
     tenantId: string,
     filters: BilanFilters
-): Promise<{ range: DateRangeFilter; label: string }> {
+): Promise<{ filter: PeriodFilter; label: string }> {
     const now = new Date();
 
     if (filters.periode === "personnalisee" && filters.dateFrom && filters.dateTo) {
         return {
-            range: { gte: filters.dateFrom, lte: filters.dateTo },
+            filter: { range: { gte: filters.dateFrom, lte: filters.dateTo } },
             label: `${filters.dateFrom.toLocaleDateString("fr-FR")} - ${filters.dateTo.toLocaleDateString("fr-FR")}`,
         };
     }
@@ -40,26 +42,26 @@ export async function resolvePeriodRange(
         const saison = await saisonRepository.findById(tenantId, filters.saisonId);
         if (saison) {
             return {
-                range: { gte: saison.dateDebut, lte: saison.dateFin },
+                filter: { saisonId: saison.id },
                 label: saison.nom,
             };
         }
     }
 
     if (filters.periode === "jour") {
-        return { range: { gte: startOfDay(now), lte: endOfDay(now) }, label: "Aujourd'hui" };
+        return { filter: { range: { gte: startOfDay(now), lte: endOfDay(now) } }, label: "Aujourd'hui" };
     }
 
     if (filters.periode === "annee") {
         return {
-            range: { gte: startOfYear(now), lte: endOfYear(now) },
+            filter: { range: { gte: startOfYear(now), lte: endOfYear(now) } },
             label: `Année ${now.getFullYear()}`,
         };
     }
 
     // Défaut : mois en cours
     return {
-        range: { gte: startOfMonth(now), lte: endOfMonth(now) },
+        filter: { range: { gte: startOfMonth(now), lte: endOfMonth(now) } },
         label: now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
     };
 }
@@ -74,7 +76,7 @@ export const financeService = {
     async getBilanGlobal(tenantId: string, filters: BilanFilters) {
         await requirePermission("finance:read");
 
-        const { range, label } = await resolvePeriodRange(tenantId, filters);
+        const { filter, label } = await resolvePeriodFilter(tenantId, filters);
 
         const [
             totalEncaissementsClients,
@@ -85,11 +87,11 @@ export const financeService = {
             creancesClients,
             dettesAgriculteurs,
         ] = await Promise.all([
-            financeRepository.getTotalEncaissementsClients(tenantId, range),
-            financeRepository.getTotalPaiementsAgriculteurs(tenantId, range),
-            financeRepository.getTotalDepensesAutres(tenantId, range),
-            financeRepository.getTotalVentes(tenantId, range),
-            financeRepository.getTotalAchats(tenantId, range),
+            financeRepository.getTotalEncaissementsClients(tenantId, filter),
+            financeRepository.getTotalPaiementsAgriculteurs(tenantId, filter),
+            financeRepository.getTotalDepensesAutres(tenantId, filter),
+            financeRepository.getTotalVentes(tenantId, filter),
+            financeRepository.getTotalAchats(tenantId, filter),
             financeRepository.getCreancesClients(tenantId),
             financeRepository.getDettesAgriculteurs(tenantId),
         ]);

@@ -7,7 +7,7 @@ import { updateVenteSchema } from "@/validators/vente.validator";
 import { revalidatePath } from "next/cache";
 
 /**
- * Action pour corriger une vente (client/quantité/prix/saison)
+ * Action pour corriger une vente (client/quantité/prix)
  */
 export async function updateVenteAction(formData: FormData) {
     try {
@@ -21,7 +21,6 @@ export async function updateVenteAction(formData: FormData) {
             clientId: formData.get("clientId"),
             quantite: formData.get("quantite"),
             prixUnitaire: formData.get("prixUnitaire"),
-            saisonId: formData.get("saisonId") || undefined,
         };
 
         const parsed = updateVenteSchema.safeParse(rawData);

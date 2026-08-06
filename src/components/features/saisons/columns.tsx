@@ -5,14 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye, Lock } from "lucide-react";
+import Link from "next/link";
 
 export type Saison = {
     id: string;
     nom: string;
     dateDebut: Date;
     dateFin: Date;
-    active: boolean;
+    statut: "OUVERTE" | "CLOTUREE";
     createdAt: Date;
     _count?: {
         Vente: number;
@@ -50,16 +51,16 @@ export const createSaisonsColumns = (
         ),
     },
     {
-        accessorKey: "active",
-        header: t("finance.saisons.active"),
+        accessorKey: "statut",
+        header: t("finance.saisons.statut"),
         cell: ({ row }) => {
-            const active = row.getValue<boolean>("active");
+            const statut = row.getValue<"OUVERTE" | "CLOTUREE">("statut");
             return (
                 <Badge
-                    variant={active ? "default" : "secondary"}
-                    className={active ? "bg-green-600 hover:bg-green-700" : ""}
+                    variant={statut === "OUVERTE" ? "default" : "secondary"}
+                    className={statut === "OUVERTE" ? "bg-green-600 hover:bg-green-700" : ""}
                 >
-                    {active ? t("common.actif") : t("common.inactif")}
+                    {statut === "OUVERTE" ? t("finance.saisons.ouverte") : t("finance.saisons.cloturee")}
                 </Badge>
             );
         },
@@ -86,6 +87,28 @@ export const createSaisonsColumns = (
             const saison = row.original;
             return (
                 <div className="flex items-center gap-2">
+                    <Link href={`/dashboard/finance/saisons/${saison.id}`}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                            title={t("common.view")}
+                        >
+                            <Eye className="h-4 w-4 text-[#C17A2B]" />
+                        </Button>
+                    </Link>
+                    {saison.statut === "OUVERTE" && (
+                        <Link href={`/dashboard/finance/saisons/${saison.id}/cloture`}>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-amber-50"
+                                title={t("finance.saisons.cloture.action")}
+                            >
+                                <Lock className="h-4 w-4 text-amber-700" />
+                            </Button>
+                        </Link>
+                    )}
                     <Button
                         variant="ghost"
                         size="sm"

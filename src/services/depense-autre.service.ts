@@ -1,6 +1,7 @@
 import { depenseAutreRepository } from "@/repositories/depense-autre.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
+import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import type { CreateDepenseInput, UpdateDepenseInput } from "@/validators/depense-autre.validator";
 
 export const depenseAutreService = {
@@ -12,7 +13,8 @@ export const depenseAutreService = {
     async create(tenantId: string, userId: string, data: CreateDepenseInput) {
         await requirePermission("depense:create");
 
-        const depense = await depenseAutreRepository.create(tenantId, userId, data);
+        const saison = await getSaisonOuverte(tenantId);
+        const depense = await depenseAutreRepository.create(tenantId, userId, saison.id, data);
 
         await auditService.log({
             tenantId,
@@ -28,6 +30,12 @@ export const depenseAutreService = {
 
     async update(tenantId: string, userId: string, data: UpdateDepenseInput) {
         await requirePermission("depense:update");
+
+        const existing = await depenseAutreRepository.findById(tenantId, data.id);
+        if (!existing) {
+            throw new Error("Dépense introuvable dans cette Wakala");
+        }
+        await assertSaisonOuverte(tenantId, existing.saisonId);
 
         const depense = await depenseAutreRepository.update(tenantId, data);
 

@@ -21,7 +21,6 @@ export async function createVenteAction(formData: FormData) {
             stockId: formData.get("stockId"),
             quantite: formData.get("quantite"),
             prixUnitaire: formData.get("prixUnitaire"),
-            saisonId: formData.get("saisonId") || undefined,
         };
 
         const parsed = createVenteSchema.safeParse(rawData);

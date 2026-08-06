@@ -85,18 +85,21 @@ model BonAchat {
   statut              StatutBonAchat        @default(EN_ATTENTE)
   observations        String?
   livraisonId         String                @unique
+  saisonId            String
   createdById         String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   tenantId            String
   User                User                  @relation(fields: [createdById], references: [id])
   Livraison           Livraison             @relation(fields: [livraisonId], references: [id])
+  Saison              Saison                @relation(fields: [saisonId], references: [id])
   Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   PaiementAgriculteur PaiementAgriculteur[]
 
   @@unique([tenantId, numero])
   @@index([createdById])
   @@index([numero])
+  @@index([saisonId])
   @@index([tenantId])
 }
 
@@ -107,15 +110,18 @@ model PaiementAgriculteur {
   modePaiement String?
   observations String?
   bonAchatId   String
+  saisonId     String
   createdById  String
   createdAt    DateTime @default(now())
   tenantId     String
   BonAchat     BonAchat @relation(fields: [bonAchatId], references: [id])
+  Saison       Saison   @relation(fields: [saisonId], references: [id])
   User         User     @relation(fields: [createdById], references: [id])
   Tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([bonAchatId])
   @@index([createdById])
+  @@index([saisonId])
   @@index([tenantId])
   @@index([datePaiement])
 }
@@ -127,37 +133,88 @@ model EncaissementClient {
   modePaiement     String?
   observations     String?
   venteId          String
+  saisonId         String
   createdById      String
   createdAt        DateTime @default(now())
   tenantId         String
   Vente            Vente    @relation(fields: [venteId], references: [id])
+  Saison           Saison   @relation(fields: [saisonId], references: [id])
   User             User     @relation(fields: [createdById], references: [id])
   Tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([venteId])
   @@index([createdById])
+  @@index([saisonId])
   @@index([tenantId])
   @@index([dateEncaissement])
 }
 
 model Saison {
-  id          String   @id
-  nom         String
-  dateDebut   DateTime
-  dateFin     DateTime
-  active      Boolean  @default(true)
-  tenantId    String
-  createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime
-  Tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  User        User     @relation(fields: [createdById], references: [id])
-  Vente       Vente[]
+  id                  String                @id
+  nom                 String
+  dateDebut           DateTime
+  dateFin             DateTime
+  statut              StatutSaison          @default(OUVERTE)
+  tenantId            String
+  createdById         String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  User                User                  @relation(fields: [createdById], references: [id])
+  Vente               Vente[]
+  Livraison           Livraison[]
+  BonAchat            BonAchat[]
+  PaiementAgriculteur PaiementAgriculteur[]
+  EncaissementClient  EncaissementClient[]
+  DepenseAutre        DepenseAutre[]
+  BilanSaison         BilanSaison?
 
   @@unique([tenantId, nom])
   @@index([tenantId])
   @@index([dateDebut])
   @@index([dateFin])
+  @@index([statut])
+}
+
+/// Snapshot figé du bilan financier et de stock d'une saison, créé une seule
+/// fois lors de la clôture. Ne doit plus jamais être recalculé ni réécrit,
+/// même si les données sous-jacentes changent ensuite.
+model BilanSaison {
+  id                         String   @id
+  saisonId                   String   @unique
+  tenantId                   String
+
+  nombreLivraisons           Int
+  totalQuantiteLivree        Float
+  totalQuantiteAcceptee      Float
+
+  totalAchatsMontant         Float
+  quantitePayable            Float
+  totalPaiementsAgriculteurs Float
+  soldeAgriculteursRestant   Float
+
+  totalVentesQuantite        Float
+  chiffreAffairesVentes      Float
+  totalEncaissements         Float
+  creancesClientsRestantes   Float
+
+  totalDepensesAutres        Float
+
+  tresorerie                 Float
+  margeBrute                 Float
+  margeNette                 Float
+
+  stockFinalParTypeDate      Json
+  stockCaisses               Json
+
+  clotureeAt                 DateTime @default(now())
+  clotureeParId               String
+
+  Saison                     Saison   @relation(fields: [saisonId], references: [id])
+  Tenant                     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  User                       User     @relation(fields: [clotureeParId], references: [id])
+
+  @@index([tenantId])
 }
 
 model DepenseAutre {
@@ -167,14 +224,17 @@ model DepenseAutre {
   categorie    String?
   dateDepense  DateTime @default(now())
   observations String?
+  saisonId     String
   createdById  String
   createdAt    DateTime @default(now())
   updatedAt    DateTime
   tenantId     String
+  Saison       Saison   @relation(fields: [saisonId], references: [id])
   User         User     @relation(fields: [createdById], references: [id])
   Tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([createdById])
+  @@index([saisonId])
   @@index([tenantId])
   @@index([dateDepense])
 }
@@ -278,6 +338,7 @@ model Livraison {
   quantiteLivree      Float
   quantiteAcceptee    Float
   agriculteurId       String
+  saisonId            String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   tenantId            String
@@ -285,6 +346,7 @@ model Livraison {
   Echantillon         Echantillon[]
   LivraisonTypeCaisse LivraisonTypeCaisse[]
   Agriculteur         Agriculteur           @relation(fields: [agriculteurId], references: [id])
+  Saison              Saison                @relation(fields: [saisonId], references: [id])
   Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Pesee               Pesee[]
   PretCaisse          PretCaisse[]
@@ -295,6 +357,7 @@ model Livraison {
   @@index([createdAt])
   @@index([dateLivraison])
   @@index([numeroLot])
+  @@index([saisonId])
   @@index([tenantId])
 }
 
@@ -470,6 +533,7 @@ model Tenant {
   EncaissementClient  EncaissementClient[]
   Saison              Saison[]
   DepenseAutre        DepenseAutre[]
+  BilanSaison         BilanSaison[]
 
   @@index([active])
   @@index([code])
@@ -547,6 +611,7 @@ model User {
   EncaissementClient  EncaissementClient[]
   Saison              Saison[]
   DepenseAutre        DepenseAutre[]
+  BilanSaison         BilanSaison[]
 
   @@index([email])
 }
@@ -560,14 +625,14 @@ model Vente {
   statut             StatutVente          @default(EN_ATTENTE)
   clientId           String
   stockId            String
-  saisonId           String?
+  saisonId           String
   createdById        String
   createdAt          DateTime             @default(now())
   tenantId           String
   Client             Client               @relation(fields: [clientId], references: [id])
   User               User                 @relation(fields: [createdById], references: [id])
   StockDate          StockDate            @relation(fields: [stockId], references: [id])
-  Saison             Saison?              @relation(fields: [saisonId], references: [id])
+  Saison             Saison               @relation(fields: [saisonId], references: [id])
   Tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   EncaissementClient EncaissementClient[]
 
@@ -634,6 +699,7 @@ enum AuditAction {
   CREATE_SAISON
   UPDATE_SAISON
   DELETE_SAISON
+  CLOTURER_SAISON
   CREATE_PAIEMENT_AGRICULTEUR
   CREATE_ENCAISSEMENT_CLIENT
   CREATE_DEPENSE_AUTRE
@@ -657,4 +723,9 @@ enum StatutPret {
   EN_COURS
   RETOURNE
   INCOMPLET
+}
+
+enum StatutSaison {
+  OUVERTE
+  CLOTUREE
 }

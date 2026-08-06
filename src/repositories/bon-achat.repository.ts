@@ -84,6 +84,7 @@ export const bonAchatRepository = {
             montant: number;
             observations?: string;
             livraisonId: string;
+            saisonId: string;
             createdById: string;
             tenantId: string;
         },
@@ -97,6 +98,7 @@ export const bonAchatRepository = {
                 montant: data.montant,
                 observations: data.observations,
                 livraisonId: data.livraisonId,
+                saisonId: data.saisonId,
                 createdById: data.createdById,
                 tenantId: data.tenantId,
                 updatedAt: new Date(),

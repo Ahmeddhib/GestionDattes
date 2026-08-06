@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { createId } from "@paralleldrive/cuid2";
+import type { Prisma } from "@/generated/prisma";
 import type { CreateSaisonInput, UpdateSaisonInput } from "@/validators/saison.validator";
+
+type DbClient = typeof prisma | Prisma.TransactionClient;
 
 /**
  * Repository pour gérer les saisons
@@ -24,12 +27,11 @@ export const saisonRepository = {
     },
 
     /**
-     * Récupérer les saisons actives d'un tenant
+     * Récupérer la saison OUVERTE du tenant (il y en a au plus une)
      */
-    async findActive(tenantId: string) {
-        return prisma.saison.findMany({
-            where: { tenantId, active: true },
-            orderBy: { dateDebut: "desc" },
+    async findOuverte(tenantId: string) {
+        return prisma.saison.findFirst({
+            where: { tenantId, statut: "OUVERTE" },
         });
     },
 
@@ -52,8 +54,8 @@ export const saisonRepository = {
     /**
      * Créer une nouvelle saison
      */
-    async create(tenantId: string, createdById: string, data: CreateSaisonInput) {
-        return prisma.saison.create({
+    async create(tenantId: string, createdById: string, data: CreateSaisonInput, client: DbClient = prisma) {
+        return client.saison.create({
             data: {
                 id: createId(),
                 tenantId,
@@ -61,14 +63,15 @@ export const saisonRepository = {
                 nom: data.nom,
                 dateDebut: data.dateDebut,
                 dateFin: data.dateFin,
-                active: data.active ?? true,
+                statut: data.statut ?? "OUVERTE",
                 updatedAt: new Date(),
             },
         });
     },
 
     /**
-     * Mettre à jour une saison avec vérification du tenant
+     * Mettre à jour une saison avec vérification du tenant (nom/dates
+     * uniquement — le statut n'est jamais modifié depuis ce chemin)
      */
     async update(tenantId: string, data: UpdateSaisonInput) {
         const existing = await prisma.saison.findFirst({
@@ -85,7 +88,6 @@ export const saisonRepository = {
                 nom: data.nom,
                 dateDebut: data.dateDebut,
                 dateFin: data.dateFin,
-                active: data.active ?? true,
                 updatedAt: new Date(),
             },
         });

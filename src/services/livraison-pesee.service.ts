@@ -6,6 +6,7 @@ import { agriculteurRepository } from "@/repositories/agriculteur.repository";
 import { auditService } from "./audit.service";
 import { resolveLignesPesee, retournerCaissesAutomatiquement, syncLivraisonWithPesees } from "./pesee.service";
 import { requirePermission } from "@/lib/permissions";
+import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import type {
     CreerLivraisonAvecPeseesInput,
     MettreAJourLivraisonAvecPeseesInput,
@@ -27,6 +28,10 @@ export const livraisonPeseeService = {
         if (!agriculteur) {
             throw new Error("Agriculteur introuvable");
         }
+
+        // Toute nouvelle livraison est automatiquement rattachée à la saison
+        // ouverte du tenant — jamais choisie par l'utilisateur.
+        const saison = await getSaisonOuverte(tenantId);
 
         // Revalider chaque ligne contre les vraies données serveur (jamais confiance au client)
         const resolved = await resolveLignesPesee(tenantId, data.lignes);
@@ -72,6 +77,7 @@ export const livraisonPeseeService = {
                 tenantId,
                 numeroLot,
                 Array.from(stockGroups, ([typeDateId, quantite]) => ({ typeDateId, quantite })),
+                saison.id,
                 tx
             );
 
@@ -125,6 +131,7 @@ export const livraisonPeseeService = {
                     montant: montantTotal,
                     observations: data.observations,
                     livraisonId: livraison.id,
+                    saisonId: saison.id,
                     createdById: userId,
                     tenantId,
                 },
@@ -186,6 +193,8 @@ export const livraisonPeseeService = {
         if (!existing) {
             throw new Error("Livraison introuvable dans cette Wakala");
         }
+
+        await assertSaisonOuverte(tenantId, existing.saisonId);
 
         const agriculteurId = data.agriculteurId ?? existing.agriculteurId;
         const agriculteur = await agriculteurRepository.findById(tenantId, agriculteurId);

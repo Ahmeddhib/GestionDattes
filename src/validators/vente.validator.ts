@@ -10,7 +10,6 @@ export const createVenteSchema = z.object({
     stockId: z.string().min(1, "Le lot de stock est requis"),
     quantite: z.coerce.number().positive("La quantité doit être positive"),
     prixUnitaire: z.coerce.number().positive("Le prix unitaire doit être positif"),
-    saisonId: z.string().optional(),
 });
 
 /**
@@ -23,7 +22,6 @@ export const updateVenteSchema = z.object({
     clientId: z.string().min(1, "Le client est requis"),
     quantite: z.coerce.number().positive("La quantité doit être positive"),
     prixUnitaire: z.coerce.number().positive("Le prix unitaire doit être positif"),
-    saisonId: z.string().optional(),
 });
 
 export type CreateVenteInput = z.infer<typeof createVenteSchema>;

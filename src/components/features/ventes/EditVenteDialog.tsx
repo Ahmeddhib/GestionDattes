@@ -9,7 +9,6 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { getClientsAction } from "@/actions/clients/get-clients.action";
-import { getSaisonsActivesAction } from "@/actions/saisons/get-saisons.action";
 import { updateVenteAction } from "@/actions/ventes/update-vente.action";
 import type { Vente } from "./columns";
 
@@ -39,8 +38,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-const AUCUNE_SAISON = "none";
-
 const formSchema = z.object({
     clientId: z.string().min(1, "validation.required"),
     quantite: z.preprocess(
@@ -51,7 +48,6 @@ const formSchema = z.object({
         (val) => (val === "" || val === undefined ? undefined : Number(val)),
         z.number({ message: "validation.required" }).positive("validation.positive")
     ),
-    saisonId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -67,7 +63,6 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [clients, setClients] = useState<any[]>([]);
-    const [saisons, setSaisons] = useState<any[]>([]);
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema) as any,
@@ -75,18 +70,14 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
             clientId: "",
             quantite: undefined as any,
             prixUnitaire: undefined as any,
-            saisonId: AUCUNE_SAISON,
         },
     });
 
     useEffect(() => {
         if (open) {
-            Promise.all([getClientsAction(), getSaisonsActivesAction()]).then(
-                ([clientsResult, saisonsResult]) => {
-                    if (clientsResult.success) setClients(clientsResult.data || []);
-                    if (saisonsResult.success) setSaisons(saisonsResult.data || []);
-                }
-            );
+            getClientsAction().then((clientsResult) => {
+                if (clientsResult.success) setClients(clientsResult.data || []);
+            });
         }
     }, [open]);
 
@@ -96,7 +87,6 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                 clientId: vente.Client.id,
                 quantite: vente.quantite,
                 prixUnitaire: vente.prixUnitaire,
-                saisonId: vente.Saison?.id || AUCUNE_SAISON,
             });
         }
     }, [vente, open, form]);
@@ -114,9 +104,6 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
         formData.append("clientId", data.clientId);
         formData.append("quantite", data.quantite.toString());
         formData.append("prixUnitaire", data.prixUnitaire.toString());
-        if (data.saisonId && data.saisonId !== AUCUNE_SAISON) {
-            formData.append("saisonId", data.saisonId);
-        }
 
         const result = await updateVenteAction(formData);
         setLoading(false);
@@ -222,39 +209,6 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                                 )}
                             />
                         </div>
-
-                        {saisons.length > 0 && (
-                            <FormField
-                                control={form.control}
-                                name="saisonId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">
-                                            {t("finance.saisons.title")}
-                                            <span className="text-[#3D1C00]/40 ml-1 font-normal">
-                                                ({t("common.optional")})
-                                            </span>
-                                        </FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value || AUCUNE_SAISON}>
-                                            <FormControl>
-                                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent className="bg-white">
-                                                <SelectItem value={AUCUNE_SAISON}>{t("common.all")}</SelectItem>
-                                                {saisons.map((s) => (
-                                                    <SelectItem key={s.id} value={s.id}>
-                                                        {s.nom}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage className="text-red-600 text-xs" />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
 
                         <div className="rounded-md bg-[#FAF0DC] p-3 flex items-center justify-between">
                             <span className="text-sm font-medium text-[#3D1C00]">

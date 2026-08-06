@@ -51,7 +51,7 @@ export const venteRepository = {
             montant: number;
             clientId: string;
             stockId: string;
-            saisonId?: string;
+            saisonId: string;
         },
         tenantId: string,
         createdById: string,
@@ -68,7 +68,7 @@ export const venteRepository = {
                 StockDate: { connect: { id: data.stockId } },
                 User: { connect: { id: createdById } },
                 Tenant: { connect: { id: tenantId } },
-                ...(data.saisonId && { Saison: { connect: { id: data.saisonId } } }),
+                Saison: { connect: { id: data.saisonId } },
             },
         });
     },
@@ -91,7 +91,6 @@ export const venteRepository = {
             prixUnitaire: number;
             montant: number;
             clientId: string;
-            saisonId?: string;
         },
         client: DbClient = prisma
     ) {
@@ -102,7 +101,6 @@ export const venteRepository = {
                 prixUnitaire: data.prixUnitaire,
                 montant: data.montant,
                 clientId: data.clientId,
-                saisonId: data.saisonId || null,
             },
         });
     },

@@ -19,12 +19,13 @@ export const depenseAutreRepository = {
         });
     },
 
-    async create(tenantId: string, createdById: string, data: CreateDepenseInput) {
+    async create(tenantId: string, createdById: string, saisonId: string, data: CreateDepenseInput) {
         return prisma.depenseAutre.create({
             data: {
                 id: createId(),
                 tenantId,
                 createdById,
+                saisonId,
                 libelle: data.libelle,
                 montant: data.montant,
                 categorie: data.categorie || null,

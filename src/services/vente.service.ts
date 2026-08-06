@@ -3,6 +3,7 @@ import { clientRepository } from "@/repositories/client.repository";
 import { stockDateRepository } from "@/repositories/stock-date.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
+import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import { prisma } from "@/lib/prisma";
 import type { CreateVenteInput, UpdateVenteInput } from "@/validators/vente.validator";
 
@@ -56,10 +57,11 @@ export const venteService = {
         }
 
         const montant = data.quantite * data.prixUnitaire;
+        const saison = await getSaisonOuverte(tenantId);
 
         const vente = await prisma.$transaction(async (tx) => {
             const nouvelleVente = await venteRepository.create(
-                { ...data, montant },
+                { ...data, montant, saisonId: saison.id },
                 tenantId,
                 userId,
                 tx
@@ -94,11 +96,12 @@ export const venteService = {
     },
 
     /**
-     * Corrige une vente (client/quantité/prix/saison) tant qu'aucun
-     * encaissement n'a été enregistré dessus. Le lot de stock n'est pas
-     * modifiable ; la quantité réservée sur ce lot est réajustée par delta,
-     * dans la même transaction que la mise à jour, pour rester cohérente
-     * même en cas de modifications concurrentes.
+     * Corrige une vente (client/quantité/prix) tant qu'aucun encaissement n'a
+     * été enregistré dessus. Le lot de stock n'est pas modifiable ; la
+     * quantité réservée sur ce lot est réajustée par delta, dans la même
+     * transaction que la mise à jour, pour rester cohérente même en cas de
+     * modifications concurrentes. La saison n'est jamais modifiable après
+     * création.
      */
     async update(tenantId: string, userId: string, data: UpdateVenteInput) {
         await requirePermission("vente:update");
@@ -121,6 +124,8 @@ export const venteService = {
                     "Impossible de modifier une vente qui a déjà un encaissement enregistré"
                 );
             }
+
+            await assertSaisonOuverte(tenantId, existing.saisonId, tx);
 
             const disponibleAvecAncienneQuantite = existing.StockDate.quantiteDisponible + existing.quantite;
             if (data.quantite > disponibleAvecAncienneQuantite) {

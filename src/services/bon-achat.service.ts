@@ -85,6 +85,7 @@ export const bonAchatService = {
                     montant,
                     observations: data.observations,
                     livraisonId: data.livraisonId,
+                    saisonId: livraison.saisonId,
                     createdById: userId,
                     tenantId,
                 },

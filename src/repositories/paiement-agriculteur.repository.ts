@@ -69,6 +69,7 @@ export const paiementAgriculteurRepository = {
         data: CreatePaiementAgriculteurInput,
         tenantId: string,
         createdById: string,
+        saisonId: string,
         client: DbClient
     ) {
         const bonAchat = await client.bonAchat.findFirst({
@@ -99,6 +100,7 @@ export const paiementAgriculteurRepository = {
                 modePaiement: data.modePaiement || null,
                 observations: data.observations || null,
                 bonAchatId: data.bonAchatId,
+                saisonId,
                 createdById,
                 tenantId,
             },

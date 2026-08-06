@@ -83,6 +83,23 @@ export async function createWakalaAction(data: CreateWakalaData) {
                 },
             });
 
+            // 5. Créer la saison ouverte par défaut — toute nouvelle Wakala doit
+            // avoir immédiatement une saison OUVERTE pour que ses premières
+            // opérations (livraisons, ventes...) puissent s'y rattacher.
+            const now = new Date();
+            await tx.saison.create({
+                data: {
+                    id: createId(),
+                    nom: `Saison ${now.getFullYear()}-${now.getFullYear() + 1}`,
+                    dateDebut: new Date(now.getFullYear(), 0, 1),
+                    dateFin: new Date(now.getFullYear(), 11, 31),
+                    statut: "OUVERTE",
+                    tenantId: wakala.id,
+                    createdById: adminUser.id,
+                    updatedAt: now,
+                },
+            });
+
             return {
                 wakala,
                 adminUser: {

@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus } from "lucide-react";
+import { Plus, User, Package, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { getClientsAction } from "@/actions/clients/get-clients.action";
 import { getStockLotsForVenteAction } from "@/actions/ventes/get-stock-lots-for-vente.action";
-import { getSaisonsActivesAction } from "@/actions/saisons/get-saisons.action";
 import { createVenteAction } from "@/actions/ventes/create-vente.action";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
     Select,
     SelectContent,
@@ -38,8 +38,26 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
-const AUCUNE_SAISON = "none";
+function stockLevelBadgeClass(quantite: number) {
+    if (quantite <= 0) return "bg-red-100 text-red-700";
+    if (quantite < 50) return "bg-orange-100 text-orange-700";
+    return "bg-green-100 text-green-700";
+}
 
 export function CreateVenteDialog() {
     const { t } = useClientTranslations();
@@ -48,8 +66,8 @@ export function CreateVenteDialog() {
     const [loading, setLoading] = useState(false);
     const [clients, setClients] = useState<any[]>([]);
     const [lots, setLots] = useState<any[]>([]);
-    const [saisons, setSaisons] = useState<any[]>([]);
     const [stockMax, setStockMax] = useState(0);
+    const [stockPopoverOpen, setStockPopoverOpen] = useState(false);
 
     const formSchema = z.object({
         clientId: z.string().min(1, t("validation.required")),
@@ -68,7 +86,6 @@ export function CreateVenteDialog() {
             (val) => (val === "" || val === undefined ? undefined : Number(val)),
             z.number({ message: t("validation.required") }).positive(t("validation.positive"))
         ),
-        saisonId: z.string().optional(),
     });
 
     type FormData = {
@@ -76,7 +93,6 @@ export function CreateVenteDialog() {
         stockId: string;
         quantite: number;
         prixUnitaire: number;
-        saisonId?: string;
     };
 
     const form = useForm<FormData>({
@@ -86,7 +102,6 @@ export function CreateVenteDialog() {
             stockId: "",
             quantite: undefined as any,
             prixUnitaire: undefined as any,
-            saisonId: AUCUNE_SAISON,
         },
     });
 
@@ -113,14 +128,12 @@ export function CreateVenteDialog() {
     const montantTotal = (watchQuantite || 0) * (watchPrixUnitaire || 0);
 
     async function loadData() {
-        const [clientsResult, lotsResult, saisonsResult] = await Promise.all([
+        const [clientsResult, lotsResult] = await Promise.all([
             getClientsAction(),
             getStockLotsForVenteAction(),
-            getSaisonsActivesAction(),
         ]);
         if (clientsResult.success) setClients(clientsResult.data || []);
         if (lotsResult.success) setLots(lotsResult.data || []);
-        if (saisonsResult.success) setSaisons(saisonsResult.data || []);
     }
 
     async function onSubmit(data: FormData) {
@@ -131,9 +144,6 @@ export function CreateVenteDialog() {
         formData.append("stockId", data.stockId);
         formData.append("quantite", data.quantite.toString());
         formData.append("prixUnitaire", data.prixUnitaire.toString());
-        if (data.saisonId && data.saisonId !== AUCUNE_SAISON) {
-            formData.append("saisonId", data.saisonId);
-        }
 
         const result = await createVenteAction(formData);
         setLoading(false);
@@ -183,16 +193,27 @@ export function CreateVenteDialog() {
                                     <FormLabel className="text-[#3D1C00]">{t("finance.ventes.client")}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="h-10 w-full rounded-sm border-[#C17A2B]/20 bg-white">
                                                 <SelectValue placeholder={t("finance.ventes.client")} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent className="bg-white">
-                                            {clients.map((c) => (
-                                                <SelectItem key={c.id} value={c.id}>
-                                                    {c.nom}
-                                                </SelectItem>
-                                            ))}
+                                            {clients.length === 0 ? (
+                                                <div className="px-2 py-3 text-center text-sm text-[#3D1C00]/50">
+                                                    {t("finance.ventes.aucunClient")}
+                                                </div>
+                                            ) : (
+                                                clients.map((c) => (
+                                                    <SelectItem key={c.id} value={c.id} className="py-2">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <User className="h-4 w-4 shrink-0 text-[#C17A2B]" />
+                                                            <span className="truncate font-medium text-[#3D1C00]">
+                                                                {c.nom}
+                                                            </span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))
+                                            )}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage className="text-red-600 text-xs" />
@@ -206,20 +227,104 @@ export function CreateVenteDialog() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-[#3D1C00]">{t("finance.ventes.lotStock")}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
-                                                <SelectValue placeholder={t("finance.ventes.lotStock")} />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent className="bg-white">
-                                            {lots.map((l) => (
-                                                <SelectItem key={l.id} value={l.id}>
-                                                    {l.typeDate} - Lot {l.numeroLot} - Stock: {l.quantiteDisponible}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Popover open={stockPopoverOpen} onOpenChange={setStockPopoverOpen}>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={stockPopoverOpen}
+                                                    className="h-10 w-full justify-between rounded-sm border-[#C17A2B]/20 bg-white font-normal hover:bg-white"
+                                                >
+                                                    {field.value ? (
+                                                        (() => {
+                                                            const selected = lots.find((l) => l.id === field.value);
+                                                            if (!selected) return t("finance.ventes.lotStock");
+                                                            return (
+                                                                <span className="flex min-w-0 items-center gap-2 truncate">
+                                                                    <Package className="h-4 w-4 shrink-0 text-[#C17A2B]" />
+                                                                    <span className="truncate">
+                                                                        <span className="font-medium text-[#3D1C00]">
+                                                                            {selected.typeDate}
+                                                                        </span>
+                                                                        <span className="text-[#3D1C00]/50">
+                                                                            {" "}
+                                                                            · Lot {selected.numeroLot}
+                                                                        </span>
+                                                                    </span>
+                                                                </span>
+                                                            );
+                                                        })()
+                                                    ) : (
+                                                        <span className="text-muted-foreground">
+                                                            {t("finance.ventes.lotStock")}
+                                                        </span>
+                                                    )}
+                                                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            align="start"
+                                            className="w-[--radix-popover-trigger-width] bg-white p-0"
+                                        >
+                                            <Command
+                                                className="bg-white"
+                                                filter={(value, search) =>
+                                                    value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+                                                }
+                                            >
+                                                <CommandInput
+                                                    placeholder={t("finance.ventes.rechercherLot")}
+                                                />
+                                                <CommandList>
+                                                    <CommandEmpty>
+                                                        {t("finance.ventes.aucunLot")}
+                                                    </CommandEmpty>
+                                                    <CommandGroup>
+                                                        {lots.map((l) => (
+                                                            <CommandItem
+                                                                key={l.id}
+                                                                value={`${l.typeDate} Lot ${l.numeroLot}`}
+                                                                onSelect={() => {
+                                                                    field.onChange(l.id);
+                                                                    setStockPopoverOpen(false);
+                                                                }}
+                                                                className="py-2"
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        "h-4 w-4",
+                                                                        field.value === l.id ? "opacity-100" : "opacity-0"
+                                                                    )}
+                                                                />
+                                                                <div className="flex w-full items-center justify-between gap-3">
+                                                                    <div className="flex min-w-0 items-center gap-2">
+                                                                        <Package className="h-4 w-4 shrink-0 text-[#C17A2B]" />
+                                                                        <span className="truncate">
+                                                                            <span className="font-medium text-[#3D1C00]">
+                                                                                {l.typeDate}
+                                                                            </span>
+                                                                            <span className="text-[#3D1C00]/50">
+                                                                                {" "}
+                                                                                · Lot {l.numeroLot}
+                                                                            </span>
+                                                                        </span>
+                                                                    </div>
+                                                                    <Badge
+                                                                        className={`shrink-0 border-0 ${stockLevelBadgeClass(l.quantiteDisponible)}`}
+                                                                    >
+                                                                        {l.quantiteDisponible} kg
+                                                                    </Badge>
+                                                                </div>
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
                                     <FormMessage className="text-red-600 text-xs" />
                                 </FormItem>
                             )}
@@ -281,39 +386,6 @@ export function CreateVenteDialog() {
                                 )}
                             />
                         </div>
-
-                        {saisons.length > 0 && (
-                            <FormField
-                                control={form.control}
-                                name="saisonId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">
-                                            {t("finance.saisons.title")}
-                                            <span className="text-[#3D1C00]/40 ml-1 font-normal">
-                                                ({t("common.optional")})
-                                            </span>
-                                        </FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value || AUCUNE_SAISON}>
-                                            <FormControl>
-                                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent className="bg-white">
-                                                <SelectItem value={AUCUNE_SAISON}>{t("common.all")}</SelectItem>
-                                                {saisons.map((s) => (
-                                                    <SelectItem key={s.id} value={s.id}>
-                                                        {s.nom}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage className="text-red-600 text-xs" />
-                                    </FormItem>
-                                )}
-                            />
-                        )}
 
                         <div className="rounded-md bg-[#FAF0DC] p-3 flex items-center justify-between">
                             <span className="text-sm font-medium text-[#3D1C00]">

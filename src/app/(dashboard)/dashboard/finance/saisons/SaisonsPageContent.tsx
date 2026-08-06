@@ -15,7 +15,7 @@ export function SaisonsPageContent({ saisons }: SaisonsPageContentProps) {
     const { t } = useClientTranslations();
 
     const total = saisons.length;
-    const actives = saisons.filter((s) => s.active).length;
+    const ouvertes = saisons.filter((s) => s.statut === "OUVERTE").length;
 
     return (
         <PageContainer>
@@ -46,8 +46,8 @@ export function SaisonsPageContent({ saisons }: SaisonsPageContentProps) {
                 <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">{t("finance.saisons.active")}</p>
-                            <p className="text-3xl font-bold text-green-600 mt-2">{actives}</p>
+                            <p className="text-sm font-medium text-gray-600">{t("finance.saisons.ouverte")}</p>
+                            <p className="text-3xl font-bold text-green-600 mt-2">{ouvertes}</p>
                         </div>
                         <div className="h-12 w-12 bg-green-100 rounded-md flex items-center justify-center">
                             <CalendarRange className="h-6 w-6 text-green-600" />

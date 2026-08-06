@@ -2,6 +2,13 @@ import { prisma } from "@/lib/prisma";
 
 export type DateRangeFilter = { gte?: Date; lte?: Date };
 
+/**
+ * Filtre de période pour les agrégats du bilan financier : soit une saison
+ * précise (saisonId, filtrage exact — jamais déduit de dates), soit une
+ * plage de dates (jour/mois/année/personnalisée).
+ */
+export type PeriodFilter = { saisonId: string } | { range?: DateRangeFilter };
+
 function dateWhere(range?: DateRangeFilter) {
     if (!range || (!range.gte && !range.lte)) return undefined;
     return {
@@ -10,47 +17,55 @@ function dateWhere(range?: DateRangeFilter) {
     };
 }
 
+function periodWhere(filter: PeriodFilter, dateField: string) {
+    if ("saisonId" in filter) {
+        return { saisonId: filter.saisonId };
+    }
+    const range = dateWhere(filter.range);
+    return range ? { [dateField]: range } : {};
+}
+
 /**
  * Requêtes d'agrégation pures pour le Bilan Financier Global. Rien n'est
  * jamais persisté ici — tout est recalculé à la demande, comme
  * nombreRestant sur PretCaisse.
  */
 export const financeRepository = {
-    async getTotalEncaissementsClients(tenantId: string, range?: DateRangeFilter) {
+    async getTotalEncaissementsClients(tenantId: string, filter: PeriodFilter = {}) {
         const result = await prisma.encaissementClient.aggregate({
-            where: { tenantId, ...(dateWhere(range) && { dateEncaissement: dateWhere(range) }) },
+            where: { tenantId, ...periodWhere(filter, "dateEncaissement") },
             _sum: { montant: true },
         });
         return result._sum.montant ?? 0;
     },
 
-    async getTotalPaiementsAgriculteurs(tenantId: string, range?: DateRangeFilter) {
+    async getTotalPaiementsAgriculteurs(tenantId: string, filter: PeriodFilter = {}) {
         const result = await prisma.paiementAgriculteur.aggregate({
-            where: { tenantId, ...(dateWhere(range) && { datePaiement: dateWhere(range) }) },
+            where: { tenantId, ...periodWhere(filter, "datePaiement") },
             _sum: { montant: true },
         });
         return result._sum.montant ?? 0;
     },
 
-    async getTotalDepensesAutres(tenantId: string, range?: DateRangeFilter) {
+    async getTotalDepensesAutres(tenantId: string, filter: PeriodFilter = {}) {
         const result = await prisma.depenseAutre.aggregate({
-            where: { tenantId, ...(dateWhere(range) && { dateDepense: dateWhere(range) }) },
+            where: { tenantId, ...periodWhere(filter, "dateDepense") },
             _sum: { montant: true },
         });
         return result._sum.montant ?? 0;
     },
 
-    async getTotalVentes(tenantId: string, range?: DateRangeFilter) {
+    async getTotalVentes(tenantId: string, filter: PeriodFilter = {}) {
         const result = await prisma.vente.aggregate({
-            where: { tenantId, ...(dateWhere(range) && { date: dateWhere(range) }) },
+            where: { tenantId, ...periodWhere(filter, "date") },
             _sum: { montant: true },
         });
         return result._sum.montant ?? 0;
     },
 
-    async getTotalAchats(tenantId: string, range?: DateRangeFilter) {
+    async getTotalAchats(tenantId: string, filter: PeriodFilter = {}) {
         const result = await prisma.bonAchat.aggregate({
-            where: { tenantId, ...(dateWhere(range) && { createdAt: dateWhere(range) }) },
+            where: { tenantId, ...periodWhere(filter, "createdAt") },
             _sum: { montant: true },
         });
         return result._sum.montant ?? 0;

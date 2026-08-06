@@ -30,14 +30,13 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 const formSchema = z
     .object({
         nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
         dateDebut: z.string().min(1, "La date de début est requise"),
         dateFin: z.string().min(1, "La date de fin est requise"),
-        active: z.boolean(),
     })
     .refine((data) => new Date(data.dateFin) > new Date(data.dateDebut), {
         message: "La date de fin doit être après la date de début",
@@ -59,7 +58,7 @@ export function UpdateSaisonDialog({ saison, open, onOpenChange }: UpdateSaisonD
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
-        defaultValues: { nom: "", dateDebut: "", dateFin: "", active: true },
+        defaultValues: { nom: "", dateDebut: "", dateFin: "" },
     });
 
     useEffect(() => {
@@ -68,7 +67,6 @@ export function UpdateSaisonDialog({ saison, open, onOpenChange }: UpdateSaisonD
                 nom: saison.nom,
                 dateDebut: format(new Date(saison.dateDebut), "yyyy-MM-dd"),
                 dateFin: format(new Date(saison.dateFin), "yyyy-MM-dd"),
-                active: saison.active,
             });
         }
     }, [saison, open, form]);
@@ -165,22 +163,22 @@ export function UpdateSaisonDialog({ saison, open, onOpenChange }: UpdateSaisonD
                             />
                         </div>
 
-                        <FormField
-                            control={form.control}
-                            name="active"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                                    <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={(checked) => field.onChange(!!checked)}
-                                            disabled={isLoading}
-                                        />
-                                    </FormControl>
-                                    <FormLabel className="!mt-0">{t("finance.saisons.active")}</FormLabel>
-                                </FormItem>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-[#3D1C00]/60">{t("finance.saisons.statut")}:</span>
+                            <Badge
+                                variant={saison.statut === "OUVERTE" ? "default" : "secondary"}
+                                className={saison.statut === "OUVERTE" ? "bg-green-600 hover:bg-green-700" : ""}
+                            >
+                                {saison.statut === "OUVERTE"
+                                    ? t("finance.saisons.ouverte")
+                                    : t("finance.saisons.cloturee")}
+                            </Badge>
+                            {saison.statut === "OUVERTE" && (
+                                <span className="text-xs text-[#3D1C00]/50">
+                                    {t("finance.saisons.statutNonModifiable")}
+                                </span>
                             )}
-                        />
+                        </div>
 
                         <DialogFooter>
                             <Button
