@@ -1,6 +1,6 @@
 {
-    "buildCommand": "prisma generate && next build",
-    "installCommand": "npm install",
+    "buildCommand": "bun run build",
+    "installCommand": "bun install --frozen-lockfile",
     "framework": "nextjs",
     "regions": [
         "iad1"

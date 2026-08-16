@@ -93,20 +93,4 @@ export const saisonRepository = {
         });
     },
 
-    /**
-     * Supprimer une saison avec vérification du tenant
-     */
-    async delete(tenantId: string, id: string) {
-        const existing = await prisma.saison.findFirst({
-            where: { id, tenantId },
-        });
-
-        if (!existing) {
-            throw new Error("Saison introuvable dans cette Wakala");
-        }
-
-        return prisma.saison.delete({
-            where: { id },
-        });
-    },
 };

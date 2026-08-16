@@ -1,5 +1,12 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import {
+    addBrandedPdfFooters,
+    createBrandedPdf,
+    PDF_DARK,
+    printBrandedPdf,
+    type PdfBranding,
+} from "@/lib/pdf-branding";
 
 export interface BilanSaisonForPdf {
     nombreLivraisons: number;
@@ -25,7 +32,11 @@ export interface BilanSaisonForPdf {
         nombreRetourne: number;
         nombreNonRetourne: number;
     }[];
-    clotureeAt: Date;
+    stockEntreParTypeDate: { typeDateId: string; nom: string; quantiteDisponible: number }[];
+    stockOrigineRestantParTypeDate: { typeDateId: string; nom: string; quantiteDisponible: number }[];
+    type: "PROVISOIRE" | "FINAL";
+    version: number;
+    genereAt: Date;
 }
 
 export interface SaisonForPdf {
@@ -34,42 +45,34 @@ export interface SaisonForPdf {
     dateFin: Date | string;
 }
 
-const PRIMARY: [number, number, number] = [193, 122, 43];
-const TEXT: [number, number, number] = [61, 28, 0];
-const MUTED: [number, number, number] = [110, 100, 90];
+/**
+ * `jspdf-autotable` accroche la position finale du tableau sur l'instance jsPDF
+ * sans la déclarer dans ses types. Un seul point d'accès typé plutôt qu'un
+ * `as any` à chaque appel.
+ */
+function finDuTableau(doc: jsPDF): number {
+    return (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+}
+
+const TEXT = PDF_DARK;
 
 /**
  * Construit le PDF du bilan de saison en ne lisant QUE les champs déjà
  * figés dans BilanSaison — aucune donnée n'est recalculée ici.
  */
-function buildBilanSaisonDoc(bilan: BilanSaisonForPdf, saison: SaisonForPdf): jsPDF {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-
-    doc.setFontSize(18);
-    doc.setTextColor(...TEXT);
-    doc.setFont("helvetica", "bold");
-    doc.text("BILAN DE SAISON", 14, 20);
-
-    doc.setFontSize(12);
-    doc.setTextColor(...PRIMARY);
-    doc.text(saison.nom, 14, 28);
-
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...MUTED);
-    doc.text(
-        `${new Date(saison.dateDebut).toLocaleDateString("fr-FR")} — ${new Date(saison.dateFin).toLocaleDateString("fr-FR")}`,
-        14,
-        34
-    );
-    doc.text(`Clôturée le : ${bilan.clotureeAt.toLocaleDateString("fr-FR")}`, pageWidth - 14, 20, {
-        align: "right",
+async function buildBilanSaisonDoc(
+    bilan: BilanSaisonForPdf,
+    saison: SaisonForPdf,
+    branding?: PdfBranding
+): Promise<jsPDF> {
+    const estProvisoire = bilan.type === "PROVISOIRE";
+    const { doc, contentStartY } = await createBrandedPdf({
+        title: estProvisoire ? "Bilan provisoire" : "Bilan final de saison",
+        branding,
+        reference: `SAISON : ${saison.nom}`,
+        date: bilan.genereAt,
+        subtitle: `${new Date(saison.dateDebut).toLocaleDateString("fr-FR")} — ${new Date(saison.dateFin).toLocaleDateString("fr-FR")} · ${estProvisoire ? `Version ${bilan.version} — document provisoire` : "Bilan de clôture"}`,
     });
-
-    doc.setDrawColor(...PRIMARY);
-    doc.setLineWidth(0.5);
-    doc.line(14, 40, pageWidth - 14, 40);
 
     const rows: { label: string; value: string }[] = [
         { label: "Nombre de livraisons", value: `${bilan.nombreLivraisons}` },
@@ -91,13 +94,14 @@ function buildBilanSaisonDoc(bilan: BilanSaisonForPdf, saison: SaisonForPdf): js
     autoTable(doc, {
         head: [["Indicateur", "Valeur"]],
         body: rows.map((r) => [r.label, r.value]),
-        startY: 46,
-        styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT },
-        headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontStyle: "bold" },
+        startY: contentStartY,
+        theme: "plain",
+        styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+        headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
         columnStyles: { 1: { halign: "right" } },
     });
 
-    let y = (doc as any).lastAutoTable.finalY + 10;
+    let y = finDuTableau(doc) + 10;
 
     if (bilan.stockFinalParTypeDate.length > 0) {
         doc.setFontSize(11);
@@ -109,12 +113,43 @@ function buildBilanSaisonDoc(bilan: BilanSaisonForPdf, saison: SaisonForPdf): js
             head: [["Variété", "Quantité disponible"]],
             body: bilan.stockFinalParTypeDate.map((s) => [s.nom, s.quantiteDisponible.toFixed(2)]),
             startY: y + 4,
-            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT },
-            headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontStyle: "bold" },
+            theme: "plain",
+            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+            headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
             columnStyles: { 1: { halign: "right" } },
         });
 
-        y = (doc as any).lastAutoTable.finalY + 10;
+        y = finDuTableau(doc) + 10;
+    }
+
+    // Chiffres attribuables à la saison, à distinguer du stock physique global
+    // ci-dessus : ici c'est ce qui est ENTRÉ durant la campagne, et ce qu'il en
+    // restait au moment du calcul.
+    if (bilan.stockEntreParTypeDate.length > 0) {
+        const restantParType = new Map(
+            bilan.stockOrigineRestantParTypeDate.map((s) => [s.typeDateId, s.quantiteDisponible])
+        );
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...TEXT);
+        doc.text("Stock issu de cette saison", 14, y);
+
+        autoTable(doc, {
+            head: [["Variété", "Entré durant la saison", "Restant au calcul"]],
+            body: bilan.stockEntreParTypeDate.map((s) => [
+                s.nom,
+                s.quantiteDisponible.toFixed(2),
+                (restantParType.get(s.typeDateId) ?? 0).toFixed(2),
+            ]),
+            startY: y + 4,
+            theme: "plain",
+            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+            headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
+            columnStyles: { 1: { halign: "right" }, 2: { halign: "right" } },
+        });
+
+        y = finDuTableau(doc) + 10;
     }
 
     if (bilan.stockCaisses.length > 0) {
@@ -132,25 +167,30 @@ function buildBilanSaisonDoc(bilan: BilanSaisonForPdf, saison: SaisonForPdf): js
                 `${c.nombreNonRetourne}`,
             ]),
             startY: y + 4,
-            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT },
-            headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontStyle: "bold" },
+            theme: "plain",
+            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+            headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
         });
     }
 
+    addBrandedPdfFooters(doc, branding);
     return doc;
 }
 
-export function downloadBilanSaisonPDF(bilan: BilanSaisonForPdf, saison: SaisonForPdf) {
-    const doc = buildBilanSaisonDoc(bilan, saison);
-    doc.save(`bilan-saison-${saison.nom.replace(/\s+/g, "-")}.pdf`);
+export async function downloadBilanSaisonPDF(
+    bilan: BilanSaisonForPdf,
+    saison: SaisonForPdf,
+    branding?: PdfBranding
+) {
+    const doc = await buildBilanSaisonDoc(bilan, saison, branding);
+    const suffixe = bilan.type === "PROVISOIRE" ? `provisoire-v${bilan.version}` : "final";
+    doc.save(`bilan-saison-${saison.nom.replace(/\s+/g, "-")}-${suffixe}.pdf`);
 }
 
-export function printBilanSaisonPDF(bilan: BilanSaisonForPdf, saison: SaisonForPdf) {
-    const doc = buildBilanSaisonDoc(bilan, saison);
-    const blobUrl = doc.output("bloburl");
-    const win = window.open(blobUrl as unknown as string, "_blank");
-    win?.addEventListener("load", () => {
-        win.focus();
-        win.print();
-    });
+export function printBilanSaisonPDF(
+    bilan: BilanSaisonForPdf,
+    saison: SaisonForPdf,
+    branding?: PdfBranding
+) {
+    return printBrandedPdf(() => buildBilanSaisonDoc(bilan, saison, branding));
 }

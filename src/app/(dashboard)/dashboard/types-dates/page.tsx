@@ -12,7 +12,7 @@ export default async function TypesDatesPage() {
 
     if (!result.success) {
         return (
-            <div className="flex-1 p-8">
+            <div className="flex-1 px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
                 <div className="rounded-[14px] border border-red-200 bg-red-50 p-4 text-red-800">
                     Erreur: {result.error}
                 </div>
@@ -21,7 +21,7 @@ export default async function TypesDatesPage() {
     }
 
     return (
-        <Suspense fallback={<div className="flex-1 p-8">Chargement...</div>}>
+        <Suspense fallback={<div className="flex-1 px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">Chargement...</div>}>
             <TypesDatesPageContent typesDates={result.data || []} />
         </Suspense>
     );

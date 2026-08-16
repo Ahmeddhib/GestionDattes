@@ -18,9 +18,9 @@ function withSolde<T extends { montant: number; EncaissementClient: { montant: n
 }
 
 export const venteService = {
-    async getAll(tenantId: string) {
+    async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("vente:read");
-        const ventes = await venteRepository.findAll(tenantId);
+        const ventes = await venteRepository.findAll(tenantId, opts);
         return ventes.map(withSolde);
     },
 

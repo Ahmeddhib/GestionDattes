@@ -4,13 +4,15 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { StockDattesTableAdvanced } from "@/components/features/stock-dattes/StockDattesTableAdvanced";
 import type { StockDateGroupe } from "@/components/features/stock-dattes/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
+import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import { Grape, Warehouse } from "lucide-react";
 
 interface StockDattesPageContentProps {
+    saisonFiltre: SaisonFiltreProps;
     stockDates: StockDateGroupe[];
 }
 
-export function StockDattesPageContent({ stockDates }: StockDattesPageContentProps) {
+export function StockDattesPageContent({ stockDates, saisonFiltre }: StockDattesPageContentProps) {
     const { t } = useClientTranslations();
 
     const quantiteTotale = stockDates.reduce((sum, s) => sum + s.quantiteTotale, 0);
@@ -18,6 +20,8 @@ export function StockDattesPageContent({ stockDates }: StockDattesPageContentPro
 
     return (
         <PageContainer>
+            <SaisonFilterBar {...saisonFiltre} />
+
             <div>
                 <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
                     <Grape className="h-8 w-8 text-[#C17A2B]" />

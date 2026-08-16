@@ -5,11 +5,11 @@ import { createId } from "@paralleldrive/cuid2";
 type DbClient = typeof prisma | Prisma.TransactionClient;
 
 export const venteRepository = {
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.vente.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
             include: {
-                Client: { select: { id: true, nom: true, telephone: true } },
+                Client: { select: { id: true, nom: true, telephone: true, adresse: true, email: true } },
                 StockDate: {
                     select: {
                         id: true,
@@ -29,7 +29,7 @@ export const venteRepository = {
         return prisma.vente.findFirst({
             where: { id, tenantId },
             include: {
-                Client: { select: { id: true, nom: true, telephone: true } },
+                Client: { select: { id: true, nom: true, telephone: true, adresse: true, email: true } },
                 StockDate: {
                     select: {
                         id: true,

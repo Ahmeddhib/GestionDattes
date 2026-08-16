@@ -5,9 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Edit } from "lucide-react";
+import { Edit, ReceiptText } from "lucide-react";
 import { RecordEncaissementDialog } from "./RecordEncaissementDialog";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { EncaissementsHistoryDialog } from "./EncaissementsHistoryDialog";
+import { downloadVenteInvoicePDF } from "@/lib/vente-invoice-pdf";
+import type { PdfBranding } from "@/lib/pdf-branding";
 
 export type Vente = {
     id: string;
@@ -23,6 +26,8 @@ export type Vente = {
         id: string;
         nom: string;
         telephone: string | null;
+        adresse?: string | null;
+        email?: string | null;
     };
     StockDate: {
         id: string;
@@ -40,7 +45,9 @@ const STATUT_CONFIG: Record<string, { labelKey: string; className: string }> = {
 
 export const createVentesColumns = (
     t: (key: string) => string,
-    onEdit: (vente: Vente) => void
+    onEdit: (vente: Vente) => void,
+    branding: PdfBranding,
+    saisonActive?: SaisonActive
 ): ColumnDef<Vente>[] => [
     {
         accessorKey: "Client",
@@ -120,6 +127,16 @@ export const createVentesColumns = (
             const vente = row.original;
             return (
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => void downloadVenteInvoicePDF(vente, branding)}
+                        className="h-9 w-9 p-0 hover:bg-[#E7F3EF]"
+                        title="Télécharger la facture KAYEN"
+                        aria-label={`Télécharger la facture de ${vente.Client.nom}`}
+                    >
+                        <ReceiptText className="h-4 w-4 text-[#005d4b]" />
+                    </Button>
                     <EncaissementsHistoryDialog venteId={vente.id} clientNom={vente.Client.nom} />
                     {vente.statut === "EN_ATTENTE" && (
                         <Button
@@ -136,6 +153,7 @@ export const createVentesColumns = (
                             venteId={vente.id}
                             clientNom={vente.Client.nom}
                             montantRestant={vente.montantRestant}
+                            saisonActive={saisonActive}
                         />
                     )}
                 </div>

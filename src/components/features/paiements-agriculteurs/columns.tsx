@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { RecordPaiementDialog } from "./RecordPaiementDialog";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { PaiementsHistoryDialog } from "./PaiementsHistoryDialog";
 
 export type BonAchatAvecSolde = {
@@ -33,7 +34,8 @@ const STATUT_CONFIG: Record<string, { labelKey: string; className: string }> = {
 };
 
 export const createPaiementsColumns = (
-    t: (key: string) => string
+    t: (key: string) => string,
+    saisonActive?: SaisonActive
 ): ColumnDef<BonAchatAvecSolde>[] => [
     {
         accessorKey: "numero",
@@ -114,7 +116,11 @@ export const createPaiementsColumns = (
                 <div className="flex items-center gap-2">
                     <PaiementsHistoryDialog bonAchatId={bonAchat.id} numero={bonAchat.numero} />
                     {bonAchat.statut !== "PAYE" && (
-                        <RecordPaiementDialog bonAchatId={bonAchat.id} numero={bonAchat.numero} />
+                        <RecordPaiementDialog
+                            bonAchatId={bonAchat.id}
+                            numero={bonAchat.numero}
+                            saisonActive={saisonActive}
+                        />
                     )}
                 </div>
             );

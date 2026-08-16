@@ -19,6 +19,7 @@ export async function createTypeDateAction(formData: FormData) {
         const rawData = {
             nom: formData.get("nom"),
             description: formData.get("description") || undefined,
+            seuilAlerte: formData.get("seuilAlerte") || undefined,
         };
 
         const parsed = createTypeDateSchema.safeParse(rawData);

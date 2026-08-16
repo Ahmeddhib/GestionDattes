@@ -6,7 +6,16 @@ import type { BilanSaisonForPdf, SaisonForPdf } from "./bilan-saison-pdf";
  * figés dans BilanSaison — aucune donnée n'est recalculée ici.
  */
 export function exportBilanSaisonToExcel(bilan: BilanSaisonForPdf, saison: SaisonForPdf) {
+    const estProvisoire = bilan.type === "PROVISOIRE";
+
     const indicateurs = [
+        // En-tête d'identification : un fichier provisoire ne doit jamais être
+        // confondu avec le bilan de clôture une fois détaché de l'application.
+        {
+            Indicateur: "Nature du bilan",
+            Valeur: estProvisoire ? `PROVISOIRE (version ${bilan.version})` : "FINAL (clôture)",
+        },
+        { Indicateur: "Généré le", Valeur: bilan.genereAt.toLocaleDateString("fr-FR") },
         { Indicateur: "Nombre de livraisons", Valeur: bilan.nombreLivraisons },
         { Indicateur: "Quantité livrée (kg)", Valeur: bilan.totalQuantiteLivree },
         { Indicateur: "Quantité acceptée (kg)", Valeur: bilan.totalQuantiteAcceptee },
@@ -36,14 +45,28 @@ export function exportBilanSaisonToExcel(bilan: BilanSaisonForPdf, saison: Saiso
         "Non retournées": c.nombreNonRetourne,
     }));
 
+    // Stock attribuable à la saison, distinct de l'instantané physique global.
+    const restantParType = new Map(
+        bilan.stockOrigineRestantParTypeDate.map((s) => [s.typeDateId, s.quantiteDisponible])
+    );
+    const stockSaison = bilan.stockEntreParTypeDate.map((s) => ({
+        Variété: s.nom,
+        "Entré durant la saison": s.quantiteDisponible,
+        "Restant au moment du calcul": restantParType.get(s.typeDateId) ?? 0,
+    }));
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(indicateurs), "Bilan");
     if (stockFinal.length > 0) {
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(stockFinal), "Stock final");
     }
+    if (stockSaison.length > 0) {
+        XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(stockSaison), "Stock saison");
+    }
     if (caisses.length > 0) {
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(caisses), "Caisses");
     }
 
-    XLSX.writeFile(workbook, `bilan-saison-${saison.nom.replace(/\s+/g, "-")}.xlsx`);
+    const suffixe = estProvisoire ? `provisoire-v${bilan.version}` : "final";
+    XLSX.writeFile(workbook, `bilan-saison-${saison.nom.replace(/\s+/g, "-")}-${suffixe}.xlsx`);
 }

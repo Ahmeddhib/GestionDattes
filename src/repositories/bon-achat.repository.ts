@@ -30,9 +30,9 @@ export const bonAchatRepository = {
         return client.bonAchat.findFirst({ where: { livraisonId, tenantId } });
     },
 
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.bonAchat.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
             include: {
                 Livraison: {
                     select: {

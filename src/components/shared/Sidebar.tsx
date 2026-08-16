@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
@@ -37,9 +38,11 @@ interface SidebarProps {
         email: string;
         role: string;
     };
+    onNavigate?: () => void;
+    className?: string;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
     const pathname = usePathname();
     const { t } = useClientTranslations();
 
@@ -166,45 +169,86 @@ export function Sidebar({ user }: SidebarProps) {
         },
     ];
 
+    // L'entrée active est le lien le PLUS SPÉCIFIQUE qui préfixe l'URL. Une
+    // égalité stricte n'allumait rien sur les sous-pages (ex.
+    // /dashboard/finance/saisons/<id>), et un simple startsWith allumerait
+    // « Bilan financier » en même temps que « Ventes ».
+    const activeHref = menuSections
+        .flatMap((section) => section.items.map((item) => item.href))
+        .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
+        .sort((a, b) => b.length - a.length)[0];
+
     return (
-        <aside className="w-64 min-h-screen bg-[#3D1C00] text-white flex flex-col">
+        // `cn` et non une interpolation : `w-full` (defaut, pour remplir le
+        // tiroir mobile) doit pouvoir etre ecrase par le `w-64` passe par le
+        // layout. Concatener ne suffit pas — c'est l'ordre dans la feuille CSS
+        // qui tranche, pas l'ordre dans l'attribut class.
+        <aside
+            className={cn(
+                "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#3D1C00] text-white",
+                className
+            )}
+        >
             {/* Logo */}
-            <div className="p-6 border-b border-white/10">
-                <h1 className="text-2xl font-bold text-dattes-200">
-                    Gestion Dattes
-                </h1>
-                <p className="text-xs text-dattes-300 mt-1">Système ERP</p>
+            <div className="shrink-0 border-b border-white/10 p-4">
+                <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dattes-200">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f7f3e9]">
+                        <Image src="/kayen-logo.jpg" alt="Logo Kayen Fruits Packaging" fill sizes="48px" className="object-cover" priority />
+                    </div>
+                    <div className="min-w-0">
+                        <h1 className="truncate text-lg font-bold text-dattes-100">KAYEN</h1>
+                        <p className="truncate text-[10px] tracking-wide text-dattes-300">FRUITS PACKAGING</p>
+                    </div>
+                </Link>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 px-3 py-6 space-y-6 overflow-y-auto">
+            {/* Navigation. Le dégradé de bas de liste est le seul indice fiable
+                qu'il reste des entrées : la barre de défilement est en mode
+                overlay sur la plupart des plateformes et ne s'affiche que
+                pendant le geste. Sans lui, la dernière entrée visible semble
+                coupée par erreur. */}
+            <div className="relative min-h-0 flex-1">
+            <nav className="sidebar-scroll h-full overflow-y-auto overscroll-contain pb-4">
                 {menuSections.map((section) => (
                     <div key={section.title}>
-                        {/* Section Title */}
-                        <div className="px-4 mb-2">
-                            <h3 className="text-xs font-semibold uppercase tracking-wider text-dattes-300">
+                        {/* Titre de section collant : avec 22 entrées, la section
+                            en cours doit rester lisible pendant le défilement. */}
+                        <div className="sticky top-0 z-10 bg-[#3D1C00]/95 px-6 pb-2 pt-4 backdrop-blur-sm">
+                            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-dattes-300">
                                 {section.title}
                             </h3>
                         </div>
 
                         {/* Section Items */}
-                        <div className="space-y-1">
+                        <div className="space-y-0.5 px-3">
                             {section.items.map((item) => {
-                                const isActive = pathname === item.href;
+                                const isActive = item.href === activeHref;
                                 const Icon = item.icon;
 
                                 return (
                                     <Link
                                         key={item.href}
                                         href={item.href}
+                                        onClick={onNavigate}
+                                        aria-current={isActive ? "page" : undefined}
                                         className={cn(
-                                            "flex items-center gap-3 px-4 py-3 rounded-md transition-all",
-                                            "hover:bg-white/10",
-                                            isActive && "bg-dattes-600 text-white shadow-lg"
+                                            // min-h-11 = cible tactile de 44px dans le tiroir mobile,
+                                            // resserrée à 40px sur grand écran où le pointeur est précis.
+                                            "relative flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors lg:min-h-10",
+                                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dattes-200",
+                                            isActive
+                                                ? "bg-dattes-600 font-semibold text-white"
+                                                : "text-white/85 hover:bg-white/10 hover:text-white"
                                         )}
                                     >
-                                        <Icon className="w-5 h-5" />
-                                        <span className="font-medium">{item.label}</span>
+                                        {isActive && (
+                                            <span
+                                                aria-hidden
+                                                className="absolute inset-y-1.5 inset-s-0 w-1 rounded-full bg-dattes-200"
+                                            />
+                                        )}
+                                        <Icon className="h-4.5 w-4.5 shrink-0" />
+                                        <span className="truncate">{item.label}</span>
                                     </Link>
                                 );
                             })}
@@ -212,10 +256,15 @@ export function Sidebar({ user }: SidebarProps) {
                     </div>
                 ))}
             </nav>
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-[#3D1C00] to-transparent"
+                />
+            </div>
 
             {/* User Info */}
             {user && (
-                <div className="p-4 border-t border-white/10">
+                <div className="shrink-0 border-t border-white/10 bg-[#3D1C00] p-4">
                     <div className="flex items-center gap-3 mb-3">
                         <Avatar name={user.name} size="md" />
                         <div className="flex-1 min-w-0">

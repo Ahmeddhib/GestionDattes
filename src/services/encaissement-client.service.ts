@@ -12,9 +12,9 @@ export const encaissementClientService = {
         return encaissementClientRepository.findByVente(venteId, tenantId);
     },
 
-    async getAll(tenantId: string) {
+    async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("encaissement-client:read");
-        return encaissementClientRepository.findAll(tenantId);
+        return encaissementClientRepository.findAll(tenantId, opts);
     },
 
     /**

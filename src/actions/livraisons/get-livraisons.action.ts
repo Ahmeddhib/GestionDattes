@@ -7,7 +7,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
 /**
  * Action pour récupérer toutes les livraisons (du tenant actuel)
  */
-export async function getLivraisonsAction() {
+export async function getLivraisonsAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function getLivraisonsAction() {
         }
 
         const tenantId = await getTenantId();
-        const livraisons = await livraisonService.getAll(tenantId, session.user.id);
+        const livraisons = await livraisonService.getAll(tenantId, session.user.id, opts);
 
         return { success: true, data: livraisons };
     } catch (error) {

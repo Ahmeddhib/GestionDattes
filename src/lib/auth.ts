@@ -35,6 +35,7 @@ export const {
     signIn,
     signOut,
     auth,
+    unstable_update,
 } = NextAuth({
     basePath: "/api/auth",
     session: {
@@ -68,13 +69,9 @@ export const {
                         tenantId = undefined;
                     }
 
-                    // Mode ré-authentification: si le mot de passe est "__REAUTH__"
-                    // on skip la vérification du mot de passe (utilisateur déjà authentifié)
-                    const isReauth = password === "__REAUTH__";
+                    console.log("[AUTH] Login attempt:", { email, hasTenantId: !!tenantId });
 
-                    console.log("[AUTH] Login attempt:", { email, hasTenantId: !!tenantId, isReauth });
-
-                    if (!email || (!password && !isReauth)) {
+                    if (!email || !password) {
                         console.error("[AUTH] Missing email or password");
                         throw new Error("MISSING_CREDENTIALS");
                     }
@@ -94,13 +91,11 @@ export const {
                         throw new Error("ACCOUNT_DISABLED");
                     }
 
-                    // Vérifier le mot de passe (sauf en mode ré-auth)
-                    if (!isReauth) {
-                        const validPassword = await bcrypt.compare(password, user.password);
-                        if (!validPassword) {
-                            console.error("[AUTH] Invalid password for:", email);
-                            throw new Error("INVALID_CREDENTIALS");
-                        }
+                    // Une connexion Credentials exige toujours le mot de passe réel.
+                    const validPassword = await bcrypt.compare(password, user.password);
+                    if (!validPassword) {
+                        console.error("[AUTH] Invalid password for:", email);
+                        throw new Error("INVALID_CREDENTIALS");
                     }
 
                     // Si aucun tenantId fourni, permettre le login sans tenant
@@ -189,16 +184,26 @@ export const {
             }
 
             // Mise à jour du tenant (changement de Wakala)
-            if (trigger === "update" && session) {
-                console.log("[JWT] Mise à jour tenant:", {
-                    ancien: token.tenantId,
-                    nouveau: session.tenantId,
+            if (trigger === "update" && session?.user?.tenantId && token.id) {
+                const tenantUser = await prisma.tenantUser.findUnique({
+                    where: {
+                        userId_tenantId: {
+                            userId: token.id as string,
+                            tenantId: session.user.tenantId,
+                        },
+                    },
+                    include: {
+                        Role: { select: { name: true } },
+                        Tenant: { select: { name: true, code: true, active: true } },
+                    },
                 });
 
-                token.tenantId = session.tenantId;
-                token.tenantName = session.tenantName;
-                token.tenantCode = session.tenantCode;
-                token.role = session.role;
+                if (tenantUser?.active && tenantUser.Tenant.active) {
+                    token.tenantId = session.user.tenantId;
+                    token.tenantName = tenantUser.Tenant.name;
+                    token.tenantCode = tenantUser.Tenant.code;
+                    token.role = tenantUser.Role.name;
+                }
             }
 
             return token;

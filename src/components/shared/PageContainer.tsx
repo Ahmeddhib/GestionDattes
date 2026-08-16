@@ -5,5 +5,9 @@
  * de chaque page, à la place d'un div ad-hoc.
  */
 export function PageContainer({ children }: { children: React.ReactNode }) {
-    return <div className="flex-1 space-y-6 p-8">{children}</div>;
+    return (
+        <div className="mx-auto w-full min-w-0 max-w-[1600px] flex-1 space-y-4 px-3 py-4 sm:space-y-6 sm:px-5 sm:py-6 lg:px-8 lg:py-8 2xl:max-w-[1760px]">
+            {children}
+        </div>
+    );
 }

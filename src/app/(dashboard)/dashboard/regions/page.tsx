@@ -6,7 +6,7 @@ export default async function RegionsPage() {
 
     if (!result.success) {
         return (
-            <div className="p-8">
+            <div className="px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
                 <div className="rounded-xl bg-red-50 p-4 text-red-600">
                     ❌ {result.error}
                 </div>

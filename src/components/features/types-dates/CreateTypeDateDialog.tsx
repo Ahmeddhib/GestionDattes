@@ -85,6 +85,21 @@ export function CreateTypeDateDialog() {
                         />
                     </div>
 
+                    <div className="space-y-2">
+                        <Label htmlFor="seuilAlerte" className="text-[#3D1C00]">
+                            {t("typesDates.seuilAlerte")}
+                        </Label>
+                        <Input
+                            id="seuilAlerte"
+                            name="seuilAlerte"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder={t("typesDates.seuilAlertePlaceholder")}
+                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                        />
+                    </div>
+
                     <div className="flex justify-end gap-3 pt-4">
                         <Button
                             type="button"

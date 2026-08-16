@@ -4,11 +4,13 @@ import { Grape } from "lucide-react";
 import { TypesDatesTableAdvanced } from "@/components/features/types-dates/TypesDatesTableAdvanced";
 import { CreateTypeDateDialog } from "@/components/features/types-dates/CreateTypeDateDialog";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 type TypeDate = {
     id: string;
     nom: string;
     description: string | null;
+    seuilAlerte: number | null;
     _count?: {
         livraisons: number;
         stocksDates: number;
@@ -31,16 +33,16 @@ export function TypesDatesPageContent({ typesDates }: TypesDatesPageContentProps
     );
 
     return (
-        <div className="flex-1 space-y-6 p-8">
+        <PageContainer>
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex items-center gap-3">
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Grape className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-[#3D1C00]">
+                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
                                 {t("typesDates.title")}
                             </h1>
                             <p className="text-sm text-[#3D1C00]/60">
@@ -87,6 +89,6 @@ export function TypesDatesPageContent({ typesDates }: TypesDatesPageContentProps
 
             {/* Table */}
             <TypesDatesTableAdvanced typesDates={typesDates} />
-        </div>
+        </PageContainer>
     );
 }

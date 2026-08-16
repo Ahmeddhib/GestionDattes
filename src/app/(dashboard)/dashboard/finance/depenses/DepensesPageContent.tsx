@@ -5,13 +5,25 @@ import { DepensesTableAdvanced } from "@/components/features/depenses/DepensesTa
 import { CreateDepenseDialog } from "@/components/features/depenses/CreateDepenseDialog";
 import type { Depense } from "@/components/features/depenses/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
+import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
+import { AucuneSaisonAlert } from "@/components/features/saisons/AucuneSaisonAlert";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { Wallet2 } from "lucide-react";
+import type { PdfBranding } from "@/lib/pdf-branding";
 
 interface DepensesPageContentProps {
+    saisonFiltre: SaisonFiltreProps;
+    saisonOuverte: SaisonActive | null;
     depenses: Depense[];
+    branding: PdfBranding;
 }
 
-export function DepensesPageContent({ depenses }: DepensesPageContentProps) {
+export function DepensesPageContent({
+    depenses,
+    saisonFiltre,
+    saisonOuverte,
+    branding,
+}: DepensesPageContentProps) {
     const { t } = useClientTranslations();
 
     const total = depenses.length;
@@ -19,7 +31,10 @@ export function DepensesPageContent({ depenses }: DepensesPageContentProps) {
 
     return (
         <PageContainer>
-            <div className="flex items-center justify-between">
+            <SaisonFilterBar {...saisonFiltre} />
+            {!saisonOuverte && <AucuneSaisonAlert canGererSaisons />}
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
                         <Wallet2 className="h-8 w-8 text-[#C17A2B]" />
@@ -27,7 +42,7 @@ export function DepensesPageContent({ depenses }: DepensesPageContentProps) {
                     </h1>
                     <p className="text-gray-600 mt-2">{t("finance.depenses.description")}</p>
                 </div>
-                <CreateDepenseDialog />
+                {!saisonFiltre.isReadOnly && saisonOuverte && <CreateDepenseDialog saisonActive={saisonOuverte} />}
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
@@ -59,7 +74,7 @@ export function DepensesPageContent({ depenses }: DepensesPageContentProps) {
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <DepensesTableAdvanced data={depenses} />
+                <DepensesTableAdvanced data={depenses} branding={branding} />
             </div>
         </PageContainer>
     );

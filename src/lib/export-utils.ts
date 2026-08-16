@@ -1,6 +1,51 @@
-import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import {
+    addBrandedPdfFooters,
+    createBrandedPdf,
+    PDF_DARK,
+    type PdfBranding,
+} from "@/lib/pdf-branding";
+
+async function exportTablePdf(options: {
+    title: string;
+    fileName: string;
+    head: string[];
+    body: (string | number)[][];
+    branding?: PdfBranding;
+    orientation?: "portrait" | "landscape";
+}) {
+    const { doc, contentStartY } = await createBrandedPdf({
+        title: options.title,
+        branding: options.branding,
+        reference: `RAPPORT — ${options.body.length} ligne${options.body.length > 1 ? "s" : ""}`,
+        orientation: options.orientation ?? "landscape",
+    });
+
+    autoTable(doc, {
+        head: [options.head],
+        body: options.body,
+        startY: contentStartY,
+        theme: "plain",
+        styles: {
+            font: "helvetica",
+            fontSize: 8,
+            textColor: PDF_DARK,
+            cellPadding: { top: 3.5, right: 2, bottom: 3.5, left: 2 },
+            lineColor: [75, 75, 75],
+            lineWidth: { bottom: 0.2 },
+        },
+        headStyles: {
+            fontStyle: "bold",
+            fontSize: 8,
+            lineWidth: { bottom: 0.35 },
+        },
+        margin: { left: 14, right: 14, bottom: 18 },
+    });
+
+    addBrandedPdfFooters(doc, options.branding);
+    doc.save(`${options.fileName}-${Date.now()}.pdf`);
+}
 
 type PretForExport = {
     id: string;
@@ -22,24 +67,11 @@ type PretForExport = {
     observations?: string | null;
 };
 
-export function exportPretsToPDF(prets: PretForExport[], title: string = "Prêts de Caisses") {
-    const doc = new jsPDF();
-
-    // Configuration des couleurs
-    const primaryColor: [number, number, number] = [193, 122, 43]; // #C17A2B
-    const textColor: [number, number, number] = [61, 28, 0]; // #3D1C00
-
-    // En-tête du document
-    doc.setFontSize(20);
-    doc.setTextColor(...textColor);
-    doc.text(title, 14, 20);
-
-    // Date du rapport
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
-
-    // Préparer les données pour le tableau
+export async function exportPretsToPDF(
+    prets: PretForExport[],
+    branding?: PdfBranding,
+    title: string = "Prêts de Caisses"
+) {
     const tableData = prets.map((pret) => [
         `${pret.agriculteur.nom} ${pret.agriculteur.prenom}`,
         pret.agriculteur.code,
@@ -52,40 +84,13 @@ export function exportPretsToPDF(prets: PretForExport[], title: string = "Prêts
         pret.observations || "-",
     ]);
 
-    // Générer le tableau
-    autoTable(doc, {
-        head: [
-            [
-                "Agriculteur",
-                "Code",
-                "Type Caisse",
-                "Prêté",
-                "Retourné",
-                "Restant",
-                "Statut",
-                "Date Prêt",
-                "Observations",
-            ],
-        ],
+    await exportTablePdf({
+        title,
+        fileName: "prets-caisses",
+        branding,
+        head: ["Agriculteur", "Code", "Type Caisse", "Prêté", "Retourné", "Restant", "Statut", "Date Prêt", "Observations"],
         body: tableData,
-        startY: 35,
-        styles: {
-            fontSize: 8,
-            cellPadding: 3,
-        },
-        headStyles: {
-            fillColor: primaryColor,
-            textColor: [255, 255, 255] as [number, number, number],
-            fontStyle: "bold",
-        },
-        alternateRowStyles: {
-            fillColor: [250, 240, 220], // #FAF0DC
-        },
-        margin: { top: 35 },
     });
-
-    // Télécharger le PDF
-    doc.save(`prets-caisses-${new Date().getTime()}.pdf`);
 }
 
 export function exportPretsToExcel(prets: PretForExport[], fileName: string = "prets-caisses") {
@@ -163,19 +168,9 @@ type PaiementAgriculteurForExport = {
 
 export function exportPaiementsAgriculteursToPDF(
     bonsAchat: PaiementAgriculteurForExport[],
+    branding?: PdfBranding,
     title: string = "Paiements Agriculteurs"
 ) {
-    const doc = new jsPDF();
-    const primaryColor: [number, number, number] = [193, 122, 43];
-    const textColor: [number, number, number] = [61, 28, 0];
-
-    doc.setFontSize(20);
-    doc.setTextColor(...textColor);
-    doc.text(title, 14, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
-
     const tableData = bonsAchat.map((ba) => [
         ba.numero,
         `${ba.Livraison.Agriculteur.nom} ${ba.Livraison.Agriculteur.prenom}`,
@@ -186,17 +181,13 @@ export function exportPaiementsAgriculteursToPDF(
         new Date(ba.createdAt).toLocaleDateString("fr-FR"),
     ]);
 
-    autoTable(doc, {
-        head: [["N° Bon", "Agriculteur", "Montant", "Payé", "Restant", "Statut", "Date"]],
+    return exportTablePdf({
+        title,
+        fileName: "paiements-agriculteurs",
+        branding,
+        head: ["N° Bon", "Agriculteur", "Montant", "Payé", "Restant", "Statut", "Date"],
         body: tableData,
-        startY: 35,
-        styles: { fontSize: 8, cellPadding: 3 },
-        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [250, 240, 220] },
-        margin: { top: 35 },
     });
-
-    doc.save(`paiements-agriculteurs-${new Date().getTime()}.pdf`);
 }
 
 export function exportPaiementsAgriculteursToExcel(
@@ -232,18 +223,11 @@ type VenteForExport = {
     createdAt: Date;
 };
 
-export function exportVentesToPDF(ventes: VenteForExport[], title: string = "Ventes") {
-    const doc = new jsPDF();
-    const primaryColor: [number, number, number] = [193, 122, 43];
-    const textColor: [number, number, number] = [61, 28, 0];
-
-    doc.setFontSize(20);
-    doc.setTextColor(...textColor);
-    doc.text(title, 14, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
-
+export function exportVentesToPDF(
+    ventes: VenteForExport[],
+    branding?: PdfBranding,
+    title: string = "Ventes"
+) {
     const tableData = ventes.map((v) => [
         v.Client.nom,
         `${v.StockDate.TypeDate.nom} (Lot ${v.StockDate.Livraison.numeroLot})`,
@@ -255,17 +239,13 @@ export function exportVentesToPDF(ventes: VenteForExport[], title: string = "Ven
         new Date(v.createdAt).toLocaleDateString("fr-FR"),
     ]);
 
-    autoTable(doc, {
-        head: [["Client", "Lot", "Quantité", "Prix U.", "Montant", "Restant", "Statut", "Date"]],
+    return exportTablePdf({
+        title,
+        fileName: "ventes",
+        branding,
+        head: ["Client", "Lot", "Quantité", "Prix U.", "Montant", "Restant", "Statut", "Date"],
         body: tableData,
-        startY: 35,
-        styles: { fontSize: 8, cellPadding: 3 },
-        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [250, 240, 220] },
-        margin: { top: 35 },
     });
-
-    doc.save(`ventes-${new Date().getTime()}.pdf`);
 }
 
 export function exportVentesToExcel(ventes: VenteForExport[], fileName: string = "ventes") {
@@ -296,18 +276,11 @@ type DepenseForExport = {
     observations: string | null;
 };
 
-export function exportDepensesToPDF(depenses: DepenseForExport[], title: string = "Autres Dépenses") {
-    const doc = new jsPDF();
-    const primaryColor: [number, number, number] = [193, 122, 43];
-    const textColor: [number, number, number] = [61, 28, 0];
-
-    doc.setFontSize(20);
-    doc.setTextColor(...textColor);
-    doc.text(title, 14, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Date: ${new Date().toLocaleDateString("fr-FR")}`, 14, 28);
-
+export function exportDepensesToPDF(
+    depenses: DepenseForExport[],
+    branding?: PdfBranding,
+    title: string = "Autres Dépenses"
+) {
     const tableData = depenses.map((d) => [
         d.libelle,
         d.categorie || "-",
@@ -316,17 +289,14 @@ export function exportDepensesToPDF(depenses: DepenseForExport[], title: string 
         d.observations || "-",
     ]);
 
-    autoTable(doc, {
-        head: [["Libellé", "Catégorie", "Montant", "Date", "Observations"]],
+    return exportTablePdf({
+        title,
+        fileName: "depenses",
+        branding,
+        orientation: "portrait",
+        head: ["Libellé", "Catégorie", "Montant", "Date", "Observations"],
         body: tableData,
-        startY: 35,
-        styles: { fontSize: 8, cellPadding: 3 },
-        headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [250, 240, 220] },
-        margin: { top: 35 },
     });
-
-    doc.save(`depenses-${new Date().getTime()}.pdf`);
 }
 
 export function exportDepensesToExcel(depenses: DepenseForExport[], fileName: string = "depenses") {

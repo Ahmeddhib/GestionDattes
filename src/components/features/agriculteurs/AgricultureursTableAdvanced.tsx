@@ -102,12 +102,12 @@ export function AgricultureursTableAdvanced({
     return (
         <>
             {/* Filtre par région */}
-            <div className="mb-4 flex items-center gap-4">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                 <label className="text-sm font-medium text-[#3D1C00]">
                     {t("agriculteurs.region")} :
                 </label>
                 <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                    <SelectTrigger className="w-[250px] rounded-[7px] border-[#C17A2B]/20 bg-white">
+                    <SelectTrigger className="w-full rounded-[7px] border-[#C17A2B]/20 bg-white sm:w-[250px]">
                         <SelectValue placeholder={t("common.all")} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">

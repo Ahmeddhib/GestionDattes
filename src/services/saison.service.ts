@@ -75,35 +75,11 @@ export const saisonService = {
         return saison;
     },
 
-    async delete(tenantId: string, userId: string, id: string) {
-        await requirePermission("saison:delete");
-
-        const saison = await saisonRepository.findById(tenantId, id);
-        if (!saison) {
-            throw new Error("Saison introuvable dans cette Wakala");
-        }
-
-        if (saison._count && saison._count.Vente > 0) {
-            throw new Error(
-                `Impossible de supprimer cette saison car elle a ${saison._count.Vente} vente(s) associée(s)`
-            );
-        }
-
-        if (saison.statut === "OUVERTE") {
-            throw new Error("Impossible de supprimer la saison ouverte");
-        }
-
-        await saisonRepository.delete(tenantId, id);
-
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "DELETE_SAISON",
-            targetId: id,
-            description: `Saison supprimée: ${saison.nom}`,
-            details: { nom: saison.nom },
-        });
-
-        return { success: true };
-    },
 };
+
+// Une saison n'est jamais supprimée physiquement : elle est l'unité
+// comptable de rattachement de toutes les opérations, et une campagne
+// clôturée est un historique définitif. Il n'existe donc volontairement
+// aucune méthode `delete` ici, et la permission "saison:delete" a été
+// retirée. La valeur DELETE_SAISON reste dans l'enum AuditAction car des
+// journaux historiques la référencent.

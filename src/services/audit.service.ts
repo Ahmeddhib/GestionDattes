@@ -24,7 +24,13 @@ export const auditService = {
 
     async getAuditLogs(
         tenantId: string,
-        options?: { page?: number; pageSize?: number; actorId?: string; action?: AuditAction }
+        options?: {
+            page?: number;
+            pageSize?: number;
+            actorId?: string;
+            action?: AuditAction;
+            targetId?: string;
+        }
     ) {
         await requirePermission("audit:read");
         const result = await auditRepository.findAll(tenantId, options);

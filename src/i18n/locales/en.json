@@ -80,7 +80,111 @@
         "overview": "Overview",
         "management": "Management",
         "administration": "Administration",
-        "finance": "Finance"
+        "finance": "Finance",
+        "noSaisonOuverte": "No open season",
+        "refresh": "Refresh",
+        "refreshedAt": "Refreshed at {time}",
+        "viewModule": "View module",
+        "viewAll": "View all",
+        "filters": {
+            "periode": "Period",
+            "saison": "Season",
+            "dateRange": "Date range",
+            "selectSaison": "Select a season",
+            "apply": "Apply",
+            "jour": "Today",
+            "semaine": "This week",
+            "mois": "This month",
+            "annee": "This year",
+            "saisonOption": "Season",
+            "personnalisee": "Custom range"
+        },
+        "kpi": {
+            "quantiteNetteLivree": "Net quantity delivered",
+            "nombreLivraisons": "Number of deliveries",
+            "stockTotal": "Total date stock",
+            "montantBonsAchat": "Total purchase orders amount",
+            "chiffreAffaires": "Revenue",
+            "totalEncaisse": "Total collected",
+            "totalPayeAgriculteurs": "Total paid to farmers",
+            "tresorerieNette": "Net cash flow",
+            "dettesAgriculteurs": "Debts to farmers",
+            "creancesClients": "Client receivables"
+        },
+        "charts": {
+            "deliveries": {
+                "title": "Deliveries",
+                "description": "Net weight and payable quantity, by day or month",
+                "poidsNet": "Net weight delivered",
+                "quantitePayable": "Payable quantity"
+            },
+            "cashflow": {
+                "title": "Cash flow",
+                "description": "Client payments, farmer payments and other expenses",
+                "encaissements": "Client payments",
+                "paiements": "Farmer payments",
+                "depenses": "Other expenses"
+            },
+            "stock": {
+                "title": "Stock by variety",
+                "description": "Current available quantity, by date variety",
+                "disponible": "Available stock",
+                "seuil": "Alert threshold"
+            },
+            "repartition": {
+                "title": "Delivery breakdown",
+                "description": "Net weight delivered by variety, over the period",
+                "autres": "Other varieties"
+            },
+            "sales": {
+                "title": "Sales trend",
+                "description": "Quantity sold and revenue, by day or month",
+                "quantite": "Quantity sold",
+                "montant": "Revenue"
+            }
+        },
+        "topAgriculteurs": {
+            "title": "Top farmers",
+            "description": "By quantity delivered over the period",
+            "agriculteur": "Farmer",
+            "quantiteLivree": "Quantity delivered",
+            "empty": "No deliveries for this period"
+        },
+        "recentActivity": {
+            "title": "Recent activity",
+            "empty": "No recent activity",
+            "livraisons": "Latest deliveries",
+            "bonsAchat": "Latest purchase orders",
+            "paiementsAgriculteurs": "Latest farmer payments",
+            "ventes": "Latest sales",
+            "encaissements": "Latest client payments",
+            "mouvementsStock": "Recent stock movements"
+        },
+        "alerts": {
+            "title": "Alerts and required actions",
+            "allClear": "No alerts — everything is up to date.",
+            "bonsAchatImpayes": "{count} purchase order(s) unpaid or partially paid — {montant} remaining",
+            "creancesClients": "{count} sale(s) with a pending client receivable — {montant} remaining",
+            "livraisonsSansBonAchat": "{count} delivery(ies) with no associated purchase order",
+            "livraisonsSansPesee": "{count} delivery(ies) with no weighing recorded",
+            "caissesNonRetournees": "{count} crate loan(s) not returned",
+            "stockFaible": "Low stock for {nom}: {quantite} (threshold: {seuil})",
+            "saisonProcheFin": "Season \"{nom}\" ends in {jours} day(s)",
+            "aucuneSaisonOuverte": "No open season for this Wakala — new operations are blocked",
+            "saisonSelectionneeCloturee": "You are viewing the frozen statement of closed season \"{nom}\""
+        },
+        "quickActions": {
+            "nouvelleLivraison": "New delivery",
+            "nouvelleVente": "New sale",
+            "avanceAgriculteur": "Farmer advance",
+            "encaissementClient": "Client payment",
+            "ajouterDepense": "Add an expense",
+            "consulterStock": "View stock",
+            "bilanFinancier": "Financial statement"
+        },
+        "empty": {
+            "chart": "No data for this period"
+        }
     },
     "regions": {
         "title": "Regions",
@@ -228,6 +332,8 @@
         "namePlaceholder": "E.g., Deglet Nour, Allig, Kentichi...",
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Variety description (optional)",
+        "seuilAlerte": "Alert threshold (kg)",
+        "seuilAlertePlaceholder": "E.g., 100 (optional)",
         "livraisons": "Deliveries",
         "stocksDates": "Stocks",
         "totalUsage": "Total Usage",
@@ -397,7 +503,27 @@
                 "confirmMessage": "This closure is irreversible. Once confirmed, no operation can be added or modified in this season.",
                 "confirmButton": "Close the season",
                 "successToast": "Season closed successfully",
-                "backToList": "Back to list"
+                "backToList": "Back to list",
+                "blockersDescription": "These issues prevent closure. Fix them before continuing.",
+                "warningsTitle": "Warnings (do not prevent closure)",
+                "noWarnings": "No warnings.",
+                "warningsHint": "Remaining stock or open balances are not errors: it is up to you to decide the campaign is over.",
+                "acknowledge": "I have read the warnings and confirm this campaign is definitively over.",
+                "corriger": "Fix",
+                "prochaineSaison": "No season is open. Create the next season to resume operations.",
+                "checks": {
+                    "LIVRAISON_SANS_PESEE": "{count} delivery/deliveries with no weighing — net weight was never established.",
+                    "LIVRAISON_SANS_BON_ACHAT": "{count} delivery/deliveries with no purchase order — the purchase was never priced.",
+                    "DETTES_AGRICULTEURS_RESTANTES": "Remaining farmer debts: {valeur}",
+                    "CREANCES_CLIENTS_RESTANTES": "Remaining client receivables: {valeur}",
+                    "CAISSES_NON_RETOURNEES": "{valeur} crate(s) not returned",
+                    "STOCK_RESTANT": "Stock remaining in the warehouse: {valeur}",
+                    "PAIEMENTS_PARTIELS": "{count} partially paid purchase order(s)",
+                    "ENCAISSEMENTS_PARTIELS": "{count} partially collected sale(s)",
+                    "BONS_ACHAT_IMPAYES": "{count} unpaid purchase order(s)",
+                    "SURPAIEMENT_BON_ACHAT": "{count} purchase order(s) paid beyond their amount",
+                    "SURENCAISSEMENT_VENTE": "{count} sale(s) collected beyond their amount"
+                }
             },
             "bilan": {
                 "title": "Season Overview",
@@ -433,7 +559,69 @@
                 "historique": "History",
                 "creeLe": "Created on",
                 "saisonSuivante": "Next season",
-                "saisonPrecedente": "Previous season"
+                "saisonPrecedente": "Previous season",
+                "stockEntre": "Stock received during the season",
+                "stockOrigineRestant": "Stock from this season still available",
+                "caissesSaison": "Crates lent during the season",
+                "stockFinalHint": "Physical snapshot of the warehouse at computation time, across all origin seasons.",
+                "auMomentDuCalcul": "at computation time"
+            },
+            "errors": {
+                "aucuneSaisonOuverte": "No open season for this Wakala. Ask an ADMIN to open or create a season before recording new operations.",
+                "saisonCloturee": "Operation not allowed: season “{nom}” is closed. A closed season's data is final.",
+                "saisonIntrouvable": "Season not found in this Wakala."
+            },
+            "saisonActive": "Active season",
+            "aucuneSaison": {
+                "title": "No open season",
+                "message": "No new operation can be recorded until a season is open.",
+                "cta": "Manage seasons"
+            },
+            "provisoire": {
+                "action": "Generate a provisional report",
+                "description": "Freezes a snapshot of the indicators without closing the season. You can keep working and generate more.",
+                "successToast": "Provisional report v{version} generated",
+                "badge": "Provisional",
+                "badgeFinal": "Final",
+                "version": "Version {version}",
+                "genereLe": "Generated on",
+                "genereePar": "by",
+                "listeTitle": "Season reports",
+                "aucun": "No report has been generated for this season yet.",
+                "selectVersion": "Displayed report",
+                "vsCloture": "Generating a provisional report closes nothing. Only the definitive closure locks the season."
+            },
+            "detail": {
+                "tabs": {
+                    "apercu": "Overview",
+                    "livraisons": "Deliveries",
+                    "pesees": "Weighings",
+                    "bonsAchat": "Purchase orders",
+                    "ventes": "Sales",
+                    "paiements": "Farmer payments",
+                    "encaissements": "Client payments",
+                    "depenses": "Expenses",
+                    "stock": "Stock / lots",
+                    "caisses": "Crates",
+                    "bilans": "Reports",
+                    "audit": "History"
+                },
+                "stockNote": "Lots received during this season. A lot sold in a later season is still listed here — its origin is what counts.",
+                "caissesNote": "Loans made during this season. Crates lent in a previous season and never returned remain counted in the global stock.",
+                "audit": {
+                    "date": "Date",
+                    "action": "Action",
+                    "auteur": "User",
+                    "description": "Description"
+                }
+            },
+            "filtre": {
+                "label": "Season",
+                "courante": "Current season",
+                "precedente": "Previous season",
+                "toutes": "All seasons",
+                "clotureeBadge": "Closed season",
+                "lectureSeule": "This season is closed: viewing and export only."
             }
         },
         "ventes": {
@@ -452,7 +640,8 @@
             "enregistrerEncaissement": "Record a collection",
             "nouvelEncaissement": "New collection",
             "historiqueEncaissements": "Collection history",
-            "encaissementEnregistre": "Collection recorded successfully"
+            "encaissementEnregistre": "Collection recorded successfully",
+            "lotSaison": "Lot {nom}"
         },
         "depenses": {
             "title": "Other Expenses",
@@ -464,6 +653,13 @@
             "montant": "Amount",
             "searchPlaceholder": "Search an expense...",
             "deleteConfirm": "Are you sure you want to delete the expense"
+        },
+        "encaissements": {
+            "date": "Date",
+            "client": "Client",
+            "modePaiement": "Payment method",
+            "enregistrePar": "Recorded by",
+            "montant": "Amount"
         }
     },
     "stockDattes": {

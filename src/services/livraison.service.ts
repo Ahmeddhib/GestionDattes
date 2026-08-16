@@ -17,10 +17,10 @@ export const livraisonService = {
     /**
      * Récupère toutes les livraisons avec transformation camelCase
      */
-    async getAll(tenantId: string, userId: string) {
+    async getAll(tenantId: string, userId: string, opts?: { saisonId?: string }) {
         await checkPermission(userId, "livraison:read");
 
-        const livraisons = await livraisonRepository.findAll(tenantId);
+        const livraisons = await livraisonRepository.findAll(tenantId, opts);
 
         // Transformation PascalCase → camelCase
         return livraisons.map((livraison) => {
@@ -295,6 +295,8 @@ export const livraisonService = {
         if (!existing) {
             throw new Error("Livraison introuvable");
         }
+
+        await assertSaisonOuverte(tenantId, existing.saisonId);
 
         // Vérifier si la livraison est utilisée
         const isUsed = await livraisonRepository.isUsed(id, tenantId);

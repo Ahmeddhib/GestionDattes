@@ -38,8 +38,16 @@ export interface IndicateursSaison {
     margeBrute: number;
     margeNette: number;
 
+    /** Instantané PHYSIQUE global du tenant — voir le commentaire ci-dessous. */
     stockFinalParTypeDate: StockFinalTypeDate[];
+    /** Caisses physiquement dehors, toutes saisons confondues. */
     stockCaisses: StockCaisseType[];
+    /** Flux : quantité ENTRÉE en stock durant cette saison. */
+    stockEntreParTypeDate: StockFinalTypeDate[];
+    /** Part de ce stock encore disponible au moment du calcul. */
+    stockOrigineRestantParTypeDate: StockFinalTypeDate[];
+    /** Caisses prêtées DURANT cette saison. */
+    caissesSaison: StockCaisseType[];
 }
 
 /**
@@ -49,10 +57,22 @@ export interface IndicateursSaison {
  * BilanSaison) — logique unique, jamais dupliquée.
  *
  * Les flux (livraisons, achats, paiements, ventes, encaissements, dépenses)
- * sont filtrés par saisonId. Le stock (StockDate) et les caisses
- * (PretCaisse) n'ont pas de saisonId propre dans le schéma actuel : leurs
- * indicateurs sont donc des snapshots globaux du tenant au moment du calcul,
- * pas un sous-ensemble de la saison.
+ * sont filtrés par saisonId.
+ *
+ * Pour le stock, deux familles de chiffres coexistent DÉLIBÉRÉMENT :
+ *
+ *  - `stockFinalParTypeDate` et `stockCaisses` restent des instantanés
+ *    PHYSIQUES globaux du tenant. Ce n'est pas une limitation : c'est ce que
+ *    « stock restant en fin de campagne » veut dire. Les filtrer par saison
+ *    omettrait le report invendu des campagnes précédentes encore en rayon,
+ *    et le chiffre ne se réconcilierait plus avec un inventaire physique.
+ *
+ *  - `stockEntreParTypeDate`, `stockOrigineRestantParTypeDate` et
+ *    `caissesSaison` sont les chiffres réellement attribuables à la saison.
+ *    Attention : `quantiteDisponible` est une colonne mutable, donc
+ *    `stockOrigineRestantParTypeDate` continue de baisser après la clôture au
+ *    fil des ventes des lots de cette saison. Il n'est valable que FIGÉ dans
+ *    un snapshot — ne jamais le recalculer en direct pour une saison close.
  */
 export async function computeIndicateursSaison(
     tenantId: string,
@@ -68,6 +88,8 @@ export async function computeIndicateursSaison(
         depensesAgg,
         stockDateRows,
         pretCaisseRows,
+        stockSaisonRows,
+        pretCaisseSaisonRows,
     ] = await Promise.all([
         client.livraison.aggregate({
             where: { tenantId, saisonId },
@@ -100,6 +122,26 @@ export async function computeIndicateursSaison(
         }),
         client.pretCaisse.findMany({
             where: { tenantId },
+            select: {
+                nombrePrete: true,
+                nombreRetourne: true,
+                typeCaisseId: true,
+                TypeCaisse: { select: { nom: true } },
+            },
+        }),
+        // Chiffres attribuables à la saison, désormais possibles grâce à
+        // StockDate.saisonOrigineId et PretCaisse.saisonId.
+        client.stockDate.findMany({
+            where: { tenantId, saisonOrigineId: saisonId },
+            select: {
+                quantite: true,
+                quantiteDisponible: true,
+                typeDateId: true,
+                TypeDate: { select: { nom: true } },
+            },
+        }),
+        client.pretCaisse.findMany({
+            where: { tenantId, saisonId },
             select: {
                 nombrePrete: true,
                 nombreRetourne: true,
@@ -174,6 +216,53 @@ export async function computeIndicateursSaison(
         }
     }
 
+    // Regroupements par variété du stock issu de CETTE saison : `quantite` est
+    // le flux entré (stable pour toujours), `quantiteDisponible` ce qu'il en
+    // reste au moment du calcul (mutable, valable uniquement figé).
+    const stockEntreParType = new Map<string, StockFinalTypeDate>();
+    const stockRestantParType = new Map<string, StockFinalTypeDate>();
+    for (const row of stockSaisonRows) {
+        const entre = stockEntreParType.get(row.typeDateId);
+        if (entre) {
+            entre.quantiteDisponible += row.quantite;
+        } else {
+            stockEntreParType.set(row.typeDateId, {
+                typeDateId: row.typeDateId,
+                nom: row.TypeDate.nom,
+                quantiteDisponible: row.quantite,
+            });
+        }
+
+        const restant = stockRestantParType.get(row.typeDateId);
+        if (restant) {
+            restant.quantiteDisponible += row.quantiteDisponible;
+        } else {
+            stockRestantParType.set(row.typeDateId, {
+                typeDateId: row.typeDateId,
+                nom: row.TypeDate.nom,
+                quantiteDisponible: row.quantiteDisponible,
+            });
+        }
+    }
+
+    const caissesSaisonParType = new Map<string, StockCaisseType>();
+    for (const row of pretCaisseSaisonRows) {
+        const existing = caissesSaisonParType.get(row.typeCaisseId);
+        if (existing) {
+            existing.nombrePrete += row.nombrePrete;
+            existing.nombreRetourne += row.nombreRetourne;
+            existing.nombreNonRetourne += row.nombrePrete - row.nombreRetourne;
+        } else {
+            caissesSaisonParType.set(row.typeCaisseId, {
+                typeCaisseId: row.typeCaisseId,
+                nom: row.TypeCaisse.nom,
+                nombrePrete: row.nombrePrete,
+                nombreRetourne: row.nombreRetourne,
+                nombreNonRetourne: row.nombrePrete - row.nombreRetourne,
+            });
+        }
+    }
+
     return {
         nombreLivraisons,
         totalQuantiteLivree,
@@ -192,5 +281,8 @@ export async function computeIndicateursSaison(
         margeNette,
         stockFinalParTypeDate: Array.from(stockParType.values()),
         stockCaisses: Array.from(caissesParType.values()),
+        stockEntreParTypeDate: Array.from(stockEntreParType.values()),
+        stockOrigineRestantParTypeDate: Array.from(stockRestantParType.values()),
+        caissesSaison: Array.from(caissesSaisonParType.values()),
     };
 }

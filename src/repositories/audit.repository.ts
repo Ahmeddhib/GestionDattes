@@ -16,6 +16,7 @@ export const auditRepository = {
             pageSize?: number;
             actorId?: string;
             action?: AuditAction;
+            targetId?: string;
         }
     ) {
         const page = options?.page || 1;
@@ -34,6 +35,13 @@ export const auditRepository = {
 
         if (options?.action) {
             where.action = options.action;
+        }
+
+        // Utilisé par l'onglet « Historique » du détail d'une saison : les
+        // actions de clôture et de génération de bilan enregistrent l'id de la
+        // saison dans `targetId`.
+        if (options?.targetId) {
+            where.targetId = options.targetId;
         }
 
         const [data, total] = await Promise.all([

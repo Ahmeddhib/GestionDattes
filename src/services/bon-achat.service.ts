@@ -3,20 +3,34 @@ import { livraisonRepository } from "@/repositories/livraison.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { assertSaisonOuverte } from "@/lib/saison-guard";
 import type { CreateBonAchatInput } from "@/validators/bon-achat.validator";
 
 export const bonAchatService = {
     async getTenantInfo(tenantId: string) {
         const tenant = await prisma.tenant.findUniqueOrThrow({
             where: { id: tenantId },
-            select: { name: true, address: true, phone: true, email: true },
+            select: { name: true, address: true, phone: true, email: true, settings: true },
         });
-        return tenant;
+        const settings = tenant.settings;
+        const logoUrl =
+            settings && typeof settings === "object" && !Array.isArray(settings) &&
+            "logoUrl" in settings && typeof settings.logoUrl === "string" &&
+            settings.logoUrl.startsWith("/")
+                ? settings.logoUrl
+                : "/kayen-logo.jpg";
+        return {
+            name: tenant.name,
+            address: tenant.address,
+            phone: tenant.phone,
+            email: tenant.email,
+            logoUrl,
+        };
     },
 
-    async getAll(tenantId: string) {
+    async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("bon-achat:read");
-        const bonsAchat = await bonAchatRepository.findAll(tenantId);
+        const bonsAchat = await bonAchatRepository.findAll(tenantId, opts);
 
         // Convertit les Decimal Prisma en number : ces objets ne sont pas
         // sérialisables lorsqu'ils traversent la frontière Server → Client Component.
@@ -68,6 +82,11 @@ export const bonAchatService = {
         if (!livraison) {
             throw new Error("Livraison introuvable dans cette Wakala");
         }
+
+        // Le bon d'achat hérite de la saison de sa livraison — un achat appartient
+        // à la campagne où la marchandise est entrée, pas à la saison ouverte du
+        // moment. On refuse donc d'en créer un si cette saison-là est clôturée.
+        await assertSaisonOuverte(tenantId, livraison.saisonId);
 
         const existing = await bonAchatRepository.findByLivraisonId(data.livraisonId, tenantId);
         if (existing) {

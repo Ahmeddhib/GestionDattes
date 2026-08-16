@@ -20,9 +20,9 @@ export const encaissementClientRepository = {
         });
     },
 
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.encaissementClient.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
             orderBy: { dateEncaissement: "desc" },
             include: {
                 User: { select: { id: true, name: true } },

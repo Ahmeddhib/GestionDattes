@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { livraisonService } from "@/services/livraison.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { updateLivraisonSchema } from "@/validators/livraison.validator";
@@ -57,7 +58,7 @@ export async function updateLivraisonAction(formData: FormData) {
         console.error("❌ updateLivraisonAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la mise à jour de la livraison",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

@@ -1,11 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Menu } from "lucide-react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import WakalaSwitcher from "./WakalaSwitcher";
 import { useEffect, useState } from "react";
+import { Sidebar } from "./Sidebar";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 interface Tenant {
     id: string;
@@ -23,6 +26,9 @@ interface TopBarProps {
         tenantId?: string;
         tenantName?: string;
         tenantCode?: string;
+        name: string;
+        email: string;
+        role: string;
     };
 }
 
@@ -30,6 +36,7 @@ export function TopBar({ user }: TopBarProps) {
     const pathname = usePathname();
     const { t } = useClientTranslations();
     const [availableTenants, setAvailableTenants] = useState<Tenant[]>([]);
+    const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
 
     // Fetch available tenants for the user
     useEffect(() => {
@@ -70,8 +77,21 @@ export function TopBar({ user }: TopBarProps) {
     });
 
     return (
-        <header className="h-16 bg-white border-b border-[#F0E0C0] px-8 flex items-center justify-between sticky top-0 z-10">
-            <div className="flex items-center gap-4">
+        // `shrink-0` et non `sticky` : l'en-tête est un frère de <main> dans un
+        // shell à hauteur d'écran, donc il reste en place sans position collante.
+        <header className="relative z-30 flex min-h-16 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#F0E0C0] bg-white px-3 py-2 sm:px-5 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11 shrink-0 lg:hidden"
+                    onClick={() => setMobileNavigationOpen(true)}
+                    aria-label="Ouvrir le menu de navigation"
+                    aria-expanded={mobileNavigationOpen}
+                >
+                    <Menu className="h-5 w-5" />
+                </Button>
                 {/* Wakala Switcher - Only show if tenant selected */}
                 {user?.tenantId && (
                     <>
@@ -83,13 +103,13 @@ export function TopBar({ user }: TopBarProps) {
                             }}
                             availableTenants={availableTenants}
                         />
-                        <div className="border-l border-gray-200 h-8" />
+                        <div className="hidden h-8 border-s border-gray-200 sm:block" />
                     </>
                 )}
 
-                <div>
-                    <h2 className="text-xl font-bold text-[#2C1A00]">{pageName}</h2>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                <div className="min-w-0">
+                    <h2 className="truncate text-base font-bold text-[#2C1A00] sm:text-xl">{pageName}</h2>
+                    <div className="mt-1 hidden min-w-0 items-center gap-2 overflow-hidden text-sm text-gray-600 md:flex">
                         {breadcrumbs.map((crumb, index) => (
                             <div key={crumb.path} className="flex items-center gap-2">
                                 {index > 0 && <ChevronRight className="w-3 h-3" />}
@@ -105,9 +125,19 @@ export function TopBar({ user }: TopBarProps) {
             </div>
 
             {/* Language Switcher */}
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <LanguageSwitcher />
             </div>
+
+            <Sheet open={mobileNavigationOpen} onOpenChange={setMobileNavigationOpen}>
+                <SheetContent side="left" showCloseButton={false} className="w-[min(88vw,20rem)] border-0 bg-[#3D1C00] p-0 sm:max-w-80">
+                    <SheetTitle className="sr-only">Navigation principale</SheetTitle>
+                    <Sidebar
+                        user={user ? { name: user.name, email: user.email, role: user.role } : undefined}
+                        onNavigate={() => setMobileNavigationOpen(false)}
+                    />
+                </SheetContent>
+            </Sheet>
         </header>
     );
 }

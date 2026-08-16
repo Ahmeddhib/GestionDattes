@@ -9,6 +9,7 @@ export async function getAuditLogsAction(options?: {
     pageSize?: number;
     actorId?: string;
     action?: AuditAction;
+    targetId?: string;
 }) {
     try {
         const tenantId = await getTenantId();

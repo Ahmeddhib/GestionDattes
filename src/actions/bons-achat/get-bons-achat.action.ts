@@ -7,7 +7,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
 /**
  * Action pour récupérer tous les bons d'achat (du tenant actuel)
  */
-export async function getBonsAchatAction() {
+export async function getBonsAchatAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function getBonsAchatAction() {
         }
 
         const tenantId = await getTenantId();
-        const bonsAchat = await bonAchatService.getAll(tenantId);
+        const bonsAchat = await bonAchatService.getAll(tenantId, opts);
 
         return { success: true, data: bonsAchat };
     } catch (error) {

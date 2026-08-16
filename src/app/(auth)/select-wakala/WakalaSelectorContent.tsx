@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { Building2, ChevronRight, Loader2, Plus } from "lucide-react";
 import { selectWakalaAction } from "@/actions/auth/select-wakala.action";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -54,27 +53,10 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                     setError(result.error);
                     setSelectedTenantId(null);
                 } else if (result.success && result.tenant) {
-                    // Stocker les infos dans sessionStorage pour le login
                     sessionStorage.setItem("selectedWakalaId", result.tenant.id);
                     sessionStorage.setItem("selectedWakalaCode", result.tenant.code);
-                    sessionStorage.setItem("userEmail", result.email);
-
-                    // Forcer une déconnexion puis rediriger vers login
-                    // Le login form va auto-reconnecter avec le tenant
-                    await signIn("credentials", {
-                        email: result.email,
-                        password: "__REAUTH__", // Mot de passe spécial pour indiquer une ré-auth
-                        tenantId: result.tenant.id,
-                        redirect: false,
-                    }).then((res) => {
-                        if (res?.ok) {
-                            router.push("/dashboard");
-                            router.refresh();
-                        } else {
-                            // Si échec, rediriger vers login
-                            window.location.href = `/login?reauth=true&tenantId=${result.tenant.id}`;
-                        }
-                    });
+                    router.push("/dashboard");
+                    router.refresh();
                 }
             } catch (err) {
                 setError("Une erreur est survenue");

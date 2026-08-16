@@ -101,6 +101,8 @@ model BonAchat {
   @@index([numero])
   @@index([saisonId])
   @@index([tenantId])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, statut])
 }
 
 model PaiementAgriculteur {
@@ -124,6 +126,8 @@ model PaiementAgriculteur {
   @@index([saisonId])
   @@index([tenantId])
   @@index([datePaiement])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, datePaiement])
 }
 
 model EncaissementClient {
@@ -147,74 +151,126 @@ model EncaissementClient {
   @@index([saisonId])
   @@index([tenantId])
   @@index([dateEncaissement])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, dateEncaissement])
 }
 
+/// Une saison n'est jamais supprimée : elle est l'unité de rattachement de
+/// toutes les opérations, et une campagne clôturée est un historique
+/// définitif qui n'est jamais rouvert.
+///
+/// Contrainte non exprimable en Prisma, posée en SQL brut par la migration
+/// 20260804064645_saisons_socle : index unique partiel
+/// `Saison_one_open_per_tenant` sur ("tenantId") WHERE statut = 'OUVERTE',
+/// qui garantit au niveau base qu'un tenant n'a jamais deux saisons ouvertes.
 model Saison {
   id                  String                @id
   nom                 String
   dateDebut           DateTime
   dateFin             DateTime
   statut              StatutSaison          @default(OUVERTE)
+  clotureeAt          DateTime?
+  clotureeParId       String?
   tenantId            String
   createdById         String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  User                User                  @relation(fields: [createdById], references: [id])
+  User                User                  @relation("SaisonCreatedBy", fields: [createdById], references: [id])
+  // onDelete: Restrict et non le SET NULL par défaut d'une relation optionnelle :
+  // « qui a clôturé cette campagne » est une information d'audit qui ne doit pas
+  // s'effacer silencieusement si le compte de la personne est supprimé.
+  ClotureePar         User?                 @relation("SaisonClotureePar", fields: [clotureeParId], references: [id], onDelete: Restrict)
   Vente               Vente[]
   Livraison           Livraison[]
   BonAchat            BonAchat[]
   PaiementAgriculteur PaiementAgriculteur[]
   EncaissementClient  EncaissementClient[]
   DepenseAutre        DepenseAutre[]
-  BilanSaison         BilanSaison?
+  StockDate           StockDate[]
+  PretCaisse          PretCaisse[]
+  BilanSaison         BilanSaison[]
 
   @@unique([tenantId, nom])
   @@index([tenantId])
   @@index([dateDebut])
   @@index([dateFin])
   @@index([statut])
+  @@index([clotureeParId])
 }
 
-/// Snapshot figé du bilan financier et de stock d'une saison, créé une seule
-/// fois lors de la clôture. Ne doit plus jamais être recalculé ni réécrit,
-/// même si les données sous-jacentes changent ensuite.
+/// Snapshot figé des indicateurs d'une saison. Une fois créé, il n'est
+/// JAMAIS recalculé ni réécrit, même si les données sous-jacentes changent
+/// ensuite.
+///
+/// Deux natures, portées par `type` :
+///   - PROVISOIRE : généré à la demande pendant que la saison est OUVERTE,
+///     autant de fois que voulu. Ne verrouille rien.
+///   - FINAL : créé une seule fois, dans la transaction de clôture.
+/// `version` est une séquence monotone unique par saison (provisoire v1, v2,
+/// … puis final vN).
+///
+/// Contrainte non exprimable en Prisma, posée en SQL brut par la migration
+/// saisons_bilans_versionnes : index unique partiel
+/// `BilanSaison_one_final_per_saison` sur ("saisonId") WHERE type = 'FINAL',
+/// qui garantit au niveau base qu'une saison n'a jamais deux bilans finaux.
 model BilanSaison {
-  id                         String   @id
-  saisonId                   String   @unique
-  tenantId                   String
+  id                             String          @id
+  saisonId                       String
+  tenantId                       String
+  type                           TypeBilanSaison @default(PROVISOIRE)
+  version                        Int
 
-  nombreLivraisons           Int
-  totalQuantiteLivree        Float
-  totalQuantiteAcceptee      Float
+  nombreLivraisons               Int
+  totalQuantiteLivree            Float
+  totalQuantiteAcceptee          Float
 
-  totalAchatsMontant         Float
-  quantitePayable            Float
-  totalPaiementsAgriculteurs Float
-  soldeAgriculteursRestant   Float
+  totalAchatsMontant             Float
+  quantitePayable                Float
+  totalPaiementsAgriculteurs     Float
+  soldeAgriculteursRestant       Float
 
-  totalVentesQuantite        Float
-  chiffreAffairesVentes      Float
-  totalEncaissements         Float
-  creancesClientsRestantes   Float
+  totalVentesQuantite            Float
+  chiffreAffairesVentes          Float
+  totalEncaissements             Float
+  creancesClientsRestantes       Float
 
-  totalDepensesAutres        Float
+  totalDepensesAutres            Float
 
-  tresorerie                 Float
-  margeBrute                 Float
-  margeNette                 Float
+  tresorerie                     Float
+  margeBrute                     Float
+  margeNette                     Float
 
-  stockFinalParTypeDate      Json
-  stockCaisses               Json
+  /// Instantané PHYSIQUE de l'entrepôt du tenant au moment du calcul, toutes
+  /// saisons d'origine confondues. Volontairement NON filtré par saison :
+  /// c'est un solde à un instant t, pas un flux attribuable — le filtrer
+  /// omettrait le report des campagnes précédentes encore en rayon.
+  stockFinalParTypeDate          Json
+  /// Idem pour les caisses : compte global des caisses physiquement dehors.
+  stockCaisses                   Json
+  /// Flux attribuable à la saison : quantité ENTRÉE en stock durant celle-ci
+  /// (StockDate.saisonOrigineId). Stable pour toujours.
+  /// Le @default("[]") ne sert qu'aux bilans antérieurs à cette colonne :
+  /// tout nouveau snapshot renseigne les trois champs explicitement.
+  stockEntreParTypeDate          Json            @default("[]")
+  /// Part de ce stock encore disponible AU MOMENT DU CALCUL. Valide
+  /// uniquement figée : cette valeur continue de baisser après la clôture,
+  /// au fil des ventes des lots de cette saison.
+  stockOrigineRestantParTypeDate Json            @default("[]")
+  /// Caisses prêtées DURANT la saison (PretCaisse.saisonId).
+  caissesSaison                  Json            @default("[]")
 
-  clotureeAt                 DateTime @default(now())
-  clotureeParId               String
+  genereAt                       DateTime        @default(now())
+  genereParId                    String
 
-  Saison                     Saison   @relation(fields: [saisonId], references: [id])
-  Tenant                     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  User                       User     @relation(fields: [clotureeParId], references: [id])
+  Saison                         Saison          @relation(fields: [saisonId], references: [id])
+  Tenant                         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  User                           User            @relation(fields: [genereParId], references: [id])
 
+  @@unique([saisonId, version])
   @@index([tenantId])
+  @@index([tenantId, saisonId])
+  @@index([saisonId, type])
 }
 
 model DepenseAutre {
@@ -237,6 +293,8 @@ model DepenseAutre {
   @@index([saisonId])
   @@index([tenantId])
   @@index([dateDepense])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, dateDepense])
 }
 
 model BonSortie {
@@ -359,6 +417,8 @@ model Livraison {
   @@index([numeroLot])
   @@index([saisonId])
   @@index([tenantId])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, dateLivraison])
 }
 
 model LivraisonTypeCaisse {
@@ -432,6 +492,9 @@ model PretCaisse {
   typeCaisseId   String
   livraisonId    String?
   livreurId      String?
+  /// Saison durant laquelle le prêt a été consenti. `livraisonId` étant
+  /// optionnel, un prêt autonome n'aurait sinon aucun rattachement possible.
+  saisonId       String
   createdById    String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime
@@ -440,6 +503,7 @@ model PretCaisse {
   User           User        @relation(fields: [createdById], references: [id])
   Livraison      Livraison?  @relation(fields: [livraisonId], references: [id])
   Livreur        Livreur?    @relation(fields: [livreurId], references: [id])
+  Saison         Saison      @relation(fields: [saisonId], references: [id])
   Tenant         Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   TypeCaisse     TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
 
@@ -450,6 +514,8 @@ model PretCaisse {
   @@index([statut])
   @@index([tenantId])
   @@index([typeCaisseId])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, statut])
 }
 
 model Region {
@@ -483,12 +549,19 @@ model StockDate {
   dateEntree         DateTime          @default(now())
   typeDateId         String
   livraisonId        String
+  /// Saison d'ENTRÉE du lot, héritée de sa livraison et jamais réécrite.
+  /// Délibérément nommée `saisonOrigineId` et non `saisonId` : un lot entré
+  /// en saison A reste attribué à A même s'il est vendu pendant la saison B.
+  /// Filtrer le stock physique là-dessus donnerait un chiffre faux (cf. le
+  /// commentaire de BilanSaison.stockFinalParTypeDate).
+  saisonOrigineId    String
   createdAt          DateTime          @default(now())
   updatedAt          DateTime
   tenantId           String
   BonSortie          BonSortie[]
   Conditionnement    Conditionnement[]
   Livraison          Livraison         @relation(fields: [livraisonId], references: [id])
+  Saison             Saison            @relation(fields: [saisonOrigineId], references: [id])
   Tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   TypeDate           TypeDate          @relation(fields: [typeDateId], references: [id])
   Vente              Vente[]
@@ -498,6 +571,8 @@ model StockDate {
   @@index([livraisonId])
   @@index([tenantId])
   @@index([typeDateId])
+  @@index([tenantId, saisonOrigineId])
+  @@index([tenantId, saisonOrigineId, dateEntree])
 }
 
 model Tenant {
@@ -581,6 +656,7 @@ model TypeDate {
   id                  String                @id
   nom                 String
   description         String?
+  seuilAlerte         Float?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   tenantId            String
@@ -609,7 +685,11 @@ model User {
   Vente               Vente[]
   PaiementAgriculteur PaiementAgriculteur[]
   EncaissementClient  EncaissementClient[]
-  Saison              Saison[]
+  // Le nom de champ reste `Saison` (les relations sont nommées uniquement
+  // pour lever l'ambiguïté introduite par `SaisonCloturee` — le renommer
+  // casserait tous les consommateurs existants).
+  Saison              Saison[]              @relation("SaisonCreatedBy")
+  SaisonCloturee      Saison[]              @relation("SaisonClotureePar")
   DepenseAutre        DepenseAutre[]
   BilanSaison         BilanSaison[]
 
@@ -642,6 +722,8 @@ model Vente {
   @@index([stockId])
   @@index([saisonId])
   @@index([tenantId])
+  @@index([tenantId, saisonId])
+  @@index([tenantId, saisonId, date])
 }
 
 enum AuditAction {
@@ -700,6 +782,7 @@ enum AuditAction {
   UPDATE_SAISON
   DELETE_SAISON
   CLOTURER_SAISON
+  GENERER_BILAN_PROVISOIRE
   CREATE_PAIEMENT_AGRICULTEUR
   CREATE_ENCAISSEMENT_CLIENT
   CREATE_DEPENSE_AUTRE
@@ -728,4 +811,9 @@ enum StatutPret {
 enum StatutSaison {
   OUVERTE
   CLOTUREE
+}
+
+enum TypeBilanSaison {
+  PROVISOIRE
+  FINAL
 }

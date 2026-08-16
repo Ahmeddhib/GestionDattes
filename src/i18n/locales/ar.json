@@ -80,7 +80,111 @@
         "overview": "نظرة عامة",
         "management": "الإدارة",
         "administration": "الإدارة العامة",
-        "finance": "المالية"
+        "finance": "المالية",
+        "noSaisonOuverte": "لا يوجد موسم مفتوح",
+        "refresh": "تحديث",
+        "refreshedAt": "تم التحديث في {time}",
+        "viewModule": "عرض الوحدة",
+        "viewAll": "عرض الكل",
+        "filters": {
+            "periode": "الفترة",
+            "saison": "الموسم",
+            "dateRange": "نطاق التاريخ",
+            "selectSaison": "اختر موسمًا",
+            "apply": "تطبيق",
+            "jour": "اليوم",
+            "semaine": "هذا الأسبوع",
+            "mois": "هذا الشهر",
+            "annee": "هذه السنة",
+            "saisonOption": "الموسم",
+            "personnalisee": "نطاق مخصص"
+        },
+        "kpi": {
+            "quantiteNetteLivree": "الكمية الصافية المسلمة",
+            "nombreLivraisons": "عدد التسليمات",
+            "stockTotal": "إجمالي مخزون التمور",
+            "montantBonsAchat": "إجمالي مبلغ سندات الشراء",
+            "chiffreAffaires": "رقم الأعمال",
+            "totalEncaisse": "إجمالي المحصّل",
+            "totalPayeAgriculteurs": "إجمالي المدفوع للفلاحين",
+            "tresorerieNette": "صافي الخزينة",
+            "dettesAgriculteurs": "ديون تجاه الفلاحين",
+            "creancesClients": "ديون العملاء"
+        },
+        "charts": {
+            "deliveries": {
+                "title": "التسليمات",
+                "description": "الوزن الصافي والكمية القابلة للدفع، يوميًا أو شهريًا",
+                "poidsNet": "الوزن الصافي المسلم",
+                "quantitePayable": "الكمية القابلة للدفع"
+            },
+            "cashflow": {
+                "title": "التدفق المالي",
+                "description": "تحصيلات العملاء، دفعات الفلاحين والمصاريف الأخرى",
+                "encaissements": "تحصيلات العملاء",
+                "paiements": "دفعات الفلاحين",
+                "depenses": "مصاريف أخرى"
+            },
+            "stock": {
+                "title": "المخزون حسب الصنف",
+                "description": "الكمية المتوفرة حاليًا، حسب صنف التمر",
+                "disponible": "المخزون المتوفر",
+                "seuil": "حد التنبيه"
+            },
+            "repartition": {
+                "title": "توزيع التسليمات",
+                "description": "الوزن الصافي المسلم حسب الصنف، خلال الفترة",
+                "autres": "أصناف أخرى"
+            },
+            "sales": {
+                "title": "تطور المبيعات",
+                "description": "الكمية المباعة ورقم الأعمال، يوميًا أو شهريًا",
+                "quantite": "الكمية المباعة",
+                "montant": "رقم الأعمال"
+            }
+        },
+        "topAgriculteurs": {
+            "title": "أفضل الفلاحين",
+            "description": "حسب الكمية المسلمة خلال الفترة",
+            "agriculteur": "الفلاح",
+            "quantiteLivree": "الكمية المسلمة",
+            "empty": "لا توجد تسليمات لهذه الفترة"
+        },
+        "recentActivity": {
+            "title": "النشاط الأخير",
+            "empty": "لا يوجد نشاط أخير",
+            "livraisons": "آخر التسليمات",
+            "bonsAchat": "آخر سندات الشراء",
+            "paiementsAgriculteurs": "آخر دفعات الفلاحين",
+            "ventes": "آخر المبيعات",
+            "encaissements": "آخر تحصيلات العملاء",
+            "mouvementsStock": "آخر حركات المخزون"
+        },
+        "alerts": {
+            "title": "التنبيهات والإجراءات المطلوبة",
+            "allClear": "لا توجد تنبيهات — كل شيء محدّث.",
+            "bonsAchatImpayes": "{count} سند(ات) شراء غير مدفوعة أو مدفوعة جزئيًا — {montant} متبقٍ",
+            "creancesClients": "{count} عملية بيع بها دين عميل معلّق — {montant} متبقٍ",
+            "livraisonsSansBonAchat": "{count} تسليم(ات) بدون سند شراء مرتبط",
+            "livraisonsSansPesee": "{count} تسليم(ات) بدون عملية وزن مسجّلة",
+            "caissesNonRetournees": "{count} سلفة (سلف) صناديق غير مرجعة",
+            "stockFaible": "مخزون منخفض لـ {nom}: {quantite} (الحد: {seuil})",
+            "saisonProcheFin": "ينتهي موسم \"{nom}\" خلال {jours} يوم/أيام",
+            "aucuneSaisonOuverte": "لا يوجد موسم مفتوح لهذه الوكالة — العمليات الجديدة محظورة",
+            "saisonSelectionneeCloturee": "أنت تعرض الميزانية المجمّدة للموسم المغلق \"{nom}\""
+        },
+        "quickActions": {
+            "nouvelleLivraison": "تسليم جديد",
+            "nouvelleVente": "بيع جديد",
+            "avanceAgriculteur": "سلفة للفلاح",
+            "encaissementClient": "تحصيل من العميل",
+            "ajouterDepense": "إضافة مصروف",
+            "consulterStock": "عرض المخزون",
+            "bilanFinancier": "الميزانية المالية"
+        },
+        "empty": {
+            "chart": "لا توجد بيانات لهذه الفترة"
+        }
     },
     "regions": {
         "title": "المناطق",
@@ -228,6 +332,8 @@
         "namePlaceholder": "مثال: دقلة نور، عليق، كنتيشي...",
         "descriptionLabel": "الوصف",
         "descriptionPlaceholder": "وصف الصنف (اختياري)",
+        "seuilAlerte": "حد التنبيه (كغ)",
+        "seuilAlertePlaceholder": "مثال: 100 (اختياري)",
         "livraisons": "التسليمات",
         "stocksDates": "المخزون",
         "totalUsage": "إجمالي الاستخدامات",
@@ -397,7 +503,27 @@
                 "confirmMessage": "هذا الإغلاق نهائي ولا رجعة فيه. بعد التأكيد، لن يكون بالإمكان إضافة أو تعديل أي عملية في هذا الموسم.",
                 "confirmButton": "إغلاق الموسم",
                 "successToast": "تم إغلاق الموسم بنجاح",
-                "backToList": "العودة إلى القائمة"
+                "backToList": "العودة إلى القائمة",
+                "blockersDescription": "هذه النقاط تمنع الغلق. صحّحها قبل المتابعة.",
+                "warningsTitle": "تنبيهات (لا تمنع الغلق)",
+                "noWarnings": "لا توجد تنبيهات.",
+                "warningsHint": "المخزون المتبقي أو الأرصدة المفتوحة ليست أخطاء: أنت من يقرر أن الحملة قد انتهت.",
+                "acknowledge": "لقد قرأت التنبيهات وأؤكد أن الحملة انتهت نهائيًا.",
+                "corriger": "تصحيح",
+                "prochaineSaison": "لا يوجد موسم مفتوح. أنشئ الموسم التالي لاستئناف العمليات.",
+                "checks": {
+                    "LIVRAISON_SANS_PESEE": "{count} تسليم بدون أي وزن — لم يتم تحديد الوزن الصافي أبدًا.",
+                    "LIVRAISON_SANS_BON_ACHAT": "{count} تسليم بدون سند شراء — لم يتم تقييم الشراء.",
+                    "DETTES_AGRICULTEURS_RESTANTES": "ديون الفلاحين المتبقية: {valeur}",
+                    "CREANCES_CLIENTS_RESTANTES": "مستحقات العملاء المتبقية: {valeur}",
+                    "CAISSES_NON_RETOURNEES": "{valeur} صندوق غير معاد",
+                    "STOCK_RESTANT": "المخزون المتبقي في المستودع: {valeur}",
+                    "PAIEMENTS_PARTIELS": "{count} سند شراء مدفوع جزئيًا",
+                    "ENCAISSEMENTS_PARTIELS": "{count} بيع محصّل جزئيًا",
+                    "BONS_ACHAT_IMPAYES": "{count} سند شراء غير مدفوع",
+                    "SURPAIEMENT_BON_ACHAT": "{count} سند شراء دُفع فوق مبلغه",
+                    "SURENCAISSEMENT_VENTE": "{count} بيع حُصّل فوق مبلغه"
+                }
             },
             "bilan": {
                 "title": "ميزانية الموسم",
@@ -433,7 +559,69 @@
                 "historique": "السجل",
                 "creeLe": "أُنشئ في",
                 "saisonSuivante": "الموسم التالي",
-                "saisonPrecedente": "الموسم السابق"
+                "saisonPrecedente": "الموسم السابق",
+                "stockEntre": "المخزون الداخل خلال الموسم",
+                "stockOrigineRestant": "مخزون هذا الموسم المتاح بعد",
+                "caissesSaison": "الصناديق المُعارة خلال الموسم",
+                "stockFinalHint": "لقطة فعلية للمستودع وقت الحساب، لكل مواسم المنشأ.",
+                "auMomentDuCalcul": "وقت الحساب"
+            },
+            "errors": {
+                "aucuneSaisonOuverte": "لا توجد موسم مفتوح لهذه الوكالة. اطلب من مسؤول فتح أو إنشاء موسم قبل تسجيل عمليات جديدة.",
+                "saisonCloturee": "عملية غير ممكنة: الموسم «{nom}» مغلق. بيانات الموسم المغلق نهائية.",
+                "saisonIntrouvable": "الموسم غير موجود في هذه الوكالة."
+            },
+            "saisonActive": "الموسم النشط",
+            "aucuneSaison": {
+                "title": "لا يوجد موسم مفتوح",
+                "message": "لا يمكن تسجيل أي عملية جديدة حتى يتم فتح موسم.",
+                "cta": "إدارة المواسم"
+            },
+            "provisoire": {
+                "action": "إنشاء حصيلة مؤقتة",
+                "description": "يثبّت لقطة من المؤشرات دون غلق الموسم. يمكنك مواصلة العمل وإنشاء غيرها.",
+                "successToast": "تم إنشاء الحصيلة المؤقتة v{version}",
+                "badge": "مؤقتة",
+                "badgeFinal": "نهائية",
+                "version": "الإصدار {version}",
+                "genereLe": "تم الإنشاء في",
+                "genereePar": "بواسطة",
+                "listeTitle": "حصائل الموسم",
+                "aucun": "لم يتم إنشاء أي حصيلة لهذا الموسم بعد.",
+                "selectVersion": "الحصيلة المعروضة",
+                "vsCloture": "إنشاء حصيلة مؤقتة لا يغلق شيئًا. الغلق النهائي وحده يقفل الموسم."
+            },
+            "detail": {
+                "tabs": {
+                    "apercu": "نظرة عامة",
+                    "livraisons": "التسليمات",
+                    "pesees": "الأوزان",
+                    "bonsAchat": "سندات الشراء",
+                    "ventes": "المبيعات",
+                    "paiements": "مدفوعات الفلاحين",
+                    "encaissements": "تحصيلات العملاء",
+                    "depenses": "المصاريف",
+                    "stock": "المخزون / الدفعات",
+                    "caisses": "الصناديق",
+                    "bilans": "الحصائل",
+                    "audit": "السجل"
+                },
+                "stockNote": "الدفعات الواردة خلال هذا الموسم. الدفعة المباعة في موسم لاحق تبقى مدرجة هنا: الأصل هو المعتبر.",
+                "caissesNote": "الإعارات الممنوحة خلال هذا الموسم. الصناديق المُعارة في موسم سابق ولم تُرجع تبقى محسوبة في المخزون الإجمالي.",
+                "audit": {
+                    "date": "التاريخ",
+                    "action": "الإجراء",
+                    "auteur": "المستخدم",
+                    "description": "الوصف"
+                }
+            },
+            "filtre": {
+                "label": "الموسم",
+                "courante": "الموسم الحالي",
+                "precedente": "الموسم السابق",
+                "toutes": "كل المواسم",
+                "clotureeBadge": "موسم مغلق",
+                "lectureSeule": "هذا الموسم مغلق: الاطلاع والتصدير فقط."
             }
         },
         "ventes": {
@@ -452,7 +640,8 @@
             "enregistrerEncaissement": "تسجيل تحصيل",
             "nouvelEncaissement": "تحصيل جديد",
             "historiqueEncaissements": "سجل التحصيلات",
-            "encaissementEnregistre": "تم تسجيل التحصيل بنجاح"
+            "encaissementEnregistre": "تم تسجيل التحصيل بنجاح",
+            "lotSaison": "دفعة {nom}"
         },
         "depenses": {
             "title": "مصاريف أخرى",
@@ -464,6 +653,13 @@
             "montant": "المبلغ",
             "searchPlaceholder": "البحث عن مصروف...",
             "deleteConfirm": "هل أنت متأكد من حذف المصروف"
+        },
+        "encaissements": {
+            "date": "التاريخ",
+            "client": "العميل",
+            "modePaiement": "طريقة الدفع",
+            "enregistrePar": "سجّله",
+            "montant": "المبلغ"
         }
     },
     "stockDattes": {

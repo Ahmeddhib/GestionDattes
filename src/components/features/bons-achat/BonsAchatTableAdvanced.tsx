@@ -65,8 +65,8 @@ export function BonsAchatTableAdvanced({ data, tenant }: BonsAchatTableAdvancedP
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-end gap-3 px-1">
-                <div className="min-w-55">
+            <div className="grid grid-cols-1 items-end gap-3 px-1 sm:grid-cols-2 xl:flex xl:flex-wrap">
+                <div className="min-w-0 xl:min-w-55">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">
                         {t("livraisons.agriculteur")}
                     </label>
@@ -85,7 +85,7 @@ export function BonsAchatTableAdvanced({ data, tenant }: BonsAchatTableAdvancedP
                     </Select>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">
                         {t("bonAchat.periode")}
                     </label>

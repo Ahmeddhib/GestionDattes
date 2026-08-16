@@ -26,9 +26,9 @@ export const paiementAgriculteurRepository = {
     /**
      * Historique complet des paiements du tenant (page Finance).
      */
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.paiementAgriculteur.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
             orderBy: { datePaiement: "desc" },
             include: {
                 User: { select: { id: true, name: true } },

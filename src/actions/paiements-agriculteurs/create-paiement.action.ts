@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { paiementAgriculteurService } from "@/services/paiement-agriculteur.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { createPaiementAgriculteurSchema } from "@/validators/paiement-agriculteur.validator";
@@ -47,7 +48,7 @@ export async function createPaiementAction(formData: FormData) {
         console.error("❌ createPaiementAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de l'enregistrement du paiement",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

@@ -5,23 +5,44 @@ import { StatsCards } from "@/components/features/stock-caisses/StatsCards";
 import { PretsTable } from "@/components/features/stock-caisses/PretsTable";
 import { CreatePretDialog } from "@/components/features/stock-caisses/CreatePretDialog";
 import { LowStockAlert } from "@/components/features/stock-caisses/LowStockAlert";
+import { AucuneSaisonAlert } from "@/components/features/saisons/AucuneSaisonAlert";
+import { SaisonFilterBar } from "@/components/shared/SaisonFilterBar";
 import { StockCaissesContent } from "./StockCaissesContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getServerTranslations } from "@/i18n/server";
+import { getTenantId } from "@/lib/tenant/get-tenant";
+import { getSaisonFiltrePourPage } from "@/lib/saison-filter";
 import { PageContainer } from "@/components/shared/PageContainer";
+import { getTenantPdfBranding } from "@/lib/pdf-branding.server";
 
-export default async function StockCaissesPage() {
+export default async function StockCaissesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ saisonId?: string }>;
+}) {
     const t = await getServerTranslations();
 
-    const [statsResult, pretsResult, typesCaissesResult] = await Promise.all([
+    const tenantId = await getTenantId();
+    const { saisonId: saisonParam } = await searchParams;
+    const { saisonId, saisonOuverte, saisonFiltre } = await getSaisonFiltrePourPage(
+        tenantId,
+        saisonParam
+    );
+
+    const [statsResult, pretsResult, typesCaissesResult, pdfBranding] = await Promise.all([
+        // Les statistiques et le stock par type restent des instantanés
+        // physiques globaux : des caisses prêtées lors d'une campagne
+        // précédente et jamais rendues sont toujours dehors aujourd'hui.
         getPretsStatistiquesAction(),
-        getPretsAction(),
+        getPretsAction({ saisonId }),
         getTypesCaissesAction(),
+        getTenantPdfBranding(tenantId),
     ]);
 
     const stats = statsResult.success ? statsResult.data : null;
     const prets = pretsResult.success ? pretsResult.data : [];
     const typesCaisses = typesCaissesResult.success ? (typesCaissesResult.data || []) : [];
+
 
     return (
         <PageContainer>
@@ -35,8 +56,14 @@ export default async function StockCaissesPage() {
                         {t('pretsCaisses.description')}
                     </p>
                 </div>
-                <CreatePretDialog />
+                {!saisonFiltre.isReadOnly && saisonOuverte && (
+                    <CreatePretDialog saisonActive={saisonOuverte} />
+                )}
             </div>
+
+            <SaisonFilterBar {...saisonFiltre} />
+
+            {!saisonOuverte && <AucuneSaisonAlert canGererSaisons />}
 
             {/* Alerte Stock Faible */}
             <LowStockAlert typesCaisses={typesCaisses} />
@@ -50,7 +77,7 @@ export default async function StockCaissesPage() {
             {/* Tableau Prêts - Mobile Responsive */}
             <Suspense fallback={<Skeleton className="h-[400px]" />}>
                 <div className="overflow-x-auto">
-                    <PretsTable prets={prets} />
+                    <PretsTable prets={prets} branding={pdfBranding} />
                 </div>
             </Suspense>
         </PageContainer>

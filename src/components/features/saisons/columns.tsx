@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Edit, Trash2, Eye, Lock } from "lucide-react";
+import { Edit, Eye, Lock } from "lucide-react";
 import Link from "next/link";
 
 export type Saison = {
@@ -20,10 +20,12 @@ export type Saison = {
     };
 };
 
+// Pas d'action "Supprimer" : une saison n'est jamais supprimée (voir
+// saison.service.ts). Seule la modification du nom/des dates reste possible,
+// et uniquement tant que la saison est ouverte.
 export const createSaisonsColumns = (
     t: (key: string) => string,
-    onEdit: (saison: Saison) => void,
-    onDelete: (saison: Saison) => void
+    onEdit: (saison: Saison) => void
 ): ColumnDef<Saison>[] => [
     {
         accessorKey: "nom",
@@ -114,16 +116,9 @@ export const createSaisonsColumns = (
                         size="sm"
                         onClick={() => onEdit(saison)}
                         className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                        title={t("common.edit")}
                     >
                         <Edit className="h-4 w-4 text-[#C17A2B]" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(saison)}
-                        className="h-8 w-8 p-0 hover:bg-red-50"
-                    >
-                        <Trash2 className="h-4 w-4 text-red-600" />
                     </Button>
                 </div>
             );

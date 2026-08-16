@@ -2,7 +2,7 @@
 
 import { LoginForm } from "@/components/auth/login-form";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
 
 export function LoginPageContent() {
     const { t } = useClientTranslations();
@@ -27,18 +27,15 @@ export function LoginPageContent() {
                     {/* Logo */}
                     <div className="relative">
                         <div className="flex items-center gap-3 mb-10">
-                            <div
-                                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                                style={{ background: "#C17A2B" }}
-                            >
-                                🌴
+                            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#f7f3e9]">
+                                <Image src="/kayen-logo.jpg" alt="Logo Kayen Fruits Packaging" fill sizes="56px" className="object-cover" priority />
                             </div>
                             <div>
-                                <p className="text-sm font-medium" style={{ color: "#F5E6C8" }}>
-                                    Gestion Dattes
+                                <p className="text-base font-semibold" style={{ color: "#F5E6C8" }}>
+                                    KAYEN
                                 </p>
-                                <p className="text-[10px]" style={{ color: "rgba(245,230,200,0.45)" }}>
-                                    Plateforme ERP
+                                <p className="text-[10px] tracking-wide" style={{ color: "rgba(245,230,200,0.55)" }}>
+                                    FRUITS PACKAGING · ERP
                                 </p>
                             </div>
                         </div>
@@ -114,8 +111,11 @@ export function LoginPageContent() {
                 </div>
 
                 {/* ── Panneau droit — Formulaire ── */}
-                <div className="flex-1 bg-white flex items-center justify-center p-10 md:p-12">
+                <div className="flex flex-1 items-center justify-center bg-white p-5 sm:p-8 md:p-12">
                     <div className="w-full max-w-sm">
+                        <div className="mb-6 flex justify-center md:hidden">
+                            <Image src="/kayen-logo.jpg" alt="Kayen Fruits Packaging" width={136} height={136} className="h-28 w-28 rounded-xl object-cover" priority />
+                        </div>
                         <div className="mb-8">
                             <h1 className="text-2xl font-medium mb-1.5" style={{ color: "#2C1A00" }}>
                                 {t("auth.login")}

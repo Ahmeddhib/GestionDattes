@@ -18,7 +18,7 @@ export function BilanExportButtons({ bilan, tenant }: BilanExportButtonsProps) {
             <Button
                 type="button"
                 variant="outline"
-                onClick={() => printBilanPDF(bilan, tenant)}
+                onClick={() => void printBilanPDF(bilan, tenant)}
                 className="gap-2 rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
             >
                 <Printer className="h-4 w-4" />
@@ -27,7 +27,7 @@ export function BilanExportButtons({ bilan, tenant }: BilanExportButtonsProps) {
             <Button
                 type="button"
                 variant="outline"
-                onClick={() => downloadBilanPDF(bilan, tenant)}
+                onClick={() => void downloadBilanPDF(bilan, tenant)}
                 className="gap-2 rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
             >
                 <FileDown className="h-4 w-4" />

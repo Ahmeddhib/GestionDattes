@@ -8,6 +8,7 @@ import { z } from "zod";
 import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { createDepenseAction } from "@/actions/depenses/create-depense.action";
 
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function CreateDepenseDialog() {
+export function CreateDepenseDialog({ saisonActive }: { saisonActive?: SaisonActive }) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
@@ -105,6 +106,8 @@ export function CreateDepenseDialog() {
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {saisonActive && <SaisonActiveField saison={saisonActive} />}
+
                         <FormField
                             control={form.control}
                             name="libelle"
@@ -119,7 +122,7 @@ export function CreateDepenseDialog() {
                             )}
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <FormField
                                 control={form.control}
                                 name="montant"

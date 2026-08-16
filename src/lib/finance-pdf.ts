@@ -1,5 +1,11 @@
-import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import {
+    addBrandedPdfFooters,
+    createBrandedPdf,
+    PDF_DARK,
+    printBrandedPdf,
+    type PdfBranding,
+} from "@/lib/pdf-branding";
 
 export type BilanForPdf = {
     periodeLabel: string;
@@ -15,128 +21,72 @@ export type BilanForPdf = {
     resultatNet: number;
 };
 
-export type TenantForBilanPdf = {
-    name: string;
-    address?: string | null;
-    phone?: string | null;
-    email?: string | null;
-};
+export type TenantForBilanPdf = PdfBranding;
 
-const PRIMARY: [number, number, number] = [193, 122, 43]; // #C17A2B
-const TEXT: [number, number, number] = [61, 28, 0]; // #3D1C00
-const MUTED: [number, number, number] = [110, 100, 90];
-const GREEN: [number, number, number] = [22, 163, 74];
-const RED: [number, number, number] = [220, 38, 38];
+async function buildBilanDoc(bilan: BilanForPdf, tenant: TenantForBilanPdf) {
+    const { doc, contentStartY } = await createBrandedPdf({
+        title: "Bilan financier",
+        branding: tenant,
+        reference: `PÉRIODE : ${bilan.periodeLabel}`,
+    });
 
-function buildBilanDoc(bilan: BilanForPdf, tenant: TenantForBilanPdf): jsPDF {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+    autoTable(doc, {
+        head: [["INDICATEUR", "MONTANT"]],
+        body: [
+            ["Total encaissements clients", `${bilan.totalEncaissementsClients.toFixed(3)} TND`],
+            ["Total paiements agriculteurs", `${bilan.totalPaiementsAgriculteurs.toFixed(3)} TND`],
+            ["Total autres dépenses", `${bilan.totalDepensesAutres.toFixed(3)} TND`],
+            ["Trésorerie nette", `${bilan.tresorerieNette.toFixed(3)} TND`],
+            ["Chiffre d'affaires", `${bilan.chiffreAffaires.toFixed(3)} TND`],
+            ["Créances clients", `${bilan.creancesClients.toFixed(3)} TND`],
+            ["Dettes agriculteurs", `${bilan.dettesAgriculteurs.toFixed(3)} TND`],
+            ["RÉSULTAT NET", `${bilan.resultatNet.toFixed(3)} TND`],
+        ],
+        startY: contentStartY,
+        theme: "plain",
+        styles: { fontSize: 9, cellPadding: 3.5, textColor: PDF_DARK, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+        headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
+        columnStyles: { 1: { halign: "right", fontStyle: "bold" } },
+        margin: { left: 14, right: 14, bottom: 18 },
+    });
 
-    // En-tête : identité de la Wakala
-    doc.setFontSize(18);
-    doc.setTextColor(...TEXT);
-    doc.setFont("helvetica", "bold");
-    doc.text(tenant.name, 14, 20);
-
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...MUTED);
-    let infoY = 26;
-    for (const line of [tenant.address, tenant.phone, tenant.email].filter(Boolean) as string[]) {
-        doc.text(line, 14, infoY);
-        infoY += 4.5;
-    }
-
-    doc.setFontSize(16);
-    doc.setTextColor(...PRIMARY);
-    doc.setFont("helvetica", "bold");
-    doc.text("BILAN FINANCIER", pageWidth - 14, 20, { align: "right" });
-
-    doc.setFontSize(10);
-    doc.setTextColor(...TEXT);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Période : ${bilan.periodeLabel}`, pageWidth - 14, 27, { align: "right" });
-    doc.text(`Généré le : ${new Date().toLocaleDateString("fr-FR")}`, pageWidth - 14, 32, { align: "right" });
-
-    doc.setDrawColor(...PRIMARY);
-    doc.setLineWidth(0.5);
-    doc.line(14, 40, pageWidth - 14, 40);
-
-    // Bloc résumé : lignes label/valeur empilées
-    const rows: { label: string; value: number; color: [number, number, number]; big?: boolean }[] = [
-        { label: "Total encaissements clients", value: bilan.totalEncaissementsClients, color: GREEN },
-        { label: "Total paiements agriculteurs", value: -bilan.totalPaiementsAgriculteurs, color: RED },
-        { label: "Total autres dépenses", value: -bilan.totalDepensesAutres, color: RED },
-        { label: "Trésorerie nette", value: bilan.tresorerieNette, color: PRIMARY, big: true },
-        { label: "Chiffre d'affaires", value: bilan.chiffreAffaires, color: TEXT },
-        { label: "Créances clients (reste dû)", value: bilan.creancesClients, color: RED },
-        { label: "Dettes agriculteurs (reste dû)", value: bilan.dettesAgriculteurs, color: RED },
-        { label: "Résultat net", value: bilan.resultatNet, color: PRIMARY, big: true },
-    ];
-
-    let y = 52;
-    for (const row of rows) {
-        doc.setFontSize(row.big ? 12 : 10);
-        doc.setFont("helvetica", row.big ? "bold" : "normal");
-        doc.setTextColor(...TEXT);
-        doc.text(row.label, 14, y);
-
-        doc.setFontSize(row.big ? 13 : 11);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...row.color);
-        doc.text(`${row.value.toFixed(2)} TND`, pageWidth - 14, y, { align: "right" });
-
-        y += row.big ? 10 : 7.5;
-    }
-
-    // Détail : top créances clients / dettes agriculteurs non soldées
-    y += 4;
+    let y = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12;
     if (bilan.creancesClientsDetail.length > 0) {
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...TEXT);
-        doc.text("Top créances clients non soldées", 14, y);
-
         autoTable(doc, {
-            head: [["Client", "Reste à payer"]],
-            body: bilan.creancesClientsDetail.map((d) => [d.client, d.restant.toFixed(2)]),
-            startY: y + 4,
-            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT },
-            headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontStyle: "bold" },
+            head: [["CRÉANCES CLIENTS", "RESTE À PAYER"]],
+            body: bilan.creancesClientsDetail.map((item) => [item.client, `${item.restant.toFixed(3)} TND`]),
+            startY: y,
+            theme: "plain",
+            styles: { fontSize: 8.5, cellPadding: 3, textColor: PDF_DARK, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+            headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
             columnStyles: { 1: { halign: "right" } },
-            margin: { left: 14, right: pageWidth / 2 + 4 },
-            tableWidth: pageWidth / 2 - 18,
+            margin: { left: 14, right: 14, bottom: 18 },
         });
+        y = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12;
     }
 
     if (bilan.dettesAgriculteursDetail.length > 0) {
-        const startY = y + 4;
         autoTable(doc, {
-            head: [["Agriculteur", "Reste à payer"]],
-            body: bilan.dettesAgriculteursDetail.map((d) => [d.agriculteur, d.restant.toFixed(2)]),
-            startY,
-            styles: { fontSize: 9, cellPadding: 2.5, textColor: TEXT },
-            headStyles: { fillColor: PRIMARY, textColor: [255, 255, 255], fontStyle: "bold" },
+            head: [["DETTES AGRICULTEURS", "RESTE À PAYER"]],
+            body: bilan.dettesAgriculteursDetail.map((item) => [item.agriculteur, `${item.restant.toFixed(3)} TND`]),
+            startY: y,
+            theme: "plain",
+            styles: { fontSize: 8.5, cellPadding: 3, textColor: PDF_DARK, lineColor: [75, 75, 75], lineWidth: { bottom: 0.2 } },
+            headStyles: { fontStyle: "bold", lineWidth: { bottom: 0.35 } },
             columnStyles: { 1: { halign: "right" } },
-            margin: { left: pageWidth / 2 + 4, right: 14 },
-            tableWidth: pageWidth / 2 - 18,
+            margin: { left: 14, right: 14, bottom: 18 },
         });
     }
 
+    addBrandedPdfFooters(doc, tenant);
     return doc;
 }
 
-export function downloadBilanPDF(bilan: BilanForPdf, tenant: TenantForBilanPdf) {
-    const doc = buildBilanDoc(bilan, tenant);
-    doc.save(`bilan-financier-${new Date().getTime()}.pdf`);
+export async function downloadBilanPDF(bilan: BilanForPdf, tenant: TenantForBilanPdf) {
+    const doc = await buildBilanDoc(bilan, tenant);
+    doc.save(`bilan-financier-${Date.now()}.pdf`);
 }
 
 export function printBilanPDF(bilan: BilanForPdf, tenant: TenantForBilanPdf) {
-    const doc = buildBilanDoc(bilan, tenant);
-    const blobUrl = doc.output("bloburl");
-    const win = window.open(blobUrl as unknown as string, "_blank");
-    win?.addEventListener("load", () => {
-        win.focus();
-        win.print();
-    });
+    return printBrandedPdf(() => buildBilanDoc(bilan, tenant));
 }

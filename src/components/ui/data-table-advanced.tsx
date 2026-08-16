@@ -143,7 +143,7 @@ export function DataTableAdvanced<TData, TValue>({
     onDataChange,
     onSearchChange,
 }: DataTableProps<TData, TValue>) {
-    const { t, messages } = useClientTranslations();
+    const { t } = useClientTranslations();
     const [data, setData] = React.useState(initialData);
     const [rowSelection, setRowSelection] = React.useState({});
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -239,9 +239,9 @@ export function DataTableAdvanced<TData, TValue>({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
             {/* Toolbar */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 {/* Search */}
                 {(searchKey || onSearchChange) && (
                     <Input
@@ -255,7 +255,7 @@ export function DataTableAdvanced<TData, TValue>({
                             }
                             onSearchChange?.(value);
                         }}
-                        className="max-w-sm rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                        className="w-full rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
                     />
                 )}
 
@@ -265,7 +265,7 @@ export function DataTableAdvanced<TData, TValue>({
                         <Button
                             variant="outline"
                             size="sm"
-                            className="ml-auto rounded-md border-border"
+                            className="w-full rounded-md border-border sm:ms-auto sm:w-auto"
                         >
                             <Settings2 className="mr-2 h-4 w-4" />
                             {t("common.columns")}
@@ -296,14 +296,14 @@ export function DataTableAdvanced<TData, TValue>({
             </div>
 
             {/* Table */}
-            <div className="rounded-lg border border-border bg-white overflow-hidden">
+            <div className="max-w-full overflow-hidden rounded-lg border border-border bg-white">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     modifiers={[restrictToVerticalAxis]}
                     onDragEnd={handleDragEnd}
                 >
-                    <Table>
+                    <Table className="min-w-max">
                         <TableHeader className="bg-[#FAF0DC]">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
@@ -358,13 +358,13 @@ export function DataTableAdvanced<TData, TValue>({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between px-2">
-                <div className="flex-1 text-sm text-muted-foreground">
+            <div className="flex flex-col gap-3 px-1 sm:flex-row sm:items-center sm:justify-between sm:px-2">
+                <div className="text-sm text-muted-foreground sm:flex-1">
                     {table.getFilteredSelectedRowModel().rows.length} {t("common.of")}{" "}
                     {table.getFilteredRowModel().rows.length} {t("common.rows")} {t("common.selected")}.
                 </div>
-                <div className="flex items-center space-x-6 lg:space-x-8">
-                    <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:gap-6">
+                    <div className="hidden items-center gap-2 sm:flex">
                         <p className="text-sm font-medium text-[#3D1C00]">{t("common.rowsPerPage")}</p>
                         <Select
                             value={`${table.getState().pagination.pageSize}`}
@@ -384,11 +384,11 @@ export function DataTableAdvanced<TData, TValue>({
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex w-25 items-center justify-center text-sm font-medium text-[#3D1C00]">
+                    <div className="flex min-w-24 items-center justify-center text-sm font-medium text-[#3D1C00]">
                         {t("common.page")} {table.getState().pagination.pageIndex + 1} {t("common.of")}{" "}
                         {table.getPageCount()}
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             className="hidden h-8 w-8 p-0 lg:flex rounded-md border-border"

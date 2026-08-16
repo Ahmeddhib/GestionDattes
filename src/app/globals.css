@@ -78,11 +78,92 @@
 
   body {
     @apply bg-sand text-[#2C1A00] font-sans;
+    min-width: 320px;
+    overflow-x: clip;
   }
 
   html {
     @apply antialiased;
+    overflow-x: clip;
+    scroll-behavior: smooth;
   }
+
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C17A2B] focus-visible:ring-offset-2;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: 100%;
+  }
+}
+
+@layer utilities {
+  .page-heading {
+    @apply flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .page-title {
+    @apply flex min-w-0 items-center gap-2 text-2xl font-bold leading-tight text-[#3D1C00] sm:gap-3 sm:text-3xl;
+  }
+
+  .page-actions {
+    @apply flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end;
+  }
+
+  .responsive-form-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+  }
+
+  /* La navigation latérale défile sur un fond brun très foncé, où la barre de
+     défilement native est quasi invisible : sans indice visuel, rien ne laisse
+     deviner qu'il reste des entrées plus bas. */
+  .sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.25) transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.25);
+    border-radius: 9999px;
+  }
+
+  .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.45);
+  }
+}
+
+@media (max-width: 639px) {
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"] {
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+  }
+
+  [data-slot="dialog-footer"],
+  [data-slot="alert-dialog-footer"] {
+    position: sticky;
+    bottom: -1rem;
+    z-index: 1;
+  }
+}
+
+[dir="rtl"] [data-slot="table-head"] {
+  text-align: right;
 }
 
 /* ══════════════════════════════════════════════════════════════

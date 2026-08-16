@@ -1,6 +1,8 @@
 import {
     startOfDay,
     endOfDay,
+    startOfWeek,
+    endOfWeek,
     startOfMonth,
     endOfMonth,
     startOfYear,
@@ -10,7 +12,7 @@ import { financeRepository, type PeriodFilter } from "@/repositories/finance.rep
 import { saisonRepository } from "@/repositories/saison.repository";
 import { requirePermission } from "@/lib/permissions";
 
-export type PeriodeBilan = "jour" | "mois" | "annee" | "saison" | "personnalisee";
+export type PeriodeBilan = "jour" | "semaine" | "mois" | "annee" | "saison" | "personnalisee";
 
 export interface BilanFilters {
     periode: PeriodeBilan;
@@ -50,6 +52,15 @@ export async function resolvePeriodFilter(
 
     if (filters.periode === "jour") {
         return { filter: { range: { gte: startOfDay(now), lte: endOfDay(now) } }, label: "Aujourd'hui" };
+    }
+
+    if (filters.periode === "semaine") {
+        const debut = startOfWeek(now, { weekStartsOn: 1 });
+        const fin = endOfWeek(now, { weekStartsOn: 1 });
+        return {
+            filter: { range: { gte: debut, lte: fin } },
+            label: `Semaine du ${debut.toLocaleDateString("fr-FR")} au ${fin.toLocaleDateString("fr-FR")}`,
+        };
     }
 
     if (filters.periode === "annee") {

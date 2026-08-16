@@ -4,6 +4,7 @@ import { Package } from "lucide-react";
 import { TypesCaissesTableAdvanced } from "@/components/features/types-caisses/TypesCaissesTableAdvanced";
 import { CreateTypeCaisseDialog } from "@/components/features/types-caisses/CreateTypeCaisseDialog";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 type TypeCaisse = {
     id: string;
@@ -35,16 +36,16 @@ export function TypesCaissesPageContent({ typesCaisses }: TypesCaissesPageConten
     );
 
     return (
-        <div className="flex-1 space-y-6 p-8">
+        <PageContainer>
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex items-center gap-3">
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Package className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-[#3D1C00]">
+                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
                                 {t("typesCaisses.title")}
                             </h1>
                             <p className="text-sm text-[#3D1C00]/60">
@@ -111,6 +112,6 @@ export function TypesCaissesPageContent({ typesCaisses }: TypesCaissesPageConten
 
             {/* Table */}
             <TypesCaissesTableAdvanced typesCaisses={typesCaisses} />
-        </div>
+        </PageContainer>
     );
 }

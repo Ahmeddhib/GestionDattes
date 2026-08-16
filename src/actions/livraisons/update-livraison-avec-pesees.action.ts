@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { livraisonPeseeService } from "@/services/livraison-pesee.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { mettreAJourLivraisonAvecPeseesSchema } from "@/validators/livraison-pesee.validator";
@@ -46,7 +47,7 @@ export async function updateLivraisonAvecPeseesAction(livraisonId: string, input
         console.error("❌ updateLivraisonAvecPeseesAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la modification de la livraison",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

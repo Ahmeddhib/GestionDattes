@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface DateRangePickerProps {
     value: DateRange | undefined;
@@ -19,6 +20,7 @@ interface DateRangePickerProps {
 }
 
 export function DateRangePicker({ value, onChange, placeholder, className }: DateRangePickerProps) {
+    const isMobile = useIsMobile();
     const label = React.useMemo(() => {
         if (!value?.from) return placeholder ?? "Sélectionner une période";
         if (!value.to || value.to.getTime() === value.from.getTime()) {
@@ -34,7 +36,7 @@ export function DateRangePicker({ value, onChange, placeholder, className }: Dat
                     type="button"
                     variant="outline"
                     className={cn(
-                        "justify-start gap-2 rounded-sm border-border text-left font-normal",
+                        "w-full min-w-0 justify-start gap-2 rounded-sm border-border text-start font-normal sm:w-auto",
                         !value?.from && "text-muted-foreground",
                         className
                     )}
@@ -49,20 +51,20 @@ export function DateRangePicker({ value, onChange, placeholder, className }: Dat
                                 e.stopPropagation();
                                 onChange(undefined);
                             }}
-                            className="ml-auto rounded-full p-0.5 hover:bg-[#FAF0DC]"
+                            className="ms-auto rounded-full p-0.5 hover:bg-[#FAF0DC]"
                         >
                             <X className="h-3.5 w-3.5" />
                         </span>
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto bg-white p-0" align="start">
+            <PopoverContent className="max-w-[calc(100vw-1rem)] overflow-x-auto bg-white p-0" align="start">
                 <Calendar
                     mode="range"
                     defaultMonth={value?.from}
                     selected={value}
                     onSelect={onChange}
-                    numberOfMonths={2}
+                    numberOfMonths={isMobile ? 1 : 2}
                 />
             </PopoverContent>
         </Popover>

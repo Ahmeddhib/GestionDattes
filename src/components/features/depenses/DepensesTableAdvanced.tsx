@@ -9,12 +9,14 @@ import { exportDepensesToPDF, exportDepensesToExcel } from "@/lib/export-utils";
 import { createDepensesColumns, type Depense } from "./columns";
 import { UpdateDepenseDialog } from "./UpdateDepenseDialog";
 import { DeleteDepenseDialog } from "./DeleteDepenseDialog";
+import type { PdfBranding } from "@/lib/pdf-branding";
 
 interface DepensesTableAdvancedProps {
     data: Depense[];
+    branding: PdfBranding;
 }
 
-export function DepensesTableAdvanced({ data }: DepensesTableAdvancedProps) {
+export function DepensesTableAdvanced({ data, branding }: DepensesTableAdvancedProps) {
     const { t } = useClientTranslations();
     const [selectedDepense, setSelectedDepense] = useState<Depense | null>(null);
     const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -38,7 +40,7 @@ export function DepensesTableAdvanced({ data }: DepensesTableAdvancedProps) {
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => exportDepensesToPDF(data)}
+                    onClick={() => void exportDepensesToPDF(data, branding)}
                     className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
                 >
                     <FileDown className="h-4 w-4 mr-2" />

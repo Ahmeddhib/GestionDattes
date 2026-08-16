@@ -7,7 +7,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
 /**
  * Action pour récupérer tous les prêts de caisses
  */
-export async function getPretsAction() {
+export async function getPretsAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function getPretsAction() {
         }
 
         const tenantId = await getTenantId();
-        const prets = await pretCaisseService.getAll(tenantId, session.user.id);
+        const prets = await pretCaisseService.getAll(tenantId, session.user.id, opts);
 
         return { success: true, data: prets };
     } catch (error) {

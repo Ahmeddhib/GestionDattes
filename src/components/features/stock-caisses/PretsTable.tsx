@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, FileSpreadsheet, Search, X } from "lucide-react";
 import { exportPretsToPDF, exportPretsToExcel } from "@/lib/export-utils";
+import type { PdfBranding } from "@/lib/pdf-branding";
 
 type PretsTableProps = {
     prets?: any[];
+    branding: PdfBranding;
 };
 
-export function PretsTable({ prets = [] }: PretsTableProps) {
+export function PretsTable({ prets = [], branding }: PretsTableProps) {
     const { t } = useClientTranslations();
     const columns = createPretsColumns(t);
 
@@ -119,7 +121,7 @@ export function PretsTable({ prets = [] }: PretsTableProps) {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => exportPretsToPDF(filteredPrets)}
+                        onClick={() => void exportPretsToPDF(filteredPrets, branding)}
                         className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
                     >
                         <FileDown className="h-4 w-4 mr-2" />

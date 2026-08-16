@@ -4,6 +4,7 @@ import { agriculteurRepository } from "@/repositories/agriculteur.repository";
 import { livreurRepository } from "@/repositories/livreur.repository";
 import { auditService } from "./audit.service";
 import { checkPermission } from "@/lib/permissions";
+import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import { prisma } from "@/lib/prisma";
 import type { CreatePretCaisseInput, RetourCaissesInput } from "@/validators/pret-caisse.validator";
 
@@ -14,10 +15,10 @@ export const pretCaisseService = {
     /**
      * Récupère tous les prêts avec transformation camelCase
      */
-    async getAll(tenantId: string, userId: string) {
+    async getAll(tenantId: string, userId: string, opts?: { saisonId?: string }) {
         await checkPermission(userId, "pret-caisse:read");
 
-        const prets = await pretCaisseRepository.findAll(tenantId);
+        const prets = await pretCaisseRepository.findAll(tenantId, opts);
 
         // Transformation PascalCase → camelCase
         return prets.map((pret) => ({
@@ -106,6 +107,11 @@ export const pretCaisseService = {
     async create(tenantId: string, userId: string, data: CreatePretCaisseInput) {
         await checkPermission(userId, "pret-caisse:create");
 
+        // Un prêt est un événement physique daté : il est rattaché à la saison
+        // ouverte au moment où il est consenti (livraisonId étant optionnel,
+        // il n'existe aucun autre rattachement possible).
+        const saison = await getSaisonOuverte(tenantId);
+
         // Vérifier que l'agriculteur existe
         const agriculteur = await agriculteurRepository.findById(tenantId, data.agriculteurId);
         if (!agriculteur) {
@@ -137,7 +143,7 @@ export const pretCaisseService = {
         // Transaction: créer le prêt ET déduire du stock
         const pret = await prisma.$transaction(async (tx) => {
             // Créer le prêt
-            const nouveauPret = await pretCaisseRepository.create(data, tenantId, userId);
+            const nouveauPret = await pretCaisseRepository.create(data, tenantId, userId, saison.id);
 
             // Déduire du stock
             await tx.typeCaisse.update({
@@ -183,6 +189,10 @@ export const pretCaisseService = {
         if (!pret) {
             throw new Error("Prêt introuvable");
         }
+
+        // Un retour modifie un prêt existant : il est refusé si la saison de ce
+        // prêt est clôturée.
+        await assertSaisonOuverte(tenantId, pret.saisonId);
 
         // Vérifier que le prêt n'est pas déjà clôturé
         if (pret.statut === "RETOURNE") {

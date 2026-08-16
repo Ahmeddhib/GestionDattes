@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
 export const stockDateRepository = {
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.stockDate.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonOrigineId: opts.saisonId }) },
             include: {
                 TypeDate: { select: { id: true, nom: true } },
                 Livraison: {

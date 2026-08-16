@@ -19,17 +19,25 @@ import {
     exportPaiementsAgriculteursToExcel,
 } from "@/lib/export-utils";
 import { createPaiementsColumns, type BonAchatAvecSolde } from "./columns";
+import type { PdfBranding } from "@/lib/pdf-branding";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 
 interface PaiementsAgriculteursTableAdvancedProps {
     data: BonAchatAvecSolde[];
+    branding: PdfBranding;
+    saisonActive?: SaisonActive;
 }
 
 const ALL_AGRICULTEURS = "all";
 const ALL_STATUTS = "all";
 
-export function PaiementsAgriculteursTableAdvanced({ data }: PaiementsAgriculteursTableAdvancedProps) {
+export function PaiementsAgriculteursTableAdvanced({
+    data,
+    branding,
+    saisonActive,
+}: PaiementsAgriculteursTableAdvancedProps) {
     const { t } = useClientTranslations();
-    const columns = createPaiementsColumns(t);
+    const columns = createPaiementsColumns(t, saisonActive);
 
     const [agriculteurId, setAgriculteurId] = useState<string>(ALL_AGRICULTEURS);
     const [statut, setStatut] = useState<string>(ALL_STATUTS);
@@ -72,12 +80,12 @@ export function PaiementsAgriculteursTableAdvanced({ data }: PaiementsAgriculteu
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-end gap-2 px-1">
+            <div className="flex flex-col gap-2 px-1 sm:flex-row sm:justify-end">
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => exportPaiementsAgriculteursToPDF(filteredData)}
-                    className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                    onClick={() => void exportPaiementsAgriculteursToPDF(filteredData, branding)}
+                    className="w-full rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC] sm:w-auto"
                 >
                     <FileDown className="h-4 w-4 mr-2" />
                     {t("common.exportPDF")}
@@ -86,14 +94,14 @@ export function PaiementsAgriculteursTableAdvanced({ data }: PaiementsAgriculteu
                     variant="outline"
                     size="sm"
                     onClick={() => exportPaiementsAgriculteursToExcel(filteredData)}
-                    className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                    className="w-full rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC] sm:w-auto"
                 >
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
                     {t("common.exportExcel")}
                 </Button>
             </div>
-            <div className="flex flex-wrap items-end gap-3 px-1">
-                <div className="min-w-55">
+            <div className="grid grid-cols-1 items-end gap-3 px-1 sm:grid-cols-2 xl:flex xl:flex-wrap">
+                <div className="min-w-0 xl:min-w-55">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">
                         {t("livraisons.agriculteur")}
                     </label>
@@ -112,7 +120,7 @@ export function PaiementsAgriculteursTableAdvanced({ data }: PaiementsAgriculteu
                     </Select>
                 </div>
 
-                <div className="min-w-45">
+                <div className="min-w-0 xl:min-w-45">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">
                         {t("finance.paiements.statut")}
                     </label>
@@ -129,7 +137,7 @@ export function PaiementsAgriculteursTableAdvanced({ data }: PaiementsAgriculteu
                     </Select>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("bonAchat.periode")}</label>
                     <DateRangePicker
                         value={dateRange}

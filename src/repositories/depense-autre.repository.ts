@@ -3,9 +3,9 @@ import { createId } from "@paralleldrive/cuid2";
 import type { CreateDepenseInput, UpdateDepenseInput } from "@/validators/depense-autre.validator";
 
 export const depenseAutreRepository = {
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.depenseAutre.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
             orderBy: { dateDepense: "desc" },
             include: {
                 User: { select: { id: true, name: true } },

@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { depenseAutreService } from "@/services/depense-autre.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { revalidatePath } from "next/cache";
@@ -22,7 +23,7 @@ export async function deleteDepenseAction(id: string) {
         console.error("❌ deleteDepenseAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la suppression de la dépense",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

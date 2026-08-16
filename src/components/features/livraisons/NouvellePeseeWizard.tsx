@@ -29,6 +29,7 @@ import { getTypesDatesAction } from "@/actions/types-dates/get-types-dates.actio
 import { getTypesCaissesAction } from "@/actions/types-caisses/get-types-caisses.action";
 import { getPretsEnCoursAgriculteurAction } from "@/actions/prets-caisses/get-prets-agriculteur.action";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 
 type Agriculteur = { id: string; label: string };
 type TypeDate = { id: string; nom: string };
@@ -60,7 +61,7 @@ function ligneVierge(): LigneWizard {
     };
 }
 
-export function NouvellePeseeWizard() {
+export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonActive }) {
     const { t } = useClientTranslations();
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -259,6 +260,8 @@ export function NouvellePeseeWizard() {
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {saisonActive && <SaisonActiveField saison={saisonActive} />}
+
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                             <Label className="text-[#3D1C00]">{t("livraisons.agriculteur")}</Label>
@@ -384,7 +387,7 @@ export function NouvellePeseeWizard() {
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-2 pl-1 sm:grid-cols-2">
+                                    <div className="grid grid-cols-1 gap-2 ps-1 sm:grid-cols-2">
                                         <div className="space-y-2">
                                             <div className="text-xs font-medium text-[#3D1C00]/70">
                                                 {t("pesees.grossWeightLabel")}
@@ -425,7 +428,7 @@ export function NouvellePeseeWizard() {
                                         </span>
                                     </div>
 
-                                    <div className="space-y-2 pl-1">
+                                    <div className="space-y-2 ps-1">
                                         <div className="text-xs font-medium text-[#3D1C00]/70">
                                             {t("nouvellePesee.quantiteAcceptee")}
                                         </div>

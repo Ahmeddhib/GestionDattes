@@ -31,10 +31,11 @@ export const pretCaisseRepository = {
     /**
      * Récupérer tous les prêts de caisses d'un tenant
      */
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.pretCaisse.findMany({
             where: {
                 tenantId,
+                ...(opts?.saisonId && { saisonId: opts.saisonId }),
             },
             include: {
                 Agriculteur: {
@@ -201,7 +202,8 @@ export const pretCaisseRepository = {
     async create(
         data: CreatePretCaisseInput,
         tenantId: string,
-        createdById: string
+        createdById: string,
+        saisonId: string
     ) {
         const { createId } = await import("@paralleldrive/cuid2");
 
@@ -214,6 +216,9 @@ export const pretCaisseRepository = {
                 datePreT: new Date(),
                 observations: data.observations,
                 updatedAt: new Date(),
+                Saison: {
+                    connect: { id: saisonId },
+                },
                 Agriculteur: {
                     connect: { id: data.agriculteurId },
                 },

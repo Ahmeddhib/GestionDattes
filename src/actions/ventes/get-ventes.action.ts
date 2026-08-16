@@ -7,7 +7,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
 /**
  * Action pour récupérer toutes les ventes
  */
-export async function getVentesAction() {
+export async function getVentesAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function getVentesAction() {
         }
 
         const tenantId = await getTenantId();
-        const ventes = await venteService.getAll(tenantId);
+        const ventes = await venteService.getAll(tenantId, opts);
 
         return { success: true, data: ventes };
     } catch (error) {

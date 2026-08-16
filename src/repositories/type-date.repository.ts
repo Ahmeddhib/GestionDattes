@@ -61,6 +61,7 @@ export const typeDateRepository = {
                 id: `typedate_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
                 nom: data.nom,
                 description: data.description || null,
+                seuilAlerte: data.seuilAlerte ?? null,
                 tenantId,
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -77,6 +78,7 @@ export const typeDateRepository = {
             data: {
                 ...(data.nom && { nom: data.nom }),
                 ...(data.description !== undefined && { description: data.description }),
+                ...(data.seuilAlerte !== undefined && { seuilAlerte: data.seuilAlerte }),
                 updatedAt: new Date(),
             },
         });

@@ -7,9 +7,9 @@ export const stockDateService = {
      * disponible, avec le détail des lots (une entrée de StockDate par
      * livraison) pour chaque type.
      */
-    async getAll(tenantId: string) {
+    async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("stock-date:read");
-        const stockDates = await stockDateRepository.findAll(tenantId);
+        const stockDates = await stockDateRepository.findAll(tenantId, opts);
 
         const groups = new Map<
             string,

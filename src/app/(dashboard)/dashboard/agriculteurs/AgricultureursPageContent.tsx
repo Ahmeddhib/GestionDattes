@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import { AgricultureursTableAdvanced } from "@/components/features/agriculteurs/AgricultureursTableAdvanced";
 import { CreateAgriculteurDialog } from "@/components/features/agriculteurs/CreateAgriculteurDialog";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 type Agriculteur = {
     id: string;
@@ -44,16 +45,16 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
     const totalProduction = agriculteurs.reduce((acc, a) => acc + (a.productionEstimee || 0), 0);
 
     return (
-        <div className="flex-1 space-y-6 p-8">
+        <PageContainer>
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex items-center gap-3">
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Users className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-[#3D1C00]">
+                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
                                 {t("agriculteurs.title")}
                             </h1>
                             <p className="text-sm text-[#3D1C00]/60">
@@ -66,7 +67,7 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("agriculteurs.total")}
@@ -103,6 +104,6 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
 
             {/* Advanced Table */}
             <AgricultureursTableAdvanced initialData={agriculteurs} regions={regions} />
-        </div>
+        </PageContainer>
     );
 }

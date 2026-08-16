@@ -1,7 +1,7 @@
 "use client";
 
 import { UsersTable } from "@/components/features/users/UsersTable";
-import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 interface User {
     id: string;
@@ -22,15 +22,13 @@ interface UsersPageContentProps {
 }
 
 export function UsersPageContent({ initialData, initialTotal, roles }: UsersPageContentProps) {
-    const { t } = useClientTranslations();
-
     return (
-        <div className="p-8">
+        <PageContainer>
             <UsersTable
                 initialData={initialData}
                 initialTotal={initialTotal}
                 roles={roles}
             />
-        </div>
+        </PageContainer>
     );
 }

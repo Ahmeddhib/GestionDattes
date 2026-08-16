@@ -4,13 +4,24 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { PaiementsAgriculteursTableAdvanced } from "@/components/features/paiements-agriculteurs/PaiementsAgriculteursTableAdvanced";
 import type { BonAchatAvecSolde } from "@/components/features/paiements-agriculteurs/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
+import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { HandCoins, Wallet } from "lucide-react";
+import type { PdfBranding } from "@/lib/pdf-branding";
 
 interface PaiementsAgriculteursPageContentProps {
+    saisonFiltre: SaisonFiltreProps;
+    saisonOuverte: SaisonActive | null;
     bonsAchat: BonAchatAvecSolde[];
+    branding: PdfBranding;
 }
 
-export function PaiementsAgriculteursPageContent({ bonsAchat }: PaiementsAgriculteursPageContentProps) {
+export function PaiementsAgriculteursPageContent({
+    bonsAchat,
+    saisonFiltre,
+    saisonOuverte,
+    branding,
+}: PaiementsAgriculteursPageContentProps) {
     const { t } = useClientTranslations();
 
     const totalMontant = bonsAchat.reduce((sum, b) => sum + b.montant, 0);
@@ -19,6 +30,8 @@ export function PaiementsAgriculteursPageContent({ bonsAchat }: PaiementsAgricul
 
     return (
         <PageContainer>
+            <SaisonFilterBar {...saisonFiltre} />
+
             <div>
                 <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
                     <HandCoins className="h-8 w-8 text-[#C17A2B]" />
@@ -72,7 +85,11 @@ export function PaiementsAgriculteursPageContent({ bonsAchat }: PaiementsAgricul
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <PaiementsAgriculteursTableAdvanced data={bonsAchat} />
+                <PaiementsAgriculteursTableAdvanced
+                    data={bonsAchat}
+                    branding={branding}
+                    saisonActive={saisonOuverte ?? undefined}
+                />
             </div>
         </PageContainer>
     );

@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { encaissementClientService } from "@/services/encaissement-client.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { createEncaissementClientSchema } from "@/validators/encaissement-client.validator";
@@ -46,7 +47,7 @@ export async function createEncaissementAction(formData: FormData) {
         console.error("❌ createEncaissementAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de l'enregistrement de l'encaissement",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

@@ -31,16 +31,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
+
 interface RecordEncaissementDialogProps {
     venteId: string;
     clientNom: string;
     montantRestant: number;
+    /**
+     * Saison OUVERTE — celle où l'argent circule, et non celle de la vente
+     * réglée. L'afficher rend visible une règle qui surprend sinon : un
+     * encaissement d'une vente de la campagne précédente est rattaché à la
+     * campagne en cours.
+     */
+    saisonActive?: SaisonActive;
 }
 
 export function RecordEncaissementDialog({
     venteId,
     clientNom,
     montantRestant,
+    saisonActive,
 }: RecordEncaissementDialogProps) {
     const { t } = useClientTranslations();
     const router = useRouter();
@@ -121,6 +131,8 @@ export function RecordEncaissementDialog({
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {saisonActive && <SaisonActiveField saison={saisonActive} />}
+
                         <FormField
                             control={form.control}
                             name="montant"

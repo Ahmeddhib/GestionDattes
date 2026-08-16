@@ -80,7 +80,111 @@
         "overview": "Vue d'ensemble",
         "management": "Gestion",
         "administration": "Administration",
-        "finance": "Finance"
+        "finance": "Finance",
+        "noSaisonOuverte": "Aucune saison ouverte",
+        "refresh": "Actualiser",
+        "refreshedAt": "Actualisé à {time}",
+        "viewModule": "Voir le module",
+        "viewAll": "Voir tout",
+        "filters": {
+            "periode": "Période",
+            "saison": "Saison",
+            "dateRange": "Plage de dates",
+            "selectSaison": "Sélectionner une saison",
+            "apply": "Appliquer",
+            "jour": "Aujourd'hui",
+            "semaine": "Cette semaine",
+            "mois": "Ce mois",
+            "annee": "Cette année",
+            "saisonOption": "Saison",
+            "personnalisee": "Plage personnalisée"
+        },
+        "kpi": {
+            "quantiteNetteLivree": "Quantité nette livrée",
+            "nombreLivraisons": "Nombre de livraisons",
+            "stockTotal": "Stock total de dattes",
+            "montantBonsAchat": "Montant total des Bons d'achat",
+            "chiffreAffaires": "Chiffre d'affaires",
+            "totalEncaisse": "Total encaissé",
+            "totalPayeAgriculteurs": "Total payé aux agriculteurs",
+            "tresorerieNette": "Trésorerie nette",
+            "dettesAgriculteurs": "Dettes envers les agriculteurs",
+            "creancesClients": "Créances clients"
+        },
+        "charts": {
+            "deliveries": {
+                "title": "Livraisons",
+                "description": "Poids net et quantité payable, par jour ou par mois",
+                "poidsNet": "Poids net livré",
+                "quantitePayable": "Quantité payable"
+            },
+            "cashflow": {
+                "title": "Flux financier",
+                "description": "Encaissements clients, paiements agriculteurs et autres dépenses",
+                "encaissements": "Encaissements clients",
+                "paiements": "Paiements agriculteurs",
+                "depenses": "Autres dépenses"
+            },
+            "stock": {
+                "title": "Stock par variété",
+                "description": "Quantité disponible actuelle, par variété de dattes",
+                "disponible": "Stock disponible",
+                "seuil": "Seuil d'alerte"
+            },
+            "repartition": {
+                "title": "Répartition des livraisons",
+                "description": "Poids net livré par variété, sur la période",
+                "autres": "Autres variétés"
+            },
+            "sales": {
+                "title": "Évolution des ventes",
+                "description": "Quantité vendue et chiffre d'affaires, par jour ou par mois",
+                "quantite": "Quantité vendue",
+                "montant": "Chiffre d'affaires"
+            }
+        },
+        "topAgriculteurs": {
+            "title": "Top agriculteurs",
+            "description": "Par quantité livrée sur la période",
+            "agriculteur": "Agriculteur",
+            "quantiteLivree": "Quantité livrée",
+            "empty": "Aucune livraison sur cette période"
+        },
+        "recentActivity": {
+            "title": "Activité récente",
+            "empty": "Aucune activité récente",
+            "livraisons": "Dernières livraisons",
+            "bonsAchat": "Derniers Bons d'achat",
+            "paiementsAgriculteurs": "Derniers paiements agriculteurs",
+            "ventes": "Dernières ventes",
+            "encaissements": "Derniers encaissements clients",
+            "mouvementsStock": "Mouvements récents du stock"
+        },
+        "alerts": {
+            "title": "Alertes et actions requises",
+            "allClear": "Aucune alerte — tout est à jour.",
+            "bonsAchatImpayes": "{count} bon(s) d'achat non payé(s) ou partiellement payé(s) — {montant} restant",
+            "creancesClients": "{count} vente(s) avec créance client en attente — {montant} restant",
+            "livraisonsSansBonAchat": "{count} livraison(s) sans bon d'achat associé",
+            "livraisonsSansPesee": "{count} livraison(s) sans pesée enregistrée",
+            "caissesNonRetournees": "{count} prêt(s) de caisses non retourné(s)",
+            "stockFaible": "Stock faible pour {nom} : {quantite} (seuil : {seuil})",
+            "saisonProcheFin": "La saison \"{nom}\" se termine dans {jours} jour(s)",
+            "aucuneSaisonOuverte": "Aucune saison ouverte pour cette Wakala — les nouvelles opérations sont bloquées",
+            "saisonSelectionneeCloturee": "Vous consultez le bilan figé de la saison clôturée \"{nom}\""
+        },
+        "quickActions": {
+            "nouvelleLivraison": "Nouvelle livraison",
+            "nouvelleVente": "Nouvelle vente",
+            "avanceAgriculteur": "Avance agriculteur",
+            "encaissementClient": "Encaissement client",
+            "ajouterDepense": "Ajouter une dépense",
+            "consulterStock": "Consulter le stock",
+            "bilanFinancier": "Bilan financier"
+        },
+        "empty": {
+            "chart": "Aucune donnée pour cette période"
+        }
     },
     "regions": {
         "title": "Régions",
@@ -228,6 +332,8 @@
         "namePlaceholder": "Ex: Deglet Nour, Allig, Kentichi...",
         "descriptionLabel": "Description",
         "descriptionPlaceholder": "Description de la variété (optionnel)",
+        "seuilAlerte": "Seuil d'alerte (kg)",
+        "seuilAlertePlaceholder": "Ex: 100 (optionnel)",
         "livraisons": "Livraisons",
         "stocksDates": "Stocks",
         "totalUsage": "Total Utilisations",
@@ -397,7 +503,27 @@
                 "confirmMessage": "La clôture est irréversible. Après validation, aucune opération ne pourra être ajoutée ou modifiée dans cette saison.",
                 "confirmButton": "Clôturer la saison",
                 "successToast": "Saison clôturée avec succès",
-                "backToList": "Retour à la liste"
+                "backToList": "Retour à la liste",
+                "blockersDescription": "Ces points empêchent la clôture. Corrigez-les avant de continuer.",
+                "warningsTitle": "Avertissements (n'empêchent pas la clôture)",
+                "noWarnings": "Aucun avertissement.",
+                "warningsHint": "Du stock restant ou des soldes ouverts ne sont pas des anomalies : c'est à vous de décider que la campagne est terminée.",
+                "acknowledge": "J'ai lu les avertissements et je confirme que la campagne est définitivement terminée.",
+                "corriger": "Corriger",
+                "prochaineSaison": "Aucune saison n'est ouverte. Créez la saison suivante pour reprendre les opérations.",
+                "checks": {
+                    "LIVRAISON_SANS_PESEE": "{count} livraison(s) sans aucune pesée — le poids net n'a jamais été établi.",
+                    "LIVRAISON_SANS_BON_ACHAT": "{count} livraison(s) sans bon d'achat — l'achat n'a jamais été valorisé.",
+                    "DETTES_AGRICULTEURS_RESTANTES": "Dettes agriculteurs restantes : {valeur}",
+                    "CREANCES_CLIENTS_RESTANTES": "Créances clients restantes : {valeur}",
+                    "CAISSES_NON_RETOURNEES": "{valeur} caisse(s) non retournée(s)",
+                    "STOCK_RESTANT": "Stock restant en entrepôt : {valeur}",
+                    "PAIEMENTS_PARTIELS": "{count} bon(s) d'achat partiellement payé(s)",
+                    "ENCAISSEMENTS_PARTIELS": "{count} vente(s) partiellement encaissée(s)",
+                    "BONS_ACHAT_IMPAYES": "{count} bon(s) d'achat non payé(s)",
+                    "SURPAIEMENT_BON_ACHAT": "{count} bon(s) d'achat payé(s) au-delà de leur montant",
+                    "SURENCAISSEMENT_VENTE": "{count} vente(s) encaissée(s) au-delà de leur montant"
+                }
             },
             "bilan": {
                 "title": "Bilan de la saison",
@@ -433,7 +559,69 @@
                 "historique": "Historique",
                 "creeLe": "Créée le",
                 "saisonSuivante": "Saison suivante",
-                "saisonPrecedente": "Saison précédente"
+                "saisonPrecedente": "Saison précédente",
+                "stockEntre": "Stock entré durant la saison",
+                "stockOrigineRestant": "Stock de cette saison encore disponible",
+                "caissesSaison": "Caisses prêtées durant la saison",
+                "stockFinalHint": "Instantané physique de l'entrepôt au moment du calcul, toutes saisons d'origine confondues.",
+                "auMomentDuCalcul": "au moment du calcul"
+            },
+            "errors": {
+                "aucuneSaisonOuverte": "Aucune saison ouverte pour cette Wakala. Demandez à un ADMIN d'ouvrir ou de créer une saison avant d'enregistrer de nouvelles opérations.",
+                "saisonCloturee": "Opération impossible : la saison « {nom} » est clôturée. Les données d'une saison clôturée sont définitives.",
+                "saisonIntrouvable": "Saison introuvable dans cette Wakala."
+            },
+            "saisonActive": "Saison active",
+            "aucuneSaison": {
+                "title": "Aucune saison ouverte",
+                "message": "Aucune nouvelle opération ne peut être enregistrée tant qu'une saison n'est pas ouverte.",
+                "cta": "Gérer les saisons"
+            },
+            "provisoire": {
+                "action": "Générer un bilan provisoire",
+                "description": "Fige un instantané des indicateurs sans clôturer la saison. Vous pouvez continuer à travailler et en générer d'autres.",
+                "successToast": "Bilan provisoire v{version} généré",
+                "badge": "Provisoire",
+                "badgeFinal": "Final",
+                "version": "Version {version}",
+                "genereLe": "Généré le",
+                "genereePar": "par",
+                "listeTitle": "Bilans de la saison",
+                "aucun": "Aucun bilan n'a encore été généré pour cette saison.",
+                "selectVersion": "Bilan affiché",
+                "vsCloture": "Générer un bilan provisoire ne clôture rien. Seule la clôture définitive verrouille la saison."
+            },
+            "detail": {
+                "tabs": {
+                    "apercu": "Aperçu",
+                    "livraisons": "Livraisons",
+                    "pesees": "Pesées",
+                    "bonsAchat": "Bons d'achat",
+                    "ventes": "Ventes",
+                    "paiements": "Paiements agriculteurs",
+                    "encaissements": "Encaissements clients",
+                    "depenses": "Dépenses",
+                    "stock": "Stock / lots",
+                    "caisses": "Caisses",
+                    "bilans": "Bilans",
+                    "audit": "Historique"
+                },
+                "stockNote": "Lots entrés pendant cette saison. Un lot vendu lors d'une campagne suivante reste listé ici : c'est son origine qui compte.",
+                "caissesNote": "Prêts consentis pendant cette saison. Des caisses prêtées lors d'une campagne précédente et non rendues restent comptées dans le stock global.",
+                "audit": {
+                    "date": "Date",
+                    "action": "Action",
+                    "auteur": "Utilisateur",
+                    "description": "Description"
+                }
+            },
+            "filtre": {
+                "label": "Saison",
+                "courante": "Saison courante",
+                "precedente": "Saison précédente",
+                "toutes": "Toutes les saisons",
+                "clotureeBadge": "Saison clôturée",
+                "lectureSeule": "Cette saison est clôturée : consultation et export uniquement."
             }
         },
         "ventes": {
@@ -452,7 +640,8 @@
             "enregistrerEncaissement": "Enregistrer un encaissement",
             "nouvelEncaissement": "Nouvel encaissement",
             "historiqueEncaissements": "Historique des encaissements",
-            "encaissementEnregistre": "Encaissement enregistré avec succès"
+            "encaissementEnregistre": "Encaissement enregistré avec succès",
+            "lotSaison": "Lot {nom}"
         },
         "depenses": {
             "title": "Autres Dépenses",
@@ -464,6 +653,13 @@
             "montant": "Montant",
             "searchPlaceholder": "Rechercher une dépense...",
             "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la dépense"
+        },
+        "encaissements": {
+            "date": "Date",
+            "client": "Client",
+            "modePaiement": "Mode de paiement",
+            "enregistrePar": "Enregistré par",
+            "montant": "Montant"
         }
     },
     "stockDattes": {

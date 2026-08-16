@@ -6,6 +6,7 @@ import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
+import { assertSaisonOuverte } from "@/lib/saison-guard";
 import {
     buildCreatePeseeSchema,
     buildUpdatePeseeSchema,
@@ -13,6 +14,24 @@ import {
     type CreatePeseeInput,
     type UpdatePeseeInput,
 } from "@/validators/pesee.validator";
+
+/**
+ * Une Pesee n'a pas de saisonId propre : elle appartient à la saison de sa
+ * livraison. Ce raccourci évite de dupliquer la même requête dans create,
+ * update et delete.
+ */
+async function assertLivraisonSaisonOuverte(tenantId: string, livraisonId: string) {
+    const livraison = await prisma.livraison.findFirst({
+        where: { id: livraisonId, tenantId },
+        select: { saisonId: true },
+    });
+
+    if (!livraison) {
+        throw new Error("Livraison introuvable dans cette Wakala");
+    }
+
+    await assertSaisonOuverte(tenantId, livraison.saisonId);
+}
 
 export function computeTotals(tareKg: number, grossWeights: number[]): PeseeTotals {
     const tare = new Prisma.Decimal(tareKg);
@@ -212,6 +231,9 @@ export async function syncLivraisonWithPesees(
                     dateEntree: livraison.dateLivraison,
                     typeDateId,
                     livraisonId,
+                    // Le lot hérite de la saison de sa livraison, jamais de la
+                    // saison ouverte du moment.
+                    saisonOrigineId: livraison.saisonId,
                     tenantId,
                     updatedAt: new Date(),
                 },
@@ -267,9 +289,9 @@ export async function retournerCaissesAutomatiquement(
 }
 
 export const peseeService = {
-    async getAll(tenantId: string, userId: string) {
+    async getAll(tenantId: string, userId: string, opts?: { saisonId?: string }) {
         await requirePermission("pesee:read");
-        const pesees = await peseeRepository.findAll(tenantId);
+        const pesees = await peseeRepository.findAll(tenantId, opts);
         return pesees.map(reshape);
     },
 
@@ -297,6 +319,7 @@ export const peseeService = {
      */
     async create(tenantId: string, userId: string, data: CreatePeseeInput) {
         await requirePermission("pesee:create");
+        await assertLivraisonSaisonOuverte(tenantId, data.livraisonId);
 
         const livraisonTypeCaisse = await prisma.livraisonTypeCaisse.findFirst({
             where: {
@@ -393,6 +416,8 @@ export const peseeService = {
             throw new Error("Pesée introuvable dans cette Wakala");
         }
 
+        await assertLivraisonSaisonOuverte(tenantId, existing.livraisonId);
+
         const typeCaisse = await prisma.typeCaisse.findUnique({
             where: { id: existing.typeCaisseId },
             select: { poidsKg: true },
@@ -448,6 +473,8 @@ export const peseeService = {
         if (!existing) {
             throw new Error("Pesée introuvable dans cette Wakala");
         }
+
+        await assertLivraisonSaisonOuverte(tenantId, existing.livraisonId);
 
         await prisma.$transaction(async (tx) => {
             await peseeRepository.delete(tenantId, id, tx);

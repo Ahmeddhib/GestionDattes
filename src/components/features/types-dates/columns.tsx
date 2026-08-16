@@ -9,6 +9,7 @@ export type TypeDate = {
     id: string;
     nom: string;
     description: string | null;
+    seuilAlerte: number | null;
     _count?: {
         livraisons: number;
         stocksDates: number;

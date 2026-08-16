@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { depenseAutreService } from "@/services/depense-autre.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { updateDepenseSchema } from "@/validators/depense-autre.validator";
@@ -29,7 +30,7 @@ export async function updateDepenseAction(
         console.error("❌ updateDepenseAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la mise à jour de la dépense",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

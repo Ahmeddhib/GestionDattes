@@ -8,4 +8,16 @@ export const ROUTES = {
     AUDIT_LOGS: "/dashboard/audit-logs",
     LIVREURS: "/dashboard/livreurs",
     UNAUTHORIZED: "/unauthorized",
+
+    LIVRAISONS: "/dashboard/livraisons",
+    VENTES: "/dashboard/finance/ventes",
+    BONS_ACHAT: "/dashboard/bons-achat",
+    PAIEMENTS_AGRICULTEURS: "/dashboard/finance/paiements-agriculteurs",
+    CLIENTS: "/dashboard/clients",
+    DEPENSES_AUTRES: "/dashboard/finance/depenses",
+    STOCK_DATTES: "/dashboard/stock-dattes",
+    STOCK_CAISSES: "/dashboard/stock-caisses",
+    FINANCE: "/dashboard/finance",
+    SAISONS: "/dashboard/finance/saisons",
+    SAISON: (id: string) => `/dashboard/finance/saisons/${id}`,
 } as const;

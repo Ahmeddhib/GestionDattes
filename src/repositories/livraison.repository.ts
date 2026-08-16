@@ -11,9 +11,9 @@ export const livraisonRepository = {
     /**
      * Récupère toutes les livraisons d'un tenant avec relations
      */
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.livraison.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
             include: {
                 Agriculteur: {
                     select: {
@@ -176,12 +176,15 @@ export const livraisonRepository = {
                     })),
                 },
                 StockDate: {
+                    // saisonOrigineId doit être posé explicitement : Prisma
+                    // n'hérite rien du parent dans une écriture imbriquée.
                     create: stockGroups.map((group, i) => ({
                         id: `stock_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 9)}`,
                         quantite: group.quantite,
                         quantiteDisponible: group.quantite,
                         dateEntree: new Date(data.dateLivraison),
                         typeDateId: group.typeDateId,
+                        saisonOrigineId: saisonId,
                         tenantId,
                         updatedAt: new Date(),
                     })),

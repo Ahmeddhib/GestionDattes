@@ -20,6 +20,7 @@ export async function updateTypeDateAction(formData: FormData) {
             id: formData.get("id") as string,
             nom: formData.get("nom") || undefined,
             description: formData.get("description") !== "" ? formData.get("description") : null,
+            seuilAlerte: formData.get("seuilAlerte") !== "" ? (formData.get("seuilAlerte") ?? undefined) : null,
         };
 
         const parsed = updateTypeDateSchema.safeParse(rawData);

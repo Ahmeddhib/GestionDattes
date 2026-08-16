@@ -4,13 +4,15 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { PeseesTableAdvanced } from "@/components/features/pesees/PeseesTableAdvanced";
 import type { Pesee } from "@/components/features/pesees/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
+import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import { Scale, Weight, TrendingUp } from "lucide-react";
 
 interface PeseesPageContentProps {
+    saisonFiltre: SaisonFiltreProps;
     pesees: Pesee[];
 }
 
-export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
+export function PeseesPageContent({ pesees, saisonFiltre }: PeseesPageContentProps) {
     const { t } = useClientTranslations();
 
     const totalPesees = pesees.length;
@@ -21,8 +23,10 @@ export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
 
     return (
         <PageContainer>
+            <SaisonFilterBar {...saisonFiltre} />
+
             {/* En-tête */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
                         <Scale className="h-8 w-8 text-[#C17A2B]" />
@@ -33,7 +37,7 @@ export function PeseesPageContent({ pesees }: PeseesPageContentProps) {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid gap-6 md:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>

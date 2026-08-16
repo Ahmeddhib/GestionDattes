@@ -4,14 +4,16 @@ import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { BonsAchatTableAdvanced } from "@/components/features/bons-achat/BonsAchatTableAdvanced";
 import type { BonAchat } from "@/components/features/bons-achat/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
+import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import { Receipt, Wallet } from "lucide-react";
 
 interface BonsAchatPageContentProps {
+    saisonFiltre: SaisonFiltreProps;
     bonsAchat: BonAchat[];
     tenant: { name: string; address: string | null; phone: string | null; email: string | null };
 }
 
-export function BonsAchatPageContent({ bonsAchat, tenant }: BonsAchatPageContentProps) {
+export function BonsAchatPageContent({ bonsAchat, tenant, saisonFiltre }: BonsAchatPageContentProps) {
     const { t } = useClientTranslations();
 
     const total = bonsAchat.length;
@@ -19,6 +21,8 @@ export function BonsAchatPageContent({ bonsAchat, tenant }: BonsAchatPageContent
 
     return (
         <PageContainer>
+            <SaisonFilterBar {...saisonFiltre} />
+
             <div>
                 <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
                     <Receipt className="h-8 w-8 text-[#C17A2B]" />

@@ -81,8 +81,9 @@ export const PERMISSIONS = {
     "saison:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
     "saison:create": [ROLES.ADMIN, ROLES.DIRECTION],
     "saison:update": [ROLES.ADMIN, ROLES.DIRECTION],
-    "saison:delete": [ROLES.ADMIN],
+    // Pas de "saison:delete" : une saison n'est jamais supprimée physiquement.
     "saison:cloturer": [ROLES.ADMIN],
+    "saison:bilan-provisoire": [ROLES.ADMIN, ROLES.DIRECTION],
 
     // Ventes
     "vente:read": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],

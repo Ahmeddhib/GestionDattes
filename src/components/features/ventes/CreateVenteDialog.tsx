@@ -8,6 +8,7 @@ import { z } from "zod";
 import { Plus, User, Package, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { getClientsAction } from "@/actions/clients/get-clients.action";
 import { getStockLotsForVenteAction } from "@/actions/ventes/get-stock-lots-for-vente.action";
 import { createVenteAction } from "@/actions/ventes/create-vente.action";
@@ -59,7 +60,7 @@ function stockLevelBadgeClass(quantite: number) {
     return "bg-green-100 text-green-700";
 }
 
-export function CreateVenteDialog() {
+export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActive }) {
     const { t } = useClientTranslations();
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -185,6 +186,8 @@ export function CreateVenteDialog() {
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {saisonActive && <SaisonActiveField saison={saisonActive} />}
+
                         <FormField
                             control={form.control}
                             name="clientId"
@@ -330,7 +333,7 @@ export function CreateVenteDialog() {
                             )}
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <FormField
                                 control={form.control}
                                 name="quantite"

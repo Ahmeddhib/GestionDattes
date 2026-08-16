@@ -7,7 +7,6 @@ import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ROUTES } from "@/lib/routes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/shared/Button";
 import { Eye, EyeOff, Mail, Lock, LogIn, AlertCircle, CheckCircle, ShieldCheck } from "lucide-react";
@@ -183,7 +182,7 @@ export function LoginForm() {
                 <div className="flex-1 h-px" style={{ background: "#E8D5B0" }} />
             </div>
 
-            <div className="flex gap-2 justify-center flex-wrap">
+            <div className="flex flex-col items-center justify-center gap-2 min-[380px]:flex-row min-[380px]:flex-wrap">
                 {[
                     { icon: ShieldCheck, label: "SSL chiffré" },
                     { icon: Lock, label: "RBAC activé" },

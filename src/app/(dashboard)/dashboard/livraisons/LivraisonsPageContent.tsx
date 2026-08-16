@@ -4,6 +4,10 @@ import { Truck } from "lucide-react";
 import { LivraisonsTableAdvanced } from "@/components/features/livraisons/LivraisonsTableAdvanced";
 import { NouvellePeseeWizard } from "@/components/features/livraisons/NouvellePeseeWizard";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { PageContainer } from "@/components/shared/PageContainer";
+import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
+import { AucuneSaisonAlert } from "@/components/features/saisons/AucuneSaisonAlert";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 
 type Livraison = {
     id: string;
@@ -30,9 +34,16 @@ type Livraison = {
 type LivraisonsPageContentProps = {
     livraisons: Livraison[];
     canEditAcceptedQuantity: boolean;
+    saisonFiltre: SaisonFiltreProps;
+    saisonOuverte: SaisonActive | null;
 };
 
-export function LivraisonsPageContent({ livraisons, canEditAcceptedQuantity }: LivraisonsPageContentProps) {
+export function LivraisonsPageContent({
+    livraisons,
+    canEditAcceptedQuantity,
+    saisonFiltre,
+    saisonOuverte,
+}: LivraisonsPageContentProps) {
     const { t } = useClientTranslations();
 
     // Calculer les statistiques
@@ -51,16 +62,16 @@ export function LivraisonsPageContent({ livraisons, canEditAcceptedQuantity }: L
     ).length;
 
     return (
-        <div className="flex-1 space-y-6 p-8">
+        <PageContainer>
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <div className="flex items-center gap-3">
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Truck className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-[#3D1C00]">
+                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
                                 {t("livraisons.title")}
                             </h1>
                             <p className="text-sm text-[#3D1C00]/60">
@@ -69,11 +80,20 @@ export function LivraisonsPageContent({ livraisons, canEditAcceptedQuantity }: L
                         </div>
                     </div>
                 </div>
-                <NouvellePeseeWizard />
+                {/* La création est impossible sur une saison clôturée (lecture
+                    seule) comme lorsqu'aucune saison n'est ouverte. Le blocage
+                    réel reste côté serveur. */}
+                {!saisonFiltre.isReadOnly && saisonOuverte && <NouvellePeseeWizard saisonActive={saisonOuverte} />}
             </div>
 
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <SaisonFilterBar {...saisonFiltre} />
+            </div>
+
+            {!saisonOuverte && <AucuneSaisonAlert canGererSaisons />}
+
             {/* Stats Cards */}
-            <div className="grid gap-6 md:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[14px] border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
@@ -140,6 +160,6 @@ export function LivraisonsPageContent({ livraisons, canEditAcceptedQuantity }: L
                 livraisons={livraisons}
                 canEditAcceptedQuantity={canEditAcceptedQuantity}
             />
-        </div>
+        </PageContainer>
     );
 }

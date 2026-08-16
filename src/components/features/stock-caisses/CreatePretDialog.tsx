@@ -38,10 +38,11 @@ import { getAgricultureursSimpleAction } from "@/actions/agriculteurs/get-agricu
 import { getTypesCaissesAction } from "@/actions/types-caisses/get-types-caisses.action";
 import { getLivreursAction } from "@/actions/livreurs/get-livreurs.action";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 
 const AUCUN_LIVREUR = "none";
 
-export function CreatePretDialog() {
+export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive }) {
     const { t } = useClientTranslations();
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -179,6 +180,8 @@ export function CreatePretDialog() {
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {saisonActive && <SaisonActiveField saison={saisonActive} />}
+
                         {/* Agriculteur */}
                         <FormField
                             control={form.control}

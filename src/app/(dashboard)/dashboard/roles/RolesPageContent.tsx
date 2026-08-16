@@ -1,7 +1,7 @@
 "use client";
 
 import { RolesTable } from "@/components/features/roles/RolesTable";
-import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 interface Role {
     id: string;
@@ -19,11 +19,9 @@ interface RolesPageContentProps {
 }
 
 export function RolesPageContent({ initialData, initialTotal }: RolesPageContentProps) {
-    const { t } = useClientTranslations();
-
     return (
-        <div className="p-8">
+        <PageContainer>
             <RolesTable initialData={initialData} initialTotal={initialTotal} />
-        </div>
+        </PageContainer>
     );
 }

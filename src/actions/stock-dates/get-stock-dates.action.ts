@@ -8,7 +8,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
  * Action pour récupérer le stock de dattes regroupé par type (avec le détail
  * des lots par livraison).
  */
-export async function getStockDatesAction() {
+export async function getStockDatesAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -16,7 +16,7 @@ export async function getStockDatesAction() {
         }
 
         const tenantId = await getTenantId();
-        const stockDates = await stockDateService.getAll(tenantId);
+        const stockDates = await stockDateService.getAll(tenantId, opts);
 
         return { success: true, data: stockDates };
     } catch (error) {

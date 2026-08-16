@@ -7,7 +7,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
 /**
  * Action pour récupérer toutes les pesées
  */
-export async function getPeseesAction() {
+export async function getPeseesAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function getPeseesAction() {
         }
 
         const tenantId = await getTenantId();
-        const pesees = await peseeService.getAll(tenantId, session.user.id);
+        const pesees = await peseeService.getAll(tenantId, session.user.id, opts);
 
         return { success: true, data: pesees };
     } catch (error) {

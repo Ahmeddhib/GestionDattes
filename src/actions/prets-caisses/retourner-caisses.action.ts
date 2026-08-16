@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { pretCaisseService } from "@/services/pret-caisse.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { retourCaissesSchema } from "@/validators/pret-caisse.validator";
@@ -43,7 +44,7 @@ export async function retournerCaissesAction(formData: FormData) {
         console.error("❌ retournerCaissesAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors du retour des caisses",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

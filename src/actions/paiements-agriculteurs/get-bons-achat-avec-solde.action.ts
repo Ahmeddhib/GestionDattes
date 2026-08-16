@@ -8,7 +8,7 @@ import { getTenantId } from "@/lib/tenant/get-tenant";
  * Action pour récupérer tous les bons d'achat avec leur solde
  * (montant payé / reste à payer / statut), pour la page Finance.
  */
-export async function getBonsAchatAvecSoldeAction() {
+export async function getBonsAchatAvecSoldeAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -16,7 +16,7 @@ export async function getBonsAchatAvecSoldeAction() {
         }
 
         const tenantId = await getTenantId();
-        const bonsAchat = await bonAchatService.getAll(tenantId);
+        const bonsAchat = await bonAchatService.getAll(tenantId, opts);
 
         return { success: true, data: bonsAchat };
     } catch (error) {

@@ -32,12 +32,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
+
 interface RecordPaiementDialogProps {
     bonAchatId: string;
     numero: string;
+    /**
+     * Saison OUVERTE — celle où l'argent circule, et non celle du bon d'achat
+     * réglé. L'afficher rend visible une règle qui surprend sinon : payer une
+     * dette de la campagne précédente rattache le paiement à la campagne
+     * en cours.
+     */
+    saisonActive?: SaisonActive;
 }
 
-export function RecordPaiementDialog({ bonAchatId, numero }: RecordPaiementDialogProps) {
+export function RecordPaiementDialog({ bonAchatId, numero, saisonActive }: RecordPaiementDialogProps) {
     const { t } = useClientTranslations();
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -132,6 +141,8 @@ export function RecordPaiementDialog({ bonAchatId, numero }: RecordPaiementDialo
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        {saisonActive && <SaisonActiveField saison={saisonActive} />}
+
                         <FormField
                             control={form.control}
                             name="montant"

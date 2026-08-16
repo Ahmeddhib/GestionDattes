@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { livraisonService } from "@/services/livraison.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { revalidatePath } from "next/cache";
@@ -26,7 +27,7 @@ export async function deleteLivraisonAction(id: string) {
         console.error("❌ deleteLivraisonAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la suppression de la livraison",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

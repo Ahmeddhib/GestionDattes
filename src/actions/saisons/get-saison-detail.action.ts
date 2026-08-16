@@ -18,12 +18,12 @@ export async function getSaisonDetailAction(saisonId: string) {
 
         const tenantId = await getTenantId();
         const saison = await saisonService.getById(tenantId, saisonId);
-        const bilan =
-            saison.statut === "CLOTUREE"
-                ? await saisonClotureService.getBilanSaison(tenantId, saisonId)
-                : null;
 
-        return { success: true, data: { saison, bilan } };
+        // Plus de filtre sur le statut : des bilans PROVISOIRE existent aussi
+        // sur une saison encore ouverte.
+        const bilans = await saisonClotureService.listBilans(tenantId, saisonId);
+
+        return { success: true, data: { saison, bilans } };
     } catch (error) {
         console.error("Erreur lors de la récupération du détail de la saison:", error);
         return {

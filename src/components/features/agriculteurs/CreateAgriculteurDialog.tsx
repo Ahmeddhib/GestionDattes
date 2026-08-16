@@ -142,7 +142,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 )}
                             />
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="nom"
@@ -182,7 +182,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="telephone"
@@ -259,7 +259,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 {t("agriculteurs.exploitationInfo")}
                             </h3>
 
-                            <div className="grid grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <FormField
                                     control={form.control}
                                     name="nbPalmiers"

@@ -14,7 +14,12 @@ const ACTION_CONFIG: Record<
     DELETE_ROLE: { label: "Suppression rôle", variant: "danger" },
     CREATE_SAISON: { label: "Création saison", variant: "success" },
     UPDATE_SAISON: { label: "Modification saison", variant: "warning" },
+    // DELETE_SAISON n'est plus émise (une saison ne se supprime plus), mais la
+    // valeur reste dans l'enum et dans les journaux historiques : le libellé
+    // doit donc rester lisible.
     DELETE_SAISON: { label: "Suppression saison", variant: "danger" },
+    CLOTURER_SAISON: { label: "Clôture de saison", variant: "danger" },
+    GENERER_BILAN_PROVISOIRE: { label: "Bilan provisoire", variant: "secondary" },
     CREATE_PAIEMENT_AGRICULTEUR: { label: "Paiement agriculteur", variant: "success" },
     CREATE_ENCAISSEMENT_CLIENT: { label: "Encaissement client", variant: "success" },
     CREATE_DEPENSE_AUTRE: { label: "Création dépense", variant: "success" },

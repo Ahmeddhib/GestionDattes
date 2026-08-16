@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { venteService } from "@/services/vente.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { updateVenteSchema } from "@/validators/vente.validator";
@@ -44,7 +45,7 @@ export async function updateVenteAction(formData: FormData) {
         console.error("❌ updateVenteAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la modification de la vente",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }

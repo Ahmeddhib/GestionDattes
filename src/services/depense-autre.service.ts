@@ -5,9 +5,9 @@ import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import type { CreateDepenseInput, UpdateDepenseInput } from "@/validators/depense-autre.validator";
 
 export const depenseAutreService = {
-    async getAll(tenantId: string) {
+    async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("depense:read");
-        return depenseAutreRepository.findAll(tenantId);
+        return depenseAutreRepository.findAll(tenantId, opts);
     },
 
     async create(tenantId: string, userId: string, data: CreateDepenseInput) {

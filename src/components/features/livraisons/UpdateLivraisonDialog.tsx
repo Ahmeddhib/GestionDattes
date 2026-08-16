@@ -394,7 +394,7 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
                                             )}
                                         </div>
 
-                                        <div className="grid grid-cols-1 gap-2 pl-1 sm:grid-cols-2">
+                                        <div className="grid grid-cols-1 gap-2 ps-1 sm:grid-cols-2">
                                             <div className="space-y-2">
                                                 <div className="text-xs font-medium text-[#3D1C00]/70">
                                                     {t("pesees.grossWeightLabel")}
@@ -435,7 +435,7 @@ export function UpdateLivraisonDialog({ livraison }: UpdateLivraisonDialogProps)
                                             </span>
                                         </div>
 
-                                        <div className="space-y-2 pl-1">
+                                        <div className="space-y-2 ps-1">
                                             <div className="text-xs font-medium text-[#3D1C00]/70">
                                                 {t("nouvellePesee.quantiteAcceptee")}
                                             </div>

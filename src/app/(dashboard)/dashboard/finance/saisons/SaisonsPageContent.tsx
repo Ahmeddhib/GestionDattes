@@ -19,7 +19,7 @@ export function SaisonsPageContent({ saisons }: SaisonsPageContentProps) {
 
     return (
         <PageContainer>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
                         <CalendarRange className="h-8 w-8 text-[#C17A2B]" />

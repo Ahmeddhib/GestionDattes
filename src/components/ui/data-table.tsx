@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
     });
 
     return (
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
             {/* Search */}
             {searchKey && (
                 <div className="flex items-center">
@@ -72,14 +72,14 @@ export function DataTable<TData, TValue>({
                         onChange={(event) =>
                             table.getColumn(searchKey)?.setFilterValue(event.target.value)
                         }
-                        className="max-w-sm rounded-[7px] bg-white"
+                        className="w-full rounded-[7px] bg-white sm:max-w-sm"
                     />
                 </div>
             )}
 
             {/* Table */}
-            <div className="rounded-[14px] border border-[#C17A2B]/20 overflow-hidden">
-                <Table>
+            <div className="max-w-full overflow-hidden rounded-[14px] border border-[#C17A2B]/20">
+                <Table className="min-w-max">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
@@ -125,12 +125,12 @@ export function DataTable<TData, TValue>({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between px-2">
-                <div className="flex-1 text-sm text-[#3D1C00]/60">
+            <div className="flex flex-col gap-3 px-1 sm:flex-row sm:items-center sm:justify-between sm:px-2">
+                <div className="text-sm text-[#3D1C00]/60 sm:flex-1">
                     {table.getFilteredRowModel().rows.length} ligne(s) au total
                 </div>
-                <div className="flex items-center space-x-6 lg:space-x-8">
-                    <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:gap-6">
+                    <div className="hidden items-center gap-2 sm:flex">
                         <p className="text-sm font-medium text-[#3D1C00]">Lignes par page</p>
                         <Select
                             value={`${table.getState().pagination.pageSize}`}
@@ -150,11 +150,11 @@ export function DataTable<TData, TValue>({
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex w-[100px] items-center justify-center text-sm font-medium text-[#3D1C00]">
+                    <div className="flex min-w-24 items-center justify-center text-sm font-medium text-[#3D1C00]">
                         Page {table.getState().pagination.pageIndex + 1} sur{" "}
                         {table.getPageCount()}
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             className="h-8 w-8 p-0 rounded-[7px]"

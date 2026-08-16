@@ -16,16 +16,20 @@ import {
 } from "@/components/ui/select";
 import { exportVentesToPDF, exportVentesToExcel } from "@/lib/export-utils";
 import { createVentesColumns, type Vente } from "./columns";
+import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { EditVenteDialog } from "./EditVenteDialog";
+import type { PdfBranding } from "@/lib/pdf-branding";
 
 interface VentesTableAdvancedProps {
     data: Vente[];
+    branding: PdfBranding;
+    saisonActive?: SaisonActive;
 }
 
 const ALL_CLIENTS = "all";
 const ALL_STATUTS = "all";
 
-export function VentesTableAdvanced({ data }: VentesTableAdvancedProps) {
+export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTableAdvancedProps) {
     const { t } = useClientTranslations();
 
     const [clientId, setClientId] = useState<string>(ALL_CLIENTS);
@@ -39,7 +43,7 @@ export function VentesTableAdvanced({ data }: VentesTableAdvancedProps) {
         setEditDialogOpen(true);
     };
 
-    const columns = createVentesColumns(t, handleEdit);
+    const columns = createVentesColumns(t, handleEdit, branding, saisonActive);
 
     const clients = useMemo(() => {
         const map = new Map<string, string>();
@@ -73,12 +77,12 @@ export function VentesTableAdvanced({ data }: VentesTableAdvancedProps) {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-end gap-2 px-1">
+            <div className="flex flex-col gap-2 px-1 sm:flex-row sm:justify-end">
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => exportVentesToPDF(filteredData)}
-                    className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                    onClick={() => void exportVentesToPDF(filteredData, branding)}
+                    className="w-full rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC] sm:w-auto"
                 >
                     <FileDown className="h-4 w-4 mr-2" />
                     {t("common.exportPDF")}
@@ -87,14 +91,14 @@ export function VentesTableAdvanced({ data }: VentesTableAdvancedProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => exportVentesToExcel(filteredData)}
-                    className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                    className="w-full rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC] sm:w-auto"
                 >
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
                     {t("common.exportExcel")}
                 </Button>
             </div>
-            <div className="flex flex-wrap items-end gap-3 px-1">
-                <div className="min-w-55">
+            <div className="grid grid-cols-1 items-end gap-3 px-1 sm:grid-cols-2 xl:flex xl:flex-wrap">
+                <div className="min-w-0 xl:min-w-55">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("finance.ventes.client")}</label>
                     <Select value={clientId} onValueChange={setClientId}>
                         <SelectTrigger className="w-full rounded-sm border-border">
@@ -111,7 +115,7 @@ export function VentesTableAdvanced({ data }: VentesTableAdvancedProps) {
                     </Select>
                 </div>
 
-                <div className="min-w-45">
+                <div className="min-w-0 xl:min-w-45">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">
                         {t("finance.paiements.statut")}
                     </label>
@@ -128,7 +132,7 @@ export function VentesTableAdvanced({ data }: VentesTableAdvancedProps) {
                     </Select>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("bonAchat.periode")}</label>
                     <DateRangePicker
                         value={dateRange}

@@ -18,9 +18,9 @@ export const paiementAgriculteurService = {
     /**
      * Historique complet, pour la page Finance.
      */
-    async getAll(tenantId: string) {
+    async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("paiement-agriculteur:read");
-        return paiementAgriculteurRepository.findAll(tenantId);
+        return paiementAgriculteurRepository.findAll(tenantId, opts);
     },
 
     /**

@@ -6,6 +6,7 @@ import { z } from "zod";
 export const createTypeDateSchema = z.object({
     nom: z.string().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères"),
     description: z.string().max(500, "La description ne peut pas dépasser 500 caractères").optional(),
+    seuilAlerte: z.coerce.number().positive("Le seuil doit être positif").optional(),
 });
 
 /**
@@ -15,6 +16,7 @@ export const updateTypeDateSchema = z.object({
     id: z.string().min(1, "L'ID est requis"),
     nom: z.string().min(1, "Le nom est requis").max(100, "Le nom ne peut pas dépasser 100 caractères").optional(),
     description: z.string().max(500, "La description ne peut pas dépasser 500 caractères").optional().nullable(),
+    seuilAlerte: z.coerce.number().positive("Le seuil doit être positif").optional().nullable(),
 });
 
 export type CreateTypeDateInput = z.infer<typeof createTypeDateSchema>;

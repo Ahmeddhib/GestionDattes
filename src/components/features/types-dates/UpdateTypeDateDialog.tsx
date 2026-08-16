@@ -22,6 +22,7 @@ type TypeDate = {
     id: string;
     nom: string;
     description: string | null;
+    seuilAlerte: number | null;
 };
 
 type UpdateTypeDateDialogProps = {
@@ -96,6 +97,22 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             defaultValue={typeDate.description || ""}
                             placeholder={t("typesDates.descriptionPlaceholder")}
                             rows={3}
+                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="seuilAlerte" className="text-[#3D1C00]">
+                            {t("typesDates.seuilAlerte")}
+                        </Label>
+                        <Input
+                            id="seuilAlerte"
+                            name="seuilAlerte"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            defaultValue={typeDate.seuilAlerte ?? ""}
+                            placeholder={t("typesDates.seuilAlertePlaceholder")}
                             className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>

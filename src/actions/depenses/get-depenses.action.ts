@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { depenseAutreService } from "@/services/depense-autre.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 
-export async function getDepensesAction() {
+export async function getDepensesAction(opts?: { saisonId?: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -12,7 +12,7 @@ export async function getDepensesAction() {
         }
 
         const tenantId = await getTenantId();
-        const depenses = await depenseAutreService.getAll(tenantId);
+        const depenses = await depenseAutreService.getAll(tenantId, opts);
 
         return { success: true, data: depenses };
     } catch (error) {

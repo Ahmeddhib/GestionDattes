@@ -40,9 +40,9 @@ const peseeInclude = {
  * type de caisse et par livraison, avec le détail de chaque caisse individuelle)
  */
 export const peseeRepository = {
-    async findAll(tenantId: string) {
+    async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.pesee.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(opts?.saisonId && { Livraison: { saisonId: opts.saisonId } }) },
             include: peseeInclude,
             orderBy: { createdAt: "desc" },
         });

@@ -28,11 +28,11 @@ export function BonAchatActions({ bonAchat, tenant }: BonAchatActionsProps) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white">
-                <DropdownMenuItem onClick={() => printBonAchatPDF(bonAchat, tenant)} className="gap-2">
+                <DropdownMenuItem onClick={() => void printBonAchatPDF(bonAchat, tenant)} className="gap-2">
                     <Printer className="h-4 w-4 text-[#C17A2B]" />
                     {t("bonAchat.imprimer")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => downloadBonAchatPDF(bonAchat, tenant)} className="gap-2">
+                <DropdownMenuItem onClick={() => void downloadBonAchatPDF(bonAchat, tenant)} className="gap-2">
                     <FileDown className="h-4 w-4 text-[#C17A2B]" />
                     {t("bonAchat.telechargerPdf")}
                 </DropdownMenuItem>

@@ -1,13 +1,12 @@
 "use server";
 
-import { auth } from "@/lib/auth";
+import { auth, unstable_update } from "@/lib/auth";
 import { verifyUserBelongsToTenant } from "@/lib/tenant/get-tenant";
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
 
 /**
  * Action pour sélectionner une Wakala après login
- * Stocke le tenant pour la ré-authentification
+ * Met à jour la session après vérification des droits côté serveur.
  */
 export async function selectWakalaAction(tenantId: string) {
     try {
@@ -53,19 +52,18 @@ export async function selectWakalaAction(tenantId: string) {
             return { error: "Wakala inactive" };
         }
 
-        // Stocker les infos pour la ré-authentification
-        const cookieStore = await cookies();
-        cookieStore.set("selected-tenant-id", tenantId, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 60 * 5, // 5 minutes
+        // La callback JWT relit encore ces droits avant de modifier le token.
+        await unstable_update({
+            user: {
+                tenantId: tenantUser.Tenant.id,
+                tenantName: tenantUser.Tenant.name,
+                tenantCode: tenantUser.Tenant.code,
+                role: tenantUser.Role.name,
+            },
         });
 
-        // Retourner les données pour que le client puisse ré-authentifier
         return {
             success: true,
-            email: session.user.email,
             tenant: {
                 id: tenantUser.Tenant.id,
                 name: tenantUser.Tenant.name,

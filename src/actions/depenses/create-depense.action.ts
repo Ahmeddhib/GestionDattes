@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { resolveActionErrorMessage } from "@/lib/action-error";
 import { depenseAutreService } from "@/services/depense-autre.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { createDepenseSchema } from "@/validators/depense-autre.validator";
@@ -26,7 +27,7 @@ export async function createDepenseAction(data: z.input<typeof createDepenseSche
         console.error("❌ createDepenseAction error:", error);
         return {
             success: false,
-            error: error instanceof Error ? error.message : "Erreur lors de la création de la dépense",
+            error: await resolveActionErrorMessage(error),
         };
     }
 }
