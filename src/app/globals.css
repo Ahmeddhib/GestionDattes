@@ -21,8 +21,8 @@
   --color-text-muted: #7A5C3A;
   --color-text-hint: #B08A5E;
 
-  --color-background: var(--color-page-bg);
-  --color-foreground: var(--color-text-primary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-primary: var(--color-dattes-400);
   --color-primary-foreground: #FFFFFF;
   --color-ring: var(--color-dattes-400);
@@ -71,13 +71,76 @@
   --foreground: #2C1A00;
 }
 
+.dark {
+  --card: #17120d;
+  --card-foreground: #f8f1e4;
+  --popover: #17120d;
+  --popover-foreground: #f8f1e4;
+  --secondary: #2b1d10;
+  --secondary-foreground: #f0c77d;
+  --muted: #211810;
+  --muted-foreground: #aa9983;
+  --accent: #352313;
+  --accent-foreground: #f2d39a;
+  --border: #5b4027;
+  --input: #5b4027;
+  --background: #0b0907;
+  --foreground: #f8f1e4;
+}
+
+.dashboard-premium {
+  --dash-bg: #f6f1e8;
+  --dash-card: rgb(255 252 247 / 0.9);
+  --dash-border: rgb(177 137 86 / 0.32);
+  --dash-heading: #2f2317;
+  --dash-copy: #705f4c;
+  --dash-muted: #97836b;
+  --dash-kpi-shadow: 0 12px 30px rgb(85 53 19 / 0.08);
+  background-color: var(--dash-bg) !important;
+  color: var(--dash-heading);
+}
+
+.dark .dashboard-premium {
+  --dash-bg: #0b0907;
+  --dash-card: rgb(20 16 12 / 0.86);
+  --dash-border: rgb(107 75 41 / 0.45);
+  --dash-heading: #fff;
+  --dash-copy: #c9b9a3;
+  --dash-muted: #8e806e;
+  --dash-kpi-shadow: 0 18px 40px rgb(0 0 0 / 0.18);
+}
+
+.dashboard-premium .dashboard-card {
+  border-color: var(--dash-border) !important;
+  background-color: var(--dash-card) !important;
+  box-shadow: 0 18px 45px rgb(73 45 17 / 0.08);
+}
+
+.dark .dashboard-premium .dashboard-card {
+  box-shadow: 0 18px 45px rgb(0 0 0 / 0.2);
+}
+
+.dashboard-premium .text-white { color: var(--dash-heading) !important; }
+.dashboard-premium .text-\[\#c9b9a3\],
+.dashboard-premium .text-\[\#d4c6b4\],
+.dashboard-premium .text-\[\#d6c8b6\],
+.dashboard-premium .text-\[\#e2d5c5\],
+.dashboard-premium .text-\[\#e4d8c8\],
+.dashboard-premium .text-\[\#eadfce\],
+.dashboard-premium .text-\[\#b8a995\] { color: var(--dash-copy) !important; }
+.dashboard-premium .text-\[\#8e806e\],
+.dashboard-premium .text-\[\#9f907c\],
+.dashboard-premium .text-\[\#a89985\],
+.dashboard-premium .text-\[\#776b5c\],
+.dashboard-premium .text-\[\#746858\] { color: var(--dash-muted) !important; }
+
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-sand text-[#2C1A00] font-sans;
+    @apply bg-background text-foreground font-sans;
     min-width: 320px;
     overflow-x: clip;
   }

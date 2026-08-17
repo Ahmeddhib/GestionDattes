@@ -185,6 +185,31 @@
             "consulterStock": "View stock",
             "bilanFinancier": "Financial statement"
         },
+        "premium": {
+            "greeting": "Hello, {name}",
+            "subtitle": "Here is an overview of your Wakala’s activity",
+            "activityTitle": "Activity trend",
+            "activityDescription": "Deliveries, sales and financial movements",
+            "deliveries": "Deliveries",
+            "sales": "Sales",
+            "collections": "Collections",
+            "farmerPayments": "Farmer payments",
+            "stockEmpty": "No stock available",
+            "total": "Total",
+            "financialTitle": "Financial position",
+            "collected": "Total collected",
+            "paidFarmers": "Paid to farmers",
+            "expenses": "Expenses",
+            "netCash": "Net cash flow",
+            "quickActionsTitle": "Quick actions",
+            "deliveriesShort": "Deliv.",
+            "comparisonDay": "vs previous day",
+            "comparisonWeek": "vs previous week",
+            "comparisonMonth": "vs previous month",
+            "comparisonYear": "vs previous year",
+            "comparisonSeason": "vs previous season",
+            "comparisonPeriod": "vs previous period"
+        },
         "empty": {
             "chart": "No data for this period"
         }

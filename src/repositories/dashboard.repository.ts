@@ -178,6 +178,7 @@ export const dashboardRepository = {
             by: ["agriculteurId"],
             where: livraisonWhere(tenantId, filter),
             _sum: { quantiteLivree: true },
+            _count: { _all: true },
             orderBy: { _sum: { quantiteLivree: "desc" } },
             take: limit,
         });
@@ -194,6 +195,7 @@ export const dashboardRepository = {
             agriculteurId: g.agriculteurId,
             nom: nomById.get(g.agriculteurId) ?? "—",
             quantiteLivree: g._sum.quantiteLivree ?? 0,
+            nombreLivraisons: g._count._all,
         }));
     },
 

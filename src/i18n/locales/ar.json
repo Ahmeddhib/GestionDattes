@@ -185,6 +185,31 @@
             "consulterStock": "عرض المخزون",
             "bilanFinancier": "الميزانية المالية"
         },
+        "premium": {
+            "greeting": "مرحبًا، {name}",
+            "subtitle": "إليك نظرة عامة على نشاط وكالتك",
+            "activityTitle": "تطور النشاط",
+            "activityDescription": "التسليمات والمبيعات والحركات المالية",
+            "deliveries": "التسليمات",
+            "sales": "المبيعات",
+            "collections": "التحصيلات",
+            "farmerPayments": "دفعات الفلاحين",
+            "stockEmpty": "لا يوجد مخزون متاح",
+            "total": "الإجمالي",
+            "financialTitle": "الوضع المالي",
+            "collected": "إجمالي المحصّل",
+            "paidFarmers": "المدفوع للفلاحين",
+            "expenses": "المصاريف",
+            "netCash": "صافي الخزينة",
+            "quickActionsTitle": "إجراءات سريعة",
+            "deliveriesShort": "تسليم",
+            "comparisonDay": "مقارنة باليوم السابق",
+            "comparisonWeek": "مقارنة بالأسبوع السابق",
+            "comparisonMonth": "مقارنة بالشهر السابق",
+            "comparisonYear": "مقارنة بالسنة السابقة",
+            "comparisonSeason": "مقارنة بالموسم السابق",
+            "comparisonPeriod": "مقارنة بالفترة السابقة"
+        },
         "empty": {
             "chart": "لا توجد بيانات لهذه الفترة"
         }

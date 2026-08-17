@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DateRange } from "react-day-picker";
-import { Filter } from "lucide-react";
+import { CalendarRange, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
@@ -47,14 +47,14 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
     }
 
     return (
-        <div className="grid grid-cols-1 items-end gap-3 rounded-lg border border-[#F0E0C0] bg-white p-4 shadow-sm dark:border-[#5C2D00] dark:bg-[#2A1800] sm:grid-cols-2 xl:flex xl:flex-wrap">
+        <div className="grid grid-cols-1 items-end gap-2 rounded-2xl border border-[#d8c8b2] bg-white/80 p-2 shadow-xl backdrop-blur-md dark:border-[#6b4b29]/45 dark:bg-[#14100c]/80 sm:grid-cols-2 xl:flex xl:flex-wrap">
             <div className="min-w-0 xl:min-w-45">
-                <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-[#B08A5E]">{t("dashboard.filters.periode")}</label>
+                <label className="sr-only">{t("dashboard.filters.periode")}</label>
                 <Select value={periode} onValueChange={(v) => setPeriode(v as PeriodeDashboard)}>
-                    <SelectTrigger className="w-full rounded-sm border-border">
+                    <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-white/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-44">
                         <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white">
+                    <SelectContent className="border-[#d8c8b2] bg-[#fffaf3] text-[#4b3520] dark:border-[#5e452d] dark:bg-[#17120d] dark:text-[#eadfce]">
                         <SelectItem value="jour">{t("dashboard.filters.jour")}</SelectItem>
                         <SelectItem value="semaine">{t("dashboard.filters.semaine")}</SelectItem>
                         <SelectItem value="mois">{t("dashboard.filters.mois")}</SelectItem>
@@ -69,10 +69,10 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
                 <div className="min-w-0 xl:min-w-55">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-[#B08A5E]">{t("dashboard.filters.saison")}</label>
                     <Select value={saisonId} onValueChange={setSaisonId}>
-                        <SelectTrigger className="w-full rounded-sm border-border">
+                    <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-white/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-52">
                             <SelectValue placeholder={t("dashboard.filters.selectSaison")} />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="border-[#d8c8b2] bg-[#fffaf3] text-[#4b3520] dark:border-[#5e452d] dark:bg-[#17120d] dark:text-[#eadfce]">
                             {saisons.map((s) => (
                                 <SelectItem key={s.id} value={s.id}>
                                     {s.nom}
@@ -93,9 +93,9 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
             <Button
                 type="button"
                 onClick={applyFilters}
-                className="w-full gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F] xl:w-auto"
+                className="h-10 w-full gap-2 rounded-xl bg-linear-to-r from-[#c58427] to-[#f0ba56] font-semibold text-[#241507] shadow-[0_0_24px_rgba(218,151,54,.15)] hover:brightness-110 xl:w-auto"
             >
-                <Filter className="h-4 w-4" />
+                {periode === "personnalisee" ? <CalendarRange className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
                 {t("dashboard.filters.apply")}
             </Button>
         </div>

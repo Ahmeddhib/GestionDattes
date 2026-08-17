@@ -1,67 +1,35 @@
-import { Card } from "@/components/shared/Card";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { formatKg } from "@/lib/format";
 import { ROUTES } from "@/lib/routes";
-import { getServerTranslations } from "@/i18n/server";
-import { Users } from "lucide-react";
-import Link from "next/link";
 import type { TopAgriculteurDatum } from "@/types/dashboard";
+import { getServerTranslations } from "@/i18n/server";
 
-export async function TopAgriculteursTable({ data }: { data: TopAgriculteurDatum[] }) {
+export async function TopAgriculteursTable({ data, periodLabel }: { data: TopAgriculteurDatum[]; periodLabel?: string }) {
     const t = await getServerTranslations();
-    const max = Math.max(1, ...data.map((d) => d.quantiteLivree));
-
     return (
-        <Card className="flex h-full flex-col dark:bg-[#2A1800] dark:border-[#5C2D00]">
-            <div className="mb-4 flex items-start justify-between gap-4">
-                <div>
-                    <h3 className="text-base font-semibold text-[#2C1A00] dark:text-[#F5E6C8]">
-                        {t("dashboard.topAgriculteurs.title")}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-[#B08A5E]">
-                        {t("dashboard.topAgriculteurs.description")}
-                    </p>
-                </div>
-                <Link href={ROUTES.LIVRAISONS} className="shrink-0 text-sm font-medium text-[#C17A2B] hover:underline">
-                    {t("dashboard.viewModule")}
-                </Link>
+        <section className="dashboard-card h-full rounded-2xl border border-[#6b4b29]/45 bg-[#14100c]/86 p-4 backdrop-blur-md">
+            <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-white">{t("dashboard.topAgriculteurs.title")}</h2>
+                <Link href={ROUTES.LIVRAISONS} className="inline-flex items-center gap-1 rounded-lg border border-[#dfcfb9] bg-[#fbf5ec] px-2 py-1 text-[10px] text-[#7e684e] hover:text-[#b76d17] dark:border-[#6b4b29]/35 dark:bg-black/10 dark:text-[#9f907c] dark:hover:text-[#e6a73c]">{periodLabel ?? t("dashboard.viewAll")} <ArrowRight className="h-3 w-3 rtl:rotate-180" /></Link>
             </div>
-
             {data.length === 0 ? (
-                <div className="flex flex-1 items-center justify-center">
-                    <EmptyState icon={<Users className="h-10 w-10" />} title={t("dashboard.topAgriculteurs.empty")} />
-                </div>
+                <div className="py-12 text-center text-xs text-[#8e806e]">{t("dashboard.topAgriculteurs.empty")}</div>
             ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>{t("dashboard.topAgriculteurs.agriculteur")}</TableHead>
-                            <TableHead className="text-right">{t("dashboard.topAgriculteurs.quantiteLivree")}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {data.map((d) => (
-                            <TableRow key={d.agriculteurId}>
-                                <TableCell className="text-[#2C1A00] dark:text-[#F5E6C8]">{d.nom}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-[#F0E0C0] dark:bg-[#5C2D00]">
-                                            <div
-                                                className="h-full rounded-full bg-[#C17A2B]"
-                                                style={{ width: `${(d.quantiteLivree / max) * 100}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-[#2C1A00] dark:text-[#F5E6C8]">
-                                            {formatKg(d.quantiteLivree)}
-                                        </span>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                <div>
+                    <div className="grid grid-cols-[24px_1fr_auto_auto] gap-2 border-b border-[#5b4027]/35 pb-2 text-[10px] uppercase tracking-wide text-[#746858]">
+                        <span>#</span><span>{t("dashboard.topAgriculteurs.agriculteur")}</span><span>{t("dashboard.topAgriculteurs.quantiteLivree")}</span><span>{t("dashboard.premium.deliveriesShort")}</span>
+                    </div>
+                    {data.map((item, index) => (
+                        <div key={item.agriculteurId} className="grid grid-cols-[24px_1fr_auto_auto] items-center gap-2 border-b border-[#5b4027]/25 py-2.5 text-xs last:border-0">
+                            <span className={`flex h-5 w-5 items-center justify-center rounded-full font-semibold ${index === 0 ? "bg-[#c17a2b] text-[#1c1005]" : "bg-[#b78b55]/15 text-[#7b5b37] dark:bg-white/10 dark:text-[#c9b9a3]"}`}>{index + 1}</span>
+                            <span className="min-w-0 truncate text-[#e2d5c5]">{item.nom}</span>
+                            <strong className="whitespace-nowrap text-white">{formatKg(item.quantiteLivree)}</strong>
+                            <span className="w-7 text-right text-[#9f907c]">{item.nombreLivraisons}</span>
+                        </div>
+                    ))}
+                </div>
             )}
-        </Card>
+        </section>
     );
 }

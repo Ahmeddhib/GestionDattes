@@ -129,12 +129,30 @@ export const dashboardService = {
 
         let previousTrendFilter: TrendFilter | null = null;
         let previousBilanFilters: DashboardFiltersValue | null = null;
-        if (!isSaisonMode && filter.range?.gte && filter.range?.lte) {
+        let comparisonLabel = t("dashboard.premium.comparisonPeriod");
+        if (isSaisonMode) {
+            const currentSaison = await saisonRepository.findById(tenantId, (filter as { saisonId: string }).saisonId);
+            const previousSaison = currentSaison
+                ? await saisonRepository.findPrevious(tenantId, currentSaison.dateDebut)
+                : null;
+            if (previousSaison) {
+                previousTrendFilter = { saisonId: previousSaison.id };
+                previousBilanFilters = { periode: "saison", saisonId: previousSaison.id };
+                comparisonLabel = t("dashboard.premium.comparisonSeason");
+            }
+        } else if (filter.range?.gte && filter.range?.lte) {
             const durationMs = filter.range.lte.getTime() - filter.range.gte.getTime();
             const prevLte = new Date(filter.range.gte.getTime() - 1);
             const prevGte = new Date(prevLte.getTime() - durationMs);
             previousTrendFilter = { dateFrom: prevGte, dateTo: prevLte };
             previousBilanFilters = { periode: "personnalisee", dateFrom: prevGte, dateTo: prevLte };
+            comparisonLabel = ({
+                jour: t("dashboard.premium.comparisonDay"),
+                semaine: t("dashboard.premium.comparisonWeek"),
+                mois: t("dashboard.premium.comparisonMonth"),
+                annee: t("dashboard.premium.comparisonYear"),
+                personnalisee: t("dashboard.premium.comparisonPeriod"),
+            } as Partial<Record<DashboardFiltersValue["periode"], string>>)[filters.periode] ?? comparisonLabel;
         }
 
         const kpis: KpiDatum[] = [];
@@ -178,7 +196,7 @@ export const dashboardService = {
         if (canFinance) {
             const [current, previous] = await Promise.all([
                 getMoneyIndicators(tenantId, filters),
-                !isSaisonMode && previousBilanFilters ? getMoneyIndicators(tenantId, previousBilanFilters) : null,
+                previousBilanFilters ? getMoneyIndicators(tenantId, previousBilanFilters) : null,
             ]);
 
             kpis.push({
@@ -242,7 +260,7 @@ export const dashboardService = {
             });
         }
 
-        return kpis;
+        return kpis.map((kpi) => kpi.evolution ? { ...kpi, comparisonLabel } : kpi);
     },
 
     async getDeliveriesTrend(tenantId: string, filters: DashboardFiltersValue): Promise<TrendPoint[]> {

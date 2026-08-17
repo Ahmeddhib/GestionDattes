@@ -1,74 +1,55 @@
 import Link from "next/link";
-import { Card } from "@/components/shared/Card";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDistanceToNow } from "date-fns";
+import { arTN, enUS, fr } from "date-fns/locale";
+import { ArrowRight, HandCoins, PackageOpen, ReceiptText, ShoppingCart, Truck, Wallet, type LucideIcon } from "lucide-react";
 import { formatKg, formatMontant } from "@/lib/format";
-import { getServerTranslations } from "@/i18n/server";
-import { Inbox } from "lucide-react";
 import type { RecentActivitySection } from "@/types/dashboard";
+import { getServerLocale, getServerTranslations } from "@/i18n/server";
+
+const ICONS: Record<string, { icon: LucideIcon; tone: string }> = {
+    livraisons: { icon: Truck, tone: "bg-green-100 text-green-600 dark:bg-green-950/55 dark:text-green-400" },
+    bonsAchat: { icon: ReceiptText, tone: "bg-amber-100 text-amber-600 dark:bg-amber-950/55 dark:text-amber-400" },
+    paiementsAgriculteurs: { icon: HandCoins, tone: "bg-orange-100 text-orange-600 dark:bg-orange-950/55 dark:text-orange-400" },
+    ventes: { icon: ShoppingCart, tone: "bg-lime-100 text-lime-600 dark:bg-lime-950/55 dark:text-lime-400" },
+    encaissements: { icon: Wallet, tone: "bg-sky-100 text-sky-600 dark:bg-sky-950/55 dark:text-sky-400" },
+    mouvementsStock: { icon: PackageOpen, tone: "bg-purple-100 text-purple-600 dark:bg-purple-950/55 dark:text-purple-400" },
+};
 
 export async function RecentActivity({ sections }: { sections: RecentActivitySection[] }) {
-    if (sections.length === 0) return null;
-    const t = await getServerTranslations();
+    const [t, locale] = await Promise.all([getServerTranslations(), getServerLocale()]);
+    const dateLocale = locale === "ar" ? arTN : locale === "en" ? enUS : fr;
+    const items = sections
+        .flatMap((section) => section.items.slice(0, 2).map((item) => ({ ...item, section })))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5);
+    if (!sections.length) return null;
 
     return (
-        <Card className="dark:bg-[#2A1800] dark:border-[#5C2D00]">
-            <h3 className="mb-4 text-base font-semibold text-[#2C1A00] dark:text-[#F5E6C8]">
-                {t("dashboard.recentActivity.title")}
-            </h3>
-            <Tabs defaultValue={sections[0].code}>
-                <TabsList className="mb-3 flex-wrap">
-                    {sections.map((s) => (
-                        <TabsTrigger key={s.code} value={s.code} className="text-xs">
-                            {s.title}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-                {sections.map((s) => (
-                    <TabsContent key={s.code} value={s.code}>
-                        {s.items.length === 0 ? (
-                            <EmptyState icon={<Inbox className="h-8 w-8" />} title={t("dashboard.recentActivity.empty")} />
-                        ) : (
-                            <ul className="divide-y divide-[#F0E0C0] dark:divide-[#5C2D00]">
-                                {s.items.map((item) => (
-                                    <li key={item.id}>
-                                        <Link
-                                            href={item.href}
-                                            className="flex items-center justify-between gap-3 py-2.5 hover:bg-[#FAF0DC] dark:hover:bg-[#3D1C00] -mx-2 px-2 rounded-md"
-                                        >
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium text-[#2C1A00] dark:text-[#F5E6C8]">
-                                                    {item.label}
-                                                </p>
-                                                {item.sousLabel && (
-                                                    <p className="truncate text-xs text-gray-500 dark:text-[#B08A5E]">
-                                                        {item.sousLabel}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="shrink-0 text-right">
-                                                {item.montant != null && (
-                                                    <p className="text-sm font-medium text-[#C17A2B]">
-                                                        {s.unit === "TND" ? formatMontant(item.montant) : formatKg(item.montant)}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs text-gray-400">
-                                                    {item.date.toLocaleDateString("fr-FR")}
-                                                </p>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        <div className="mt-2 text-right">
-                            <Link href={s.href} className="text-sm font-medium text-[#C17A2B] hover:underline">
-                                {t("dashboard.viewAll")} →
+        <section className="dashboard-card h-full rounded-2xl border border-[#6b4b29]/45 bg-[#14100c]/86 p-4 backdrop-blur-md">
+            <div className="mb-2 flex items-center justify-between">
+                <h2 className="font-semibold text-white">{t("dashboard.recentActivity.title")}</h2>
+                <Link href={sections[0].href} className="inline-flex items-center gap-1 text-[11px] text-[#9f907c] hover:text-[#e6a73c]">{t("dashboard.viewAll")} <ArrowRight className="h-3 w-3 rtl:rotate-180" /></Link>
+            </div>
+            {items.length === 0 ? (
+                <div className="py-12 text-center text-xs text-[#8e806e]">{t("dashboard.recentActivity.empty")}</div>
+            ) : (
+                <div className="divide-y divide-[#5b4027]/30">
+                    {items.map((item) => {
+                        const config = ICONS[item.section.code] ?? ICONS.mouvementsStock;
+                        const Icon = config.icon;
+                        return (
+                            <Link key={`${item.section.code}-${item.id}`} href={item.href} className="flex items-center gap-3 rounded-lg py-2.5 transition hover:bg-[#f8efe2]/70 dark:hover:bg-white/[.02]">
+                                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.tone}`}><Icon className="h-4 w-4" /></span>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-xs font-medium text-white">{item.section.title} · {item.label}</p>
+                                    <p className="truncate text-[10px] text-[#8e806e]">{item.sousLabel ?? (item.montant != null ? (item.section.unit === "kg" ? formatKg(item.montant) : formatMontant(item.montant)) : "")}</p>
+                                </div>
+                                <time className="shrink-0 text-[10px] text-[#776b5c]">{formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: dateLocale })}</time>
                             </Link>
-                        </div>
-                    </TabsContent>
-                ))}
-            </Tabs>
-        </Card>
+                        );
+                    })}
+                </div>
+            )}
+        </section>
     );
 }

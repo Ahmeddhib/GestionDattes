@@ -51,6 +51,14 @@ export const saisonRepository = {
         });
     },
 
+    /** Saison immédiatement antérieure à une saison donnée, dans la même Wakala. */
+    async findPrevious(tenantId: string, dateDebut: Date) {
+        return prisma.saison.findFirst({
+            where: { tenantId, dateDebut: { lt: dateDebut } },
+            orderBy: { dateDebut: "desc" },
+        });
+    },
+
     /**
      * Créer une nouvelle saison
      */

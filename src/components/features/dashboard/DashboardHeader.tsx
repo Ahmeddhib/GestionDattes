@@ -1,53 +1,40 @@
-import { Badge } from "@/components/ui/badge";
-import { RefreshButton } from "./RefreshButton";
+import { CalendarDays, MapPin } from "lucide-react";
 import { getServerTranslations } from "@/i18n/server";
 import type { ReactNode } from "react";
 
-interface SaisonActive {
-    nom: string;
-    statut: string;
-    dateFin: Date;
-}
-
 interface DashboardHeaderProps {
+    userName: string;
     wakalaName: string;
-    saisonActive: SaisonActive | null;
+    saisonActive: { nom: string; statut: string; dateFin: Date } | null;
     canSeeSaison: boolean;
     filters?: ReactNode;
-    children?: ReactNode;
 }
 
-export async function DashboardHeader({ wakalaName, saisonActive, canSeeSaison, filters, children }: DashboardHeaderProps) {
+export async function DashboardHeader({ userName, wakalaName, saisonActive, canSeeSaison, filters }: DashboardHeaderProps) {
     const t = await getServerTranslations();
-    return (
-        <div className="mb-6 space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-[#2C1A00] dark:text-[#F5E6C8]">{t("dashboard.title")}</h1>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-[#B08A5E]">
-                        <span>{wakalaName}</span>
-                        {canSeeSaison && (
-                            <>
-                                <span className="text-gray-300 dark:text-[#5C2D00]">•</span>
-                                {saisonActive ? (
-                                    <span className="flex items-center gap-1.5">
-                                        {saisonActive.nom}
-                                        <Badge className="bg-green-600 hover:bg-green-700">{t("finance.saisons.ouverte")}</Badge>
-                                    </span>
-                                ) : (
-                                    <Badge variant="secondary" className="bg-red-100 text-red-700">
-                                        {t("dashboard.noSaisonOuverte")}
-                                    </Badge>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-                <RefreshButton />
-            </div>
+    const firstName = userName.trim().split(/\s+/)[0] || userName;
 
-            {filters}
-            {children}
-        </div>
+    return (
+        <header className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
+                <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                    {t("dashboard.premium.greeting", { name: firstName })} <span aria-hidden>👋</span>
+                </h1>
+                <p className="mt-1 text-sm text-[#b8a995]">{t("dashboard.premium.subtitle")}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#9f907c]">
+                    <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#d39735]" />{wakalaName}</span>
+                    {canSeeSaison && saisonActive && (
+                        <span className="inline-flex items-center gap-2 rounded-full border border-[#dfcfb9] bg-white/75 px-3 py-1 shadow-sm dark:border-[#614322]/60 dark:bg-black/20 dark:shadow-none">
+                            <CalendarDays className="h-3.5 w-3.5 text-[#d39735]" />
+                            {saisonActive.nom}
+                            <span className="rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:border-green-700/40 dark:bg-green-900/50 dark:text-green-300">
+                                {t("finance.saisons.ouverte")}
+                            </span>
+                        </span>
+                    )}
+                </div>
+            </div>
+            <div className="w-full xl:w-auto">{filters}</div>
+        </header>
     );
 }

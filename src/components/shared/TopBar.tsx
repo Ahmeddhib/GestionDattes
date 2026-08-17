@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface Tenant {
     id: string;
@@ -34,6 +35,7 @@ interface TopBarProps {
 
 export function TopBar({ user }: TopBarProps) {
     const pathname = usePathname();
+    const premiumDashboard = pathname === "/dashboard";
     const { t } = useClientTranslations();
     const [availableTenants, setAvailableTenants] = useState<Tenant[]>([]);
     const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
@@ -79,7 +81,9 @@ export function TopBar({ user }: TopBarProps) {
     return (
         // `shrink-0` et non `sticky` : l'en-tête est un frère de <main> dans un
         // shell à hauteur d'écran, donc il reste en place sans position collante.
-        <header className="relative z-30 flex min-h-16 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#F0E0C0] bg-white px-3 py-2 sm:px-5 lg:px-8">
+        <header className={premiumDashboard
+            ? "relative z-30 flex min-h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#dfd1be] bg-[#faf6ee] px-3 py-2 text-[#2f2317] dark:border-[#5b4027]/45 dark:bg-[#0b0907] dark:text-white sm:px-5 lg:px-6"
+            : "relative z-30 flex min-h-16 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#F0E0C0] bg-white px-3 py-2 sm:px-5 lg:px-8"}>
             <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <Button
                     type="button"
@@ -103,12 +107,12 @@ export function TopBar({ user }: TopBarProps) {
                             }}
                             availableTenants={availableTenants}
                         />
-                        <div className="hidden h-8 border-s border-gray-200 sm:block" />
+                        <div className={premiumDashboard ? "hidden h-8 border-s border-[#5b4027] sm:block" : "hidden h-8 border-s border-gray-200 sm:block"} />
                     </>
                 )}
 
-                <div className="min-w-0">
-                    <h2 className="truncate text-base font-bold text-[#2C1A00] sm:text-xl">{pageName}</h2>
+                <div className={premiumDashboard ? "hidden min-w-0 lg:block" : "min-w-0"}>
+                    <h2 className={premiumDashboard ? "truncate text-sm font-medium text-[#6f5d48] dark:text-[#c9b9a3]" : "truncate text-base font-bold text-[#2C1A00] sm:text-xl"}>{pageName}</h2>
                     <div className="mt-1 hidden min-w-0 items-center gap-2 overflow-hidden text-sm text-gray-600 md:flex">
                         {breadcrumbs.map((crumb, index) => (
                             <div key={crumb.path} className="flex items-center gap-2">
@@ -126,6 +130,7 @@ export function TopBar({ user }: TopBarProps) {
 
             {/* Language Switcher */}
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+                <ThemeToggle premium={premiumDashboard} />
                 <LanguageSwitcher />
             </div>
 

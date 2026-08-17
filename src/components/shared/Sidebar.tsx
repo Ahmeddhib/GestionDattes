@@ -44,6 +44,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
     const pathname = usePathname();
+    const premiumDashboard = pathname === "/dashboard";
     const { t } = useClientTranslations();
 
     const menuSections = [
@@ -186,11 +187,12 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
         <aside
             className={cn(
                 "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#3D1C00] text-white",
+                premiumDashboard && "bg-[#2b1707] bg-[linear-gradient(180deg,rgba(43,23,7,.90),rgba(51,26,7,.82)),url('/dashboard-date-palm-bg.png')] bg-cover bg-left-bottom dark:bg-[#0d0a07] dark:bg-[linear-gradient(180deg,rgba(11,8,5,.92),rgba(14,9,5,.82)),url('/dashboard-date-palm-bg.png')]",
                 className
             )}
         >
             {/* Logo */}
-            <div className="shrink-0 border-b border-white/10 p-4">
+            <div className={cn("shrink-0 border-b border-white/10 p-4", premiumDashboard && "bg-[#2a1607]/30 backdrop-blur-sm dark:bg-black/20")}>
                 <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dattes-200">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f7f3e9]">
                         <Image src="/kayen-logo.jpg" alt="Logo Kayen Fruits Packaging" fill sizes="48px" className="object-cover" priority />
@@ -213,7 +215,7 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
                     <div key={section.title}>
                         {/* Titre de section collant : avec 22 entrées, la section
                             en cours doit rester lisible pendant le défilement. */}
-                        <div className="sticky top-0 z-10 bg-[#3D1C00]/95 px-6 pb-2 pt-4 backdrop-blur-sm">
+                        <div className={cn("sticky top-0 z-10 bg-[#3D1C00]/95 px-6 pb-2 pt-4 backdrop-blur-sm", premiumDashboard && "bg-[#2b1707]/90 dark:bg-[#0d0a07]/90")}>
                             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-dattes-300">
                                 {section.title}
                             </h3>
@@ -237,7 +239,9 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
                                             "relative flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors lg:min-h-10",
                                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dattes-200",
                                             isActive
-                                                ? "bg-dattes-600 font-semibold text-white"
+                                                ? premiumDashboard
+                                                    ? "border border-[#8b5b23]/45 bg-[#7a4517]/35 font-semibold text-[#f0b548] shadow-[inset_0_0_24px_rgba(193,122,43,.12)]"
+                                                    : "bg-dattes-600 font-semibold text-white"
                                                 : "text-white/85 hover:bg-white/10 hover:text-white"
                                         )}
                                     >
@@ -258,13 +262,13 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
             </nav>
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-[#3D1C00] to-transparent"
+                    className={cn("pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-[#3D1C00] to-transparent", premiumDashboard && "from-[#2b1707] dark:from-[#0d0a07]")}
                 />
             </div>
 
             {/* User Info */}
             {user && (
-                <div className="shrink-0 border-t border-white/10 bg-[#3D1C00] p-4">
+                <div className={cn("shrink-0 border-t border-white/10 bg-[#3D1C00] p-4", premiumDashboard && "bg-[#2a1607]/55 backdrop-blur-md dark:bg-black/35")}>
                     <div className="flex items-center gap-3 mb-3">
                         <Avatar name={user.name} size="md" />
                         <div className="flex-1 min-w-0">

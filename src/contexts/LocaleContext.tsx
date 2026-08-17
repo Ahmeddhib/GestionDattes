@@ -3,47 +3,38 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { Locale } from "@/i18n/config";
 import { defaultLocale, localeDirections } from "@/i18n/config";
+import { useRouter } from "next/navigation";
 
 interface LocaleContextType {
     locale: Locale;
     setLocale: (locale: Locale) => void;
-    messages: any;
+    messages: Record<string, unknown> | null;
     t: (key: string, params?: Record<string, string>) => string;
 }
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-    const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-    const [messages, setMessages] = useState<any>(null);
+export function LocaleProvider({ children, initialLocale = defaultLocale }: { children: ReactNode; initialLocale?: Locale }) {
+    const router = useRouter();
+    const [locale, setLocaleState] = useState<Locale>(initialLocale);
+    const [messages, setMessages] = useState<Record<string, unknown> | null>(null);
 
     // Charger les messages de traduction
     useEffect(() => {
         const loadMessages = async () => {
             try {
                 const mod = await import(`@/i18n/locales/${locale}.json`);
-                setMessages(mod.default);
+                setMessages(mod.default as Record<string, unknown>);
             } catch (error) {
                 console.error(`Erreur chargement traductions ${locale}:`, error);
                 // Fallback vers français
                 const mod = await import("@/i18n/locales/fr.json");
-                setMessages(mod.default);
+                setMessages(mod.default as Record<string, unknown>);
             }
         };
 
         loadMessages();
     }, [locale]);
-
-    // Initialiser la langue depuis localStorage au premier chargement
-    useEffect(() => {
-        const savedLocale = localStorage.getItem("preferred-locale") as Locale;
-        if (savedLocale && ["fr", "ar", "en"].includes(savedLocale)) {
-            setLocaleState(savedLocale);
-            // Appliquer direction RTL/LTR
-            document.documentElement.dir = localeDirections[savedLocale];
-            document.documentElement.lang = savedLocale;
-        }
-    }, []);
 
     // Fonction pour changer de langue
     const setLocale = (newLocale: Locale) => {
@@ -51,12 +42,13 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
         // Sauvegarder dans localStorage
         localStorage.setItem("preferred-locale", newLocale);
+        document.cookie = `NEXT_LOCALE=${newLocale}; Path=/; Max-Age=31536000; SameSite=Lax`;
 
         // Mettre à jour la direction du document (RTL pour arabe)
         document.documentElement.dir = localeDirections[newLocale];
         document.documentElement.lang = newLocale;
 
-        console.log("🌍 Langue changée:", newLocale);
+        router.refresh();
     };
 
     // Fonction de traduction
@@ -64,10 +56,12 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
         if (!messages) return key;
 
         const keys = key.split(".");
-        let value: any = messages;
+        let value: unknown = messages;
 
         for (const k of keys) {
-            value = value?.[k];
+            value = value && typeof value === "object"
+                ? (value as Record<string, unknown>)[k]
+                : undefined;
             if (value === undefined) return key;
         }
 
@@ -76,7 +70,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
             return value.replace(/\{(\w+)\}/g, (_, paramKey) => params[paramKey] || `{${paramKey}}`);
         }
 
-        return value || key;
+        return typeof value === "string" ? value : key;
     };
 
     return (

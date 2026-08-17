@@ -185,6 +185,31 @@
             "consulterStock": "Consulter le stock",
             "bilanFinancier": "Bilan financier"
         },
+        "premium": {
+            "greeting": "Bonjour, {name}",
+            "subtitle": "Voici un aperçu de l’activité de votre Wakala",
+            "activityTitle": "Évolution de l’activité",
+            "activityDescription": "Livraisons, ventes et mouvements financiers",
+            "deliveries": "Livraisons",
+            "sales": "Ventes",
+            "collections": "Encaissements",
+            "farmerPayments": "Paiements agriculteurs",
+            "stockEmpty": "Aucun stock disponible",
+            "total": "Total",
+            "financialTitle": "Situation financière",
+            "collected": "Total encaissé",
+            "paidFarmers": "Payé aux agriculteurs",
+            "expenses": "Dépenses",
+            "netCash": "Trésorerie nette",
+            "quickActionsTitle": "Actions rapides",
+            "deliveriesShort": "Livr.",
+            "comparisonDay": "vs jour précédent",
+            "comparisonWeek": "vs semaine précédente",
+            "comparisonMonth": "vs mois précédent",
+            "comparisonYear": "vs année précédente",
+            "comparisonSeason": "vs saison précédente",
+            "comparisonPeriod": "vs période précédente"
+        },
         "empty": {
             "chart": "Aucune donnée pour cette période"
         }

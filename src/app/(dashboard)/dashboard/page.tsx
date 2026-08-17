@@ -70,6 +70,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     return (
         <DashboardContent
             tenantId={tenantId}
+            userName={session.user.name}
             wakalaName={session.user.tenantName || ""}
             filters={filters}
             saisons={saisons.map((s) => ({ id: s.id, nom: s.nom }))}

@@ -22,6 +22,7 @@ export interface KpiDatum {
     value: number;
     unit: "TND" | "kg" | "nombre";
     evolution?: Evolution;
+    comparisonLabel?: string;
     href: string;
 }
 
@@ -67,4 +68,5 @@ export interface TopAgriculteurDatum {
     agriculteurId: string;
     nom: string;
     quantiteLivree: number;
+    nombreLivraisons: number;
 }
