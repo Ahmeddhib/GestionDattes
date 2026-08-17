@@ -1,6 +1,7 @@
 import { depenseAutreRepository } from "@/repositories/depense-autre.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
+import type { SortDirection } from "@/lib/pagination";
 import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import type { CreateDepenseInput, UpdateDepenseInput } from "@/validators/depense-autre.validator";
 
@@ -8,6 +9,37 @@ export const depenseAutreService = {
     async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("depense:read");
         return depenseAutreRepository.findAll(tenantId, opts);
+    },
+
+    /** Toutes les dépenses du filtre courant, pour l'export. */
+    async getAllFiltre(tenantId: string, params: { search: string; saisonId?: string }) {
+        await requirePermission("depense:read");
+        return depenseAutreRepository.findAllFiltre(tenantId, params);
+    },
+
+    /** Une page de dépenses, avec les totaux du jeu filtré calculés en base. */
+    async getPage(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+        }
+    ) {
+        await requirePermission("depense:read");
+
+        const [resultat, totaux] = await Promise.all([
+            depenseAutreRepository.findPage(tenantId, params),
+            depenseAutreRepository.getTotauxFiltres(tenantId, {
+                search: params.search,
+                saisonId: params.saisonId,
+            }),
+        ]);
+
+        return { resultat, totaux };
     },
 
     async create(tenantId: string, userId: string, data: CreateDepenseInput) {

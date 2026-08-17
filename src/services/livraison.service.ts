@@ -8,6 +8,55 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ROLES } from "@/constants/roles";
 import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
+import { supprimerLivraisonEnCascade } from "./livraison-suppression.service";
+import { type SortDirection } from "@/lib/pagination";
+
+/**
+ * Passage PascalCase (Prisma) → camelCase (UI), partagé par la liste complète
+ * et par la version paginée : les deux doivent produire exactement la même
+ * forme, sans quoi le tableau se comporterait différemment selon le chemin.
+ */
+function mapLivraison(
+    livraison: Awaited<ReturnType<typeof livraisonRepository.findAll>>[number]
+) {
+    const quantiteKg =
+        livraison.quantiteLivree ??
+        livraison.LivraisonTypeCaisse.reduce(
+            (total, ltc) => total + ltc.quantite * ltc.TypeCaisse.poidsKg,
+            0
+        );
+
+    return {
+        ...livraison,
+        agriculteur: livraison.Agriculteur,
+        caisses: livraison.LivraisonTypeCaisse.map((ltc) => ({
+            id: ltc.id,
+            typeCaisseId: ltc.typeCaisseId,
+            typeDateId: ltc.typeDateId,
+            quantite: ltc.quantite,
+            typeCaisse: {
+                id: ltc.TypeCaisse.id,
+                nom: ltc.TypeCaisse.nom,
+                poidsKg: ltc.TypeCaisse.poidsKg,
+            },
+            typeDate: ltc.TypeDate,
+        })),
+        bonAchat: livraison.BonAchat,
+        quantiteKg,
+        _count: livraison._count
+            ? {
+                echantillons: livraison._count.Echantillon,
+                pretsCaisses: livraison._count.PretCaisse,
+                stocksDates: livraison._count.StockDate,
+                pesees: livraison._count.Pesee,
+            }
+            : undefined,
+        // On retire les clés PascalCase remplacées ci-dessus.
+        Agriculteur: undefined,
+        LivraisonTypeCaisse: undefined,
+        BonAchat: undefined,
+    };
+}
 import type { CreateLivraisonInput, UpdateLivraisonInput } from "@/validators/livraison.validator";
 
 /**
@@ -21,44 +70,41 @@ export const livraisonService = {
         await checkPermission(userId, "livraison:read");
 
         const livraisons = await livraisonRepository.findAll(tenantId, opts);
+        return livraisons.map(mapLivraison);
+    },
 
-        // Transformation PascalCase → camelCase
-        return livraisons.map((livraison) => {
-            // Calculer la quantité totale en kg
-            const quantiteKg = livraison.quantiteLivree ?? livraison.LivraisonTypeCaisse.reduce(
-                (total, ltc) => total + (ltc.quantite * ltc.TypeCaisse.poidsKg),
-                0
-            );
+    /**
+     * Une page de livraisons, avec les totaux du jeu FILTRÉ à côté.
+     *
+     * Les totaux viennent d'agrégats en base et non des lignes renvoyées :
+     * additionner la page afficherait le total des dix lignes visibles.
+     */
+    async getPage(
+        tenantId: string,
+        userId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+        }
+    ) {
+        await checkPermission(userId, "livraison:read");
 
-            return {
-                ...livraison,
-                agriculteur: livraison.Agriculteur,
-                caisses: livraison.LivraisonTypeCaisse.map((ltc) => ({
-                    id: ltc.id,
-                    typeCaisseId: ltc.typeCaisseId,
-                    typeDateId: ltc.typeDateId,
-                    quantite: ltc.quantite,
-                    typeCaisse: {
-                        id: ltc.TypeCaisse.id,
-                        nom: ltc.TypeCaisse.nom,
-                        poidsKg: ltc.TypeCaisse.poidsKg,
-                    },
-                    typeDate: ltc.TypeDate,
-                })),
-                bonAchat: livraison.BonAchat,
-                quantiteKg, // Quantité totale calculée
-                _count: livraison._count ? {
-                    echantillons: livraison._count.Echantillon,
-                    pretsCaisses: livraison._count.PretCaisse,
-                    stocksDates: livraison._count.StockDate,
-                    pesees: livraison._count.Pesee,
-                } : undefined,
-                // Supprimer les versions PascalCase
-                Agriculteur: undefined,
-                LivraisonTypeCaisse: undefined,
-                BonAchat: undefined,
-            };
-        });
+        const [page, totaux] = await Promise.all([
+            livraisonRepository.findPage(tenantId, params),
+            livraisonRepository.getTotauxFiltres(tenantId, {
+                search: params.search,
+                saisonId: params.saisonId,
+            }),
+        ]);
+
+        return {
+            resultat: { ...page, items: page.items.map(mapLivraison) },
+            totaux,
+        };
     },
 
     /**
@@ -298,17 +344,12 @@ export const livraisonService = {
 
         await assertSaisonOuverte(tenantId, existing.saisonId);
 
-        // Vérifier si la livraison est utilisée
-        const isUsed = await livraisonRepository.isUsed(id, tenantId);
-        if (isUsed) {
-            throw new Error(
-                "Impossible de supprimer cette livraison car elle est utilisée (pesée, échantillons, prêts ou stock)"
-            );
-        }
+        // Suppression en cascade : la pesée, le stock et le bon d'achat créés
+        // par l'assistant sont défaits, et les retours de caisses annulés.
+        // Seules les traces laissées en aval (vente, paiement, conditionnement,
+        // analyse) bloquent encore — cf. livraison-suppression.service.ts.
+        const resultat = await supprimerLivraisonEnCascade(tenantId, id);
 
-        await livraisonRepository.delete(id, tenantId);
-
-        // Audit log
         await auditService.log({
             tenantId,
             actorId: userId,
@@ -318,6 +359,8 @@ export const livraisonService = {
             details: {
                 numeroLot: existing.numeroLot,
                 agriculteur: existing.Agriculteur ? `${existing.Agriculteur.nom} ${existing.Agriculteur.prenom}` : undefined,
+                peseesSupprimees: resultat.peseesSupprimees,
+                caissesRetireesDuStock: resultat.caissesRetireesDuStock,
             },
         });
     },

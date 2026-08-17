@@ -1,4 +1,9 @@
-import { peseeRepository, type PeseeTotals } from "@/repositories/pesee.repository";
+import {
+    peseeRepository,
+    type LivraisonPeseeRow,
+    type PeseeTotals,
+} from "@/repositories/pesee.repository";
+import type { SortDirection } from "@/lib/pagination";
 import { pretCaisseRepository } from "@/repositories/pret-caisse.repository";
 import { typeCaisseRepository } from "@/repositories/type-caisse.repository";
 import { typeDateRepository } from "@/repositories/type-date.repository";
@@ -73,11 +78,16 @@ export type LignePeseeInput = {
 export async function resolveLignesPesee(tenantId: string, lignes: LignePeseeInput[]) {
     return Promise.all(
         lignes.map(async (ligne) => {
-            const typeDate = await typeDateRepository.findById(ligne.typeDateId, tenantId);
+            // Les deux lectures sont indépendantes : les enchaîner coûtait un
+            // aller-retour de plus par ligne, ce qui se voit quand la base est
+            // distante (~150 ms l'aller-retour depuis un poste hors région).
+            const [typeDate, typeCaisse] = await Promise.all([
+                typeDateRepository.findById(ligne.typeDateId, tenantId),
+                typeCaisseRepository.findById(tenantId, ligne.typeCaisseId),
+            ]);
             if (!typeDate) {
                 throw new Error(`Type de datte introuvable: ${ligne.typeDateId}`);
             }
-            const typeCaisse = await typeCaisseRepository.findById(tenantId, ligne.typeCaisseId);
             if (!typeCaisse) {
                 throw new Error(`Type de caisse introuvable: ${ligne.typeCaisseId}`);
             }
@@ -144,6 +154,48 @@ function reshape(pesee: PeseeWithRelations) {
         })),
         livraison: pesee.Livraison,
         createdAt: pesee.createdAt,
+    };
+}
+
+/**
+ * Transforme une livraison et ses pesées en une ligne de tableau.
+ *
+ * `createdAt` est le maximum des dates de pesée : c'est ce que la colonne
+ * « Date pesée » affiche, et une livraison peut être pesée en plusieurs fois.
+ */
+function regrouperLivraison(livraison: LivraisonPeseeRow) {
+    const lignes = livraison.Pesee.map((p) => ({
+        id: p.id,
+        livraisonId: p.livraisonId,
+        typeCaisseId: p.typeCaisseId,
+        typeCaisse: p.TypeCaisse,
+        typeDateId: p.typeDateId,
+        typeDate: p.TypeDate,
+        nombreCaisses: p.nombreCaisses,
+        poidsBrutTotal: toNumber(p.poidsBrutTotal),
+        poidsTareTotal: toNumber(p.poidsTareTotal),
+        poidsNetTotal: toNumber(p.poidsNetTotal),
+        prixKg: p.prixKg,
+        quantiteAcceptee: toNumber(p.quantiteAcceptee),
+        createdAt: p.createdAt,
+    }));
+
+    return {
+        livraisonId: livraison.id,
+        numeroLot: livraison.numeroLot,
+        dateLivraison: livraison.dateLivraison,
+        agriculteur: livraison.Agriculteur,
+        lignes,
+        nombreCaisses: lignes.reduce((s, l) => s + l.nombreCaisses, 0),
+        poidsBrutTotal: lignes.reduce((s, l) => s + l.poidsBrutTotal, 0),
+        poidsTareTotal: lignes.reduce((s, l) => s + l.poidsTareTotal, 0),
+        poidsNetTotal: lignes.reduce((s, l) => s + l.poidsNetTotal, 0),
+        quantiteAcceptee: lignes.reduce((s, l) => s + l.quantiteAcceptee, 0),
+        montant: lignes.reduce((s, l) => s + l.prixKg * l.quantiteAcceptee, 0),
+        createdAt: lignes.reduce<Date>(
+            (max, l) => (l.createdAt > max ? l.createdAt : max),
+            lignes[0]?.createdAt ?? livraison.createdAt
+        ),
     };
 }
 
@@ -263,11 +315,14 @@ export async function retournerCaissesAutomatiquement(
         tx
     );
 
-    if (!pretEnCours) return;
+    // Retourne le nombre RÉELLEMENT remis au stock — souvent 0, quand
+    // l'agriculteur n'a aucun prêt ouvert pour ce type de caisse. L'appelant
+    // le consigne sur la pesée pour pouvoir l'annuler exactement.
+    if (!pretEnCours) return 0;
 
     const nombreRestant = pretEnCours.nombrePrete - pretEnCours.nombreRetourne;
     const quantiteARetourner = Math.min(nombreCaissesPesees, nombreRestant);
-    if (quantiteARetourner <= 0) return;
+    if (quantiteARetourner <= 0) return 0;
 
     await pretCaisseRepository.retournerCaisses(
         pretEnCours.id,
@@ -277,15 +332,13 @@ export async function retournerCaissesAutomatiquement(
         tx
     );
 
-    const typeCaisse = await typeCaisseRepository.findById(tenantId, typeCaisseId, tx);
-    if (typeCaisse) {
-        await typeCaisseRepository.update(
-            tenantId,
-            typeCaisseId,
-            { stockDisponible: typeCaisse.stockDisponible + quantiteARetourner },
-            tx
-        );
-    }
+    // Incrément atomique : une seule instruction, filtrée par tenant. La
+    // version précédente lisait le stock puis réécrivait la somme, ce qui
+    // perdait silencieusement une mise à jour quand deux pesées du même type
+    // de caisse se croisaient.
+    await typeCaisseRepository.incrementerStock(tenantId, typeCaisseId, quantiteARetourner, tx);
+
+    return quantiteARetourner;
 }
 
 export const peseeService = {
@@ -293,6 +346,39 @@ export const peseeService = {
         await requirePermission("pesee:read");
         const pesees = await peseeRepository.findAll(tenantId, opts);
         return pesees.map(reshape);
+    },
+
+    /**
+     * Une page de livraisons pesées, déjà regroupées, plus les totaux du jeu
+     * filtré.
+     *
+     * Le regroupement reste calculé côté serveur mais reste EXACT : chaque
+     * livraison de la page arrive avec la totalité de ses pesées, donc ses sommes
+     * portent sur tout son contenu. Ce sont les totaux d'en-tête qui ne peuvent
+     * pas être dérivés des lignes reçues — d'où l'agrégat séparé.
+     */
+    async getPageParLivraison(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+        }
+    ) {
+        await requirePermission("pesee:read");
+
+        const [page, totaux] = await Promise.all([
+            peseeRepository.findPageParLivraison(tenantId, params),
+            peseeRepository.getTotauxFiltres(tenantId, {
+                search: params.search,
+                saisonId: params.saisonId,
+            }),
+        ]);
+
+        return { resultat: { ...page, items: page.items.map(regrouperLivraison) }, totaux };
     },
 
     async getById(tenantId: string, userId: string, id: string) {

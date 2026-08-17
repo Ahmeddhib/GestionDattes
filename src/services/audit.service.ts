@@ -22,6 +22,24 @@ export const auditService = {
         return auditRepository.create(data, client);
     },
 
+    /**
+     * Écrit un lot d'entrées d'audit en une seule instruction. À préférer
+     * dans les boucles : `log` appelé par itération multiplie les allers-retours.
+     */
+    async logMany(
+        entrees: {
+            tenantId: string;
+            actorId: string;
+            action: AuditAction;
+            description?: string;
+            targetId?: string;
+            details?: any;
+        }[],
+        client?: typeof prisma | Prisma.TransactionClient
+    ) {
+        return auditRepository.createMany(entrees, client);
+    },
+
     async getAuditLogs(
         tenantId: string,
         options?: {

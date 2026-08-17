@@ -1,10 +1,39 @@
-import { bonAchatRepository } from "@/repositories/bon-achat.repository";
+import { bonAchatRepository, type FiltresBonAchat } from "@/repositories/bon-achat.repository";
 import { livraisonRepository } from "@/repositories/livraison.repository";
 import { auditService } from "./audit.service";
 import { requirePermission } from "@/lib/permissions";
+import type { SortDirection } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
 import { assertSaisonOuverte } from "@/lib/saison-guard";
 import type { CreateBonAchatInput } from "@/validators/bon-achat.validator";
+
+/**
+ * Prisma → UI : calcule le solde et convertit les `Decimal`, qui ne traversent
+ * pas la frontière Server → Client Component. Partagée par la liste complète,
+ * la page et l'export : les trois doivent produire la même forme.
+ */
+function mapBonAchat(
+    ba: Awaited<ReturnType<typeof bonAchatRepository.findAll>>[number]
+) {
+    const montantPaye = ba.PaiementAgriculteur.reduce((sum, p) => sum + p.montant, 0);
+    return {
+        ...ba,
+        montantPaye,
+        montantRestant: ba.montant - montantPaye,
+        PaiementAgriculteur: undefined,
+        Livraison: {
+            ...ba.Livraison,
+            Pesee: ba.Livraison.Pesee.map((p) => ({
+                id: p.id,
+                prixKg: p.prixKg,
+                quantiteAcceptee: p.quantiteAcceptee.toNumber(),
+                poidsNetTotal: p.poidsNetTotal.toNumber(),
+                typeDate: p.TypeDate,
+                typeCaisse: p.TypeCaisse,
+            })),
+        },
+    };
+}
 
 export const bonAchatService = {
     async getTenantInfo(tenantId: string) {
@@ -31,29 +60,49 @@ export const bonAchatService = {
     async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("bon-achat:read");
         const bonsAchat = await bonAchatRepository.findAll(tenantId, opts);
+        return bonsAchat.map(mapBonAchat);
+    },
 
-        // Convertit les Decimal Prisma en number : ces objets ne sont pas
-        // sérialisables lorsqu'ils traversent la frontière Server → Client Component.
-        return bonsAchat.map((ba) => {
-            const montantPaye = ba.PaiementAgriculteur.reduce((sum, p) => sum + p.montant, 0);
-            return {
-                ...ba,
-                montantPaye,
-                montantRestant: ba.montant - montantPaye,
-                PaiementAgriculteur: undefined,
-                Livraison: {
-                    ...ba.Livraison,
-                    Pesee: ba.Livraison.Pesee.map((p) => ({
-                        id: p.id,
-                        prixKg: p.prixKg,
-                        quantiteAcceptee: p.quantiteAcceptee.toNumber(),
-                        poidsNetTotal: p.poidsNetTotal.toNumber(),
-                        typeDate: p.TypeDate,
-                        typeCaisse: p.TypeCaisse,
-                    })),
-                },
-            };
-        });
+    /** Une page de bons d'achat, avec les totaux du jeu filtré calculés en base. */
+    async getPage(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+            filtres?: FiltresBonAchat;
+        }
+    ) {
+        await requirePermission("bon-achat:read");
+
+        const [page, totaux, agriculteurs] = await Promise.all([
+            bonAchatRepository.findPage(tenantId, params),
+            bonAchatRepository.getTotauxFiltres(tenantId, {
+                search: params.search,
+                saisonId: params.saisonId,
+                filtres: params.filtres,
+            }),
+            bonAchatRepository.findAgriculteursAvecBonAchat(tenantId, params.saisonId),
+        ]);
+
+        return {
+            resultat: { ...page, items: page.items.map(mapBonAchat) },
+            totaux,
+            agriculteurs,
+        };
+    },
+
+    /** Toutes les lignes du filtre courant, pour l'export. */
+    async getAllFiltre(
+        tenantId: string,
+        params: { search: string; saisonId?: string; filtres?: FiltresBonAchat }
+    ) {
+        await requirePermission("bon-achat:read");
+        const bonsAchat = await bonAchatRepository.findAllFiltre(tenantId, params);
+        return bonsAchat.map(mapBonAchat);
     },
 
     async getById(tenantId: string, id: string) {

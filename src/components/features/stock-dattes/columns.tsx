@@ -12,15 +12,30 @@ export type Lot = {
     quantiteDisponible: number;
 };
 
+/**
+ * Une ligne du tableau = un type de datte, agrégé par la base.
+ *
+ * `nombreLots` remplace le tableau `lots` d'origine : la ligne n'a besoin que du
+ * compte pour s'afficher, et embarquer chaque lot sérialisait tout le stock dans
+ * la page pour un détail rarement ouvert.
+ */
 export type StockDateGroupe = {
     typeDateId: string;
     typeDate: string;
     quantiteTotale: number;
     quantiteDisponible: number;
-    lots: Lot[];
+    nombreLots: number;
 };
 
-export const createStockDattesColumns = (t: (key: string) => string): ColumnDef<StockDateGroupe>[] => [
+export const createStockDattesColumns = (
+    t: (key: string) => string,
+    /**
+     * Saison déjà résolue côté serveur (et non la valeur brute de l'URL, qui
+     * peut valoir « courante »). Sans elle, le détail listerait les lots de
+     * toutes les saisons sous une ligne filtrée sur une seule.
+     */
+    saisonId?: string
+): ColumnDef<StockDateGroupe>[] => [
     {
         accessorKey: "typeDate",
         header: t("stockDattes.typeDate"),
@@ -32,7 +47,12 @@ export const createStockDattesColumns = (t: (key: string) => string): ColumnDef<
         id: "lots",
         header: t("stockDattes.nombreLots"),
         cell: ({ row }) => (
-            <LotsDetailDialog typeDate={row.original.typeDate} lots={row.original.lots} />
+            <LotsDetailDialog
+                typeDateId={row.original.typeDateId}
+                typeDate={row.original.typeDate}
+                nombreLots={row.original.nombreLots}
+                saisonId={saisonId}
+            />
         ),
     },
     {

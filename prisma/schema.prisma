@@ -453,6 +453,12 @@ model Pesee {
   poidsNetMoyen    Decimal       @db.Decimal(6, 2)
   prixKg           Float         @default(0)
   quantiteAcceptee Decimal       @default(0) @db.Decimal(8, 2)
+  /// Nombre de caisses effectivement rendues au stock par le retour
+  /// automatique declenche a la pesee. Sans cette trace, supprimer la
+  /// livraison ne pouvait pas annuler le retour exactement : on retombait sur
+  /// le nombre de caisses pesees, qui surestime des qu aucun pret n etait
+  /// ouvert, et le stock devenait faux.
+  caissesRetournees Int          @default(0)
   createdAt        DateTime      @default(now())
   tenantId         String
   Caisses          PeseeCaisse[]

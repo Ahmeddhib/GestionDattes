@@ -1,8 +1,85 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { createId } from "@paralleldrive/cuid2";
+import { paginate, resolveOrderBy, type SortDirection } from "@/lib/pagination";
 
 type DbClient = typeof prisma | Prisma.TransactionClient;
+
+/**
+ * Tris exposés à l'URL. Volontairement limités aux colonnes de la LIVRAISON :
+ * les autres colonnes du tableau (poids, nombre de caisses, montant) sont des
+ * sommes de ses pesées, qu'aucun `ORDER BY` ne sait produire ici. Les rendre
+ * cliquables donnerait un tri faux sans le dire.
+ */
+const TRIS_LIVRAISON_PESEE: Record<
+    string,
+    (dir: SortDirection) => Prisma.LivraisonOrderByWithRelationInput
+> = {
+    numeroLot: (dir) => ({ numeroLot: dir }),
+    agriculteur: (dir) => ({ Agriculteur: { nom: dir } }),
+};
+
+/**
+ * Le tableau des pesées affiche UNE LIGNE PAR LIVRAISON, chacune agrégeant ses
+ * `Pesee` (une par couple type de datte / type de caisse). La pagination porte
+ * donc sur la livraison, pas sur la pesée — sinon une page de dix pesées
+ * produirait un nombre de lignes imprévisible, et une livraison serait coupée
+ * en deux entre deux pages.
+ */
+function buildLivraisonPeseeWhere(
+    tenantId: string,
+    search: string,
+    saisonId?: string
+): Prisma.LivraisonWhereInput {
+    return {
+        tenantId,
+        // Seules les livraisons effectivement pesées : le tableau se construisait
+        // à partir des `Pesee`, une livraison sans pesée n'y figurait pas.
+        Pesee: { some: {} },
+        ...(saisonId && { saisonId }),
+        ...(search && {
+            OR: [
+                { numeroLot: { contains: search, mode: "insensitive" as const } },
+                { Agriculteur: { nom: { contains: search, mode: "insensitive" as const } } },
+                { Agriculteur: { prenom: { contains: search, mode: "insensitive" as const } } },
+                { Agriculteur: { code: { contains: search, mode: "insensitive" as const } } },
+            ],
+        }),
+    };
+}
+
+const LIVRAISON_PESEE_SELECT = {
+    id: true,
+    numeroLot: true,
+    dateLivraison: true,
+    createdAt: true,
+    Agriculteur: { select: { id: true, code: true, nom: true, prenom: true } },
+    Pesee: {
+        // `Caisses` volontairement absent : le détail des lignes n'affiche que le
+        // type et les totaux. Les charger ramenait une ligne par caisse pesée —
+        // des centaines de lignes jamais lues.
+        select: {
+            id: true,
+            livraisonId: true,
+            typeCaisseId: true,
+            typeDateId: true,
+            nombreCaisses: true,
+            poidsBrutTotal: true,
+            poidsTareTotal: true,
+            poidsNetTotal: true,
+            prixKg: true,
+            quantiteAcceptee: true,
+            createdAt: true,
+            TypeCaisse: { select: { id: true, nom: true } },
+            TypeDate: { select: { id: true, nom: true } },
+        },
+        orderBy: { createdAt: "asc" as const },
+    },
+} satisfies Prisma.LivraisonSelect;
+
+export type LivraisonPeseeRow = Prisma.LivraisonGetPayload<{
+    select: typeof LIVRAISON_PESEE_SELECT;
+}>;
 
 export interface PeseeTotals {
     nombreCaisses: number;
@@ -48,6 +125,72 @@ export const peseeRepository = {
         });
     },
 
+    /**
+     * Une page de livraisons pesées, chacune accompagnée de ses pesées.
+     *
+     * Tri par défaut sur `Livraison.createdAt` décroissant. La colonne affichée
+     * « Date pesée » est le maximum des `Pesee.createdAt` de la livraison ; aucun
+     * `ORDER BY` Prisma ne l'exprime, et comme les pesées sont créées avec la
+     * livraison par l'assistant, les deux ordres coïncident en pratique.
+     */
+    async findPageParLivraison(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+        }
+    ) {
+        const where = buildLivraisonPeseeWhere(tenantId, params.search, params.saisonId);
+        const orderBy = resolveOrderBy<Prisma.LivraisonOrderByWithRelationInput>(
+            params.sortBy,
+            params.sortDir,
+            TRIS_LIVRAISON_PESEE,
+            (dir) => ({ createdAt: dir })
+        );
+
+        return paginate(
+            params.page,
+            params.pageSize,
+            (skip, take) =>
+                prisma.livraison.findMany({
+                    where,
+                    select: LIVRAISON_PESEE_SELECT,
+                    orderBy,
+                    skip,
+                    take,
+                }),
+            () => prisma.livraison.count({ where })
+        );
+    },
+
+    /**
+     * Totaux du jeu FILTRÉ, agrégés en base sur les `Pesee` — et non sur les
+     * lignes de la page, ce qui donnerait les totaux des dix livraisons visibles
+     * en les présentant comme ceux de la campagne.
+     */
+    async getTotauxFiltres(tenantId: string, params: { search: string; saisonId?: string }) {
+        const whereLivraison = buildLivraisonPeseeWhere(tenantId, params.search, params.saisonId);
+
+        const agg = await prisma.pesee.aggregate({
+            where: { tenantId, Livraison: whereLivraison },
+            _count: { _all: true },
+            _sum: { poidsBrutTotal: true, poidsTareTotal: true, poidsNetTotal: true },
+        });
+
+        const nombre = (valeur: Prisma.Decimal | null) => (valeur ? valeur.toNumber() : 0);
+
+        return {
+            totalPesees: agg._count._all,
+            poidsBrutTotal: nombre(agg._sum.poidsBrutTotal),
+            poidsTareTotal: nombre(agg._sum.poidsTareTotal),
+            poidsNetTotal: nombre(agg._sum.poidsNetTotal),
+        };
+    },
+
     async findById(tenantId: string, id: string) {
         return prisma.pesee.findFirst({
             where: { id, tenantId },
@@ -90,7 +233,13 @@ export const peseeRepository = {
         totals: PeseeTotals,
         prixKg: number,
         quantiteAcceptee: number,
-        client: DbClient = prisma
+        client: DbClient = prisma,
+        /**
+         * Caisses réellement remises au stock par le retour automatique.
+         * Nécessaire pour pouvoir annuler ce retour à l'identique si la
+         * livraison est supprimée.
+         */
+        caissesRetournees = 0
     ) {
         return client.pesee.create({
             data: {
@@ -109,6 +258,7 @@ export const peseeRepository = {
                 poidsNetMoyen: totals.poidsNetMoyen,
                 prixKg,
                 quantiteAcceptee,
+                caissesRetournees,
                 createdAt: new Date(),
                 Caisses: {
                     create: grossWeights.map((poidsBrut, index) => ({

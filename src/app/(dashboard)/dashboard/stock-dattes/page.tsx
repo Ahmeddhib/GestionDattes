@@ -33,7 +33,13 @@ export default async function StockDattesPage({
     // un lot entré en saison A reste rattaché à A même vendu pendant la saison B.
     const { saisonId, saisonFiltre } = await getSaisonFiltrePourPage(tenantId, saisonParam);
 
-    const stockDates = await stockDateService.getAll(tenantId, { saisonId });
+    const stockDates = await stockDateService.getGroupes(tenantId, { saisonId });
 
-    return <StockDattesPageContent stockDates={stockDates} saisonFiltre={saisonFiltre} />;
+    return (
+        <StockDattesPageContent
+            stockDates={stockDates}
+            saisonFiltre={saisonFiltre}
+            saisonId={saisonId}
+        />
+    );
 }

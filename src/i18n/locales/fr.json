@@ -36,7 +36,10 @@
         "total": "Total",
         "actif": "Actif",
         "inactif": "Inactif",
-        "view": "Voir"
+        "view": "Voir",
+        "sortBy": "Trier par",
+        "rangeOfTotal": "{start}–{end} sur {total}",
+        "retry": "Réessayer"
     },
     "validation": {
         "required": "Ce champ est requis",
@@ -390,7 +393,17 @@
         "creating": "Création...",
         "updating": "Mise à jour...",
         "deleting": "Suppression...",
-        "kg": "kg"
+        "kg": "kg",
+        "suppression": {
+            "refus": "Suppression impossible :",
+            "motifs": {
+                "STOCK_VENDU": "{count} vente(s) portent déjà sur ce stock",
+                "STOCK_CONDITIONNE": "{count} conditionnement(s) utilisent ce stock",
+                "STOCK_SORTI": "{count} bon(s) de sortie utilisent ce stock",
+                "BON_ACHAT_PAYE": "{count} paiement(s) enregistrés sur le bon d'achat",
+                "ECHANTILLON_ANALYSE": "{count} analyse(s) rattachées aux échantillons"
+            }
+        }
     },
     "nouvellePesee": {
         "createNew": "Nouvelle pesée",
@@ -672,6 +685,7 @@
         "nombreLots": "Lots",
         "voirLots": "Voir les lots",
         "detailLots": "Détail des lots entrés pour ce type de datte",
+        "searchLotPlaceholder": "Rechercher un lot, un agriculteur...",
         "dateEntree": "Date d'entrée",
         "empty": "Aucun stock de dattes pour le moment",
         "stats": {
@@ -701,7 +715,8 @@
             "generic": "Une erreur est survenue",
             "notFound": "{entity} introuvable",
             "alreadyExists": "{entity} existe déjà",
-            "cannotDelete": "Impossible de supprimer {entity}"
+            "cannotDelete": "Impossible de supprimer {entity}",
+            "database": "Base de données momentanément injoignable. Vérifiez votre connexion puis réessayez."
         }
     },
     "pretsCaisses": {

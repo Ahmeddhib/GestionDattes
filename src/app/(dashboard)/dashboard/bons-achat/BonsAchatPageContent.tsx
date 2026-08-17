@@ -1,23 +1,37 @@
 "use client";
 
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { BonsAchatTableAdvanced } from "@/components/features/bons-achat/BonsAchatTableAdvanced";
+import { BonsAchatTableServer, type AgriculteurOption } from "@/components/features/bons-achat/BonsAchatTableServer";
+import type { PaginatedResult } from "@/lib/pagination";
 import type { BonAchat } from "@/components/features/bons-achat/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
 import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import { Receipt, Wallet } from "lucide-react";
 
+export type TotauxBonsAchat = {
+    total: number;
+    montantTotal: number;
+    montantPaye: number;
+    montantRestant: number;
+};
+
 interface BonsAchatPageContentProps {
     saisonFiltre: SaisonFiltreProps;
-    bonsAchat: BonAchat[];
+    resultat: PaginatedResult<BonAchat>;
+    /** Totaux du jeu FILTRÉ, calculés en base — jamais depuis `resultat.items`. */
+    totaux: TotauxBonsAchat;
+    agriculteurs: AgriculteurOption[];
     tenant: { name: string; address: string | null; phone: string | null; email: string | null };
 }
 
-export function BonsAchatPageContent({ bonsAchat, tenant, saisonFiltre }: BonsAchatPageContentProps) {
+export function BonsAchatPageContent({
+    resultat,
+    totaux,
+    agriculteurs,
+    tenant,
+    saisonFiltre,
+}: BonsAchatPageContentProps) {
     const { t } = useClientTranslations();
-
-    const total = bonsAchat.length;
-    const montantTotal = bonsAchat.reduce((sum, b) => sum + b.montant, 0);
 
     return (
         <PageContainer>
@@ -36,7 +50,7 @@ export function BonsAchatPageContent({ bonsAchat, tenant, saisonFiltre }: BonsAc
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">{t("bonAchat.stats.total")}</p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{total}</p>
+                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{totaux.total}</p>
                         </div>
                         <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
                             <Receipt className="h-6 w-6 text-[#C17A2B]" />
@@ -48,7 +62,7 @@ export function BonsAchatPageContent({ bonsAchat, tenant, saisonFiltre }: BonsAc
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">{t("bonAchat.stats.montantTotal")}</p>
-                            <p className="text-3xl font-bold text-[#C17A2B] mt-2">{montantTotal.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-[#C17A2B] mt-2">{totaux.montantTotal.toFixed(2)}</p>
                         </div>
                         <div className="h-12 w-12 bg-green-100 rounded-md flex items-center justify-center">
                             <Wallet className="h-6 w-6 text-green-600" />
@@ -58,7 +72,11 @@ export function BonsAchatPageContent({ bonsAchat, tenant, saisonFiltre }: BonsAc
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <BonsAchatTableAdvanced data={bonsAchat} tenant={tenant} />
+                <BonsAchatTableServer
+                    resultat={resultat}
+                    agriculteurs={agriculteurs}
+                    tenant={tenant}
+                />
             </div>
         </PageContainer>
     );

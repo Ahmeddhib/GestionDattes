@@ -4,7 +4,8 @@ import { ROUTES } from "@/lib/routes";
 import { getServerTranslations } from "@/i18n/server";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { getSaisonFiltrePourPage } from "@/lib/saison-filter";
-import { getDepensesAction } from "@/actions/depenses/get-depenses.action";
+import { getDepensesPageAction } from "@/actions/depenses/get-depenses-page.action";
+import { parseQueryParams, type RawSearchParams } from "@/lib/pagination";
 import { DepensesPageContent } from "./DepensesPageContent";
 import { getTenantPdfBranding } from "@/lib/pdf-branding.server";
 
@@ -18,20 +19,22 @@ export async function generateMetadata() {
 export default async function DepensesPage({
     searchParams,
 }: {
-    searchParams: Promise<{ saisonId?: string }>;
+    searchParams: Promise<RawSearchParams>;
 }) {
     const session = await auth();
     if (!session) redirect(ROUTES.LOGIN);
 
     const tenantId = await getTenantId();
-    const { saisonId: saisonParam } = await searchParams;
+    const params = await searchParams;
     const { saisonId, saisonOuverte, saisonFiltre } = await getSaisonFiltrePourPage(
         tenantId,
-        saisonParam
+        typeof params.saisonId === "string" ? params.saisonId : undefined
     );
 
+    const query = parseQueryParams(params, { sortBy: "dateDepense", sortDir: "desc" });
+
     const [result, pdfBranding] = await Promise.all([
-        getDepensesAction({ saisonId }),
+        getDepensesPageAction({ ...query, saisonId }),
         getTenantPdfBranding(tenantId),
     ]);
 
@@ -41,7 +44,8 @@ export default async function DepensesPage({
 
     return (
         <DepensesPageContent
-            depenses={result.data || []}
+            resultat={result.data.resultat}
+            totaux={result.data.totaux}
             saisonFiltre={saisonFiltre}
             saisonOuverte={saisonOuverte}
             branding={pdfBranding}

@@ -1,9 +1,9 @@
-import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { ROLES } from "@/constants/roles";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 import { getSaisonFiltrePourPage } from "@/lib/saison-filter";
-import { getLivraisonsAction } from "@/actions/livraisons/get-livraisons.action";
+import { getLivraisonsPageAction } from "@/actions/livraisons/get-livraisons-page.action";
+import { parseQueryParams, type RawSearchParams } from "@/lib/pagination";
 import { LivraisonsPageContent } from "./LivraisonsPageContent";
 
 export const metadata = {
@@ -14,18 +14,22 @@ export const metadata = {
 export default async function LivraisonsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ saisonId?: string }>;
+    searchParams: Promise<RawSearchParams>;
 }) {
     const session = await auth();
-    const { saisonId: saisonParam } = await searchParams;
+    const params = await searchParams;
 
     const tenantId = await getTenantId();
     const { saisonId, saisonOuverte, saisonFiltre } = await getSaisonFiltrePourPage(
         tenantId,
-        saisonParam
+        typeof params.saisonId === "string" ? params.saisonId : undefined
     );
 
-    const result = await getLivraisonsAction({ saisonId });
+    // Pagination, tri et recherche sont lus et bornés ici, puis transmis tels
+    // quels : rien de l'URL n'atteint Prisma sans passer par cette étape.
+    const query = parseQueryParams(params, { sortBy: "dateLivraison", sortDir: "desc" });
+
+    const result = await getLivraisonsPageAction({ ...query, saisonId });
 
     if (!result.success) {
         return (
@@ -38,15 +42,14 @@ export default async function LivraisonsPage({
     }
 
     return (
-        <Suspense fallback={<div className="flex-1 px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">Chargement...</div>}>
-            <LivraisonsPageContent
-                livraisons={result.data || []}
-                canEditAcceptedQuantity={
-                    session?.user.role === ROLES.ADMIN || session?.user.role === ROLES.DIRECTION
-                }
-                saisonFiltre={saisonFiltre}
-                saisonOuverte={saisonOuverte}
-            />
-        </Suspense>
+        <LivraisonsPageContent
+            resultat={result.data.resultat}
+            totaux={result.data.totaux}
+            canEditAcceptedQuantity={
+                session?.user.role === ROLES.ADMIN || session?.user.role === ROLES.DIRECTION
+            }
+            saisonFiltre={saisonFiltre}
+            saisonOuverte={saisonOuverte}
+        />
     );
 }

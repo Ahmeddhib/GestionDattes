@@ -1,24 +1,35 @@
 "use client";
 
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { PeseesTableAdvanced } from "@/components/features/pesees/PeseesTableAdvanced";
-import type { Pesee } from "@/components/features/pesees/columns";
+import { PeseesTableServer } from "@/components/features/pesees/PeseesTableServer";
+import type { PeseeGroupee } from "@/components/features/pesees/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
 import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
+import type { PaginatedResult } from "@/lib/pagination";
 import { Scale, Weight, TrendingUp } from "lucide-react";
+
+export interface TotauxPesees {
+    totalPesees: number;
+    poidsBrutTotal: number;
+    poidsTareTotal: number;
+    poidsNetTotal: number;
+}
 
 interface PeseesPageContentProps {
     saisonFiltre: SaisonFiltreProps;
-    pesees: Pesee[];
+    resultat: PaginatedResult<PeseeGroupee>;
+    /**
+     * Totaux agrégés en base sur tout le jeu filtré. Les recalculer depuis
+     * `resultat.items` donnerait les totaux des dix livraisons affichées, sans
+     * aucun signe visible que le chiffre est faux.
+     */
+    totaux: TotauxPesees;
 }
 
-export function PeseesPageContent({ pesees, saisonFiltre }: PeseesPageContentProps) {
+export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPageContentProps) {
     const { t } = useClientTranslations();
 
-    const totalPesees = pesees.length;
-    const poidsBrutTotal = pesees.reduce((sum, p) => sum + p.poidsBrutTotal, 0);
-    const poidsNetTotal = pesees.reduce((sum, p) => sum + p.poidsNetTotal, 0);
-    const tareTotal = pesees.reduce((sum, p) => sum + p.poidsTareTotal, 0);
+    const { totalPesees, poidsBrutTotal, poidsNetTotal, poidsTareTotal: tareTotal } = totaux;
     const pourcentageTare = poidsBrutTotal > 0 ? (tareTotal / poidsBrutTotal) * 100 : 0;
 
     return (
@@ -110,7 +121,7 @@ export function PeseesPageContent({ pesees, saisonFiltre }: PeseesPageContentPro
 
             {/* Table */}
             <div className="bg-white rounded-[14px] border border-gray-200 shadow-sm">
-                <PeseesTableAdvanced data={pesees} />
+                <PeseesTableServer resultat={resultat} />
             </div>
         </PageContainer>
     );

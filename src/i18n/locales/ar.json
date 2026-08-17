@@ -36,7 +36,10 @@
         "total": "الإجمالي",
         "actif": "نشط",
         "inactif": "غير نشط",
-        "view": "عرض"
+        "view": "عرض",
+        "sortBy": "ترتيب حسب",
+        "rangeOfTotal": "{start}–{end} من {total}",
+        "retry": "إعادة المحاولة"
     },
     "validation": {
         "required": "هذا الحقل مطلوب",
@@ -390,7 +393,17 @@
         "creating": "جارٍ الإنشاء...",
         "updating": "جارٍ التحديث...",
         "deleting": "جارٍ الحذف...",
-        "kg": "كلغ"
+        "kg": "كلغ",
+        "suppression": {
+            "refus": "يتعذّر الحذف:",
+            "motifs": {
+                "STOCK_VENDU": "{count} عملية بيع تعتمد على هذا المخزون",
+                "STOCK_CONDITIONNE": "{count} عملية تعبئة تستخدم هذا المخزون",
+                "STOCK_SORTI": "{count} سند خروج يستخدم هذا المخزون",
+                "BON_ACHAT_PAYE": "{count} دفعة مسجّلة على سند الشراء",
+                "ECHANTILLON_ANALYSE": "{count} تحليل مرتبط بالعينات"
+            }
+        }
     },
     "nouvellePesee": {
         "createNew": "وزن جديد",
@@ -672,6 +685,7 @@
         "nombreLots": "الدفعات",
         "voirLots": "عرض الدفعات",
         "detailLots": "تفاصيل الدفعات المستلمة لهذا الصنف",
+        "searchLotPlaceholder": "البحث عن دفعة أو فلاح...",
         "dateEntree": "تاريخ الدخول",
         "empty": "لا يوجد مخزون تمور بعد",
         "stats": {
@@ -701,7 +715,8 @@
             "generic": "حدث خطأ",
             "notFound": "{entity} غير موجود",
             "alreadyExists": "{entity} موجود بالفعل",
-            "cannotDelete": "لا يمكن حذف {entity}"
+            "cannotDelete": "لا يمكن حذف {entity}",
+            "database": "قاعدة البيانات غير متاحة موقتًا. تحقق من اتصالك ثم أعد المحاولة."
         }
     },
     "pretsCaisses": {

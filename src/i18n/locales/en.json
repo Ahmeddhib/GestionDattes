@@ -36,7 +36,10 @@
         "total": "Total",
         "actif": "Active",
         "inactif": "Inactive",
-        "view": "View"
+        "view": "View",
+        "sortBy": "Sort by",
+        "rangeOfTotal": "{start}–{end} of {total}",
+        "retry": "Retry"
     },
     "validation": {
         "required": "This field is required",
@@ -390,7 +393,17 @@
         "creating": "Creating...",
         "updating": "Updating...",
         "deleting": "Deleting...",
-        "kg": "kg"
+        "kg": "kg",
+        "suppression": {
+            "refus": "Cannot delete:",
+            "motifs": {
+                "STOCK_VENDU": "{count} sale(s) already draw on this stock",
+                "STOCK_CONDITIONNE": "{count} packaging record(s) use this stock",
+                "STOCK_SORTI": "{count} delivery note(s) use this stock",
+                "BON_ACHAT_PAYE": "{count} payment(s) recorded on the purchase order",
+                "ECHANTILLON_ANALYSE": "{count} analysis record(s) linked to the samples"
+            }
+        }
     },
     "nouvellePesee": {
         "createNew": "New Weighing",
@@ -672,6 +685,7 @@
         "nombreLots": "Lots",
         "voirLots": "View lots",
         "detailLots": "Detail of received lots for this date type",
+        "searchLotPlaceholder": "Search a lot, a farmer...",
         "dateEntree": "Entry date",
         "empty": "No date stock yet",
         "stats": {
@@ -701,7 +715,8 @@
             "generic": "An error occurred",
             "notFound": "{entity} not found",
             "alreadyExists": "{entity} already exists",
-            "cannotDelete": "Cannot delete {entity}"
+            "cannotDelete": "Cannot delete {entity}",
+            "database": "The database is temporarily unreachable. Check your connection and try again."
         }
     },
     "pretsCaisses": {

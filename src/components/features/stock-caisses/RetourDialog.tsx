@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDownToLine } from "lucide-react";
+import { Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -48,8 +48,18 @@ export function RetourDialog({ pret }: RetourDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-green-600">
-                    <ArrowDownToLine className="h-4 w-4" />
+                {/* `Undo2` et non une flèche de téléchargement : l'action rend
+                    des caisses prêtées, elle ne télécharge rien. Le bouton est
+                    sans texte, d'où le `title` et l'`aria-label` — sinon il
+                    n'avait aucun nom accessible. */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-sm text-green-600 hover:bg-green-50 hover:text-green-700"
+                    title={t("pretsCaisses.retournerCaisses")}
+                    aria-label={t("pretsCaisses.retournerCaisses")}
+                >
+                    <Undo2 className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="rounded-lg sm:max-w-112.5 bg-white">

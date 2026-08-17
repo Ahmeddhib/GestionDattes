@@ -141,23 +141,35 @@ export const pretCaisseService = {
         }
 
         // Transaction: créer le prêt ET déduire du stock
-        const pret = await prisma.$transaction(async (tx) => {
-            // Créer le prêt
-            const nouveauPret = await pretCaisseRepository.create(data, tenantId, userId, saison.id);
+        const pret = await prisma.$transaction(
+            async (tx) => {
+                const nouveauPret = await pretCaisseRepository.create(
+                    data,
+                    tenantId,
+                    userId,
+                    saison.id,
+                    tx
+                );
 
-            // Déduire du stock
-            await tx.typeCaisse.update({
-                where: { id: data.typeCaisseId },
-                data: {
-                    stockDisponible: {
-                        decrement: data.nombrePrete,
+                // `updateMany` filtré par tenant : `update` sur l'id seul
+                // laissait la porte ouverte à un décrément sur le type de caisse
+                // d'une autre Wakala si l'id venait à ne pas correspondre.
+                await tx.typeCaisse.updateMany({
+                    where: { id: data.typeCaisseId, tenantId },
+                    data: {
+                        stockDisponible: { decrement: data.nombrePrete },
+                        updatedAt: new Date(),
                     },
-                    updatedAt: new Date(),
-                },
-            });
+                });
 
-            return nouveauPret;
-        });
+                return nouveauPret;
+            },
+            // Le délai par défaut de Prisma est de 5 s. Il suffit largement quand
+            // l'application et la base sont dans la même région, mais expire dès
+            // que la latence est élevée — ce qui faisait échouer la création avec
+            // un P2028 alors que rien n'était anormal.
+            { timeout: 20000, maxWait: 10000 }
+        );
 
         // Audit log
         await auditService.log({

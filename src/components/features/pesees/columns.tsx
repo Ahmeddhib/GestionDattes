@@ -37,6 +37,21 @@ export type Pesee = {
 };
 
 /**
+ * Ligne de pesée telle qu'affichée dans le détail d'une livraison.
+ *
+ * Sous-ensemble de `Pesee` : le poids de chaque caisse individuelle (`caisses`)
+ * n'y figure pas, car le détail n'affiche que le type et les totaux. Le charger
+ * ramenait une ligne par caisse pesée, jamais lue.
+ */
+export type LignePesee = {
+    id: string;
+    typeCaisse: { id: string; nom: string } | null;
+    typeDate: { id: string; nom: string } | null;
+    nombreCaisses: number;
+    poidsNetTotal: number;
+};
+
+/**
  * Une livraison peut contenir plusieurs Pesee (une par combinaison type de
  * datte / type de caisse). Pour l'affichage, elles sont regroupées en une
  * seule ligne de tableau par livraison.
@@ -46,7 +61,7 @@ export type PeseeGroupee = {
     numeroLot: string;
     dateLivraison: Date;
     agriculteur: { id: string; code: string; nom: string; prenom: string };
-    lignes: Pesee[];
+    lignes: LignePesee[];
     nombreCaisses: number;
     poidsBrutTotal: number;
     poidsTareTotal: number;

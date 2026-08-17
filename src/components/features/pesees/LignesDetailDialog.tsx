@@ -19,11 +19,11 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import type { Pesee } from "./columns";
+import type { LignePesee } from "./columns";
 
 interface LignesDetailDialogProps {
     numeroLot: string;
-    lignes: Pesee[];
+    lignes: LignePesee[];
 }
 
 export function LignesDetailDialog({ numeroLot, lignes }: LignesDetailDialogProps) {

@@ -25,8 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // `data-scroll-behavior="smooth"` acquitte le `scroll-behavior: smooth`
+    // déclaré sur `html` dans globals.css. Sans cet attribut, Next avertit et
+    // laisse le défilement animé s'appliquer aux changements de route : la
+    // restauration de position au retour arrière devient une animation, et
+    // atterrit à côté. Voir MainScrollRestoration.
     <html
       lang="fr"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

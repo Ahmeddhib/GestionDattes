@@ -1,7 +1,8 @@
 "use client";
 
 import { Truck } from "lucide-react";
-import { LivraisonsTableAdvanced } from "@/components/features/livraisons/LivraisonsTableAdvanced";
+import { LivraisonsTableServer } from "@/components/features/livraisons/LivraisonsTableServer";
+import type { PaginatedResult } from "@/lib/pagination";
 import { NouvellePeseeWizard } from "@/components/features/livraisons/NouvellePeseeWizard";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { PageContainer } from "@/components/shared/PageContainer";
@@ -31,35 +32,36 @@ type Livraison = {
     };
 };
 
+export type TotauxLivraisons = {
+    total: number;
+    quantiteTotale: number;
+    ceMois: number;
+    cetteAnnee: number;
+};
+
 type LivraisonsPageContentProps = {
-    livraisons: Livraison[];
+    resultat: PaginatedResult<Livraison>;
+    /**
+     * Totaux du jeu de données FILTRÉ, calculés en base.
+     *
+     * ⚠️ Ne jamais les recalculer depuis `resultat.items` : depuis la
+     * pagination serveur, ce tableau ne contient qu'une page. Le total
+     * afficherait « la somme des dix lignes visibles », sans erreur visible.
+     */
+    totaux: TotauxLivraisons;
     canEditAcceptedQuantity: boolean;
     saisonFiltre: SaisonFiltreProps;
     saisonOuverte: SaisonActive | null;
 };
 
 export function LivraisonsPageContent({
-    livraisons,
+    resultat,
+    totaux,
     canEditAcceptedQuantity,
     saisonFiltre,
     saisonOuverte,
 }: LivraisonsPageContentProps) {
     const { t } = useClientTranslations();
-
-    // Calculer les statistiques
-    const totalQuantity = livraisons.reduce((acc, l) => acc + l.quantiteKg, 0);
-
-    const now = new Date();
-    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const thisYearStart = new Date(now.getFullYear(), 0, 1);
-
-    const thisMonth = livraisons.filter(
-        (l) => new Date(l.dateLivraison) >= thisMonthStart
-    ).length;
-
-    const thisYear = livraisons.filter(
-        (l) => new Date(l.dateLivraison) >= thisYearStart
-    ).length;
 
     return (
         <PageContainer>
@@ -101,7 +103,7 @@ export function LivraisonsPageContent({
                                 {t("livraisons.total")}
                             </p>
                             <p className="text-2xl font-bold text-[#3D1C00]">
-                                {livraisons.length}
+                                {totaux.total}
                             </p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
@@ -116,7 +118,7 @@ export function LivraisonsPageContent({
                             <p className="text-sm text-[#3D1C00]/60">
                                 {t("livraisons.thisMonth")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">{thisMonth}</p>
+                            <p className="text-2xl font-bold text-[#3D1C00]">{totaux.ceMois}</p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Truck className="h-6 w-6 text-[#C17A2B]" />
@@ -130,7 +132,7 @@ export function LivraisonsPageContent({
                             <p className="text-sm text-[#3D1C00]/60">
                                 {t("livraisons.thisYear")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">{thisYear}</p>
+                            <p className="text-2xl font-bold text-[#3D1C00]">{totaux.cetteAnnee}</p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Truck className="h-6 w-6 text-[#C17A2B]" />
@@ -145,7 +147,7 @@ export function LivraisonsPageContent({
                                 {t("livraisons.totalQuantity")}
                             </p>
                             <p className="text-2xl font-bold text-[#3D1C00]">
-                                {totalQuantity.toFixed(0)} {t("livraisons.kg")}
+                                {totaux.quantiteTotale.toFixed(0)} {t("livraisons.kg")}
                             </p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
@@ -155,9 +157,9 @@ export function LivraisonsPageContent({
                 </div>
             </div>
 
-            {/* Table */}
-            <LivraisonsTableAdvanced
-                livraisons={livraisons}
+            {/* Table : pagination, tri et recherche exécutés par la base. */}
+            <LivraisonsTableServer
+                resultat={resultat}
                 canEditAcceptedQuantity={canEditAcceptedQuantity}
             />
         </PageContainer>

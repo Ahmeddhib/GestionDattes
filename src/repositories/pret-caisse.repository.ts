@@ -203,11 +203,15 @@ export const pretCaisseRepository = {
         data: CreatePretCaisseInput,
         tenantId: string,
         createdById: string,
-        saisonId: string
+        saisonId: string,
+        // Sans ce paramètre, la création partait toujours sur le client global :
+        // appelée depuis une transaction, elle s'exécutait EN DEHORS, et le prêt
+        // subsistait si le décrément de stock échouait ensuite.
+        client: DbClient = prisma
     ) {
         const { createId } = await import("@paralleldrive/cuid2");
 
-        return prisma.pretCaisse.create({
+        return client.pretCaisse.create({
             data: {
                 id: createId(),
                 nombrePrete: data.nombrePrete,

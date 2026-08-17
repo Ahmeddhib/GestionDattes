@@ -5,8 +5,10 @@ import { stockDateService } from "@/services/stock-date.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
 
 /**
- * Action pour récupérer le stock de dattes regroupé par type (avec le détail
- * des lots par livraison).
+ * Action pour récupérer le stock de dattes regroupé par type.
+ *
+ * Ne renvoie plus le détail des lots : il se lit à la demande via
+ * `getLotsStockPageAction`.
  */
 export async function getStockDatesAction(opts?: { saisonId?: string }) {
     try {
@@ -16,7 +18,7 @@ export async function getStockDatesAction(opts?: { saisonId?: string }) {
         }
 
         const tenantId = await getTenantId();
-        const stockDates = await stockDateService.getAll(tenantId, opts);
+        const stockDates = await stockDateService.getGroupes(tenantId, opts);
 
         return { success: true, data: stockDates };
     } catch (error) {

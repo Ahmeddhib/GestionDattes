@@ -103,6 +103,42 @@ export const auditRepository = {
         });
     },
 
+    /**
+     * Écrit plusieurs entrées d'audit en une seule instruction.
+     *
+     * Une entrée par itération de boucle coûtait un aller-retour chacune, ce
+     * qui domine le temps d'une création multi-lignes lorsque la base est
+     * distante. `createMany` n'a pas de `select`, mais un journal n'a jamais
+     * besoin d'être relu juste après avoir été écrit.
+     */
+    async createMany(
+        entrees: {
+            tenantId: string;
+            actorId: string;
+            action: AuditAction;
+            description?: string;
+            targetId?: string;
+            details?: any;
+        }[],
+        client: DbClient = prisma
+    ) {
+        if (entrees.length === 0) return { count: 0 };
+
+        const { createId } = await import("@paralleldrive/cuid2");
+
+        return client.auditLog.createMany({
+            data: entrees.map((e) => ({
+                id: createId(),
+                tenantId: e.tenantId,
+                actorId: e.actorId,
+                action: e.action,
+                description: e.description,
+                targetId: e.targetId,
+                details: e.details,
+            })),
+        });
+    },
+
     async count(tenantId: string) {
         return prisma.auditLog.count({
             where: { tenantId },

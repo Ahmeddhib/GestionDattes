@@ -81,7 +81,26 @@ export const livraisonPeseeService = {
                 tx
             );
 
+            // Les entrées d'audit sont accumulées puis écrites en une seule
+            // instruction à la fin : une écriture par itération multipliait les
+            // allers-retours sans rien apporter, le journal n'étant jamais relu
+            // dans la foulée.
+            const entreesAudit: Parameters<typeof auditService.logMany>[0] = [];
+
             for (const r of resolved) {
+                // Le retour de caisses est fait AVANT la pesée pour que son
+                // résultat exact soit consigné dessus : c'est cette trace qui
+                // permet d'annuler le retour à l'identique si la livraison est
+                // supprimée plus tard.
+                const caissesRetournees = await retournerCaissesAutomatiquement(
+                    tx,
+                    tenantId,
+                    data.agriculteurId,
+                    r.typeCaisseId,
+                    r.totals.nombreCaisses,
+                    numeroLot
+                );
+
                 const pesee = await peseeRepository.create(
                     tenantId,
                     livraison.id,
@@ -93,34 +112,23 @@ export const livraisonPeseeService = {
                     r.totals,
                     r.prixKg,
                     r.quantiteAcceptee,
-                    tx
-                );
-
-                await retournerCaissesAutomatiquement(
                     tx,
-                    tenantId,
-                    data.agriculteurId,
-                    r.typeCaisseId,
-                    r.totals.nombreCaisses,
-                    numeroLot
+                    caissesRetournees
                 );
 
-                await auditService.log(
-                    {
-                        tenantId,
-                        actorId: userId,
-                        action: "CREATE_PESEE",
-                        targetId: pesee.id,
-                        description: `Pesée créée (assistant) pour la livraison ${numeroLot} (${r.typeCaisse.nom} / ${r.typeDate.nom})`,
-                        details: {
-                            typeCaisse: r.typeCaisse.nom,
-                            typeDate: r.typeDate.nom,
-                            nombreCaisses: r.totals.nombreCaisses,
-                            poidsNetTotal: r.totals.poidsNetTotal.toNumber(),
-                        },
+                entreesAudit.push({
+                    tenantId,
+                    actorId: userId,
+                    action: "CREATE_PESEE",
+                    targetId: pesee.id,
+                    description: `Pesée créée (assistant) pour la livraison ${numeroLot} (${r.typeCaisse.nom} / ${r.typeDate.nom})`,
+                    details: {
+                        typeCaisse: r.typeCaisse.nom,
+                        typeDate: r.typeDate.nom,
+                        nombreCaisses: r.totals.nombreCaisses,
+                        poidsNetTotal: r.totals.poidsNetTotal.toNumber(),
                     },
-                    tx
-                );
+                });
             }
 
             const numeroBonAchat = await bonAchatRepository.generateNumeroBonAchat(tenantId, tx);
@@ -138,7 +146,7 @@ export const livraisonPeseeService = {
                 tx
             );
 
-            await auditService.log(
+            entreesAudit.push(
                 {
                     tenantId,
                     actorId: userId,
@@ -147,10 +155,6 @@ export const livraisonPeseeService = {
                     description: `Bon d'achat ${numeroBonAchat} généré pour la livraison ${numeroLot}`,
                     details: { numero: numeroBonAchat, prixKgMoyen, montant: montantTotal },
                 },
-                tx
-            );
-
-            await auditService.log(
                 {
                     tenantId,
                     actorId: userId,
@@ -163,9 +167,10 @@ export const livraisonPeseeService = {
                         lignes: resolved.length,
                         quantiteLivreeTotal,
                     },
-                },
-                tx
+                }
             );
+
+            await auditService.logMany(entreesAudit, tx);
 
             return { livraison, bonAchat };
         }, { timeout: 20000, maxWait: 10000 });

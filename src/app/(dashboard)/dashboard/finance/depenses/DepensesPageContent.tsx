@@ -1,7 +1,8 @@
 "use client";
 
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { DepensesTableAdvanced } from "@/components/features/depenses/DepensesTableAdvanced";
+import { DepensesTableServer } from "@/components/features/depenses/DepensesTableServer";
+import type { PaginatedResult } from "@/lib/pagination";
 import { CreateDepenseDialog } from "@/components/features/depenses/CreateDepenseDialog";
 import type { Depense } from "@/components/features/depenses/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
@@ -11,23 +12,28 @@ import type { SaisonActive } from "@/components/features/saisons/SaisonActiveFie
 import { Wallet2 } from "lucide-react";
 import type { PdfBranding } from "@/lib/pdf-branding";
 
+export type TotauxDepenses = { total: number; montantTotal: number };
+
 interface DepensesPageContentProps {
     saisonFiltre: SaisonFiltreProps;
     saisonOuverte: SaisonActive | null;
-    depenses: Depense[];
+    resultat: PaginatedResult<Depense>;
+    /**
+     * Totaux du jeu FILTRÉ, calculés en base. Ne jamais les recalculer depuis
+     * `resultat.items` : ce tableau ne contient qu'une page.
+     */
+    totaux: TotauxDepenses;
     branding: PdfBranding;
 }
 
 export function DepensesPageContent({
-    depenses,
+    resultat,
+    totaux,
     saisonFiltre,
     saisonOuverte,
     branding,
 }: DepensesPageContentProps) {
     const { t } = useClientTranslations();
-
-    const total = depenses.length;
-    const montantTotal = depenses.reduce((sum, d) => sum + d.montant, 0);
 
     return (
         <PageContainer>
@@ -50,7 +56,7 @@ export function DepensesPageContent({
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">{t("common.total")}</p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{total}</p>
+                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{totaux.total}</p>
                         </div>
                         <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
                             <Wallet2 className="h-6 w-6 text-[#C17A2B]" />
@@ -64,7 +70,7 @@ export function DepensesPageContent({
                             <p className="text-sm font-medium text-gray-600">
                                 {t("finance.depenses.montant")}
                             </p>
-                            <p className="text-3xl font-bold text-red-600 mt-2">{montantTotal.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-red-600 mt-2">{totaux.montantTotal.toFixed(2)}</p>
                         </div>
                         <div className="h-12 w-12 bg-red-100 rounded-md flex items-center justify-center">
                             <Wallet2 className="h-6 w-6 text-red-600" />
@@ -74,7 +80,7 @@ export function DepensesPageContent({
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <DepensesTableAdvanced data={depenses} branding={branding} />
+                <DepensesTableServer resultat={resultat} branding={branding} />
             </div>
         </PageContainer>
     );

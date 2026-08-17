@@ -1,8 +1,70 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
+import { paginate, resolveOrderBy, type SortDirection } from "@/lib/pagination";
 import type { CreateLivraisonInput, UpdateLivraisonInput } from "@/validators/livraison.validator";
 
 type DbClient = typeof prisma | Prisma.TransactionClient;
+
+/**
+ * Colonnes triables exposées à l'URL.
+ *
+ * ⚠️ Table fermée : `resolveOrderBy` n'accepte qu'une de ces clés et retombe
+ * sur le tri par défaut sinon. Aucun nom de colonne ne transite depuis l'URL
+ * vers Prisma. Chaque entrée correspond à un index existant — trier sur une
+ * colonne non indexée ferait trier la table entière en mémoire côté base.
+ */
+const TRIS_LIVRAISON: Record<
+    string,
+    (dir: SortDirection) => Prisma.LivraisonOrderByWithRelationInput
+> = {
+    numeroLot: (dir) => ({ numeroLot: dir }),
+    dateLivraison: (dir) => ({ dateLivraison: dir }),
+    quantiteLivree: (dir) => ({ quantiteLivree: dir }),
+    quantiteAcceptee: (dir) => ({ quantiteAcceptee: dir }),
+    createdAt: (dir) => ({ createdAt: dir }),
+    agriculteur: (dir) => ({ Agriculteur: { nom: dir } }),
+};
+
+/**
+ * Recherche côté base, jamais en mémoire : on ne peut pas filtrer un jeu de
+ * données qu'on ne charge plus entièrement. Porte sur le numéro de lot et sur
+ * l'identité de l'agriculteur, les deux entrées naturelles.
+ */
+function buildLivraisonWhere(
+    tenantId: string,
+    search: string,
+    saisonId?: string
+): Prisma.LivraisonWhereInput {
+    return {
+        tenantId,
+        ...(saisonId && { saisonId }),
+        ...(search && {
+            OR: [
+                { numeroLot: { contains: search, mode: "insensitive" as const } },
+                { Agriculteur: { nom: { contains: search, mode: "insensitive" as const } } },
+                { Agriculteur: { prenom: { contains: search, mode: "insensitive" as const } } },
+                { Agriculteur: { code: { contains: search, mode: "insensitive" as const } } },
+            ],
+        }),
+    };
+}
+
+/** Relations chargées avec une livraison, identiques en liste et en page. */
+const LIVRAISON_INCLUDE = {
+    Agriculteur: {
+        select: { id: true, code: true, nom: true, prenom: true, cin: true },
+    },
+    LivraisonTypeCaisse: {
+        include: {
+            TypeCaisse: { select: { id: true, nom: true, poidsKg: true } },
+            TypeDate: { select: { id: true, nom: true } },
+        },
+    },
+    BonAchat: { select: { id: true, numero: true, prixKg: true, montant: true } },
+    _count: {
+        select: { Echantillon: true, PretCaisse: true, StockDate: true, Pesee: true },
+    },
+} satisfies Prisma.LivraisonInclude;
 
 /**
  * Repository pour la gestion des livraisons (multi-tenant)
@@ -60,6 +122,74 @@ export const livraisonRepository = {
             },
             orderBy: { createdAt: "desc" },
         });
+    },
+
+    /**
+     * Une page de livraisons, filtrée, triée et comptée par la base.
+     *
+     * `paginate` lance la lecture et le comptage en parallèle et rattrape le
+     * cas d'une page demandée au-delà du dernier numéro.
+     */
+    async findPage(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+        }
+    ) {
+        const where = buildLivraisonWhere(tenantId, params.search, params.saisonId);
+        const orderBy = resolveOrderBy<Prisma.LivraisonOrderByWithRelationInput>(
+            params.sortBy,
+            params.sortDir,
+            TRIS_LIVRAISON,
+            (dir) => ({ createdAt: dir })
+        );
+
+        return paginate(
+            params.page,
+            params.pageSize,
+            (skip, take) =>
+                prisma.livraison.findMany({ where, include: LIVRAISON_INCLUDE, orderBy, skip, take }),
+            () => prisma.livraison.count({ where })
+        );
+    },
+
+    /**
+     * Totaux du jeu de données FILTRÉ, indépendants de la page affichée.
+     *
+     * Indispensable depuis la pagination serveur : additionner les lignes reçues
+     * donnerait « le total des dix lignes visibles » sans la moindre erreur
+     * visible. Trois agrégats en parallèle plutôt qu'un chargement complet.
+     */
+    async getTotauxFiltres(
+        tenantId: string,
+        params: { search: string; saisonId?: string }
+    ) {
+        const where = buildLivraisonWhere(tenantId, params.search, params.saisonId);
+        const maintenant = new Date();
+        const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+        const debutAnnee = new Date(maintenant.getFullYear(), 0, 1);
+
+        const [global, ceMois, cetteAnnee] = await Promise.all([
+            prisma.livraison.aggregate({
+                where,
+                _count: { _all: true },
+                _sum: { quantiteLivree: true },
+            }),
+            prisma.livraison.count({ where: { ...where, dateLivraison: { gte: debutMois } } }),
+            prisma.livraison.count({ where: { ...where, dateLivraison: { gte: debutAnnee } } }),
+        ]);
+
+        return {
+            total: global._count._all,
+            quantiteTotale: global._sum.quantiteLivree ?? 0,
+            ceMois,
+            cetteAnnee,
+        };
     },
 
     /**
@@ -253,11 +383,16 @@ export const livraisonRepository = {
     },
 
     /**
-     * Supprime une livraison
+     * ⚠️ Ne pas utiliser pour supprimer une livraison saisie via l'assistant :
+     * elle laisserait derrière elle la pesée, le stock et le bon d'achat, et le
+     * retour de caisses ne serait pas annulé. Le chemin correct est
+     * `supprimerLivraisonEnCascade` (`livraison-suppression.service.ts`), qui
+     * défait l'ensemble dans une transaction. Conservée pour les suppressions
+     * unitaires internes uniquement.
      */
     async delete(id: string, tenantId: string) {
-        return prisma.livraison.delete({
-            where: { id },
+        return prisma.livraison.deleteMany({
+            where: { id, tenantId },
         });
     },
 

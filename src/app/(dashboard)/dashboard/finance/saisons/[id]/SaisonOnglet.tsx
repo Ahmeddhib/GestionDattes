@@ -160,10 +160,12 @@ export async function SaisonOnglet({
             // Lots ENTRÉS pendant cette saison (`saisonOrigineId`). Un lot
             // vendu pendant une campagne ultérieure reste listé ici : c'est son
             // origine, pas sa disponibilité, qui définit son appartenance.
-            const stockDates = await stockDateService.getAll(tenantId, { saisonId });
+            const stockDates = await stockDateService.getGroupes(tenantId, { saisonId });
             return (
                 <Panneau note={t("finance.saisons.detail.stockNote")}>
-                    <StockDattesTableAdvanced data={stockDates} />
+                    {/* `saisonId` vient du paramètre de route : le détail des lots
+                        doit rester borné à la saison consultée. */}
+                    <StockDattesTableAdvanced data={stockDates} saisonId={saisonId} />
                 </Panneau>
             );
         }

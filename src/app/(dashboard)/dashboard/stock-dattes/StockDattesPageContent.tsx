@@ -10,11 +10,20 @@ import { Grape, Warehouse } from "lucide-react";
 interface StockDattesPageContentProps {
     saisonFiltre: SaisonFiltreProps;
     stockDates: StockDateGroupe[];
+    saisonId?: string;
 }
 
-export function StockDattesPageContent({ stockDates, saisonFiltre }: StockDattesPageContentProps) {
+export function StockDattesPageContent({
+    stockDates,
+    saisonFiltre,
+    saisonId,
+}: StockDattesPageContentProps) {
     const { t } = useClientTranslations();
 
+    // Ces sommes restent justes : `stockDates` contient TOUS les types du filtre
+    // courant, chacun déjà agrégé en base sur l'intégralité de ses lots. Ce n'est
+    // pas le cas des modules paginés, où sommer les lignes reçues ne donnerait que
+    // le total de la page affichée.
     const quantiteTotale = stockDates.reduce((sum, s) => sum + s.quantiteTotale, 0);
     const quantiteDisponible = stockDates.reduce((sum, s) => sum + s.quantiteDisponible, 0);
 
@@ -69,7 +78,7 @@ export function StockDattesPageContent({ stockDates, saisonFiltre }: StockDattes
             </div>
 
             <div className="bg-white rounded-[14px] border border-gray-200 shadow-sm">
-                <StockDattesTableAdvanced data={stockDates} />
+                <StockDattesTableAdvanced data={stockDates} saisonId={saisonId} />
             </div>
         </PageContainer>
     );

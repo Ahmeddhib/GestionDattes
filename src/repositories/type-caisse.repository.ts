@@ -102,6 +102,32 @@ export const typeCaisseRepository = {
     },
 
     /**
+     * Ajoute (ou retire, si négatif) des caisses au stock disponible, de façon
+     * atomique.
+     *
+     * `updateMany` et non `update` : il accepte un `where` non unique, ce qui
+     * permet de filtrer par tenant dans la MÊME instruction. Le motif
+     * « lire puis réécrire une valeur calculée » qu'il remplace coûtait trois
+     * allers-retours et perdait une mise à jour dès que deux pesées portant sur
+     * le même type de caisse s'exécutaient en parallèle.
+     *
+     * @returns le nombre de lignes touchées — `0` si le type de caisse
+     *          n'appartient pas au tenant.
+     */
+    async incrementerStock(
+        tenantId: string,
+        id: string,
+        delta: number,
+        client: DbClient = prisma
+    ): Promise<number> {
+        const { count } = await client.typeCaisse.updateMany({
+            where: { id, tenantId },
+            data: { stockDisponible: { increment: delta }, updatedAt: new Date() },
+        });
+        return count;
+    },
+
+    /**
      * Mettre à jour un type de caisse
      * Vérifie que le type de caisse appartient au tenant
      */

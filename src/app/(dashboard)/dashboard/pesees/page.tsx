@@ -5,6 +5,7 @@ import { getServerTranslations } from "@/i18n/server";
 import { hasPermission } from "@/lib/permissions";
 import { getTenantFromSession } from "@/lib/tenant/get-tenant";
 import { getSaisonFiltrePourPage } from "@/lib/saison-filter";
+import { parseQueryParams, type RawSearchParams } from "@/lib/pagination";
 import { peseeService } from "@/services/pesee.service";
 import { PeseesPageContent } from "./PeseesPageContent";
 
@@ -18,7 +19,7 @@ export async function generateMetadata() {
 export default async function PeseesPage({
     searchParams,
 }: {
-    searchParams: Promise<{ saisonId?: string }>;
+    searchParams: Promise<RawSearchParams>;
 }) {
     const session = await auth();
     if (!session) redirect(ROUTES.LOGIN);
@@ -28,10 +29,19 @@ export default async function PeseesPage({
     }
 
     const tenantId = getTenantFromSession(session);
-    const { saisonId: saisonParam } = await searchParams;
+    const params = await searchParams;
+    const saisonParam = Array.isArray(params.saisonId) ? params.saisonId[0] : params.saisonId;
     const { saisonId, saisonFiltre } = await getSaisonFiltrePourPage(tenantId, saisonParam);
 
-    const pesees = await peseeService.getAll(tenantId, session.user.id, { saisonId });
+    const { page, pageSize, search, sortBy, sortDir } = parseQueryParams(params);
+    const { resultat, totaux } = await peseeService.getPageParLivraison(tenantId, {
+        page,
+        pageSize,
+        search,
+        sortBy,
+        sortDir,
+        saisonId,
+    });
 
-    return <PeseesPageContent pesees={pesees} saisonFiltre={saisonFiltre} />;
+    return <PeseesPageContent resultat={resultat} totaux={totaux} saisonFiltre={saisonFiltre} />;
 }
