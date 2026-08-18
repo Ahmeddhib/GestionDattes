@@ -72,20 +72,20 @@ export function DataTable<TData, TValue>({
                         onChange={(event) =>
                             table.getColumn(searchKey)?.setFilterValue(event.target.value)
                         }
-                        className="w-full rounded-[7px] bg-white sm:max-w-sm"
+                        className="h-10 w-full rounded-xl bg-background sm:max-w-sm"
                     />
                 </div>
             )}
 
             {/* Table */}
-            <div className="max-w-full overflow-hidden rounded-[14px] border border-[#C17A2B]/20">
+            <div className="max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                 <Table className="min-w-max">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className="text-[#3D1C00] font-semibold">
+                                    <TableHead key={header.id} className="font-semibold text-foreground">
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -104,7 +104,7 @@ export function DataTable<TData, TValue>({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className="hover:bg-[#FAF0DC]/50"
+                                            className="hover:bg-muted/50"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -115,7 +115,7 @@ export function DataTable<TData, TValue>({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center text-[#3D1C00]/60">
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
                                     Aucun résultat.
                                 </TableCell>
                             </TableRow>
@@ -126,22 +126,22 @@ export function DataTable<TData, TValue>({
 
             {/* Pagination */}
             <div className="flex flex-col gap-3 px-1 sm:flex-row sm:items-center sm:justify-between sm:px-2">
-                <div className="text-sm text-[#3D1C00]/60 sm:flex-1">
+            <div className="text-sm text-muted-foreground sm:flex-1">
                     {table.getFilteredRowModel().rows.length} ligne(s) au total
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:gap-6">
                     <div className="hidden items-center gap-2 sm:flex">
-                        <p className="text-sm font-medium text-[#3D1C00]">Lignes par page</p>
+                    <p className="text-sm font-medium text-foreground">Lignes par page</p>
                         <Select
                             value={`${table.getState().pagination.pageSize}`}
                             onValueChange={(value) => {
                                 table.setPageSize(Number(value));
                             }}
                         >
-                            <SelectTrigger className="h-8 w-[70px] rounded-[7px] bg-white">
+                        <SelectTrigger className="h-9 w-[70px] rounded-lg bg-background">
                                 <SelectValue placeholder={table.getState().pagination.pageSize} />
                             </SelectTrigger>
-                            <SelectContent side="top" className="bg-white">
+                        <SelectContent side="top">
                                 {[10, 20, 30, 40, 50].map((pageSize) => (
                                     <SelectItem key={pageSize} value={`${pageSize}`}>
                                         {pageSize}
@@ -150,7 +150,7 @@ export function DataTable<TData, TValue>({
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex min-w-24 items-center justify-center text-sm font-medium text-[#3D1C00]">
+                <div className="flex min-w-24 items-center justify-center text-sm font-medium text-foreground">
                         Page {table.getState().pagination.pageIndex + 1} sur{" "}
                         {table.getPageCount()}
                     </div>

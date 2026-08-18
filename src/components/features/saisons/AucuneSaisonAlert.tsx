@@ -16,10 +16,10 @@ export function AucuneSaisonAlert({ canGererSaisons = false }: { canGererSaisons
     const { t } = useClientTranslations();
 
     return (
-        <Alert variant="destructive" className="bg-red-50/60">
+        <Alert variant="destructive" className="rounded-2xl border-red-200 bg-red-50/70 dark:border-red-900/60 dark:bg-red-950/30">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>{t("finance.saisons.aucuneSaison.title")}</AlertTitle>
-            <AlertDescription className="text-red-700">
+            <AlertDescription className="text-red-700 dark:text-red-300">
                 {t("finance.saisons.aucuneSaison.message")}
                 {canGererSaisons && (
                     <>

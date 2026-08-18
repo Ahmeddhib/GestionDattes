@@ -44,7 +44,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
     const pathname = usePathname();
-    const premiumDashboard = pathname === "/dashboard";
+    const premiumDashboard = pathname.startsWith("/dashboard");
     const { t } = useClientTranslations();
 
     const menuSections = [

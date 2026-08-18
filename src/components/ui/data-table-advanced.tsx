@@ -255,7 +255,7 @@ export function DataTableAdvanced<TData, TValue>({
                             }
                             onSearchChange?.(value);
                         }}
-                        className="w-full rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
+                        className="h-10 w-full rounded-xl border-border bg-background/80 focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
                     />
                 )}
 
@@ -265,14 +265,14 @@ export function DataTableAdvanced<TData, TValue>({
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-full rounded-md border-border sm:ms-auto sm:w-auto"
+                            className="h-10 w-full rounded-xl border-border sm:ms-auto sm:w-auto"
                         >
                             <Settings2 className="mr-2 h-4 w-4" />
                             {t("common.columns")}
                             <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-50 bg-white">
+                    <DropdownMenuContent align="end" className="w-50">
                         {table
                             .getAllColumns()
                             .filter(
@@ -296,7 +296,7 @@ export function DataTableAdvanced<TData, TValue>({
             </div>
 
             {/* Table */}
-            <div className="max-w-full overflow-hidden rounded-lg border border-border bg-white">
+            <div className="max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -304,7 +304,7 @@ export function DataTableAdvanced<TData, TValue>({
                     onDragEnd={handleDragEnd}
                 >
                     <Table className="min-w-max">
-                        <TableHeader className="bg-[#FAF0DC]">
+                        <TableHeader className="bg-muted/70">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
                                     {enableDragDrop && <TableHead className="w-10"></TableHead>}
@@ -312,7 +312,7 @@ export function DataTableAdvanced<TData, TValue>({
                                         return (
                                             <TableHead
                                                 key={header.id}
-                                                className="text-[#3D1C00] font-semibold"
+                                                className="font-semibold text-foreground"
                                             >
                                                 {header.isPlaceholder
                                                     ? null
@@ -365,7 +365,7 @@ export function DataTableAdvanced<TData, TValue>({
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:gap-6">
                     <div className="hidden items-center gap-2 sm:flex">
-                        <p className="text-sm font-medium text-[#3D1C00]">{t("common.rowsPerPage")}</p>
+                        <p className="text-sm font-medium text-foreground">{t("common.rowsPerPage")}</p>
                         <Select
                             value={`${table.getState().pagination.pageSize}`}
                             onValueChange={(value) => {
@@ -384,7 +384,7 @@ export function DataTableAdvanced<TData, TValue>({
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex min-w-24 items-center justify-center text-sm font-medium text-[#3D1C00]">
+                    <div className="flex min-w-24 items-center justify-center text-sm font-medium text-foreground">
                         {t("common.page")} {table.getState().pagination.pageIndex + 1} {t("common.of")}{" "}
                         {table.getPageCount()}
                     </div>

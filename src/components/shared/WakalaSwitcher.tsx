@@ -34,7 +34,7 @@ interface Props {
 }
 
 export default function WakalaSwitcher({ currentTenant, availableTenants }: Props) {
-    const premiumDashboard = usePathname() === "/dashboard";
+    const premiumDashboard = usePathname().startsWith("/dashboard");
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);

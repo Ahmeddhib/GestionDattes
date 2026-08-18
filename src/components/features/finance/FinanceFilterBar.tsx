@@ -45,14 +45,14 @@ export function FinanceFilterBar({ saisons, currentPeriode, currentSaisonId }: F
     }
 
     return (
-        <div className="grid grid-cols-1 items-end gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:flex xl:flex-wrap">
+        <div className="grid grid-cols-1 items-end gap-3 rounded-2xl border border-border bg-card/90 p-4 shadow-sm backdrop-blur-sm sm:grid-cols-2 xl:flex xl:flex-wrap">
             <div className="min-w-0 xl:min-w-45">
                 <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("finance.bilan.periode")}</label>
                 <Select value={periode} onValueChange={setPeriode}>
-                    <SelectTrigger className="w-full rounded-sm border-border">
+                    <SelectTrigger className="w-full rounded-xl border-border">
                         <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white">
+                    <SelectContent>
                         <SelectItem value="jour">{t("finance.bilan.periodeJour")}</SelectItem>
                         <SelectItem value="mois">{t("finance.bilan.periodeMois")}</SelectItem>
                         <SelectItem value="annee">{t("finance.bilan.periodeAnnee")}</SelectItem>
@@ -66,10 +66,10 @@ export function FinanceFilterBar({ saisons, currentPeriode, currentSaisonId }: F
                 <div className="min-w-0 xl:min-w-55">
                     <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("finance.bilan.selectSaison")}</label>
                     <Select value={saisonId} onValueChange={setSaisonId}>
-                        <SelectTrigger className="w-full rounded-sm border-border">
+                        <SelectTrigger className="w-full rounded-xl border-border">
                             <SelectValue placeholder={t("finance.bilan.selectSaison")} />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent>
                             {saisons.map((s) => (
                                 <SelectItem key={s.id} value={s.id}>
                                     {s.nom}
@@ -90,7 +90,7 @@ export function FinanceFilterBar({ saisons, currentPeriode, currentSaisonId }: F
             <Button
                 type="button"
                 onClick={applyFilters}
-                className="w-full gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F] xl:w-auto"
+                className="w-full gap-2 rounded-xl bg-linear-to-r from-[#b96f1d] to-[#dfa84e] font-semibold text-white shadow-sm hover:brightness-105 xl:w-auto"
             >
                 <Filter className="h-4 w-4" />
                 {t("common.search")}

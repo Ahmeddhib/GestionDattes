@@ -8,7 +8,7 @@ export function LoadingSkeleton({ className }: LoadingSkeletonProps) {
     return (
         <div
             className={cn(
-                "animate-pulse bg-gray-200 rounded-[9px]",
+                "animate-pulse rounded-lg bg-[#dfd2c0] dark:bg-[#5c4027]/45",
                 className
             )}
         />
@@ -36,7 +36,7 @@ export function StatsSkeleton() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white border border-[#F0E0C0] rounded-[14px] p-6">
+                <div key={i} className="erp-card rounded-2xl border border-border bg-card p-6 shadow-sm">
                     <LoadingSkeleton className="h-4 w-1/2 mb-2" />
                     <LoadingSkeleton className="h-8 w-2/3" />
                 </div>

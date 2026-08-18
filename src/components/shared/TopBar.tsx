@@ -35,7 +35,7 @@ interface TopBarProps {
 
 export function TopBar({ user }: TopBarProps) {
     const pathname = usePathname();
-    const premiumDashboard = pathname === "/dashboard";
+    const premiumDashboard = pathname.startsWith("/dashboard");
     const { t } = useClientTranslations();
     const [availableTenants, setAvailableTenants] = useState<Tenant[]>([]);
     const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);

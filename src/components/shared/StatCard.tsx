@@ -18,8 +18,8 @@ export function StatCard({ title, value, icon, trend, className }: StatCardProps
         <Card className={cn("relative overflow-hidden", className)}>
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-                    <p className="text-3xl font-bold text-[#2C1A00]">{value}</p>
+                    <p className="mb-1 text-sm font-medium text-[#806d57] dark:text-[#aa9983]">{title}</p>
+                    <p className="text-3xl font-bold text-[#2C1A00] dark:text-white">{value}</p>
                     {trend && (
                         <p
                             className={cn(
@@ -32,7 +32,7 @@ export function StatCard({ title, value, icon, trend, className }: StatCardProps
                     )}
                 </div>
                 {icon && (
-                    <div className="w-12 h-12 rounded-[9px] bg-dattes-100 flex items-center justify-center text-dattes-600">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-dattes-100 text-dattes-600 dark:bg-[#4b2b0e]/60 dark:text-[#efb453]">
                         {icon}
                     </div>
                 )}

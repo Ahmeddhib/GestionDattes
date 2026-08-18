@@ -115,7 +115,7 @@ export function DataTableServer<TData, TValue>({
                     placeholder={searchPlaceholder || t("common.search")}
                     value={searchDraft}
                     onChange={(e) => setSearchDraft(e.target.value)}
-                    className="w-full rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
+                    className="h-10 w-full rounded-xl border-border bg-background/80 focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
                 />
 
                 <div className="flex flex-wrap items-center gap-2 sm:ms-auto">
@@ -128,7 +128,7 @@ export function DataTableServer<TData, TValue>({
                                 <ChevronDown className="ml-2 h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-50 bg-white">
+                    <DropdownMenuContent align="end" className="w-50">
                             {table
                                 .getAllColumns()
                                 .filter((c) => typeof c.accessorFn !== "undefined" && c.getCanHide())
@@ -152,13 +152,13 @@ export function DataTableServer<TData, TValue>({
                 ne saute pas. */}
             <div
                 className={cn(
-                    "max-w-full overflow-x-auto rounded-lg border border-border bg-white transition-opacity",
+                    "max-w-full overflow-x-auto rounded-2xl border border-border bg-card shadow-sm transition-opacity",
                     isPending && "pointer-events-none opacity-60"
                 )}
                 aria-busy={isPending}
             >
                 <Table className="min-w-max">
-                    <TableHeader className="bg-[#FAF0DC]">
+                        <TableHeader className="bg-muted/70">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
@@ -169,7 +169,7 @@ export function DataTableServer<TData, TValue>({
                                         : flexRender(header.column.columnDef.header, header.getContext());
 
                                     return (
-                                        <TableHead key={header.id} className="font-semibold text-[#3D1C00]">
+                                    <TableHead key={header.id} className="font-semibold text-foreground">
                                             {cle === undefined ? (
                                                 contenu
                                             ) : (
@@ -230,7 +230,7 @@ export function DataTableServer<TData, TValue>({
 
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end lg:gap-6">
                     <div className="hidden items-center gap-2 sm:flex">
-                        <p className="text-sm font-medium text-[#3D1C00]">{t("common.rowsPerPage")}</p>
+                    <p className="text-sm font-medium text-foreground">{t("common.rowsPerPage")}</p>
                         <Select value={`${pageSize}`} onValueChange={(v) => setPageSize(Number(v))}>
                             <SelectTrigger className="h-8 w-17.5 rounded-sm border-border">
                                 <SelectValue />
@@ -245,7 +245,7 @@ export function DataTableServer<TData, TValue>({
                         </Select>
                     </div>
 
-                    <div className="flex min-w-24 items-center justify-center text-sm font-medium text-[#3D1C00]">
+                <div className="flex min-w-24 items-center justify-center text-sm font-medium text-foreground">
                         {t("common.page")} {result.currentPage} {t("common.of")} {result.totalPages}
                     </div>
 

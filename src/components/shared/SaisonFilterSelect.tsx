@@ -55,10 +55,10 @@ export function SaisonFilterSelect({ saisons, value }: SaisonFilterSelectProps) 
         <div className="flex items-center gap-2">
             <CalendarRange className="h-4 w-4 text-[#C17A2B]" />
             <Select value={value} onValueChange={handleChange} disabled={isPending}>
-                <SelectTrigger className="w-[220px] rounded-sm border-border bg-white">
+                <SelectTrigger className="h-10 w-[min(220px,calc(100vw-4rem))] rounded-xl border-border bg-background/85">
                     <SelectValue placeholder={t("finance.saisons.filtre.label")} />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent>
                     <SelectItem value="courante">{t("finance.saisons.filtre.courante")}</SelectItem>
                     <SelectItem value="precedente">{t("finance.saisons.filtre.precedente")}</SelectItem>
                     <SelectItem value="toutes">{t("finance.saisons.filtre.toutes")}</SelectItem>

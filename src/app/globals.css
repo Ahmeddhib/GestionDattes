@@ -120,6 +120,244 @@
   box-shadow: 0 18px 45px rgb(0 0 0 / 0.2);
 }
 
+/* Shell visuel partagé par toutes les pages ERP. */
+.erp-main {
+  background-color: #f6f1e8;
+  background-image:
+    linear-gradient(180deg, rgb(246 241 232 / 0.90), #f6f1e8 23rem),
+    url('/dashboard-date-palm-bg.png');
+  background-position: top right;
+  background-repeat: no-repeat;
+  background-size: min(1500px, 100%) auto;
+}
+
+.dark .erp-main {
+  background-color: #0b0907;
+  background-image:
+    linear-gradient(180deg, rgb(11 9 7 / 0.84), #0b0907 24rem),
+    url('/dashboard-date-palm-bg.png');
+}
+
+.erp-page .page-title {
+  color: #342414;
+}
+
+.dark .erp-page .page-title {
+  color: #f8f1e4;
+}
+
+.erp-page .page-heading {
+  border-bottom: 1px solid rgb(177 137 86 / 0.18);
+  padding-bottom: 1rem;
+}
+
+.erp-page > :first-child:has(h1) {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(177 137 86 / 0.24);
+  border-radius: 1rem;
+  background-color: rgb(255 252 247 / 0.84);
+  background-image:
+    linear-gradient(90deg, rgb(255 252 247 / 0.96), rgb(255 252 247 / 0.76) 58%, rgb(255 252 247 / 0.22)),
+    url('/dashboard-date-palm-bg.png');
+  background-position: center;
+  background-size: cover;
+  padding: 1rem;
+  box-shadow: 0 12px 35px rgb(83 52 20 / 0.05);
+}
+
+.dark .erp-page > :first-child:has(h1) {
+  border-color: rgb(107 75 41 / 0.45);
+  background-color: rgb(20 16 12 / 0.86);
+  background-image:
+    linear-gradient(90deg, rgb(10 8 6 / 0.96), rgb(10 8 6 / 0.76) 58%, rgb(10 8 6 / 0.18)),
+    url('/dashboard-date-palm-bg.png');
+  box-shadow: 0 18px 45px rgb(0 0 0 / 0.18);
+}
+
+.erp-page > .grid > [class~="bg-white"] {
+  border-radius: 1rem !important;
+  border-color: rgb(177 137 86 / 0.24) !important;
+  background-color: rgb(255 252 247 / 0.90) !important;
+  box-shadow: 0 12px 32px rgb(83 52 20 / 0.055);
+  backdrop-filter: blur(6px);
+}
+
+.dark .erp-page > .grid > [class~="bg-white"] {
+  border-color: rgb(107 75 41 / 0.45) !important;
+  background-color: rgb(20 16 12 / 0.88) !important;
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.18);
+}
+
+.erp-page > [class~="bg-white"][class~="border"] {
+  border-radius: 1rem !important;
+  border-color: rgb(177 137 86 / 0.24) !important;
+  background-color: rgb(255 252 247 / 0.90) !important;
+  box-shadow: 0 12px 34px rgb(83 52 20 / 0.055);
+  backdrop-filter: blur(6px);
+}
+
+.dark .erp-page > [class~="bg-white"][class~="border"] {
+  border-color: rgb(107 75 41 / 0.45) !important;
+  background-color: rgb(20 16 12 / 0.90) !important;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 0.20);
+}
+
+/* Harmonise les panneaux internes des anciens modules sans modifier leurs formulaires. */
+.erp-page :where(div, section, article)[class~="bg-white"][class~="border"][class~="rounded-lg"],
+.erp-page :where(div, section, article)[class~="bg-white"][class~="border"][class~="rounded-xl"] {
+  border-color: rgb(177 137 86 / 0.22) !important;
+  background-color: rgb(255 252 247 / 0.88) !important;
+  box-shadow: 0 10px 28px rgb(83 52 20 / 0.045);
+  backdrop-filter: blur(5px);
+}
+
+.dark .erp-page :where(div, section, article)[class~="bg-white"][class~="border"][class~="rounded-lg"],
+.dark .erp-page :where(div, section, article)[class~="bg-white"][class~="border"][class~="rounded-xl"] {
+  border-color: rgb(107 75 41 / 0.42) !important;
+  background-color: rgb(20 16 12 / 0.88) !important;
+  box-shadow: 0 15px 38px rgb(0 0 0 / 0.16);
+}
+
+[dir="rtl"] .erp-page > :first-child:has(h1) {
+  background-image:
+    linear-gradient(270deg, rgb(255 252 247 / 0.96), rgb(255 252 247 / 0.76) 58%, rgb(255 252 247 / 0.22)),
+    url('/dashboard-date-palm-bg.png');
+  background-position: center left;
+}
+
+.dark[dir="rtl"] .erp-page > :first-child:has(h1) {
+  background-image:
+    linear-gradient(270deg, rgb(10 8 6 / 0.96), rgb(10 8 6 / 0.76) 58%, rgb(10 8 6 / 0.18)),
+    url('/dashboard-date-palm-bg.png');
+}
+
+.dark .erp-page .page-heading {
+  border-color: rgb(107 75 41 / 0.38);
+}
+
+/* Compatibilité avec les anciennes pages qui utilisaient des couleurs fixes. */
+.dark .erp-shell [class~="bg-white"] {
+  background-color: rgb(20 16 12 / 0.90) !important;
+}
+
+.dark .erp-shell [class~="bg-gray-50"],
+.dark .erp-shell [class~="bg-gray-100"] {
+  background-color: rgb(38 27 17 / 0.72) !important;
+}
+
+.dark .erp-shell [class~="bg-[#FAF0DC]"],
+.dark .erp-shell [class~="bg-[#FAF0DC]/30"],
+.dark .erp-shell [class~="bg-[#FAF0DC]/50"],
+.dark .erp-shell [class~="bg-[#FAF0DC]/60"],
+.dark .erp-shell [class~="bg-[#FAF3E8]"],
+.dark .erp-shell [class~="bg-[#FDF7EE]"],
+.dark .erp-shell [class~="bg-[#F0E0C0]"] {
+  background-color: rgb(38 27 17 / 0.78) !important;
+}
+
+.dark .erp-shell [class~="bg-green-50"],
+.dark .erp-shell [class~="bg-green-100"] {
+  background-color: rgb(20 83 45 / 0.32) !important;
+}
+
+.dark .erp-shell [class~="bg-red-50"],
+.dark .erp-shell [class~="bg-red-50/60"],
+.dark .erp-shell [class~="bg-red-100"] {
+  background-color: rgb(127 29 29 / 0.28) !important;
+}
+
+.dark .erp-shell [class~="bg-blue-50"],
+.dark .erp-shell [class~="bg-blue-100"],
+.dark .erp-shell [class~="bg-sky-100"] {
+  background-color: rgb(12 74 110 / 0.32) !important;
+}
+
+.dark .erp-shell [class~="bg-orange-50"],
+.dark .erp-shell [class~="bg-orange-100"],
+.dark .erp-shell [class~="bg-amber-50"],
+.dark .erp-shell [class~="bg-amber-100"] {
+  background-color: rgb(120 53 15 / 0.30) !important;
+}
+
+.dark .erp-shell [class~="bg-purple-50"],
+.dark .erp-shell [class~="bg-purple-100"] {
+  background-color: rgb(88 28 135 / 0.28) !important;
+}
+
+.dark .erp-shell [class~="text-gray-950"],
+.dark .erp-shell [class~="text-gray-900"],
+.dark .erp-shell [class~="text-gray-800"],
+.dark .erp-shell [class~="text-[#2C1A00]"],
+.dark .erp-shell [class~="text-[#3D1C00]"],
+.dark .erp-shell [class~="text-[#3D1C00]/70"] {
+  color: #f4eadc !important;
+}
+
+.dark .erp-shell [class~="text-gray-700"],
+.dark .erp-shell [class~="text-gray-600"],
+.dark .erp-shell [class~="text-gray-500"],
+.dark .erp-shell [class~="text-[#7A5C3A]"],
+.dark .erp-shell [class~="text-[#B08A5E]"],
+.dark .erp-shell [class~="text-[#3D1C00]/60"],
+.dark .erp-shell [class~="text-[#3D1C00]/50"],
+.dark .erp-shell [class~="text-[#3D1C00]/40"] {
+  color: #aa9983 !important;
+}
+
+.dark .erp-shell [class~="border-gray-300"],
+.dark .erp-shell [class~="border-gray-200"],
+.dark .erp-shell [class~="border-[#F0E0C0]"],
+.dark .erp-shell [class~="border-[#C17A2B]/20"] {
+  border-color: rgb(107 75 41 / 0.55) !important;
+}
+
+/* Les portails Radix sont rendus hors du shell : ils reçoivent donc le thème ici. */
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-content"],
+[data-slot="popover-content"],
+[data-slot="dropdown-menu-content"],
+[data-slot="select-content"] {
+  border-color: var(--border) !important;
+  background-color: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+  box-shadow: 0 22px 60px rgb(52 32 13 / 0.14);
+}
+
+.dark [data-slot="dialog-content"],
+.dark [data-slot="alert-dialog-content"],
+.dark [data-slot="popover-content"],
+.dark [data-slot="dropdown-menu-content"],
+.dark [data-slot="select-content"] {
+  box-shadow: 0 25px 70px rgb(0 0 0 / 0.48);
+}
+
+.dark [data-slot="dialog-content"] [class~="bg-white"],
+.dark [data-slot="alert-dialog-content"] [class~="bg-white"],
+.dark [data-slot="popover-content"] [class~="bg-white"],
+.dark [data-slot="dropdown-menu-content"] [class~="bg-white"] {
+  background-color: rgb(20 16 12 / 0.96) !important;
+}
+
+.dark [data-slot="dialog-content"] [class~="bg-[#FAF0DC]"],
+.dark [data-slot="dialog-content"] [class~="bg-[#FAF3E8]"],
+.dark [data-slot="dialog-content"] [class~="bg-gray-50"],
+.dark [data-slot="dialog-content"] [class~="bg-gray-100"] {
+  background-color: rgb(38 27 17 / 0.78) !important;
+}
+
+.dark [data-slot="dialog-content"] [class~="text-gray-900"],
+.dark [data-slot="dialog-content"] [class~="text-[#3D1C00]"],
+.dark [data-slot="dialog-content"] [class~="text-[#2C1A00]"],
+.dark [data-slot="alert-dialog-content"] [class~="text-gray-900"] {
+  color: #f4eadc !important;
+}
+
+.dark [data-slot="dialog-content"] [class~="text-gray-600"],
+.dark [data-slot="dialog-content"] [class~="text-gray-500"] {
+  color: #aa9983 !important;
+}
+
 .dashboard-premium .text-white { color: var(--dash-heading) !important; }
 .dashboard-premium .text-\[\#c9b9a3\],
 .dashboard-premium .text-\[\#d4c6b4\],
@@ -280,7 +518,7 @@
    ══════════════════════════════════════════════════════════════ */
 
 .table-card {
-  @apply bg-white rounded-lg border border-[#F0E0C0] overflow-hidden;
+  @apply overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm;
 }
 
 .table-header-bar {
@@ -288,13 +526,13 @@
 }
 
 .table-th {
-  @apply bg-[#FDF7EE] px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#B08A5E] font-semibold;
+  @apply bg-muted/70 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground;
 }
 
 .table-td {
-  @apply px-5 py-3 border-b border-[#FAF3E8] text-[13px];
+  @apply border-b border-border/60 px-5 py-3 text-[13px];
 }
 
 .table-row-hover {
-  @apply hover:bg-[#FDFAF3] transition-colors;
+  @apply transition-colors hover:bg-muted/50;
 }

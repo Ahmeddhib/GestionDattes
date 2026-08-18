@@ -26,7 +26,7 @@ export default async function DashboardLayout({
     // suivait le défilement du document, et sa propre zone de navigation ne
     // pouvait pas défiler indépendamment du contenu.
     return (
-        <div className="flex h-dvh w-full min-w-0 overflow-hidden bg-[#FAF0DC]">
+        <div className="erp-shell flex h-dvh w-full min-w-0 overflow-hidden bg-[#f6f1e8] text-[#2f2317] dark:bg-[#0b0907] dark:text-[#f8f1e4]">
             <Sidebar
                 className="hidden h-full w-64 shrink-0 lg:flex 2xl:w-72"
                 user={{
@@ -47,7 +47,7 @@ export default async function DashboardLayout({
                         role: session.user.role,
                     }}
                 />
-                <main className="min-w-0 flex-1 overflow-y-auto overscroll-contain bg-[#FAF0DC]">
+                <main className="erp-main min-w-0 flex-1 overflow-y-auto overscroll-contain">
                     {children}
                 </main>
                 <MainScrollRestoration />
