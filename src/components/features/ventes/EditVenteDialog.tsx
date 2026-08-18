@@ -121,10 +121,10 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("finance.ventes.modifierVente")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("finance.ventes.modifierVente")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {vente.StockDate.TypeDate.nom} — Lot {vente.StockDate.Livraison.numeroLot}
                     </DialogDescription>
                 </DialogHeader>
@@ -136,14 +136,14 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                             name="clientId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("finance.ventes.client")}</FormLabel>
+                                    <FormLabel className="text-foreground">{t("finance.ventes.client")}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="rounded-sm border-border bg-card">
                                                 <SelectValue placeholder={t("finance.ventes.client")} />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-card">
                                             {clients.map((c) => (
                                                 <SelectItem key={c.id} value={c.id}>
                                                     {c.nom}
@@ -162,7 +162,7 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                                 name="quantite"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">
+                                        <FormLabel className="text-foreground">
                                             {t("finance.ventes.quantite")}
                                         </FormLabel>
                                         <FormControl>
@@ -170,7 +170,7 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                                                 type="number"
                                                 step="0.01"
                                                 min="0"
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                                 {...field}
                                                 value={field.value ?? ""}
                                                 onChange={(e) =>
@@ -188,7 +188,7 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                                 name="prixUnitaire"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">
+                                        <FormLabel className="text-foreground">
                                             {t("finance.ventes.prixUnitaire")}
                                         </FormLabel>
                                         <FormControl>
@@ -196,7 +196,7 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                                                 type="number"
                                                 step="0.001"
                                                 min="0"
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                                 {...field}
                                                 value={field.value ?? ""}
                                                 onChange={(e) =>
@@ -210,8 +210,8 @@ export function EditVenteDialog({ vente, open, onOpenChange }: EditVenteDialogPr
                             />
                         </div>
 
-                        <div className="rounded-md bg-[#FAF0DC] p-3 flex items-center justify-between">
-                            <span className="text-sm font-medium text-[#3D1C00]">
+                        <div className="rounded-md bg-muted p-3 flex items-center justify-between">
+                            <span className="text-sm font-medium text-foreground">
                                 {t("finance.ventes.montantTotal")}
                             </span>
                             <span className="text-lg font-bold text-[#C17A2B]">{montantTotal.toFixed(2)}</span>

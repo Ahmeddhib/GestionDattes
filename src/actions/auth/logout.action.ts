@@ -13,7 +13,7 @@ export async function logoutAction() {
         cookieStore.delete("selected-tenant-id");
 
         // Déconnexion NextAuth
-        await signOut({ redirectTo: "/login" });
+        await signOut({ redirectTo: "/login?logout=1" });
     } catch (error) {
         console.error("Error in logoutAction:", error);
         throw error;

@@ -82,10 +82,10 @@ export default async function StockCaissesPage({
             {/* Header - Mobile Responsive */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-[#3D1C00]">
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                         {t('nav.stockCaisses')}
                     </h1>
-                    <p className="text-sm md:text-base text-[#3D1C00]/60">
+                    <p className="text-sm md:text-base text-muted-foreground">
                         {t('pretsCaisses.description')}
                     </p>
                 </div>

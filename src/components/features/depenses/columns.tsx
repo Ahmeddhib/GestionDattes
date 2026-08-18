@@ -26,7 +26,7 @@ export const createDepensesColumns = (
         accessorKey: "libelle",
         header: t("finance.depenses.libelle"),
         cell: ({ row }) => (
-            <div className="font-medium text-[#3D1C00]">{row.getValue("libelle")}</div>
+            <div className="font-medium text-foreground">{row.getValue("libelle")}</div>
         ),
     },
     {
@@ -35,7 +35,7 @@ export const createDepensesColumns = (
         cell: ({ row }) => {
             const categorie = row.getValue<string | null>("categorie");
             return categorie ? (
-                <Badge variant="outline" className="bg-[#FAF0DC] text-[#3D1C00] border-[#C17A2B]/30">
+                <Badge variant="outline" className="bg-muted text-foreground border-border">
                     {categorie}
                 </Badge>
             ) : (
@@ -57,7 +57,7 @@ export const createDepensesColumns = (
         // Idem : la colonne porte la date de la dépense, pas une date de pesée.
         header: t("finance.depenses.dateDepense"),
         cell: ({ row }) => (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
                 {format(new Date(row.getValue<Date>("dateDepense")), "dd MMM yyyy", { locale: fr })}
             </span>
         ),
@@ -68,7 +68,7 @@ export const createDepensesColumns = (
         cell: ({ row }) => {
             const observations = row.getValue<string | null>("observations");
             return observations ? (
-                <span className="text-sm text-[#3D1C00]/70 line-clamp-2 max-w-55">{observations}</span>
+                <span className="text-sm text-muted-foreground line-clamp-2 max-w-55">{observations}</span>
             ) : (
                 <span className="text-muted-foreground">—</span>
             );
@@ -85,7 +85,7 @@ export const createDepensesColumns = (
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit(depense)}
-                        className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                        className="h-8 w-8 p-0 hover:bg-muted"
                     >
                         <Edit className="h-4 w-4 text-[#C17A2B]" />
                     </Button>

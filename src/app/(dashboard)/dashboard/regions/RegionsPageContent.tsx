@@ -36,10 +36,10 @@ export function RegionsPageContent({ regions }: RegionsPageContentProps) {
                             <MapPin className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
+                            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
                                 {t("regions.title")}
                             </h1>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("regions.description")}
                             </p>
                         </div>
@@ -50,24 +50,24 @@ export function RegionsPageContent({ regions }: RegionsPageContentProps) {
 
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("regions.total")}
                     </div>
-                    <div className="mt-2 text-3xl font-bold text-[#3D1C00]">
+                    <div className="mt-2 text-3xl font-bold text-foreground">
                         {regions.length}
                     </div>
                 </div>
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("regions.agriculteurs")}
                     </div>
                     <div className="mt-2 text-3xl font-bold text-[#C17A2B]">
                         {totalAgriculteurs}
                     </div>
                 </div>
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("regions.users")}
                     </div>
                     <div className="mt-2 text-3xl font-bold text-[#C17A2B]">

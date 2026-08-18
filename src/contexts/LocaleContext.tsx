@@ -1,9 +1,18 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import type { Locale } from "@/i18n/config";
 import { defaultLocale, localeDirections } from "@/i18n/config";
 import { useRouter } from "next/navigation";
+import frMessages from "@/i18n/locales/fr.json";
+import enMessages from "@/i18n/locales/en.json";
+import arMessages from "@/i18n/locales/ar.json";
+
+const messagesByLocale: Record<Locale, Record<string, unknown>> = {
+    fr: frMessages,
+    en: enMessages,
+    ar: arMessages,
+};
 
 interface LocaleContextType {
     locale: Locale;
@@ -17,24 +26,9 @@ const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 export function LocaleProvider({ children, initialLocale = defaultLocale }: { children: ReactNode; initialLocale?: Locale }) {
     const router = useRouter();
     const [locale, setLocaleState] = useState<Locale>(initialLocale);
-    const [messages, setMessages] = useState<Record<string, unknown> | null>(null);
-
-    // Charger les messages de traduction
-    useEffect(() => {
-        const loadMessages = async () => {
-            try {
-                const mod = await import(`@/i18n/locales/${locale}.json`);
-                setMessages(mod.default as Record<string, unknown>);
-            } catch (error) {
-                console.error(`Erreur chargement traductions ${locale}:`, error);
-                // Fallback vers français
-                const mod = await import("@/i18n/locales/fr.json");
-                setMessages(mod.default as Record<string, unknown>);
-            }
-        };
-
-        loadMessages();
-    }, [locale]);
+    // Les trois petits dictionnaires sont déjà dans le bundle : le changement
+    // est synchrone et ne laisse plus les KPI dans l'ancienne langue.
+    const messages = messagesByLocale[locale] ?? messagesByLocale[defaultLocale];
 
     // Fonction pour changer de langue
     const setLocale = (newLocale: Locale) => {

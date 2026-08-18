@@ -49,18 +49,18 @@ export function CreateTypeDateDialog() {
                     {t("typesDates.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("typesDates.createDialog")}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("typesDates.createDescription")}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="nom" className="text-[#3D1C00]">
+                        <Label htmlFor="nom" className="text-foreground">
                             {t("typesDates.name")}
                         </Label>
                         <Input
@@ -68,12 +68,12 @@ export function CreateTypeDateDialog() {
                             name="nom"
                             placeholder={t("typesDates.namePlaceholder")}
                             required
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="description" className="text-[#3D1C00]">
+                        <Label htmlFor="description" className="text-foreground">
                             {t("typesDates.descriptionLabel")}
                         </Label>
                         <Textarea
@@ -81,12 +81,12 @@ export function CreateTypeDateDialog() {
                             name="description"
                             placeholder={t("typesDates.descriptionPlaceholder")}
                             rows={3}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="seuilAlerte" className="text-[#3D1C00]">
+                        <Label htmlFor="seuilAlerte" className="text-foreground">
                             {t("typesDates.seuilAlerte")}
                         </Label>
                         <Input
@@ -96,7 +96,7 @@ export function CreateTypeDateDialog() {
                             step="0.01"
                             min="0"
                             placeholder={t("typesDates.seuilAlertePlaceholder")}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 

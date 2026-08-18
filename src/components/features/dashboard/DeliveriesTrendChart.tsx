@@ -21,7 +21,7 @@ import type { TrendPoint } from "@/types/dashboard";
 function TrendTooltip({ active, payload, label }: TooltipContentProps) {
     if (!active || !payload?.length) return null;
     return (
-        <div className="rounded-md border border-border bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
+        <div className="rounded-md border border-border bg-card p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
             <p className="mb-1 font-medium text-text-primary dark:text-dattes-100">{label}</p>
             {payload.map((entry) => (
                 <p key={String(entry.dataKey)} style={{ color: entry.color }}>

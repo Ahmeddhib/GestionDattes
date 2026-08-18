@@ -55,9 +55,9 @@ export function FinanceStatsCards({ bilan }: FinanceStatsCardsProps) {
             label: t("finance.bilan.chiffreAffaires"),
             value: bilan.chiffreAffaires,
             icon: ShoppingCart,
-            iconBg: "bg-[#FAF0DC]",
+            iconBg: "bg-muted",
             iconColor: "text-[#C17A2B]",
-            valueColor: "text-[#3D1C00]",
+            valueColor: "text-foreground",
         },
         {
             label: t("finance.bilan.creancesClients"),
@@ -79,7 +79,7 @@ export function FinanceStatsCards({ bilan }: FinanceStatsCardsProps) {
             label: t("finance.bilan.resultatNet"),
             value: bilan.resultatNet,
             icon: TrendingUp,
-            iconBg: "bg-[#FAF0DC]",
+            iconBg: "bg-muted",
             iconColor: "text-[#C17A2B]",
             valueColor: bilan.resultatNet >= 0 ? "text-[#C17A2B]" : "text-red-600",
         },
@@ -92,11 +92,11 @@ export function FinanceStatsCards({ bilan }: FinanceStatsCardsProps) {
                 return (
                     <div
                         key={card.label}
-                        className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm"
+                        className="bg-card p-6 rounded-lg border border-border shadow-sm"
                     >
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">{card.label}</p>
+                                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
                                 <p className={`text-2xl font-bold mt-2 ${card.valueColor}`}>
                                     {card.value.toFixed(2)}
                                 </p>

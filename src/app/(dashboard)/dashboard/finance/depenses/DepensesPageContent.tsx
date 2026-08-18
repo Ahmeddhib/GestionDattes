@@ -42,32 +42,32 @@ export function DepensesPageContent({
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                         <Wallet2 className="h-8 w-8 text-[#C17A2B]" />
                         {t("finance.depenses.title")}
                     </h1>
-                    <p className="text-gray-600 mt-2">{t("finance.depenses.description")}</p>
+                    <p className="text-muted-foreground mt-2">{t("finance.depenses.description")}</p>
                 </div>
                 {!saisonFiltre.isReadOnly && saisonOuverte && <CreateDepenseDialog saisonActive={saisonOuverte} />}
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">{t("common.total")}</p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{totaux.total}</p>
+                            <p className="text-sm font-medium text-muted-foreground">{t("common.total")}</p>
+                            <p className="text-3xl font-bold text-foreground mt-2">{totaux.total}</p>
                         </div>
-                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
+                        <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center">
                             <Wallet2 className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("finance.depenses.montant")}
                             </p>
                             <p className="text-3xl font-bold text-red-600 mt-2">{totaux.montantTotal.toFixed(2)}</p>
@@ -79,7 +79,7 @@ export function DepensesPageContent({
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="bg-card rounded-lg border border-border shadow-sm">
                 <DepensesTableServer resultat={resultat} branding={branding} />
             </div>
         </PageContainer>

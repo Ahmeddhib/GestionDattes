@@ -36,7 +36,7 @@ export function SearchBar({
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    className="h-10 rounded-xl border-[#dfcfb9] bg-white/80 pl-10 focus:border-dattes-400 focus:ring-dattes-400 dark:border-[#5b4027] dark:bg-[#17120d]/80 rtl:pl-3 rtl:pr-10"
+                    className="h-10 rounded-xl border-[#dfcfb9] bg-card/80 pl-10 focus:border-dattes-400 focus:ring-dattes-400 dark:border-[#5b4027] dark:bg-[#17120d]/80 rtl:pl-3 rtl:pr-10"
                 />
             </div>
         </div>

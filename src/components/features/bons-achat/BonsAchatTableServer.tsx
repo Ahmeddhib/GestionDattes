@@ -76,7 +76,7 @@ export function BonsAchatTableServer({
         <div className="space-y-4">
             <div className="grid grid-cols-1 items-end gap-3 px-1 sm:grid-cols-2 xl:flex xl:flex-wrap">
                 <div className="min-w-0 xl:min-w-55">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                    <label className="mb-1 block text-xs text-muted-foreground">
                         {t("livraisons.agriculteur")}
                     </label>
                     <Select
@@ -86,7 +86,7 @@ export function BonsAchatTableServer({
                         <SelectTrigger className="w-full rounded-sm border-border">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value={TOUS}>{t("common.all")}</SelectItem>
                             {agriculteurs.map((a) => (
                                 <SelectItem key={a.id} value={a.id}>
@@ -98,7 +98,7 @@ export function BonsAchatTableServer({
                 </div>
 
                 <div className="min-w-0">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                    <label className="mb-1 block text-xs text-muted-foreground">
                         {t("bonAchat.periode")}
                     </label>
                     <DateRangePicker
@@ -119,7 +119,7 @@ export function BonsAchatTableServer({
                         variant="ghost"
                         size="sm"
                         onClick={() => setParams({ agriculteurId: "", from: "", to: "" })}
-                        className="gap-1.5 text-[#3D1C00]/70"
+                        className="gap-1.5 text-muted-foreground"
                     >
                         <X className="h-3.5 w-3.5" />
                         {t("common.resetFilters")}

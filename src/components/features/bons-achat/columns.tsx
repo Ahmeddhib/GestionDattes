@@ -60,7 +60,7 @@ export const createBonsAchatColumns = (
         accessorKey: "Livraison.numeroLot",
         header: t("livraisons.numeroLot"),
         cell: ({ row }) => (
-            <span className="text-sm text-[#3D1C00]">{row.original.Livraison.numeroLot}</span>
+            <span className="text-sm text-foreground">{row.original.Livraison.numeroLot}</span>
         ),
     },
     {
@@ -70,10 +70,10 @@ export const createBonsAchatColumns = (
             const agriculteur = row.original.Livraison.Agriculteur;
             return (
                 <div className="flex flex-col">
-                    <span className="font-medium text-[#3D1C00]">
+                    <span className="font-medium text-foreground">
                         {agriculteur.nom} {agriculteur.prenom}
                     </span>
-                    <span className="text-xs text-gray-500">{agriculteur.code}</span>
+                    <span className="text-xs text-muted-foreground">{agriculteur.code}</span>
                 </div>
             );
         },
@@ -89,7 +89,7 @@ export const createBonsAchatColumns = (
         accessorKey: "prixKg",
         header: t("bonAchat.prixKgMoyen"),
         cell: ({ row }) => (
-            <div className="text-right text-[#3D1C00]">
+            <div className="text-right text-foreground">
                 {row.getValue<number>("prixKg").toFixed(3)}
             </div>
         ),
@@ -124,7 +124,7 @@ export const createBonsAchatColumns = (
         cell: ({ row }) => {
             const date = row.getValue<Date>("createdAt");
             return (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-muted-foreground">
                     {format(new Date(date), "dd MMM yyyy HH:mm", { locale: fr })}
                 </span>
             );
@@ -136,7 +136,7 @@ export const createBonsAchatColumns = (
         cell: ({ row }) => {
             const observations = row.getValue<string | null>("observations");
             return observations ? (
-                <span className="text-sm text-[#3D1C00]/70 line-clamp-2 max-w-55">
+                <span className="text-sm text-muted-foreground line-clamp-2 max-w-55">
                     {observations}
                 </span>
             ) : (

@@ -38,30 +38,30 @@ export function BonsAchatPageContent({
             <SaisonFilterBar {...saisonFiltre} />
 
             <div>
-                <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                     <Receipt className="h-8 w-8 text-[#C17A2B]" />
                     {t("bonAchat.title")}
                 </h1>
-                <p className="text-gray-600 mt-2">{t("bonAchat.pageDescription")}</p>
+                <p className="text-muted-foreground mt-2">{t("bonAchat.pageDescription")}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">{t("bonAchat.stats.total")}</p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{totaux.total}</p>
+                            <p className="text-sm font-medium text-muted-foreground">{t("bonAchat.stats.total")}</p>
+                            <p className="text-3xl font-bold text-foreground mt-2">{totaux.total}</p>
                         </div>
-                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
+                        <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center">
                             <Receipt className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">{t("bonAchat.stats.montantTotal")}</p>
+                            <p className="text-sm font-medium text-muted-foreground">{t("bonAchat.stats.montantTotal")}</p>
                             <p className="text-3xl font-bold text-[#C17A2B] mt-2">{totaux.montantTotal.toFixed(2)}</p>
                         </div>
                         <div className="h-12 w-12 bg-green-100 rounded-md flex items-center justify-center">
@@ -71,7 +71,7 @@ export function BonsAchatPageContent({
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="bg-card rounded-lg border border-border shadow-sm">
                 <BonsAchatTableServer
                     resultat={resultat}
                     agriculteurs={agriculteurs}

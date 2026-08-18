@@ -47,8 +47,8 @@ export async function SaisonTabsNav({
                                 "whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors",
                                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C17A2B]",
                                 estActif
-                                    ? "border-[#C17A2B] font-semibold text-[#3D1C00]"
-                                    : "border-transparent text-gray-600 hover:border-[#C17A2B]/40 hover:text-[#3D1C00]"
+                                    ? "border-[#C17A2B] font-semibold text-foreground"
+                                    : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                             )}
                         >
                             {t(`finance.saisons.detail.tabs.${CLE_LIBELLE_ONGLET[onglet]}`)}

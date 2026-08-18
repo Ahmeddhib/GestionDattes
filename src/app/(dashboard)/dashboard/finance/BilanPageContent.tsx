@@ -30,11 +30,11 @@ export function BilanPageContent({
         <PageContainer>
             <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                         <Wallet className="h-8 w-8 text-[#C17A2B]" />
                         {t("finance.bilan.title")}
                     </h1>
-                    <p className="text-gray-600 mt-2">
+                    <p className="text-muted-foreground mt-2">
                         {t("finance.bilan.description")} — {bilan.periodeLabel}
                     </p>
                 </div>

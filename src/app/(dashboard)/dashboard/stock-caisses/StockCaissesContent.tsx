@@ -18,13 +18,13 @@ export function StockCaissesContent({ typesCaisses }: StockCaissesContentProps) 
     const { t } = useClientTranslations();
 
     return (
-        <div className="rounded-lg bg-white p-4 md:p-6 shadow-sm border border-[#C17A2B]/20">
-            <h2 className="text-lg md:text-xl font-semibold text-[#3D1C00] mb-4">
+        <div className="rounded-lg bg-card p-4 md:p-6 shadow-sm border border-border">
+            <h2 className="text-lg md:text-xl font-semibold text-foreground mb-4">
                 {t('pretsCaisses.stockParType')}
             </h2>
             <div className="space-y-2">
                 {!typesCaisses || typesCaisses.length === 0 ? (
-                    <div className="text-center py-8 text-[#3D1C00]/60">
+                    <div className="text-center py-8 text-muted-foreground">
                         {t('pretsCaisses.aucunTypeCaisse')}
                     </div>
                 ) : (
@@ -51,13 +51,13 @@ export function StockCaissesContent({ typesCaisses }: StockCaissesContentProps) 
                         return (
                             <div
                                 key={type.id}
-                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 rounded-md bg-[#FAF0DC] border border-[#C17A2B]/20 gap-2"
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 rounded-md bg-muted border border-border gap-2"
                             >
                                 <div className="flex-1">
-                                    <p className="font-medium text-[#3D1C00] text-sm md:text-base">
+                                    <p className="font-medium text-foreground text-sm md:text-base">
                                         {type.nom}
                                     </p>
-                                    <p className="text-xs md:text-sm text-[#3D1C00]/60">
+                                    <p className="text-xs md:text-sm text-muted-foreground">
                                         {type.poidsKg} {t('typesCaisses.kg')}
                                     </p>
                                 </div>
@@ -66,7 +66,7 @@ export function StockCaissesContent({ typesCaisses }: StockCaissesContentProps) 
                                         <p className="text-xl md:text-2xl font-bold text-[#C17A2B]">
                                             {stock}
                                         </p>
-                                        <p className="text-xs text-[#3D1C00]/60">
+                                        <p className="text-xs text-muted-foreground">
                                             {t('pretsCaisses.disponibles')}
                                         </p>
                                     </div>

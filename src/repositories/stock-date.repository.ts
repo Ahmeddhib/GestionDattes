@@ -137,6 +137,15 @@ export const stockDateRepository = {
     /**
      * Lots de stock disponibles à la vente (quantiteDisponible > 0),
      * niveau lot (une ligne par livraison/type de datte), pas agrégé par type.
+     *
+     * ⚠️ **Aucun filtre de saison ici, volontairement.** Le stock physique est
+     * physique : un lot invendu d'une campagne clôturée est toujours en entrepôt
+     * et doit rester vendable. Filtrer par saison le masquerait et empêcherait
+     * d'écouler le report. C'est précisément pour cela que la saison d'origine
+     * est remontée — pour l'ÉTIQUETER, pas pour le restreindre.
+     *
+     * `orderBy: dateEntree asc` : les lots les plus anciens (donc les reports)
+     * sortent en tête, ce qui correspond au FIFO souhaité.
      */
     async findAvailableLots(tenantId: string) {
         return prisma.stockDate.findMany({
@@ -144,6 +153,7 @@ export const stockDateRepository = {
             include: {
                 TypeDate: { select: { id: true, nom: true } },
                 Livraison: { select: { id: true, numeroLot: true } },
+                Saison: { select: { id: true, nom: true } },
             },
             orderBy: { dateEntree: "asc" },
         });

@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
+import { createId } from "@paralleldrive/cuid2";
 import { prisma } from "./prisma";
 
 declare module "next-auth" {
@@ -13,6 +16,8 @@ declare module "next-auth" {
             tenantId?: string; // Wakala sélectionnée
             tenantName?: string;
             tenantCode?: string;
+            image?: string | null;
+            authProvider?: "credentials" | "google";
         };
     }
 
@@ -24,6 +29,8 @@ declare module "next-auth" {
         tenantId?: string;
         tenantName?: string;
         tenantCode?: string;
+        image?: string | null;
+        authProvider?: "credentials" | "google";
     }
 }
 
@@ -159,6 +166,7 @@ export const {
                 }
             },
         }),
+        Google,
     ],
     callbacks: {
         /**
@@ -174,6 +182,8 @@ export const {
                 token.tenantId = user.tenantId;
                 token.tenantName = user.tenantName;
                 token.tenantCode = user.tenantCode;
+                token.picture = user.image;
+                token.authProvider = user.authProvider ?? "credentials";
 
                 console.log("[JWT] Token créé pour:", {
                     userId: user.id,
@@ -181,6 +191,10 @@ export const {
                     role: user.role,
                     tenantId: user.tenantId,
                 });
+            }
+
+            if (trigger === "update" && session?.user?.name) {
+                token.name = session.user.name;
             }
 
             // Mise à jour du tenant (changement de Wakala)
@@ -221,6 +235,8 @@ export const {
                 session.user.tenantId = token.tenantId as string | undefined;
                 session.user.tenantName = token.tenantName as string | undefined;
                 session.user.tenantCode = token.tenantCode as string | undefined;
+                session.user.image = token.picture ?? null;
+                session.user.authProvider = token.authProvider as "credentials" | "google" | undefined;
             }
             return session;
         },
@@ -230,8 +246,61 @@ export const {
          * Appelé après l'authentification réussie
          * Retourne false pour bloquer la connexion
          */
-        async signIn({ user, account, profile, email, credentials }) {
+        async signIn({ user, account, profile }) {
             try {
+                if (account?.provider === "google") {
+                    const googleProfile = profile as { email_verified?: boolean; picture?: string } | undefined;
+                    const normalizedEmail = user.email?.trim().toLowerCase();
+
+                    // Une adresse vérifiée est indispensable avant toute liaison par e-mail.
+                    if (!normalizedEmail || googleProfile?.email_verified !== true) {
+                        console.error("[SIGNIN] Adresse Google absente ou non vérifiée");
+                        return false;
+                    }
+
+                    let dbUser = await prisma.user.findUnique({
+                        where: { email: normalizedEmail },
+                    });
+
+                    if (!dbUser) {
+                        if (process.env.AUTH_GOOGLE_ALLOW_SIGNUP !== "true") {
+                            console.warn("[SIGNIN] Compte Google non rattaché:", normalizedEmail);
+                            return "/login?error=GoogleAccountNotLinked";
+                        }
+
+                        // Ce secret aléatoire ne peut pas servir à une connexion Credentials.
+                        const unusablePassword = await bcrypt.hash(randomBytes(32).toString("hex"), 12);
+                        dbUser = await prisma.user.create({
+                            data: {
+                                id: createId(),
+                                name: user.name?.trim() || normalizedEmail.split("@")[0],
+                                email: normalizedEmail,
+                                password: unusablePassword,
+                                active: true,
+                            },
+                        });
+                    }
+
+                    if (!dbUser.active) {
+                        console.error("[SIGNIN] Compte Google désactivé:", normalizedEmail);
+                        return false;
+                    }
+
+                    // Le JWT doit contenir l'identifiant interne, pas le subject Google.
+                    user.id = dbUser.id;
+                    user.email = dbUser.email;
+                    user.name = dbUser.name;
+                    user.role = "USER";
+                    user.image = googleProfile?.picture ?? user.image ?? null;
+                    user.authProvider = "google";
+                    user.tenantId = undefined;
+                    user.tenantName = undefined;
+                    user.tenantCode = undefined;
+
+                    console.log("[SIGNIN] Connexion Google autorisée pour:", dbUser.email);
+                    return true;
+                }
+
                 // Vérifier que l'utilisateur est actif
                 if (user.id) {
                     const dbUser = await prisma.user.findUnique({
@@ -304,5 +373,6 @@ export const {
             return `${baseUrl}/dashboard`;
         },
     },
-    debug: process.env.NODE_ENV === "development",
+    // Activez AUTH_DEBUG=true uniquement pour un diagnostic ponctuel.
+    debug: process.env.AUTH_DEBUG === "true",
 });

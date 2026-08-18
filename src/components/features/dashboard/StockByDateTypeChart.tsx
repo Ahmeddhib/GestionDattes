@@ -88,7 +88,7 @@ export function StockByDateTypeChart({ data }: { data: StockParTypeDatum[] }) {
                             <button
                                 type="button"
                                 key={item.typeDateId}
-                                className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-start text-xs transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6a73c]/70 dark:hover:bg-white/5"
+                                className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-start text-xs transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6a73c]/70 dark:hover:bg-card/5"
                                 onMouseEnter={() => setActiveIndex(index)}
                                 onMouseLeave={() => setActiveIndex(null)}
                                 onFocus={() => setActiveIndex(index)}

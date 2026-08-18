@@ -19,7 +19,7 @@ export function BilanExportButtons({ bilan, tenant }: BilanExportButtonsProps) {
                 type="button"
                 variant="outline"
                 onClick={() => void printBilanPDF(bilan, tenant)}
-                className="gap-2 rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                className="gap-2 rounded-md border-border hover:bg-muted"
             >
                 <Printer className="h-4 w-4" />
                 {t("bonAchat.imprimer")}
@@ -28,7 +28,7 @@ export function BilanExportButtons({ bilan, tenant }: BilanExportButtonsProps) {
                 type="button"
                 variant="outline"
                 onClick={() => void downloadBilanPDF(bilan, tenant)}
-                className="gap-2 rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                className="gap-2 rounded-md border-border hover:bg-muted"
             >
                 <FileDown className="h-4 w-4" />
                 {t("finance.bilan.exportPdf")}

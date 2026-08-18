@@ -31,14 +31,14 @@ export const createSaisonsColumns = (
         accessorKey: "nom",
         header: t("finance.saisons.nom"),
         cell: ({ row }) => (
-            <div className="font-medium text-[#3D1C00]">{row.getValue("nom")}</div>
+            <div className="font-medium text-foreground">{row.getValue("nom")}</div>
         ),
     },
     {
         accessorKey: "dateDebut",
         header: t("finance.saisons.dateDebut"),
         cell: ({ row }) => (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
                 {format(new Date(row.getValue("dateDebut")), "dd MMM yyyy", { locale: fr })}
             </span>
         ),
@@ -47,7 +47,7 @@ export const createSaisonsColumns = (
         accessorKey: "dateFin",
         header: t("finance.saisons.dateFin"),
         cell: ({ row }) => (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
                 {format(new Date(row.getValue("dateFin")), "dd MMM yyyy", { locale: fr })}
             </span>
         ),
@@ -93,7 +93,7 @@ export const createSaisonsColumns = (
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                            className="h-8 w-8 p-0 hover:bg-muted"
                             title={t("common.view")}
                         >
                             <Eye className="h-4 w-4 text-[#C17A2B]" />
@@ -115,7 +115,7 @@ export const createSaisonsColumns = (
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit(saison)}
-                        className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                        className="h-8 w-8 p-0 hover:bg-muted"
                         title={t("common.edit")}
                     >
                         <Edit className="h-4 w-4 text-[#C17A2B]" />

@@ -28,10 +28,10 @@ export function LanguageSwitcher() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-md hover:bg-[#FAF0DC] dark:hover:bg-[#2b1d10]"
+                    className="h-9 w-9 rounded-md hover:bg-muted dark:hover:bg-[#2b1d10]"
                     title={`${localeFlags[currentLocale]} ${localeNames[currentLocale]}`}
                 >
-                    <Globe className="h-5 w-5 text-[#3D1C00] dark:text-[#e6a73c]" />
+                    <Globe className="h-5 w-5 text-foreground dark:text-[#e6a73c]" />
                     <span className="sr-only">Changer de langue</span>
                 </Button>
             </DropdownMenuTrigger>
@@ -45,7 +45,7 @@ export function LanguageSwitcher() {
                             currentLocale === locale && "bg-[#f4e6cf] text-[#3d2a18] dark:bg-[#3a2816] dark:text-[#f7dfb7]"
                         )}
                     >
-                        <span className="flex h-7 w-8 shrink-0 items-center justify-center rounded-md border border-[#d8c5a8] bg-white/70 text-[10px] font-bold tracking-wide text-[#75512b] dark:border-[#654827] dark:bg-black/20 dark:text-[#e4b662]">
+                        <span className="flex h-7 w-8 shrink-0 items-center justify-center rounded-md border border-[#d8c5a8] bg-card/70 text-[10px] font-bold tracking-wide text-[#75512b] dark:border-[#654827] dark:bg-black/20 dark:text-[#e4b662]">
                             {localeCodes[locale]}
                         </span>
                         <span className="min-w-0 flex-1 font-medium">{localeNames[locale]}</span>

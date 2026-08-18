@@ -47,7 +47,7 @@ export function FinanceFilterBar({ saisons, currentPeriode, currentSaisonId }: F
     return (
         <div className="grid grid-cols-1 items-end gap-3 rounded-2xl border border-border bg-card/90 p-4 shadow-sm backdrop-blur-sm sm:grid-cols-2 xl:flex xl:flex-wrap">
             <div className="min-w-0 xl:min-w-45">
-                <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("finance.bilan.periode")}</label>
+                <label className="mb-1 block text-xs text-muted-foreground">{t("finance.bilan.periode")}</label>
                 <Select value={periode} onValueChange={setPeriode}>
                     <SelectTrigger className="w-full rounded-xl border-border">
                         <SelectValue />
@@ -64,7 +64,7 @@ export function FinanceFilterBar({ saisons, currentPeriode, currentSaisonId }: F
 
             {periode === "saison" && (
                 <div className="min-w-0 xl:min-w-55">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("finance.bilan.selectSaison")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t("finance.bilan.selectSaison")}</label>
                     <Select value={saisonId} onValueChange={setSaisonId}>
                         <SelectTrigger className="w-full rounded-xl border-border">
                             <SelectValue placeholder={t("finance.bilan.selectSaison")} />
@@ -82,7 +82,7 @@ export function FinanceFilterBar({ saisons, currentPeriode, currentSaisonId }: F
 
             {periode === "personnalisee" && (
                 <div className="min-w-0">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("bonAchat.periode")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t("bonAchat.periode")}</label>
                     <DateRangePicker value={dateRange} onChange={setDateRange} />
                 </div>
             )}

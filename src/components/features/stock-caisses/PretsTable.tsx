@@ -112,9 +112,9 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
         dateFin;
 
     return (
-        <div className="rounded-lg bg-white p-6 shadow-sm border border-[#C17A2B]/20">
+        <div className="rounded-lg bg-card p-6 shadow-sm border border-border">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-4">
-                <h2 className="text-xl font-semibold text-[#3D1C00]">
+                <h2 className="text-xl font-semibold text-foreground">
                     {t("pretsCaisses.pretsCaisses")} ({filteredPrets.length})
                 </h2>
                 <div className="flex flex-wrap gap-2">
@@ -122,7 +122,7 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => void exportPretsToPDF(filteredPrets, branding)}
-                        className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                        className="rounded-md border-border hover:bg-muted"
                     >
                         <FileDown className="h-4 w-4 mr-2" />
                         {t("common.exportPDF")}
@@ -131,7 +131,7 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => exportPretsToExcel(filteredPrets)}
-                        className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                        className="rounded-md border-border hover:bg-muted"
                     >
                         <FileSpreadsheet className="h-4 w-4 mr-2" />
                         {t("common.exportExcel")}
@@ -140,25 +140,25 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
             </div>
 
             {/* Filtres */}
-            <div className="mb-4 space-y-3 p-4 rounded-md bg-[#FAF0DC]/50 border border-[#C17A2B]/20">
+            <div className="mb-4 space-y-3 p-4 rounded-md bg-muted/50 border border-border">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     {/* Recherche */}
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#3D1C00]/40" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder={t("common.search")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 rounded-sm border-[#C17A2B]/40 bg-white"
+                            className="pl-9 rounded-sm border-border bg-card"
                         />
                     </div>
 
                     {/* Filtre Agriculteur */}
                     <Select value={selectedAgriculteur} onValueChange={setSelectedAgriculteur}>
-                        <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
+                        <SelectTrigger className="rounded-sm border-border bg-card">
                             <SelectValue placeholder={t("pretsCaisses.filterAgriculteur")} />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value="all">{t("common.all")}</SelectItem>
                             {agriculteurs.map((agri: any) => (
                                 <SelectItem key={agri.id} value={agri.id}>
@@ -170,10 +170,10 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
 
                     {/* Filtre Type de Caisse */}
                     <Select value={selectedTypeCaisse} onValueChange={setSelectedTypeCaisse}>
-                        <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
+                        <SelectTrigger className="rounded-sm border-border bg-card">
                             <SelectValue placeholder={t("pretsCaisses.filterTypeCaisse")} />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value="all">{t("common.all")}</SelectItem>
                             {typesCaisses.map((type: any) => (
                                 <SelectItem key={type.id} value={type.id}>
@@ -185,10 +185,10 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
 
                     {/* Filtre Statut */}
                     <Select value={selectedStatut} onValueChange={setSelectedStatut}>
-                        <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
+                        <SelectTrigger className="rounded-sm border-border bg-card">
                             <SelectValue placeholder={t("pretsCaisses.filterStatut")} />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value="all">{t("common.all")}</SelectItem>
                             <SelectItem value="EN_COURS">{t("pretsCaisses.enCours")}</SelectItem>
                             <SelectItem value="RETOURNE">{t("pretsCaisses.retourne")}</SelectItem>
@@ -200,25 +200,25 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
                 {/* Période */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                     <div>
-                        <label className="text-xs text-[#3D1C00]/60 mb-1 block">
+                        <label className="text-xs text-muted-foreground mb-1 block">
                             {t("common.dateDebut")}
                         </label>
                         <Input
                             type="date"
                             value={dateDebut}
                             onChange={(e) => setDateDebut(e.target.value)}
-                            className="rounded-sm border-[#C17A2B]/40 bg-white"
+                            className="rounded-sm border-border bg-card"
                         />
                     </div>
                     <div>
-                        <label className="text-xs text-[#3D1C00]/60 mb-1 block">
+                        <label className="text-xs text-muted-foreground mb-1 block">
                             {t("common.dateFin")}
                         </label>
                         <Input
                             type="date"
                             value={dateFin}
                             onChange={(e) => setDateFin(e.target.value)}
-                            className="rounded-sm border-[#C17A2B]/40 bg-white"
+                            className="rounded-sm border-border bg-card"
                         />
                     </div>
                     {hasActiveFilters && (
@@ -226,7 +226,7 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
                             variant="outline"
                             size="sm"
                             onClick={resetFilters}
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-white"
+                            className="rounded-md border-border hover:bg-card"
                         >
                             <X className="h-4 w-4 mr-2" />
                             {t("common.resetFilters")}
@@ -239,7 +239,7 @@ export function PretsTable({ prets = [], branding }: PretsTableProps) {
             {filteredPrets.length > 0 ? (
                 <DataTable columns={columns} data={filteredPrets} />
             ) : (
-                <div className="text-center py-8 text-[#3D1C00]/60">
+                <div className="text-center py-8 text-muted-foreground">
                     {hasActiveFilters
                         ? t("common.noResults")
                         : t("pretsCaisses.aucunPret")}

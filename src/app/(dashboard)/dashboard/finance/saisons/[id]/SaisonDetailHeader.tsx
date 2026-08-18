@@ -74,7 +74,7 @@ export function SaisonDetailHeader({
                         <ArrowLeft className="h-4 w-4" />
                         {t("finance.saisons.cloture.backToList")}
                     </Link>
-                    <h1 className="flex items-center gap-3 text-2xl font-bold text-[#3D1C00] sm:text-3xl">
+                    <h1 className="flex items-center gap-3 text-2xl font-bold text-foreground sm:text-3xl">
                         <CalendarRange className="h-8 w-8 shrink-0 text-[#C17A2B]" />
                         {saison.nom}
                     </h1>
@@ -87,7 +87,7 @@ export function SaisonDetailHeader({
                                 ? t("finance.saisons.ouverte")
                                 : t("finance.saisons.cloturee")}
                         </Badge>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-muted-foreground">
                             {format(new Date(saison.dateDebut), "dd MMM yyyy", { locale: fr })} —{" "}
                             {format(new Date(saison.dateFin), "dd MMM yyyy", { locale: fr })}
                         </span>
@@ -100,7 +100,7 @@ export function SaisonDetailHeader({
                             variant="outline"
                             onClick={handleGenererProvisoire}
                             disabled={isPending}
-                            className="rounded-md border-[#C17A2B]/40 text-[#3D1C00]"
+                            className="rounded-md border-border text-foreground"
                         >
                             {isPending ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -124,7 +124,7 @@ export function SaisonDetailHeader({
             {/* Le malentendu que cette page doit lever : les deux boutons
                 ci-dessus ne font pas du tout la même chose. */}
             {saison.statut === "OUVERTE" && (canGenererProvisoire || canCloturer) && (
-                <p className="-mt-2 text-sm text-gray-600">
+                <p className="-mt-2 text-sm text-muted-foreground">
                     {t("finance.saisons.provisoire.vsCloture")}
                 </p>
             )}

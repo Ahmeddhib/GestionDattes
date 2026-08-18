@@ -45,14 +45,14 @@ export default function DashboardError({
 
     return (
         <div className="flex min-h-[60vh] items-center justify-center p-6">
-            <div className="w-full max-w-md rounded-lg border border-border bg-white p-8 text-center">
+            <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center">
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-red-100">
                     <AlertTriangle className="h-7 w-7 text-red-600" />
                 </div>
-                <h2 className="mb-2 text-xl font-bold text-[#3D1C00]">
+                <h2 className="mb-2 text-xl font-bold text-foreground">
                     {t("messages.error.generic")}
                 </h2>
-                <p className="mb-6 text-sm text-gray-600">{message}</p>
+                <p className="mb-6 text-sm text-muted-foreground">{message}</p>
                 <Button
                     type="button"
                     onClick={reset}

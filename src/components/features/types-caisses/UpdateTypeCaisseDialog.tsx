@@ -61,12 +61,12 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("typesCaisses.updateDialog")}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("typesCaisses.updateDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -74,7 +74,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                     <input type="hidden" name="id" value={typeCaisse.id} />
 
                     <div className="space-y-2">
-                        <Label htmlFor="nom" className="text-[#3D1C00]">
+                        <Label htmlFor="nom" className="text-foreground">
                             {t("typesCaisses.name")}
                         </Label>
                         <Input
@@ -82,12 +82,12 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             name="nom"
                             defaultValue={typeCaisse.nom}
                             placeholder={t("typesCaisses.namePlaceholder")}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="poidsKg" className="text-[#3D1C00]">
+                        <Label htmlFor="poidsKg" className="text-foreground">
                             {t("typesCaisses.poids")}
                         </Label>
                         <Input
@@ -98,12 +98,12 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             min="0.01"
                             defaultValue={typeCaisse.poidsKg}
                             placeholder={t("typesCaisses.poidsPlaceholder")}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="stockDisponible" className="text-[#3D1C00]">
+                        <Label htmlFor="stockDisponible" className="text-foreground">
                             {t("typesCaisses.stockDisponible")}
                         </Label>
                         <Input
@@ -113,7 +113,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             min="0"
                             defaultValue={typeCaisse.stockDisponible}
                             placeholder="Quantité en stock"
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 

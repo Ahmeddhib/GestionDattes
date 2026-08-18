@@ -20,7 +20,7 @@ export const createLivreurColumns = (
     onEdit: (livreur: Livreur) => void,
     onDelete: (livreur: Livreur) => void,
 ): ColumnDef<Livreur>[] => [
-    { accessorKey: "nom", header: t("livreurs.nom"), cell: ({ row }) => <span className="font-medium text-[#3D1C00]">{row.original.nom}</span> },
+    { accessorKey: "nom", header: t("livreurs.nom"), cell: ({ row }) => <span className="font-medium text-foreground">{row.original.nom}</span> },
     { accessorKey: "telephone", header: t("livreurs.telephone"), cell: ({ row }) => row.original.telephone || "—" },
     { accessorKey: "cin", header: t("livreurs.cin"), cell: ({ row }) => row.original.cin || "—" },
     { accessorKey: "vehicule", header: t("livreurs.vehicule"), cell: ({ row }) => row.original.vehicule || "—" },

@@ -107,10 +107,10 @@ export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialo
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card border-border rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("users.updateDialog")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("users.updateDialog")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {t("users.updateDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -122,7 +122,7 @@ export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialo
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("users.name")} *</FormLabel>
+                                    <FormLabel className="text-foreground">{t("users.name")} *</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Ahmed Ben Salah"
@@ -141,7 +141,7 @@ export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialo
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("users.email")} *</FormLabel>
+                                    <FormLabel className="text-foreground">{t("users.email")} *</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="email"
@@ -161,7 +161,7 @@ export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialo
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("users.newPassword")}
                                     </FormLabel>
                                     <FormControl>
@@ -183,7 +183,7 @@ export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialo
                             name="roleId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("users.role")} *</FormLabel>
+                                    <FormLabel className="text-foreground">{t("users.role")} *</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}

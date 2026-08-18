@@ -73,10 +73,10 @@ export function CreateRegionDialog() {
                     {t("regions.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card border-border rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("regions.createDialog")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("regions.createDialog")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {t("regions.createDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -88,7 +88,7 @@ export function CreateRegionDialog() {
                             name="nom"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("regions.name")} *
                                     </FormLabel>
                                     <FormControl>
@@ -109,7 +109,7 @@ export function CreateRegionDialog() {
                             name="code"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("regions.codeOptional")}
                                     </FormLabel>
                                     <FormControl>

@@ -113,18 +113,18 @@ export function RecordEncaissementDialog({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="gap-2 rounded-sm border-[#C17A2B]/30 text-[#3D1C00] hover:bg-[#FAF0DC]"
+                    className="gap-2 rounded-sm border-border text-foreground hover:bg-muted"
                 >
                     <Wallet className="h-3.5 w-3.5 text-[#C17A2B]" />
                     {t("finance.ventes.enregistrerEncaissement")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("finance.ventes.nouvelEncaissement")} — {clientNom}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("finance.paiements.montantRestant")}: {montantRestant.toFixed(2)}
                     </DialogDescription>
                 </DialogHeader>
@@ -138,7 +138,7 @@ export function RecordEncaissementDialog({
                             name="montant"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("finance.paiements.montant")}
                                         <span className="text-orange-600 ml-1">
                                             (Max: {montantRestant.toFixed(2)})
@@ -149,7 +149,7 @@ export function RecordEncaissementDialog({
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             {...field}
                                             value={field.value ?? ""}
                                             onChange={(e) =>
@@ -167,14 +167,14 @@ export function RecordEncaissementDialog({
                             name="modePaiement"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("finance.paiements.modePaiement")}
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
                                             placeholder="Espèces, Chèque, Virement..."
-                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                         />
                                     </FormControl>
                                     <FormMessage className="text-red-600 text-xs" />
@@ -187,13 +187,13 @@ export function RecordEncaissementDialog({
                             name="observations"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("bonAchat.observations")}
                                     </FormLabel>
                                     <FormControl>
                                         <Textarea
                                             {...field}
-                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                         />
                                     </FormControl>
                                     <FormMessage className="text-red-600 text-xs" />

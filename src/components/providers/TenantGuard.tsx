@@ -30,10 +30,10 @@ export function TenantGuard({ children }: { children: React.ReactNode }) {
     // Afficher un loader pendant la vérification
     if (status === "loading") {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#FAF0DC]">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C17A2B] mx-auto"></div>
-                    <p className="mt-4 text-[#3D1C00]">Chargement...</p>
+                    <p className="mt-4 text-foreground">Chargement...</p>
                 </div>
             </div>
         );
@@ -42,10 +42,10 @@ export function TenantGuard({ children }: { children: React.ReactNode }) {
     // Si pas de tenant, ne pas afficher le contenu (redirection en cours)
     if (session && !session.user.tenantId && pathname !== "/select-wakala") {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#FAF0DC]">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C17A2B] mx-auto"></div>
-                    <p className="mt-4 text-[#3D1C00]">Redirection...</p>
+                    <p className="mt-4 text-foreground">Redirection...</p>
                 </div>
             </div>
         );

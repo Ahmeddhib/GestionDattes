@@ -78,7 +78,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-125 bg-white">
+            <DialogContent className="sm:max-w-125 bg-card">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-lg bg-[#C17A2B]/10 flex items-center justify-center">
@@ -116,7 +116,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                             className="rounded-md font-mono uppercase"
                             style={{ textTransform: "uppercase" }}
                         />
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                             Utilisez uniquement des lettres majuscules, chiffres, tirets et underscores
                         </p>
                         {errors.code && (

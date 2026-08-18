@@ -248,13 +248,13 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                     {t("nouvellePesee.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-190 bg-white max-h-[90vh] overflow-y-auto">
+            <DialogContent className="rounded-lg sm:max-w-190 bg-card max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
+                    <DialogTitle className="text-foreground flex items-center gap-2">
                         <Scale className="h-5 w-5 text-[#C17A2B]" />
                         {t("nouvellePesee.title")}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("nouvellePesee.description")}
                     </DialogDescription>
                 </DialogHeader>
@@ -264,12 +264,12 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                            <Label className="text-[#3D1C00]">{t("livraisons.agriculteur")}</Label>
+                            <Label className="text-foreground">{t("livraisons.agriculteur")}</Label>
                             <Select value={agriculteurId} onValueChange={setAgriculteurId}>
-                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                <SelectTrigger className="rounded-sm border-border bg-card">
                                     <SelectValue placeholder={t("livraisons.selectAgriculteur")} />
                                 </SelectTrigger>
-                                <SelectContent className="bg-white">
+                                <SelectContent className="bg-card">
                                     {agriculteurs.map((a) => (
                                         <SelectItem key={a.id} value={a.id}>
                                             {a.label}
@@ -279,12 +279,12 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-[#3D1C00]">{t("livraisons.dateLivraison")}</Label>
+                            <Label className="text-foreground">{t("livraisons.dateLivraison")}</Label>
                             <Input
                                 type="date"
                                 value={dateLivraison}
                                 onChange={(e) => setDateLivraison(e.target.value)}
-                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                             />
                         </div>
                     </div>
@@ -310,7 +310,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
 
                     <div className="space-y-3 border-t pt-4">
                         <div className="flex items-center justify-between">
-                            <Label className="text-[#3D1C00] text-base font-semibold">
+                            <Label className="text-foreground text-base font-semibold">
                                 {t("nouvellePesee.lignes")}
                             </Label>
                             <Button
@@ -329,7 +329,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                             return (
                                 <div
                                     key={ligne.clientId}
-                                    className="rounded-md border border-[#C17A2B]/20 p-3 space-y-3"
+                                    className="rounded-md border border-border p-3 space-y-3"
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 flex-1">
@@ -337,10 +337,10 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                 value={ligne.typeDateId}
                                                 onValueChange={(value) => updateLigne(ligne.clientId, { typeDateId: value })}
                                             >
-                                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                                <SelectTrigger className="rounded-sm border-border bg-card">
                                                     <SelectValue placeholder={t("livraisons.selectTypeDate")} />
                                                 </SelectTrigger>
-                                                <SelectContent className="bg-white">
+                                                <SelectContent className="bg-card">
                                                     {typesDates.map((td) => (
                                                         <SelectItem key={td.id} value={td.id}>
                                                             {td.nom}
@@ -352,10 +352,10 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                 value={ligne.typeCaisseId}
                                                 onValueChange={(value) => updateLigne(ligne.clientId, { typeCaisseId: value })}
                                             >
-                                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                                <SelectTrigger className="rounded-sm border-border bg-card">
                                                     <SelectValue placeholder={t("livraisons.selectTypeCaisse")} />
                                                 </SelectTrigger>
-                                                <SelectContent className="bg-white">
+                                                <SelectContent className="bg-card">
                                                     {typesCaisses.map((tc) => (
                                                         <SelectItem key={tc.id} value={tc.id}>
                                                             {tc.nom} ({t("pesees.tare")}: {tc.poidsKg} kg)
@@ -371,7 +371,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     updateLigne(ligne.clientId, { nombreCaisses: Number(e.target.value) || 0 })
                                                 }
                                                 placeholder={t("nouvellePesee.quantiteDeclaree")}
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             />
                                         </div>
                                         {lignes.length > 1 && (
@@ -389,7 +389,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
 
                                     <div className="grid grid-cols-1 gap-2 ps-1 sm:grid-cols-2">
                                         <div className="space-y-2">
-                                            <div className="text-xs font-medium text-[#3D1C00]/70">
+                                            <div className="text-xs font-medium text-muted-foreground">
                                                 {t("pesees.grossWeightLabel")}
                                             </div>
                                             <Input
@@ -400,11 +400,11 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     updateLigne(ligne.clientId, { poidsBrutTotal: parseFloat(e.target.value) || 0 })
                                                 }
                                                 placeholder={t("pesees.grossWeightLabel")}
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <div className="text-xs font-medium text-[#3D1C00]/70">
+                                            <div className="text-xs font-medium text-muted-foreground">
                                                 {t("nouvellePesee.prixKgLigne")}
                                             </div>
                                             <Input
@@ -416,20 +416,20 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     updateLigne(ligne.clientId, { prixKg: parseFloat(e.target.value) || 0 })
                                                 }
                                                 placeholder={t("nouvellePesee.prixKgLigne")}
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-2 rounded-sm bg-[#FAF0DC] p-2 text-sm">
-                                        <span className="text-[#3D1C00]/70">{t("pesees.poidsNetTotal")}:</span>
+                                    <div className="flex items-center justify-between gap-2 rounded-sm bg-muted p-2 text-sm">
+                                        <span className="text-muted-foreground">{t("pesees.poidsNetTotal")}:</span>
                                         <span className="font-semibold text-[#C17A2B]">
                                             {totals.poidsNetTotal.toFixed(2)} kg
                                         </span>
                                     </div>
 
                                     <div className="space-y-2 ps-1">
-                                        <div className="text-xs font-medium text-[#3D1C00]/70">
+                                        <div className="text-xs font-medium text-muted-foreground">
                                             {t("nouvellePesee.quantiteAcceptee")}
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -443,7 +443,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                         quantiteAcceptee: e.target.value === "" ? null : parseFloat(e.target.value) || 0,
                                                     })
                                                 }
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             />
                                             {ligne.quantiteAcceptee !== null && (
                                                 <Button
@@ -459,8 +459,8 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-2 rounded-sm bg-[#FAF0DC] p-2 text-sm">
-                                        <span className="text-[#3D1C00]/70">{t("nouvellePesee.montantLigne")}:</span>
+                                    <div className="flex items-center justify-between gap-2 rounded-sm bg-muted p-2 text-sm">
+                                        <span className="text-muted-foreground">{t("nouvellePesee.montantLigne")}:</span>
                                         <span className="font-semibold text-[#C17A2B]">
                                             {totals.montant.toFixed(2)}
                                         </span>
@@ -474,17 +474,17 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                         )}
                     </div>
 
-                    <div className="rounded-md bg-[#FAF0DC] border border-[#C17A2B] p-4 space-y-3">
+                    <div className="rounded-md bg-muted border border-[#C17A2B] p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-[#3D1C00]">
+                            <span className="text-sm font-medium text-foreground">
                                 {t("nouvellePesee.grandTotal")}
                             </span>
                             <span className="text-xl font-bold text-[#C17A2B]">
                                 {grandTotalNet.toFixed(2)} kg
                             </span>
                         </div>
-                        <div className="flex items-center justify-between border-t border-[#C17A2B]/20 pt-3">
-                            <span className="text-sm font-medium text-[#3D1C00]">
+                        <div className="flex items-center justify-between border-t border-border pt-3">
+                            <span className="text-sm font-medium text-foreground">
                                 {t("nouvellePesee.quantiteAcceptee")}
                             </span>
                             <span className="text-xl font-bold text-[#C17A2B]">
@@ -495,19 +495,19 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
 
                     <div className="border-t pt-4">
                         <div className="space-y-2">
-                            <Label className="text-[#3D1C00]">{t("nouvellePesee.montant")}</Label>
-                            <div className="rounded-sm border border-[#C17A2B]/20 bg-white px-3 py-2 text-sm font-semibold text-[#3D1C00]">
+                            <Label className="text-foreground">{t("nouvellePesee.montant")}</Label>
+                            <div className="rounded-sm border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground">
                                 {montant.toFixed(2)}
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-[#3D1C00]">{t("nouvellePesee.observations")}</Label>
+                        <Label className="text-foreground">{t("nouvellePesee.observations")}</Label>
                         <Textarea
                             value={observations}
                             onChange={(e) => setObservations(e.target.value)}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 

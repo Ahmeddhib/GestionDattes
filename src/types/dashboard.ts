@@ -23,6 +23,7 @@ export interface KpiDatum {
     unit: "TND" | "kg" | "nombre";
     evolution?: Evolution;
     comparisonLabel?: string;
+    comparisonKey?: string;
     href: string;
 }
 

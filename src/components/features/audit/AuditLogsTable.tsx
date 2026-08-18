@@ -45,7 +45,7 @@ export function AuditLogsTable({ initialData, initialTotal }: AuditLogsTableProp
             {/* Header */}
             <div>
                 <h2 className="text-2xl font-bold text-text-primary">Journal d'audit</h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-muted-foreground mt-1">
                     Historique de toutes les actions effectuées dans le système
                 </p>
             </div>
@@ -90,7 +90,7 @@ export function AuditLogsTable({ initialData, initialTotal }: AuditLogsTableProp
                                                     <div className="font-medium text-text-primary text-sm">
                                                         {log.actor.name}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="text-xs text-muted-foreground">
                                                         {log.actor.email}
                                                     </div>
                                                 </div>
@@ -99,10 +99,10 @@ export function AuditLogsTable({ initialData, initialTotal }: AuditLogsTableProp
                                         <td className="py-4 px-4">
                                             <ActionBadge action={log.action} />
                                         </td>
-                                        <td className="py-4 px-4 text-gray-600">
+                                        <td className="py-4 px-4 text-muted-foreground">
                                             {log.description || "—"}
                                         </td>
-                                        <td className="py-4 px-4 text-gray-600 text-sm">
+                                        <td className="py-4 px-4 text-muted-foreground text-sm">
                                             {formatDistanceToNow(new Date(log.createdAt), {
                                                 addSuffix: true,
                                                 locale: fr,

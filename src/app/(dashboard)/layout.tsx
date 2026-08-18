@@ -33,6 +33,7 @@ export default async function DashboardLayout({
                     name: session.user.name,
                     email: session.user.email,
                     role: session.user.role,
+                    image: session.user.image,
                 }}
             />
             <div className="flex min-w-0 flex-1 flex-col">
@@ -45,6 +46,7 @@ export default async function DashboardLayout({
                         name: session.user.name,
                         email: session.user.email,
                         role: session.user.role,
+                        image: session.user.image,
                     }}
                 />
                 <main className="erp-main min-w-0 flex-1 overflow-y-auto overscroll-contain">

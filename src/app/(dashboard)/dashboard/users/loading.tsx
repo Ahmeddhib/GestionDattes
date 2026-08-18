@@ -11,7 +11,7 @@ export default function UsersLoading() {
                 <div className="h-10 w-40 bg-gray-200 rounded-md animate-pulse" />
             </div>
             <div className="h-10 w-full bg-gray-200 rounded-sm animate-pulse mb-6" />
-            <div className="bg-white border border-border rounded-lg p-6">
+            <div className="bg-card border border-border rounded-lg p-6">
                 <TableSkeleton rows={8} />
             </div>
         </div>

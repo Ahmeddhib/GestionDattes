@@ -99,9 +99,9 @@ export function UpdateSaisonDialog({ saison, open, onOpenChange }: UpdateSaisonD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("finance.saisons.modifierSaison")}
                     </DialogTitle>
                     <DialogDescription>{t("finance.saisons.description")}</DialogDescription>
@@ -164,7 +164,7 @@ export function UpdateSaisonDialog({ saison, open, onOpenChange }: UpdateSaisonD
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-[#3D1C00]/60">{t("finance.saisons.statut")}:</span>
+                            <span className="text-sm text-muted-foreground">{t("finance.saisons.statut")}:</span>
                             <Badge
                                 variant={saison.statut === "OUVERTE" ? "default" : "secondary"}
                                 className={saison.statut === "OUVERTE" ? "bg-green-600 hover:bg-green-700" : ""}
@@ -174,7 +174,7 @@ export function UpdateSaisonDialog({ saison, open, onOpenChange }: UpdateSaisonD
                                     : t("finance.saisons.cloturee")}
                             </Badge>
                             {saison.statut === "OUVERTE" && (
-                                <span className="text-xs text-[#3D1C00]/50">
+                                <span className="text-xs text-muted-foreground">
                                     {t("finance.saisons.statutNonModifiable")}
                                 </span>
                             )}

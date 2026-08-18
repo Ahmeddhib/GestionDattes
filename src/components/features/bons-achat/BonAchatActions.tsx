@@ -27,7 +27,7 @@ export function BonAchatActions({ bonAchat, tenant }: BonAchatActionsProps) {
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white">
+            <DropdownMenuContent align="end" className="bg-card">
                 <DropdownMenuItem onClick={() => void printBonAchatPDF(bonAchat, tenant)} className="gap-2">
                     <Printer className="h-4 w-4 text-[#C17A2B]" />
                     {t("bonAchat.imprimer")}

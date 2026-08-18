@@ -54,10 +54,10 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
                             <Users className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
+                            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
                                 {t("agriculteurs.title")}
                             </h1>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("agriculteurs.description")}
                             </p>
                         </div>
@@ -68,32 +68,32 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
 
             {/* Stats Cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("agriculteurs.total")}
                     </div>
-                    <div className="mt-2 text-3xl font-bold text-[#3D1C00]">
+                    <div className="mt-2 text-3xl font-bold text-foreground">
                         {agriculteurs.length}
                     </div>
                 </div>
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("agriculteurs.nbPalmiers")}
                     </div>
                     <div className="mt-2 text-3xl font-bold text-[#C17A2B]">
                         {totalPalmiers.toLocaleString()}
                     </div>
                 </div>
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("agriculteurs.superficie")}
                     </div>
                     <div className="mt-2 text-3xl font-bold text-[#C17A2B]">
                         {totalSuperficie.toFixed(1)}
                     </div>
                 </div>
-                <div className="rounded-lg border border-border bg-white p-6">
-                    <div className="text-sm font-medium text-[#3D1C00]/60">
+                <div className="rounded-lg border border-border bg-card p-6">
+                    <div className="text-sm font-medium text-muted-foreground">
                         {t("agriculteurs.production")}
                     </div>
                     <div className="mt-2 text-3xl font-bold text-[#C17A2B]">

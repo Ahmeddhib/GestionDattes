@@ -168,12 +168,12 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                     {t("pretsCaisses.nouveauPret")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("pretsCaisses.preterCaisses")}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("pretsCaisses.nouveauPretDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -188,16 +188,16 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                             name="agriculteurId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("pretsCaisses.agriculteur")}
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="rounded-sm border-border bg-card">
                                                 <SelectValue placeholder={t("pretsCaisses.selectAgriculteur")} />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-card">
                                             {agriculteurs.map((a) => (
                                                 <SelectItem key={a.id} value={a.id}>
                                                     {a.label}
@@ -216,16 +216,16 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                             name="typeCaisseId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("pretsCaisses.typeCaisse")}
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="rounded-sm border-border bg-card">
                                                 <SelectValue placeholder={t("pretsCaisses.selectTypeCaisse")} />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-card">
                                             {typesCaisses.map((tc) => (
                                                 <SelectItem key={tc.id} value={tc.id}>
                                                     {tc.nom} ({tc.poidsKg} kg) - Stock: {tc.stockDisponible || 0}
@@ -244,19 +244,19 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                             name="livreurId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("pretsCaisses.livreur")}
-                                        <span className="text-[#3D1C00]/40 ml-1 font-normal">
+                                        <span className="text-muted-foreground ml-1 font-normal">
                                             ({t("common.optional")})
                                         </span>
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value || AUCUN_LIVREUR}>
                                         <FormControl>
-                                            <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="rounded-sm border-border bg-card">
                                                 <SelectValue placeholder={t("pretsCaisses.selectLivreur")} />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-card">
                                             <SelectItem value={AUCUN_LIVREUR}>
                                                 {t("pretsCaisses.remiseParAgriculteur")}
                                             </SelectItem>
@@ -278,7 +278,7 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                             name="nombrePrete"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("pretsCaisses.nombrePrete")}
                                         {stockMax > 0 && (
                                             <span className="text-orange-600 ml-1">(Max: {stockMax})</span>
@@ -289,7 +289,7 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                                             type="number"
                                             min="1"
                                             placeholder={t("pretsCaisses.nombrePreterPlaceholder")}
-                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             {...field}
                                             value={field.value ?? ""}
                                             onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
@@ -311,13 +311,13 @@ export function CreatePretDialog({ saisonActive }: { saisonActive?: SaisonActive
                             name="observations"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">
+                                    <FormLabel className="text-foreground">
                                         {t("pretsCaisses.observations")}
                                     </FormLabel>
                                     <FormControl>
                                         <Textarea
                                             placeholder={t("pretsCaisses.notesOptionnelles")}
-                                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                             {...field}
                                         />
                                     </FormControl>

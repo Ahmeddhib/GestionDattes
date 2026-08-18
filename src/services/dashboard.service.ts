@@ -130,6 +130,7 @@ export const dashboardService = {
         let previousTrendFilter: TrendFilter | null = null;
         let previousBilanFilters: DashboardFiltersValue | null = null;
         let comparisonLabel = t("dashboard.premium.comparisonPeriod");
+        let comparisonKey = "comparisonPeriod";
         if (isSaisonMode) {
             const currentSaison = await saisonRepository.findById(tenantId, (filter as { saisonId: string }).saisonId);
             const previousSaison = currentSaison
@@ -139,6 +140,7 @@ export const dashboardService = {
                 previousTrendFilter = { saisonId: previousSaison.id };
                 previousBilanFilters = { periode: "saison", saisonId: previousSaison.id };
                 comparisonLabel = t("dashboard.premium.comparisonSeason");
+                comparisonKey = "comparisonSeason";
             }
         } else if (filter.range?.gte && filter.range?.lte) {
             const durationMs = filter.range.lte.getTime() - filter.range.gte.getTime();
@@ -153,6 +155,13 @@ export const dashboardService = {
                 annee: t("dashboard.premium.comparisonYear"),
                 personnalisee: t("dashboard.premium.comparisonPeriod"),
             } as Partial<Record<DashboardFiltersValue["periode"], string>>)[filters.periode] ?? comparisonLabel;
+            comparisonKey = ({
+                jour: "comparisonDay",
+                semaine: "comparisonWeek",
+                mois: "comparisonMonth",
+                annee: "comparisonYear",
+                personnalisee: "comparisonPeriod",
+            } as Partial<Record<DashboardFiltersValue["periode"], string>>)[filters.periode] ?? comparisonKey;
         }
 
         const kpis: KpiDatum[] = [];
@@ -260,7 +269,7 @@ export const dashboardService = {
             });
         }
 
-        return kpis.map((kpi) => kpi.evolution ? { ...kpi, comparisonLabel } : kpi);
+        return kpis.map((kpi) => kpi.evolution ? { ...kpi, comparisonLabel, comparisonKey } : kpi);
     },
 
     async getDeliveriesTrend(tenantId: string, filters: DashboardFiltersValue): Promise<TrendPoint[]> {

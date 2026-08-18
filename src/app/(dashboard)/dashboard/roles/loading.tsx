@@ -11,7 +11,7 @@ export default function RolesLoading() {
                 <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse" />
             </div>
             <div className="h-10 w-full bg-gray-200 rounded-sm animate-pulse mb-6" />
-            <div className="bg-white border border-border rounded-lg p-6">
+            <div className="bg-card border border-border rounded-lg p-6">
                 <TableSkeleton rows={5} />
             </div>
         </div>

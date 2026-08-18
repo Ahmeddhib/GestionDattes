@@ -71,7 +71,7 @@ export const createLivraisonsColumns = (
             cell: ({ row }) => {
                 const date = new Date(row.getValue("dateLivraison"));
                 return (
-                    <div className="text-sm text-[#3D1C00]">
+                    <div className="text-sm text-foreground">
                         {format(date, "dd/MM/yyyy", { locale: fr })}
                     </div>
                 );
@@ -83,9 +83,9 @@ export const createLivraisonsColumns = (
             cell: ({ row }) => {
                 const agriculteur = row.original.agriculteur;
                 return agriculteur ? (
-                    <div className="font-medium text-[#3D1C00]">
+                    <div className="font-medium text-foreground">
                         {agriculteur.nom} {agriculteur.prenom}
-                        <div className="text-xs text-[#3D1C00]/60">{agriculteur.code}</div>
+                        <div className="text-xs text-muted-foreground">{agriculteur.code}</div>
                     </div>
                 ) : (
                     <span className="text-muted-foreground">—</span>
@@ -110,20 +110,20 @@ export const createLivraisonsColumns = (
                                     <span className="font-medium text-[#C17A2B]">
                                         {caisse.quantite}x
                                     </span>{" "}
-                                    <span className="text-[#3D1C00]">
+                                    <span className="text-foreground">
                                         {caisse.typeCaisse.nom}
                                     </span>{" "}
                                     {caisse.typeDate && (
                                         <span className="text-green-700">· {caisse.typeDate.nom}</span>
                                     )}{" "}
-                                    <span className="text-[#3D1C00]/60">
+                                    <span className="text-muted-foreground">
                                         ({totalKg.toFixed(2)} kg)
                                     </span>
                                 </div>
                             );
                         })}
                         {caisses.length > 1 && (
-                            <div className="text-xs font-semibold text-[#C17A2B] pt-1 border-t border-[#C17A2B]/20">
+                            <div className="text-xs font-semibold text-[#C17A2B] pt-1 border-t border-border">
                                 Total: {row.original.quantiteKg.toFixed(2)} kg
                             </div>
                         )}
@@ -191,7 +191,7 @@ export const createLivraisonsColumns = (
                         <Badge variant="outline" className="bg-[#C17A2B]/10 text-[#C17A2B] border-[#C17A2B]/30 font-mono">
                             {bonAchat.numero}
                         </Badge>
-                        <div className="font-semibold text-[#3D1C00] mt-1">
+                        <div className="font-semibold text-foreground mt-1">
                             {bonAchat.montant.toFixed(2)}
                         </div>
                     </div>

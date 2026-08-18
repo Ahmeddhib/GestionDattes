@@ -57,7 +57,7 @@ export function DashboardNav({ session }: DashboardNavProps) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064" />
                                 </svg>
                             </div>
-                            <span className="font-bold text-gray-800 hidden sm:block">Gestion Dattes</span>
+                            <span className="font-bold text-foreground hidden sm:block">Gestion Dattes</span>
                         </Link>
 
                         {/* Nav links */}
@@ -88,7 +88,7 @@ export function DashboardNav({ session }: DashboardNavProps) {
                                 {session.user.name?.charAt(0).toUpperCase()}
                             </div>
                             <div className="text-xs">
-                                <p className="font-semibold text-gray-800 leading-none">{session.user.name}</p>
+                                <p className="font-semibold text-foreground leading-none">{session.user.name}</p>
                                 <p className="text-violet-500 mt-0.5">{session.user.role}</p>
                             </div>
                         </div>

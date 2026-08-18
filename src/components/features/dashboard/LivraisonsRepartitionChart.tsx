@@ -26,7 +26,7 @@ function RepartitionTooltip({ active, payload }: TooltipContentProps) {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload as RepartitionDatum;
     return (
-        <div className="rounded-md border border-border bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
+        <div className="rounded-md border border-border bg-card p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
             <p className="font-medium text-text-primary dark:text-dattes-100">{d.nom}</p>
             <p>{formatKg(d.quantite)}</p>
         </div>

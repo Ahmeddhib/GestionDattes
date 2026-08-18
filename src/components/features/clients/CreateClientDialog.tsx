@@ -77,9 +77,9 @@ export function CreateClientDialog() {
                     {t("clients.addNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("clients.addNew")}
                     </DialogTitle>
                     <DialogDescription>

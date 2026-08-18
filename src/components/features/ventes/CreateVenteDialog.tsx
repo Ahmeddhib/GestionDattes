@@ -9,6 +9,7 @@ import { Plus, User, Package, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
+import { SaisonOrigineBadge } from "./SaisonOrigineBadge";
 import { getClientsAction } from "@/actions/clients/get-clients.action";
 import { getStockLotsForVenteAction } from "@/actions/ventes/get-stock-lots-for-vente.action";
 import { createVenteAction } from "@/actions/ventes/create-vente.action";
@@ -176,10 +177,17 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                     {t("finance.ventes.nouvelleVente")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            {/* Élargi : le sélecteur de lot affiche désormais type + numéro +
+                saison d'origine + quantité. À 125 la liste débordait du dialogue
+                et l'ensemble paraissait désaligné. */}
+            {/* 700px (`max-w-175`) seulement à partir de `md`. Appliquée dès
+                `sm` (640px), cette largeur dépassait la fenêtre entre 640 et
+                700px — téléphone en paysage, petite tablette — et le dialogue
+                collait aux deux bords, sans marge. */}
+            <DialogContent className="rounded-lg sm:max-w-[calc(100%-2rem)] md:max-w-175 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("finance.ventes.nouvelleVente")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("finance.ventes.nouvelleVente")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {t("finance.ventes.description")}
                     </DialogDescription>
                 </DialogHeader>
@@ -193,16 +201,16 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                             name="clientId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("finance.ventes.client")}</FormLabel>
+                                    <FormLabel className="text-foreground">{t("finance.ventes.client")}</FormLabel>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="h-10 w-full rounded-sm border-[#C17A2B]/20 bg-white">
+                                            <SelectTrigger className="h-10 w-full rounded-sm border-border bg-card">
                                                 <SelectValue placeholder={t("finance.ventes.client")} />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-white">
+                                        <SelectContent className="bg-card">
                                             {clients.length === 0 ? (
-                                                <div className="px-2 py-3 text-center text-sm text-[#3D1C00]/50">
+                                                <div className="px-2 py-3 text-center text-sm text-muted-foreground">
                                                     {t("finance.ventes.aucunClient")}
                                                 </div>
                                             ) : (
@@ -210,7 +218,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                     <SelectItem key={c.id} value={c.id} className="py-2">
                                                         <div className="flex items-center gap-2 min-w-0">
                                                             <User className="h-4 w-4 shrink-0 text-[#C17A2B]" />
-                                                            <span className="truncate font-medium text-[#3D1C00]">
+                                                            <span className="truncate font-medium text-foreground">
                                                                 {c.nom}
                                                             </span>
                                                         </div>
@@ -229,7 +237,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                             name="stockId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("finance.ventes.lotStock")}</FormLabel>
+                                    <FormLabel className="text-foreground">{t("finance.ventes.lotStock")}</FormLabel>
                                     <Popover open={stockPopoverOpen} onOpenChange={setStockPopoverOpen}>
                                         <PopoverTrigger asChild>
                                             <FormControl>
@@ -238,7 +246,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                     variant="outline"
                                                     role="combobox"
                                                     aria-expanded={stockPopoverOpen}
-                                                    className="h-10 w-full justify-between rounded-sm border-[#C17A2B]/20 bg-white font-normal hover:bg-white"
+                                                    className="h-10 w-full justify-between rounded-sm border-border bg-card font-normal hover:bg-card"
                                                 >
                                                     {field.value ? (
                                                         (() => {
@@ -248,14 +256,23 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                                 <span className="flex min-w-0 items-center gap-2 truncate">
                                                                     <Package className="h-4 w-4 shrink-0 text-[#C17A2B]" />
                                                                     <span className="truncate">
-                                                                        <span className="font-medium text-[#3D1C00]">
+                                                                        <span className="font-medium text-foreground">
                                                                             {selected.typeDate}
                                                                         </span>
-                                                                        <span className="text-[#3D1C00]/50">
+                                                                        <span className="text-muted-foreground">
                                                                             {" "}
                                                                             · Lot {selected.numeroLot}
                                                                         </span>
                                                                     </span>
+                                                                    {/* La saison reste visible popover fermé :
+                                                                        c'est au moment de valider que l'on doit
+                                                                        savoir si l'on écoule un report. */}
+                                                                    <SaisonOrigineBadge
+                                                                        saisonNom={selected.saisonNom}
+                                                                        estReporte={
+                                                                            selected.saisonOrigineId !== saisonActive?.id
+                                                                        }
+                                                                    />
                                                                 </span>
                                                             );
                                                         })()
@@ -270,10 +287,21 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                         </PopoverTrigger>
                                         <PopoverContent
                                             align="start"
-                                            className="w-[--radix-popover-trigger-width] bg-white p-0"
+                                            // `portal={false}` : dans un dialogue, `react-remove-scroll`
+                                            // annule la molette hors de son sous-arbre. Portalisée, la
+                                            // liste ne défilait qu'à la barre de défilement.
+                                            portal={false}
+                                            // Syntaxe Tailwind v4 : `w-(--var)`. Écrite
+                                            // `w-[--var]` (v3), la règle sortait en
+                                            // `width:--radix-popover-trigger-width`, sans
+                                            // `var()` — invalide, donc ignorée par le
+                                            // navigateur. La liste n'avait alors aucune
+                                            // largeur et se dimensionnait à son contenu au
+                                            // lieu de suivre le champ.
+                                            className="w-(--radix-popover-trigger-width) bg-card p-0"
                                         >
                                             <Command
-                                                className="bg-white"
+                                                className="bg-card"
                                                 filter={(value, search) =>
                                                     value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
                                                 }
@@ -289,7 +317,11 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                         {lots.map((l) => (
                                                             <CommandItem
                                                                 key={l.id}
-                                                                value={`${l.typeDate} Lot ${l.numeroLot}`}
+                                                                // La saison fait partie du `value` : le `filter` du
+                                                                // Command porte dessus, donc taper « 2024-2025 »
+                                                                // retrouve les lots reportés. Sans cela la saison
+                                                                // serait affichée mais non recherchable.
+                                                                value={`${l.typeDate} Lot ${l.numeroLot} ${l.saisonNom}`}
                                                                 onSelect={() => {
                                                                     field.onChange(l.id);
                                                                     setStockPopoverOpen(false);
@@ -302,24 +334,47 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                                         field.value === l.id ? "opacity-100" : "opacity-0"
                                                                     )}
                                                                 />
-                                                                <div className="flex w-full items-center justify-between gap-3">
-                                                                    <div className="flex min-w-0 items-center gap-2">
+                                                                {/* `flex-wrap` : sous ~400px, type + lot + saison +
+                                                                    quantite ne tiennent pas sur une ligne. Plutot que
+                                                                    de rogner le nom de la saison — l'information que
+                                                                    l'on vient justement lire — les badges passent a la
+                                                                    ligne suivante. */}
+                                                                {/* `min-w-0 flex-1` et non `w-full` : `w-full` valait
+                                                                    100% de la ligne alors que l'icone de coche et son
+                                                                    ecart occupent deja 24px — la ligne debordait
+                                                                    d'autant, et la quantite se faisait rogner. */}
+                                                                <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                                                                    <div className="flex min-w-0 flex-1 items-center gap-2">
                                                                         <Package className="h-4 w-4 shrink-0 text-[#C17A2B]" />
-                                                                        <span className="truncate">
-                                                                            <span className="font-medium text-[#3D1C00]">
+                                                                        <span className="min-w-0 truncate">
+                                                                            <span className="font-medium text-foreground">
                                                                                 {l.typeDate}
                                                                             </span>
-                                                                            <span className="text-[#3D1C00]/50">
+                                                                            <span className="text-muted-foreground">
                                                                                 {" "}
                                                                                 · Lot {l.numeroLot}
                                                                             </span>
                                                                         </span>
                                                                     </div>
-                                                                    <Badge
-                                                                        className={`shrink-0 border-0 ${stockLevelBadgeClass(l.quantiteDisponible)}`}
-                                                                    >
-                                                                        {l.quantiteDisponible} kg
-                                                                    </Badge>
+                                                                    {/* Peut se comprimer : la quantité (`shrink-0`)
+                                                                        est prioritaire, la saison s'abrège. */}
+                                                                    {/* `flex-wrap` ici aussi : sur 360px, saison + quantite
+                                                                        depassaient de ~10px et c'est la mention
+                                                                        « · report » qui sautait — l'alerte meme. La
+                                                                        quantite passe a la ligne, le motif reste entier. */}
+                                                                    <div className="ms-auto flex min-w-0 flex-wrap items-center justify-end gap-1.5">
+                                                                        <SaisonOrigineBadge
+                                                                            saisonNom={l.saisonNom}
+                                                                            estReporte={
+                                                                                l.saisonOrigineId !== saisonActive?.id
+                                                                            }
+                                                                        />
+                                                                        <Badge
+                                                                            className={`shrink-0 border-0 ${stockLevelBadgeClass(l.quantiteDisponible)}`}
+                                                                        >
+                                                                            {l.quantiteDisponible} kg
+                                                                        </Badge>
+                                                                    </div>
                                                                 </div>
                                                             </CommandItem>
                                                         ))}
@@ -339,7 +394,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                 name="quantite"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">
+                                        <FormLabel className="text-foreground">
                                             {t("finance.ventes.quantite")}
                                             {stockMax > 0 && (
                                                 <span className="text-orange-600 ml-1">(Max: {stockMax})</span>
@@ -350,7 +405,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                 type="number"
                                                 step="0.01"
                                                 min="0"
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                                 {...field}
                                                 value={field.value ?? ""}
                                                 onChange={(e) =>
@@ -368,7 +423,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                 name="prixUnitaire"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">
+                                        <FormLabel className="text-foreground">
                                             {t("finance.ventes.prixUnitaire")}
                                         </FormLabel>
                                         <FormControl>
@@ -376,7 +431,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                 type="number"
                                                 step="0.001"
                                                 min="0"
-                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                                                 {...field}
                                                 value={field.value ?? ""}
                                                 onChange={(e) =>
@@ -390,8 +445,8 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                             />
                         </div>
 
-                        <div className="rounded-md bg-[#FAF0DC] p-3 flex items-center justify-between">
-                            <span className="text-sm font-medium text-[#3D1C00]">
+                        <div className="rounded-md bg-muted p-3 flex items-center justify-between">
+                            <span className="text-sm font-medium text-foreground">
                                 {t("finance.ventes.montantTotal")}
                             </span>
                             <span className="text-lg font-bold text-[#C17A2B]">{montantTotal.toFixed(2)}</span>

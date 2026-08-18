@@ -62,9 +62,9 @@ export function RetourDialog({ pret }: RetourDialogProps) {
                     <Undo2 className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-112.5 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-112.5 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("pretsCaisses.retournerCaisses")}
                     </DialogTitle>
                 </DialogHeader>
@@ -72,22 +72,22 @@ export function RetourDialog({ pret }: RetourDialogProps) {
                     <input type="hidden" name="pretId" value={pret.id} />
 
                     {/* Info Prêt */}
-                    <div className="rounded-md bg-[#FAF0DC] p-4 space-y-2">
-                        <p className="text-sm font-medium text-[#3D1C00]">
+                    <div className="rounded-md bg-muted p-4 space-y-2">
+                        <p className="text-sm font-medium text-foreground">
                             {pret.agriculteur.nom} {pret.agriculteur.prenom}
                         </p>
-                        <p className="text-sm text-[#3D1C00]/60">{pret.typeCaisse.nom}</p>
+                        <p className="text-sm text-muted-foreground">{pret.typeCaisse.nom}</p>
                         <div className="grid grid-cols-3 gap-2 pt-2 text-center">
                             <div>
-                                <p className="text-xs text-[#3D1C00]/60">Prêté</p>
+                                <p className="text-xs text-muted-foreground">Prêté</p>
                                 <p className="text-lg font-bold text-[#C17A2B]">{pret.nombrePrete}</p>
                             </div>
                             <div>
-                                <p className="text-xs text-[#3D1C00]/60">Retourné</p>
+                                <p className="text-xs text-muted-foreground">Retourné</p>
                                 <p className="text-lg font-bold text-green-600">{pret.nombreRetourne}</p>
                             </div>
                             <div>
-                                <p className="text-xs text-[#3D1C00]/60">Restant</p>
+                                <p className="text-xs text-muted-foreground">Restant</p>
                                 <p className="text-lg font-bold text-orange-600">{pret.nombreRestant}</p>
                             </div>
                         </div>
@@ -95,7 +95,7 @@ export function RetourDialog({ pret }: RetourDialogProps) {
 
                     {/* Nombre à retourner */}
                     <div className="space-y-2">
-                        <Label className="text-[#3D1C00]">
+                        <Label className="text-foreground">
                             {t("pretsCaisses.nombreARetourner")} (Max: {pret.nombreRestant})
                         </Label>
                         <Input
@@ -104,14 +104,14 @@ export function RetourDialog({ pret }: RetourDialogProps) {
                             min="1"
                             max={pret.nombreRestant}
                             required
-                            className="rounded-sm bg-white"
+                            className="rounded-sm bg-card"
                         />
                     </div>
 
                     {/* Observations */}
                     <div className="space-y-2">
-                        <Label className="text-[#3D1C00]">{t("pretsCaisses.observations")}</Label>
-                        <Textarea name="observations" className="rounded-sm bg-white" />
+                        <Label className="text-foreground">{t("pretsCaisses.observations")}</Label>
+                        <Textarea name="observations" className="rounded-sm bg-card" />
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">

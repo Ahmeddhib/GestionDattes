@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createWakalaAction } from "@/actions/auth/create-wakala.action";
+import { toast } from "sonner";
 
 interface Tenant {
     id: string;
@@ -51,6 +52,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
 
                 if (result.error) {
                     setError(result.error);
+                    toast.error(result.error);
                     setSelectedTenantId(null);
                 } else if (result.success && result.tenant) {
                     sessionStorage.setItem("selectedWakalaId", result.tenant.id);
@@ -60,6 +62,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                 }
             } catch (err) {
                 setError("Une erreur est survenue");
+                toast.error("Une erreur est survenue lors de la sélection");
                 setSelectedTenantId(null);
             }
         });
@@ -75,7 +78,9 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
 
             if (result.error) {
                 setCreateError(result.error);
+                toast.error(result.error);
             } else if (result.success && result.tenantId) {
+                toast.success("Wakala créée avec succès");
                 // Fermer le dialog
                 setIsCreateDialogOpen(false);
                 // Réinitialiser les champs
@@ -86,26 +91,27 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
             }
         } catch (err) {
             setCreateError("Une erreur est survenue lors de la création");
+            toast.error("Une erreur est survenue lors de la création");
         } finally {
             setIsCreating(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#FAF0DC] p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-8">
+        <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+            <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full p-8">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#C17A2B]/10 mb-4">
                         <Building2 className="w-8 h-8 text-[#C17A2B]" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-3xl font-bold text-foreground mb-2">
                         Sélectionnez une Wakala
                     </h1>
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground">
                         Bienvenue <span className="font-semibold">{user.name}</span>
                     </p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
 
                 {/* Error Message */}
@@ -119,10 +125,10 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                 <div className="space-y-3">
                     {tenants.length === 0 ? (
                         <div className="text-center py-8">
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-muted-foreground mb-6">
                                 Vous n'êtes associé à aucune Wakala pour le moment.
                             </p>
-                            <p className="text-sm text-gray-500 mb-4">
+                            <p className="text-sm text-muted-foreground mb-4">
                                 Créez votre première Wakala pour commencer ou attendez qu'un administrateur vous invite.
                             </p>
                         </div>
@@ -147,13 +153,13 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                         <Building2 className="w-6 h-6 text-[#C17A2B]" />
                                     </div>
                                     <div className="text-left">
-                                        <h3 className="font-semibold text-gray-900 text-lg">
+                                        <h3 className="font-semibold text-foreground text-lg">
                                             {tenant.name}
                                         </h3>
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm text-muted-foreground">
                                             Code: <span className="font-mono">{tenant.code}</span>
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-muted-foreground">
                                             Rôle: {tenant.role.name}
                                         </p>
                                     </div>
@@ -177,15 +183,15 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 disabled={isPending}
                             >
                                 <Plus className="w-5 h-5 text-[#C17A2B]" />
-                                <span className="font-semibold text-gray-700">
+                                <span className="font-semibold text-foreground">
                                     Créer une nouvelle Wakala
                                 </span>
                             </button>
                         </DialogTrigger>
-                        <DialogContent className="bg-white sm:max-w-106.25 rounded-lg">
+                        <DialogContent className="bg-card sm:max-w-106.25 rounded-lg">
                             <form onSubmit={handleCreateWakala}>
                                 <DialogHeader>
-                                    <DialogTitle className="text-[#3D1C00]">Créer une nouvelle Wakala</DialogTitle>
+                                    <DialogTitle className="text-foreground">Créer une nouvelle Wakala</DialogTitle>
                                     <DialogDescription>
                                         Remplissez les informations pour créer votre Wakala. Vous serez automatiquement l'administrateur.
                                     </DialogDescription>
@@ -199,7 +205,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
 
                                 <div className="grid gap-4 py-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="wakalaName" className="text-[#3D1C00]">
+                                        <Label htmlFor="wakalaName" className="text-foreground">
                                             Nom de la Wakala *
                                         </Label>
                                         <Input
@@ -208,11 +214,11 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                             onChange={(e) => setWakalaName(e.target.value)}
                                             placeholder="Ex: Wakala Tunis Centre"
                                             required
-                                            className="rounded-sm border-[#C17A2B]/40"
+                                            className="rounded-sm border-border"
                                         />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label htmlFor="wakalaCode" className="text-[#3D1C00]">
+                                        <Label htmlFor="wakalaCode" className="text-foreground">
                                             Code de la Wakala *
                                         </Label>
                                         <Input
@@ -222,9 +228,9 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                             placeholder="Ex: WKL001"
                                             required
                                             maxLength={20}
-                                            className="rounded-sm border-[#C17A2B]/40 font-mono"
+                                            className="rounded-sm border-border font-mono"
                                         />
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-muted-foreground">
                                             Code unique pour identifier votre Wakala
                                         </p>
                                     </div>
@@ -260,8 +266,8 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                 </div>
 
                 {/* Info Footer */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                    <p className="text-xs text-gray-500 text-center">
+                <div className="mt-8 pt-6 border-t border-border">
+                    <p className="text-xs text-muted-foreground text-center">
                         Vous pouvez changer de Wakala à tout moment depuis le menu principal
                     </p>
                 </div>

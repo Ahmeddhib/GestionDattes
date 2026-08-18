@@ -42,10 +42,10 @@ export function TypesDatesPageContent({ typesDates }: TypesDatesPageContentProps
                             <Grape className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
+                            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
                                 {t("typesDates.title")}
                             </h1>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("typesDates.description")}
                             </p>
                         </div>
@@ -56,13 +56,13 @@ export function TypesDatesPageContent({ typesDates }: TypesDatesPageContentProps
 
             {/* Stats Cards */}
             <div className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("typesDates.total")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">
+                            <p className="text-2xl font-bold text-foreground">
                                 {typesDates.length}
                             </p>
                         </div>
@@ -72,13 +72,13 @@ export function TypesDatesPageContent({ typesDates }: TypesDatesPageContentProps
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("typesDates.totalUsage")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">{totalUsage}</p>
+                            <p className="text-2xl font-bold text-foreground">{totalUsage}</p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Grape className="h-6 w-6 text-[#C17A2B]" />

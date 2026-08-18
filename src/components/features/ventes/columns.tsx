@@ -10,6 +10,7 @@ import { RecordEncaissementDialog } from "./RecordEncaissementDialog";
 import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { EncaissementsHistoryDialog } from "./EncaissementsHistoryDialog";
 import { downloadVenteInvoicePDF } from "@/lib/vente-invoice-pdf";
+import { SaisonOrigineBadge } from "./SaisonOrigineBadge";
 import type { PdfBranding } from "@/lib/pdf-branding";
 
 export type Vente = {
@@ -33,6 +34,9 @@ export type Vente = {
         id: string;
         TypeDate: { id: string; nom: string };
         Livraison: { id: string; numeroLot: string };
+        /** Saison d'entrée du lot — distincte de la saison de la vente. */
+        saisonOrigineId: string;
+        Saison: { id: string; nom: string };
     };
     Saison: { id: string; nom: string } | null;
 };
@@ -53,7 +57,7 @@ export const createVentesColumns = (
         accessorKey: "Client",
         header: t("finance.ventes.client"),
         cell: ({ row }) => (
-            <div className="font-medium text-[#3D1C00]">{row.original.Client.nom}</div>
+            <div className="font-medium text-foreground">{row.original.Client.nom}</div>
         ),
     },
     {
@@ -62,9 +66,19 @@ export const createVentesColumns = (
         cell: ({ row }) => {
             const sd = row.original.StockDate;
             return (
-                <div className="text-sm text-[#3D1C00]">
+                <div className="text-sm text-foreground">
                     {sd.TypeDate.nom}
-                    <div className="text-xs text-gray-500">Lot {sd.Livraison.numeroLot}</div>
+                    <div className="text-xs text-muted-foreground">Lot {sd.Livraison.numeroLot}</div>
+                    {/* Référence = la saison DE CETTE VENTE, et non la saison
+                        ouverte aujourd'hui : sinon tout l'historique serait
+                        requalifié « report » à chaque clôture. */}
+                    <SaisonOrigineBadge
+                        className="mt-1"
+                        saisonNom={sd.Saison.nom}
+                        estReporte={
+                            !!row.original.Saison && sd.saisonOrigineId !== row.original.Saison.id
+                        }
+                    />
                 </div>
             );
         },
@@ -73,14 +87,14 @@ export const createVentesColumns = (
         accessorKey: "quantite",
         header: t("finance.ventes.quantite"),
         cell: ({ row }) => (
-            <div className="text-right text-[#3D1C00]">{row.getValue<number>("quantite").toFixed(2)} kg</div>
+            <div className="text-right text-foreground">{row.getValue<number>("quantite").toFixed(2)} kg</div>
         ),
     },
     {
         accessorKey: "prixUnitaire",
         header: t("finance.ventes.prixUnitaire"),
         cell: ({ row }) => (
-            <div className="text-right text-[#3D1C00]">{row.getValue<number>("prixUnitaire").toFixed(3)}</div>
+            <div className="text-right text-foreground">{row.getValue<number>("prixUnitaire").toFixed(3)}</div>
         ),
     },
     {
@@ -119,7 +133,7 @@ export const createVentesColumns = (
         // cliquable pour trier.
         header: t("finance.ventes.dateVente"),
         cell: ({ row }) => (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
                 {format(new Date(row.getValue<Date>("createdAt")), "dd MMM yyyy", { locale: fr })}
             </span>
         ),
@@ -147,7 +161,7 @@ export const createVentesColumns = (
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(vente)}
-                            className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                            className="h-8 w-8 p-0 hover:bg-muted"
                         >
                             <Edit className="h-4 w-4 text-[#C17A2B]" />
                         </Button>

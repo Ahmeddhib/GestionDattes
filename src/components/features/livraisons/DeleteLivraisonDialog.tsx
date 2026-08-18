@@ -54,12 +54,12 @@ export function DeleteLivraisonDialog({ livraison }: DeleteLivraisonDialogProps)
                     <Trash2 className="h-4 w-4" />
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="rounded-lg bg-white">
+            <AlertDialogContent className="rounded-lg bg-card">
                 <AlertDialogHeader>
-                    <AlertDialogTitle className="text-[#3D1C00]">
+                    <AlertDialogTitle className="text-foreground">
                         {t("livraisons.deleteDialog")}
                     </AlertDialogTitle>
-                    <AlertDialogDescription className="text-[#3D1C00]/60">
+                    <AlertDialogDescription className="text-muted-foreground">
                         {t("livraisons.deleteWarning").replace("{numeroLot}", livraison.numeroLot)}
                         <br />
                         <br />

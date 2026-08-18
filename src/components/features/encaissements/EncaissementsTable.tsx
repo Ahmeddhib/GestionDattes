@@ -34,7 +34,7 @@ export async function EncaissementsTable({
 
     if (encaissements.length === 0) {
         return (
-            <p className="p-10 text-center text-sm text-gray-600">
+            <p className="p-10 text-center text-sm text-muted-foreground">
                 {t("common.noResults")}
             </p>
         );
@@ -62,14 +62,14 @@ export async function EncaissementsTable({
                         <TableCell>{e.Vente?.Client?.nom ?? "—"}</TableCell>
                         <TableCell>{e.modePaiement ?? "—"}</TableCell>
                         <TableCell>{e.User?.name ?? "—"}</TableCell>
-                        <TableCell className="whitespace-nowrap text-right font-medium text-[#3D1C00]">
+                        <TableCell className="whitespace-nowrap text-right font-medium text-foreground">
                             {e.montant.toFixed(2)} TND
                         </TableCell>
                     </TableRow>
                 ))}
                 <TableRow className="bg-[#FAF0DC]/60 font-semibold">
                     <TableCell colSpan={4}>{t("common.total")}</TableCell>
-                    <TableCell className="whitespace-nowrap text-right text-[#3D1C00]">
+                    <TableCell className="whitespace-nowrap text-right text-foreground">
                         {total.toFixed(2)} TND
                     </TableCell>
                 </TableRow>

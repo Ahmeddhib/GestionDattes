@@ -28,6 +28,10 @@ export async function getStockLotsForVenteAction() {
                 typeDate: lot.TypeDate.nom,
                 numeroLot: lot.Livraison.numeroLot,
                 quantiteDisponible: lot.quantiteDisponible,
+                // Saison d'ENTRÉE du lot, jamais réécrite : elle permet de
+                // distinguer un lot de la campagne en cours d'un report.
+                saisonOrigineId: lot.saisonOrigineId,
+                saisonNom: lot.Saison.nom,
             })),
         };
     } catch (error) {

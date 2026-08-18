@@ -38,7 +38,7 @@ export async function RecentActivity({ sections }: { sections: RecentActivitySec
                         const config = ICONS[item.section.code] ?? ICONS.mouvementsStock;
                         const Icon = config.icon;
                         return (
-                            <Link key={`${item.section.code}-${item.id}`} href={item.href} className="flex items-center gap-3 rounded-lg py-2.5 transition hover:bg-[#f8efe2]/70 dark:hover:bg-white/[.02]">
+                            <Link key={`${item.section.code}-${item.id}`} href={item.href} className="flex items-center gap-3 rounded-lg py-2.5 transition hover:bg-[#f8efe2]/70 dark:hover:bg-card/[.02]">
                                 <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.tone}`}><Icon className="h-4 w-4" /></span>
                                 <div className="min-w-0 flex-1">
                                     <p className="truncate text-xs font-medium text-white">{item.section.title} · {item.label}</p>

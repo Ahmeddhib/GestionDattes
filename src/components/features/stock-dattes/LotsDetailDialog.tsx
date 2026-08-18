@@ -143,19 +143,19 @@ export function LotsDetailDialog({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="gap-2 rounded-sm border-[#C17A2B]/30 text-[#3D1C00] hover:bg-[#FAF0DC]"
+                    className="gap-2 rounded-sm border-border text-foreground hover:bg-muted"
                 >
                     <Eye className="h-3.5 w-3.5 text-[#C17A2B]" />
                     {t("stockDattes.voirLots")} ({nombreLots})
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-160 bg-white max-h-[80vh] overflow-y-auto">
+            <DialogContent className="rounded-lg sm:max-w-160 bg-card max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
+                    <DialogTitle className="text-foreground flex items-center gap-2">
                         <Warehouse className="h-5 w-5 text-[#C17A2B]" />
                         {typeDate}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("stockDattes.detailLots")}
                     </DialogDescription>
                 </DialogHeader>
@@ -186,9 +186,9 @@ export function LotsDetailDialog({
                         <TableBody>
                             {lots.map((lot) => (
                                 <TableRow key={lot.id}>
-                                    <TableCell className="font-medium text-[#3D1C00]">{lot.numeroLot}</TableCell>
-                                    <TableCell className="text-gray-600">{lot.agriculteur}</TableCell>
-                                    <TableCell className="text-gray-600">
+                                    <TableCell className="font-medium text-foreground">{lot.numeroLot}</TableCell>
+                                    <TableCell className="text-muted-foreground">{lot.agriculteur}</TableCell>
+                                    <TableCell className="text-muted-foreground">
                                         {format(new Date(lot.dateEntree), "dd MMM yyyy", { locale: fr })}
                                     </TableCell>
                                     <TableCell className="text-right">{lot.quantite.toFixed(2)} kg</TableCell>
@@ -242,7 +242,7 @@ export function LotsDetailDialog({
                         </p>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[#3D1C00]">
+                            <span className="text-sm font-medium text-foreground">
                                 {t("common.page")} {resultat.currentPage} {t("common.of")} {resultat.totalPages}
                             </span>
                             <Button

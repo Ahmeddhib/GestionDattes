@@ -59,27 +59,27 @@ export function PaiementsHistoryDialog({ bonAchatId, numero }: PaiementsHistoryD
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5 rounded-sm text-[#3D1C00] hover:bg-[#FAF0DC]"
+                    className="gap-1.5 rounded-sm text-foreground hover:bg-muted"
                 >
                     <Eye className="h-3.5 w-3.5 text-[#C17A2B]" />
                     {t("finance.paiements.historique")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-150 bg-white max-h-[80vh] overflow-y-auto">
+            <DialogContent className="rounded-lg sm:max-w-150 bg-card max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
+                    <DialogTitle className="text-foreground flex items-center gap-2">
                         <HandCoins className="h-5 w-5 text-[#C17A2B]" />
                         {numero}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("finance.paiements.historique")}
                     </DialogDescription>
                 </DialogHeader>
 
                 {loading ? (
-                    <p className="text-sm text-gray-500 py-4">{t("common.loading")}</p>
+                    <p className="text-sm text-muted-foreground py-4">{t("common.loading")}</p>
                 ) : paiements.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-4">{t("common.noResults")}</p>
+                    <p className="text-sm text-muted-foreground py-4">{t("common.noResults")}</p>
                 ) : (
                     <Table>
                         <TableHeader>
@@ -93,14 +93,14 @@ export function PaiementsHistoryDialog({ bonAchatId, numero }: PaiementsHistoryD
                         <TableBody>
                             {paiements.map((p) => (
                                 <TableRow key={p.id}>
-                                    <TableCell className="text-sm text-gray-600">
+                                    <TableCell className="text-sm text-muted-foreground">
                                         {format(new Date(p.datePaiement), "dd MMM yyyy HH:mm", { locale: fr })}
                                     </TableCell>
                                     <TableCell className="text-right font-semibold text-green-600">
                                         {p.montant.toFixed(2)}
                                     </TableCell>
-                                    <TableCell className="text-gray-600">{p.modePaiement || "—"}</TableCell>
-                                    <TableCell className="text-xs text-gray-500">{p.User.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{p.modePaiement || "—"}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">{p.User.name}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

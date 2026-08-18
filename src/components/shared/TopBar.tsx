@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { ChevronRight, Menu } from "lucide-react";
+import Link from "next/link";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import WakalaSwitcher from "./WakalaSwitcher";
@@ -10,6 +11,7 @@ import { Sidebar } from "./Sidebar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
+import { Avatar } from "./Avatar";
 
 interface Tenant {
     id: string;
@@ -30,6 +32,7 @@ interface TopBarProps {
         name: string;
         email: string;
         role: string;
+        image?: string | null;
     };
 }
 
@@ -76,6 +79,7 @@ export function TopBar({ user }: TopBarProps) {
         "/dashboard/types-dates": "nav.typesDates",
         "/dashboard/livraisons": "nav.livraisons",
         "/dashboard/stock-caisses": "nav.stockCaisses",
+        "/dashboard/profile": "nav.profile",
     };
 
     const pageName = t(routeTranslationKeys[pathname] || "nav.dashboard");
@@ -146,13 +150,23 @@ export function TopBar({ user }: TopBarProps) {
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <ThemeToggle premium={premiumDashboard} />
                 <LanguageSwitcher />
+                {user && (
+                    <Link
+                        href="/dashboard/profile"
+                        className="ms-1 rounded-lg outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#c17a2b]"
+                        aria-label="Ouvrir mon profil"
+                        title={user.name}
+                    >
+                        <Avatar name={user.name} image={user.image} size="md" />
+                    </Link>
+                )}
             </div>
 
             <Sheet open={mobileNavigationOpen} onOpenChange={setMobileNavigationOpen}>
                 <SheetContent side="left" showCloseButton={false} className="w-[min(88vw,20rem)] border-0 bg-[#3D1C00] p-0 sm:max-w-80">
                     <SheetTitle className="sr-only">Navigation principale</SheetTitle>
                     <Sidebar
-                        user={user ? { name: user.name, email: user.email, role: user.role } : undefined}
+                        user={user ? { name: user.name, email: user.email, role: user.role, image: user.image } : undefined}
                         onNavigate={() => setMobileNavigationOpen(false)}
                     />
                 </SheetContent>

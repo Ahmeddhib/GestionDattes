@@ -67,7 +67,7 @@ export function DepensesTableServer({
                             onClick={() =>
                                 void exporter((lignes) => exportDepensesToPDF(lignes, branding))
                             }
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                            className="rounded-md border-border hover:bg-muted"
                         >
                             {enCours ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -81,7 +81,7 @@ export function DepensesTableServer({
                             size="sm"
                             disabled={enCours}
                             onClick={() => void exporter((lignes) => exportDepensesToExcel(lignes))}
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                            className="rounded-md border-border hover:bg-muted"
                         >
                             <FileSpreadsheet className="mr-2 h-4 w-4" />
                             {t("common.exportExcel")}

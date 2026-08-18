@@ -98,10 +98,10 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                     {t("agriculteurs.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-150 bg-white border-border rounded-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-150 bg-card border-border rounded-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("agriculteurs.createDialog")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("agriculteurs.createDialog")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {t("agriculteurs.createDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -110,14 +110,14 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         {/* Informations Personnelles */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-semibold text-[#3D1C00]">
+                            <h3 className="text-sm font-semibold text-foreground">
                                 {t("agriculteurs.personalInfo")}
                             </h3>
 
                             {/* Info banner: code auto-généré */}
                             <div className="bg-[#C17A2B]/10 border border-[#C17A2B]/20 rounded-sm p-3 flex items-start gap-2">
                                 <span className="text-[#C17A2B] text-lg">💡</span>
-                                <p className="text-sm text-[#3D1C00]/80">
+                                <p className="text-sm text-foreground/80">
                                     <strong className="text-[#C17A2B]">{t("agriculteurs.code")}</strong> : Un code unique sera généré automatiquement (ex: AGR-0001)
                                 </p>
                             </div>
@@ -127,7 +127,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 name="cin"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">{t("agriculteurs.cin")} *</FormLabel>
+                                        <FormLabel className="text-foreground">{t("agriculteurs.cin")} *</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="12345678"
@@ -148,7 +148,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="nom"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.nom")} *</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.nom")} *</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     placeholder="Ben Ahmed"
@@ -167,7 +167,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="prenom"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.prenom")} *</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.prenom")} *</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     placeholder="Mohamed"
@@ -188,7 +188,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="telephone"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.telephone")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.telephone")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     placeholder="+216 98 123 456"
@@ -207,7 +207,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="regionId"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.region")} *</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.region")} *</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
                                                 defaultValue={field.value}
@@ -238,7 +238,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 name="adresse"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">{t("agriculteurs.adresse")}</FormLabel>
+                                        <FormLabel className="text-foreground">{t("agriculteurs.adresse")}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="Douz, Kebili"
@@ -255,7 +255,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
 
                         {/* Informations Exploitation */}
                         <div className="space-y-4 pt-4 border-t border-border">
-                            <h3 className="text-sm font-semibold text-[#3D1C00]">
+                            <h3 className="text-sm font-semibold text-foreground">
                                 {t("agriculteurs.exploitationInfo")}
                             </h3>
 
@@ -265,7 +265,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="nbPalmiers"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.nbPalmiers")} *</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.nbPalmiers")} *</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
@@ -289,7 +289,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="superficie"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.superficie")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.superficie")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
@@ -317,7 +317,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                     name="productionEstimee"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.production")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.production")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"

@@ -103,14 +103,14 @@ export function AgricultureursTableAdvanced({
         <>
             {/* Filtre par région */}
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-                <label className="text-sm font-medium text-[#3D1C00]">
+                <label className="text-sm font-medium text-foreground">
                     {t("agriculteurs.region")} :
                 </label>
                 <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                    <SelectTrigger className="w-full rounded-sm border-[#C17A2B]/20 bg-white sm:w-62.5">
+                    <SelectTrigger className="w-full rounded-sm border-border bg-card sm:w-62.5">
                         <SelectValue placeholder={t("common.all")} />
                     </SelectTrigger>
-                    <SelectContent className="bg-white">
+                    <SelectContent className="bg-card">
                         <SelectItem value="all">{t("common.all")}</SelectItem>
                         {regions.map((region) => (
                             <SelectItem key={region.id} value={region.id}>
@@ -120,7 +120,7 @@ export function AgricultureursTableAdvanced({
                     </SelectContent>
                 </Select>
                 {selectedRegion !== "all" && (
-                    <span className="text-sm text-[#3D1C00]/60">
+                    <span className="text-sm text-muted-foreground">
                         {filteredData.length} {t("agriculteurs.title").toLowerCase()}
                     </span>
                 )}

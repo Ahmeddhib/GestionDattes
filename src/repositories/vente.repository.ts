@@ -62,6 +62,11 @@ const VENTE_INCLUDE = {
             id: true,
             TypeDate: { select: { id: true, nom: true } },
             Livraison: { select: { id: true, numeroLot: true } },
+            // Saison d'ENTRÉE du lot : distincte de `Vente.saisonId`, qui est la
+            // saison de la TRANSACTION. Vendre en saison B un lot entré en A est
+            // normal — c'est ce qu'on veut rendre lisible.
+            saisonOrigineId: true,
+            Saison: { select: { id: true, nom: true } },
         },
     },
     User: { select: { id: true, name: true } },

@@ -59,10 +59,10 @@ export function RegionsTable({ initialData }: RegionsTableProps) {
                 <div className="rounded-full bg-[#C17A2B]/10 p-6 mb-4">
                     <MapPin className="h-12 w-12 text-[#C17A2B]" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#3D1C00] mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                     Aucune région
                 </h3>
-                <p className="text-sm text-[#3D1C00]/60 max-w-sm">
+                <p className="text-sm text-muted-foreground max-w-sm">
                     Commencez par créer votre première région de production
                 </p>
             </div>
@@ -74,22 +74,22 @@ export function RegionsTable({ initialData }: RegionsTableProps) {
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow className="border-border hover:bg-[#FAF0DC]/50">
-                            <TableHead className="text-[#3D1C00] font-semibold">Nom</TableHead>
-                            <TableHead className="text-[#3D1C00] font-semibold">Code</TableHead>
-                            <TableHead className="text-[#3D1C00] font-semibold text-center">
+                        <TableRow className="border-border hover:bg-muted/50">
+                            <TableHead className="text-foreground font-semibold">Nom</TableHead>
+                            <TableHead className="text-foreground font-semibold">Code</TableHead>
+                            <TableHead className="text-foreground font-semibold text-center">
                                 <div className="flex items-center justify-center gap-1">
                                     <Users className="h-4 w-4" />
                                     Agriculteurs
                                 </div>
                             </TableHead>
-                            <TableHead className="text-[#3D1C00] font-semibold text-center">
+                            <TableHead className="text-foreground font-semibold text-center">
                                 <div className="flex items-center justify-center gap-1">
                                     <Users className="h-4 w-4" />
                                     Utilisateurs
                                 </div>
                             </TableHead>
-                            <TableHead className="text-[#3D1C00] font-semibold text-right">Actions</TableHead>
+                            <TableHead className="text-foreground font-semibold text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -98,7 +98,7 @@ export function RegionsTable({ initialData }: RegionsTableProps) {
                                 key={region.id}
                                 className="border-border hover:bg-[#FAF0DC]/30"
                             >
-                                <TableCell className="font-medium text-[#3D1C00]">
+                                <TableCell className="font-medium text-foreground">
                                     {region.nom}
                                 </TableCell>
                                 <TableCell>
@@ -107,7 +107,7 @@ export function RegionsTable({ initialData }: RegionsTableProps) {
                                             {region.code}
                                         </span>
                                     ) : (
-                                        <span className="text-[#3D1C00]/40 text-sm">-</span>
+                                        <span className="text-muted-foreground text-sm">-</span>
                                     )}
                                 </TableCell>
                                 <TableCell className="text-center">

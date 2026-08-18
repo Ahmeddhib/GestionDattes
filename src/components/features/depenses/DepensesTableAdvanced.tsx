@@ -41,7 +41,7 @@ export function DepensesTableAdvanced({ data, branding }: DepensesTableAdvancedP
                     variant="outline"
                     size="sm"
                     onClick={() => void exportDepensesToPDF(data, branding)}
-                    className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                    className="rounded-md border-border hover:bg-muted"
                 >
                     <FileDown className="h-4 w-4 mr-2" />
                     {t("common.exportPDF")}
@@ -50,7 +50,7 @@ export function DepensesTableAdvanced({ data, branding }: DepensesTableAdvancedP
                     variant="outline"
                     size="sm"
                     onClick={() => exportDepensesToExcel(data)}
-                    className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                    className="rounded-md border-border hover:bg-muted"
                 >
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
                     {t("common.exportExcel")}

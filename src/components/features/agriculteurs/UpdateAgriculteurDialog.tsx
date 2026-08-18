@@ -128,10 +128,10 @@ export function UpdateAgriculteurDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-150 bg-white border-border rounded-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-150 bg-card border-border rounded-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("agriculteurs.updateDialog")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("agriculteurs.updateDialog")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {t("agriculteurs.updateDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -145,7 +145,7 @@ export function UpdateAgriculteurDialog({
                                     name="code"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.code")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.code")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
@@ -163,7 +163,7 @@ export function UpdateAgriculteurDialog({
                                     name="cin"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.cin")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.cin")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     maxLength={8}
@@ -184,7 +184,7 @@ export function UpdateAgriculteurDialog({
                                     name="nom"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.nom")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.nom")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
@@ -202,7 +202,7 @@ export function UpdateAgriculteurDialog({
                                     name="prenom"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.prenom")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.prenom")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
@@ -222,7 +222,7 @@ export function UpdateAgriculteurDialog({
                                     name="telephone"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.telephone")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.telephone")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
@@ -241,7 +241,7 @@ export function UpdateAgriculteurDialog({
                                     name="regionId"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.region")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.region")}</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
                                                 defaultValue={field.value}
@@ -272,7 +272,7 @@ export function UpdateAgriculteurDialog({
                                 name="adresse"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[#3D1C00]">{t("agriculteurs.adresse")}</FormLabel>
+                                        <FormLabel className="text-foreground">{t("agriculteurs.adresse")}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
@@ -292,7 +292,7 @@ export function UpdateAgriculteurDialog({
                                     name="nbPalmiers"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.nbPalmiers")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.nbPalmiers")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
@@ -315,7 +315,7 @@ export function UpdateAgriculteurDialog({
                                     name="superficie"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.superficie")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.superficie")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"
@@ -342,7 +342,7 @@ export function UpdateAgriculteurDialog({
                                     name="productionEstimee"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-[#3D1C00]">{t("agriculteurs.production")}</FormLabel>
+                                            <FormLabel className="text-foreground">{t("agriculteurs.production")}</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="number"

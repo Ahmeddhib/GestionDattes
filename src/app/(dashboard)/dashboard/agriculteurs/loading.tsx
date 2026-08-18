@@ -20,7 +20,7 @@ export default function AgricultureursLoading() {
             {/* Stats Skeleton */}
             <div className="grid gap-4 md:grid-cols-4">
                 {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="rounded-lg border border-border bg-white p-6">
+                    <div key={i} className="rounded-lg border border-border bg-card p-6">
                         <div className="h-4 w-32 animate-pulse rounded bg-border" />
                         <div className="mt-2 h-9 w-20 animate-pulse rounded bg-border" />
                     </div>
@@ -28,7 +28,7 @@ export default function AgricultureursLoading() {
             </div>
 
             {/* Table Skeleton */}
-            <div className="rounded-lg border border-border bg-white p-6">
+            <div className="rounded-lg border border-border bg-card p-6">
                 <div className="space-y-4">
                     {[1, 2, 3, 4, 5].map((i) => (
                         <div key={i} className="h-16 animate-pulse rounded-lg bg-border" />

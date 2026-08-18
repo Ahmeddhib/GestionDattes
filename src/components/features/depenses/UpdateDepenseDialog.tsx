@@ -104,9 +104,9 @@ export function UpdateDepenseDialog({ depense, open, onOpenChange }: UpdateDepen
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("finance.depenses.modifierDepense")}
                     </DialogTitle>
                     <DialogDescription>{t("finance.depenses.description")}</DialogDescription>

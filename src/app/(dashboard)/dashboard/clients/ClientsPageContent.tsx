@@ -23,40 +23,40 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
             {/* En-tête */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                         <Users className="h-8 w-8 text-[#C17A2B]" />
                         {t("clients.title")}
                     </h1>
-                    <p className="text-gray-600 mt-2">{t("clients.description")}</p>
+                    <p className="text-muted-foreground mt-2">{t("clients.description")}</p>
                 </div>
                 <CreateClientDialog />
             </div>
 
             {/* Stats Cards */}
             <div className="grid gap-6 md:grid-cols-3">
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("clients.stats.total")}
                             </p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">
+                            <p className="text-3xl font-bold text-foreground mt-2">
                                 {totalClients}
                             </p>
                         </div>
-                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
+                        <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center">
                             <Users className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("clients.stats.withSales")}
                             </p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">
+                            <p className="text-3xl font-bold text-foreground mt-2">
                                 {clientsAvecVentes}
                             </p>
                         </div>
@@ -66,13 +66,13 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("clients.stats.totalSales")}
                             </p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">
+                            <p className="text-3xl font-bold text-foreground mt-2">
                                 {totalVentes}
                             </p>
                         </div>
@@ -84,7 +84,7 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="bg-card rounded-lg border border-border shadow-sm">
                 <ClientsTableAdvanced data={clients} />
             </div>
         </PageContainer>

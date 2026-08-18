@@ -91,10 +91,10 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                 <div className="rounded-full bg-[#C17A2B]/10 p-6 mb-4">
                     <Users className="h-12 w-12 text-[#C17A2B]" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#3D1C00] mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                     Aucun agriculteur
                 </h3>
-                <p className="text-sm text-[#3D1C00]/60 max-w-sm">
+                <p className="text-sm text-muted-foreground max-w-sm">
                     Commencez par enregistrer votre premier agriculteur
                 </p>
             </div>
@@ -107,7 +107,7 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                 {/* Search Bar */}
                 <div className="flex items-center gap-2">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#3D1C00]/40" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             placeholder="Rechercher par nom, prénom, code, CIN ou région..."
                             value={searchTerm}
@@ -115,7 +115,7 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                             className="pl-9 rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                         />
                     </div>
-                    <div className="text-sm text-[#3D1C00]/60">
+                    <div className="text-sm text-muted-foreground">
                         {filteredAgriculteurs.length} résultat(s)
                     </div>
                 </div>
@@ -124,15 +124,15 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow className="border-border hover:bg-[#FAF0DC]/50">
-                                <TableHead className="text-[#3D1C00] font-semibold">Code</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold">Agriculteur</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold">CIN</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold">Région</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold">Contact</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold text-center">Palmiers</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold text-center">Superficie</TableHead>
-                                <TableHead className="text-[#3D1C00] font-semibold text-right">Actions</TableHead>
+                            <TableRow className="border-border hover:bg-muted/50">
+                                <TableHead className="text-foreground font-semibold">Code</TableHead>
+                                <TableHead className="text-foreground font-semibold">Agriculteur</TableHead>
+                                <TableHead className="text-foreground font-semibold">CIN</TableHead>
+                                <TableHead className="text-foreground font-semibold">Région</TableHead>
+                                <TableHead className="text-foreground font-semibold">Contact</TableHead>
+                                <TableHead className="text-foreground font-semibold text-center">Palmiers</TableHead>
+                                <TableHead className="text-foreground font-semibold text-center">Superficie</TableHead>
+                                <TableHead className="text-foreground font-semibold text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -147,17 +147,17 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                                         </span>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="font-medium text-[#3D1C00]">
+                                        <div className="font-medium text-foreground">
                                             {agriculteur.nom} {agriculteur.prenom}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-sm text-[#3D1C00]/60">
+                                    <TableCell className="text-sm text-muted-foreground">
                                         {agriculteur.cin}
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1.5">
                                             <MapPin className="h-3.5 w-3.5 text-[#C17A2B]" />
-                                            <span className="text-sm text-[#3D1C00]">
+                                            <span className="text-sm text-foreground">
                                                 {agriculteur.region.nom}
                                             </span>
                                         </div>
@@ -165,13 +165,13 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                                     <TableCell>
                                         {agriculteur.telephone ? (
                                             <div className="flex items-center gap-1.5">
-                                                <Phone className="h-3.5 w-3.5 text-[#3D1C00]/40" />
-                                                <span className="text-sm text-[#3D1C00]/60">
+                                                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span className="text-sm text-muted-foreground">
                                                     {agriculteur.telephone}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className="text-sm text-[#3D1C00]/40">-</span>
+                                            <span className="text-sm text-muted-foreground">-</span>
                                         )}
                                     </TableCell>
                                     <TableCell className="text-center">
@@ -179,7 +179,7 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                                             {agriculteur.nbPalmiers}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="text-center text-sm text-[#3D1C00]/60">
+                                    <TableCell className="text-center text-sm text-muted-foreground">
                                         {agriculteur.superficie
                                             ? `${agriculteur.superficie} ha`
                                             : "-"}
@@ -211,7 +211,7 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                 </div>
 
                 {filteredAgriculteurs.length === 0 && searchTerm && (
-                    <div className="text-center py-8 text-[#3D1C00]/60">
+                    <div className="text-center py-8 text-muted-foreground">
                         Aucun résultat pour "{searchTerm}"
                     </div>
                 )}

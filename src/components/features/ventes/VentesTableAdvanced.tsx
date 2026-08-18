@@ -82,7 +82,7 @@ export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTabl
                     variant="outline"
                     size="sm"
                     onClick={() => void exportVentesToPDF(filteredData, branding)}
-                    className="w-full rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC] sm:w-auto"
+                    className="w-full rounded-md border-border hover:bg-muted sm:w-auto"
                 >
                     <FileDown className="h-4 w-4 mr-2" />
                     {t("common.exportPDF")}
@@ -91,7 +91,7 @@ export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTabl
                     variant="outline"
                     size="sm"
                     onClick={() => exportVentesToExcel(filteredData)}
-                    className="w-full rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC] sm:w-auto"
+                    className="w-full rounded-md border-border hover:bg-muted sm:w-auto"
                 >
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
                     {t("common.exportExcel")}
@@ -99,12 +99,12 @@ export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTabl
             </div>
             <div className="grid grid-cols-1 items-end gap-3 px-1 sm:grid-cols-2 xl:flex xl:flex-wrap">
                 <div className="min-w-0 xl:min-w-55">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("finance.ventes.client")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t("finance.ventes.client")}</label>
                     <Select value={clientId} onValueChange={setClientId}>
                         <SelectTrigger className="w-full rounded-sm border-border">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value={ALL_CLIENTS}>{t("common.all")}</SelectItem>
                             {clients.map(([id, nom]) => (
                                 <SelectItem key={id} value={id}>
@@ -116,14 +116,14 @@ export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTabl
                 </div>
 
                 <div className="min-w-0 xl:min-w-45">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                    <label className="mb-1 block text-xs text-muted-foreground">
                         {t("finance.paiements.statut")}
                     </label>
                     <Select value={statut} onValueChange={setStatut}>
                         <SelectTrigger className="w-full rounded-sm border-border">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value={ALL_STATUTS}>{t("common.all")}</SelectItem>
                             <SelectItem value="EN_ATTENTE">{t("finance.paiements.statutEnAttente")}</SelectItem>
                             <SelectItem value="PARTIEL">{t("finance.paiements.statutPartiel")}</SelectItem>
@@ -133,7 +133,7 @@ export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTabl
                 </div>
 
                 <div className="min-w-0">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("bonAchat.periode")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t("bonAchat.periode")}</label>
                     <DateRangePicker
                         value={dateRange}
                         onChange={setDateRange}
@@ -151,7 +151,7 @@ export function VentesTableAdvanced({ data, branding, saisonActive }: VentesTabl
                             setStatut(ALL_STATUTS);
                             setDateRange(undefined);
                         }}
-                        className="gap-1.5 text-[#3D1C00]/70"
+                        className="gap-1.5 text-muted-foreground"
                     >
                         <X className="h-3.5 w-3.5" />
                         {t("common.resetFilters")}

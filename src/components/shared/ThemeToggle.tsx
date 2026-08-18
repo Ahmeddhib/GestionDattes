@@ -29,7 +29,7 @@ export function ThemeToggle({ premium = false }: { premium?: boolean }) {
             size="icon"
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             className={premium
-                ? "relative h-10 w-10 rounded-full border border-[#d8c8b2] bg-white/75 text-[#6d481d] hover:bg-white dark:border-[#5b4027] dark:bg-[#17120d] dark:text-[#e6a73c] dark:hover:bg-[#2b1d10]"
+                ? "relative h-10 w-10 rounded-full border border-[#d8c8b2] bg-card/75 text-[#6d481d] hover:bg-card dark:border-[#5b4027] dark:bg-[#17120d] dark:text-[#e6a73c] dark:hover:bg-[#2b1d10]"
                 : "h-10 w-10 rounded-full"}
             aria-label={accessibleLabel}
             title={mounted ? isDark ? "Mode clair" : "Mode sombre" : "Changer le thÃ¨me"}

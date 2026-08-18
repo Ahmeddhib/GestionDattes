@@ -55,34 +55,34 @@ export function VentesPageContent({
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className="flex items-center gap-2 text-2xl font-bold text-[#3D1C00] sm:gap-3 sm:text-3xl">
+                    <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground sm:gap-3 sm:text-3xl">
                         <ShoppingCart className="h-7 w-7 shrink-0 text-[#C17A2B] sm:h-8 sm:w-8" />
                         {t("finance.ventes.title")}
                     </h1>
-                    <p className="text-gray-600 mt-2">{t("finance.ventes.description")}</p>
+                    <p className="text-muted-foreground mt-2">{t("finance.ventes.description")}</p>
                 </div>
                 {!saisonFiltre.isReadOnly && saisonOuverte && <CreateVenteDialog saisonActive={saisonOuverte} />}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("finance.ventes.montantTotal")}
                             </p>
-                            <p className="text-3xl font-bold text-[#3D1C00] mt-2">{chiffreAffaires.toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-foreground mt-2">{chiffreAffaires.toFixed(2)}</p>
                         </div>
-                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
+                        <div className="h-12 w-12 bg-muted rounded-md flex items-center justify-center">
                             <ShoppingCart className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("finance.paiements.montantPaye")}
                             </p>
                             <p className="text-3xl font-bold text-green-600 mt-2">{totalEncaisse.toFixed(2)}</p>
@@ -93,10 +93,10 @@ export function VentesPageContent({
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">
+                            <p className="text-sm font-medium text-muted-foreground">
                                 {t("finance.paiements.montantRestant")}
                             </p>
                             <p className="text-3xl font-bold text-orange-600 mt-2">{totalRestant.toFixed(2)}</p>
@@ -108,7 +108,7 @@ export function VentesPageContent({
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="bg-card rounded-lg border border-border shadow-sm">
                 <VentesTableServer
                     resultat={resultat}
                     clients={clients}

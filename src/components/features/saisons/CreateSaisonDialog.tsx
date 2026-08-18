@@ -29,14 +29,12 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z
     .object({
         nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
         dateDebut: z.string().min(1, "La date de début est requise"),
         dateFin: z.string().min(1, "La date de fin est requise"),
-        ouverte: z.boolean(),
     })
     .refine((data) => new Date(data.dateFin) > new Date(data.dateDebut), {
         message: "La date de fin doit être après la date de début",
@@ -53,7 +51,7 @@ export function CreateSaisonDialog() {
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
-        defaultValues: { nom: "", dateDebut: "", dateFin: "", ouverte: false },
+        defaultValues: { nom: "", dateDebut: "", dateFin: "" },
     });
 
     const onSubmit = async (data: FormData) => {
@@ -64,7 +62,10 @@ export function CreateSaisonDialog() {
                 nom: data.nom,
                 dateDebut: data.dateDebut,
                 dateFin: data.dateFin,
-                statut: data.ouverte ? "OUVERTE" : "CLOTUREE",
+                // Toujours OUVERTE : créer une saison, c'est démarrer une
+                // campagne. Le service refuse proprement s'il en existe déjà une
+                // ouverte (contrainte `Saison_one_open_per_tenant`).
+                statut: "OUVERTE" as const,
             });
 
             if (!result.success) {
@@ -92,9 +93,9 @@ export function CreateSaisonDialog() {
                     {t("finance.saisons.nouvelleSaison")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("finance.saisons.nouvelleSaison")}
                     </DialogTitle>
                     <DialogDescription>{t("finance.saisons.description")}</DialogDescription>
@@ -161,22 +162,12 @@ export function CreateSaisonDialog() {
                             />
                         </div>
 
-                        <FormField
-                            control={form.control}
-                            name="ouverte"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                                    <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={(checked) => field.onChange(!!checked)}
-                                            disabled={isLoading}
-                                        />
-                                    </FormControl>
-                                    <FormLabel className="!mt-0">{t("finance.saisons.creerOuverte")}</FormLabel>
-                                </FormItem>
-                            )}
-                        />
+                        {/* La case « créer ouverte » a été retirée : une saison
+                            que l'on crée est une campagne qui démarre, jamais une
+                            campagne déjà close. Elle permettait de créer une
+                            saison CLOTUREE d'emblée — une saison morte à la
+                            naissance, dans laquelle aucune opération ne peut être
+                            saisie. Le statut est désormais toujours OUVERTE. */}
 
                         <DialogFooter>
                             <Button

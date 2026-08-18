@@ -79,25 +79,25 @@ export function PretsTableServer({
         agriculteurId !== TOUS || typeCaisseId !== TOUS || statut !== "EN_COURS" || !!from || !!to;
 
     return (
-        <div className="rounded-lg bg-white p-4 shadow-sm border border-[#C17A2B]/20 md:p-6">
-            <h2 className="mb-4 text-xl font-semibold text-[#3D1C00]">
+        <div className="rounded-lg bg-card p-4 shadow-sm border border-border md:p-6">
+            <h2 className="mb-4 text-xl font-semibold text-foreground">
                 {t("pretsCaisses.pretsCaisses")} ({resultat.totalItems})
             </h2>
 
-            <div className="mb-4 space-y-3 rounded-md border border-[#C17A2B]/20 bg-[#FAF0DC]/50 p-4">
+            <div className="mb-4 space-y-3 rounded-md border border-border bg-muted/50 p-4">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                        <label className="mb-1 block text-xs text-muted-foreground">
                             {t("livraisons.agriculteur")}
                         </label>
                         <Select
                             value={agriculteurId}
                             onValueChange={(v) => setParams({ agriculteurId: v === TOUS ? "" : v })}
                         >
-                            <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
+                            <SelectTrigger className="rounded-sm border-border bg-card">
                                 <SelectValue placeholder={t("pretsCaisses.filterAgriculteur")} />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
+                            <SelectContent className="bg-card">
                                 <SelectItem value={TOUS}>{t("common.all")}</SelectItem>
                                 {agriculteurs.map((a) => (
                                     <SelectItem key={a.id} value={a.id}>
@@ -109,17 +109,17 @@ export function PretsTableServer({
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                        <label className="mb-1 block text-xs text-muted-foreground">
                             {t("pretsCaisses.typeCaisse")}
                         </label>
                         <Select
                             value={typeCaisseId}
                             onValueChange={(v) => setParams({ typeCaisseId: v === TOUS ? "" : v })}
                         >
-                            <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
+                            <SelectTrigger className="rounded-sm border-border bg-card">
                                 <SelectValue placeholder={t("pretsCaisses.filterTypeCaisse")} />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
+                            <SelectContent className="bg-card">
                                 <SelectItem value={TOUS}>{t("common.all")}</SelectItem>
                                 {typesCaisses.map((tc) => (
                                     <SelectItem key={tc.id} value={tc.id}>
@@ -131,14 +131,14 @@ export function PretsTableServer({
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                        <label className="mb-1 block text-xs text-muted-foreground">
                             {t("pretsCaisses.statut")}
                         </label>
                         <Select value={statut} onValueChange={(v) => setParams({ statut: v })}>
-                            <SelectTrigger className="rounded-sm border-[#C17A2B]/40 bg-white">
+                            <SelectTrigger className="rounded-sm border-border bg-card">
                                 <SelectValue placeholder={t("pretsCaisses.filterStatut")} />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
+                            <SelectContent className="bg-card">
                                 <SelectItem value={TOUS}>{t("common.all")}</SelectItem>
                                 <SelectItem value="EN_COURS">{t("pretsCaisses.enCours")}</SelectItem>
                                 <SelectItem value="RETOURNE">{t("pretsCaisses.retourne")}</SelectItem>
@@ -148,26 +148,26 @@ export function PretsTableServer({
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                        <label className="mb-1 block text-xs text-muted-foreground">
                             {t("common.dateDebut")}
                         </label>
                         <Input
                             type="date"
                             value={from}
                             onChange={(e) => setParams({ from: e.target.value })}
-                            className="rounded-sm border-[#C17A2B]/40 bg-white"
+                            className="rounded-sm border-border bg-card"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                        <label className="mb-1 block text-xs text-muted-foreground">
                             {t("common.dateFin")}
                         </label>
                         <Input
                             type="date"
                             value={to}
                             onChange={(e) => setParams({ to: e.target.value })}
-                            className="rounded-sm border-[#C17A2B]/40 bg-white"
+                            className="rounded-sm border-border bg-card"
                         />
                     </div>
 
@@ -186,7 +186,7 @@ export function PretsTableServer({
                                         to: "",
                                     })
                                 }
-                                className="rounded-md border-[#C17A2B]/40 hover:bg-white"
+                                className="rounded-md border-border hover:bg-card"
                             >
                                 <X className="mr-2 h-4 w-4" />
                                 {t("common.resetFilters")}
@@ -208,7 +208,7 @@ export function PretsTableServer({
                             size="sm"
                             disabled={enCours}
                             onClick={() => void exporter((lignes) => exportPretsToPDF(lignes, branding))}
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                            className="rounded-md border-border hover:bg-muted"
                         >
                             {enCours ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -222,7 +222,7 @@ export function PretsTableServer({
                             size="sm"
                             disabled={enCours}
                             onClick={() => void exporter((lignes) => exportPretsToExcel(lignes))}
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                            className="rounded-md border-border hover:bg-muted"
                         >
                             <FileSpreadsheet className="mr-2 h-4 w-4" />
                             {t("common.exportExcel")}

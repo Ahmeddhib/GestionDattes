@@ -57,10 +57,10 @@ export const createPaiementsColumns = (
             const agriculteur = row.original.Livraison.Agriculteur;
             return (
                 <div className="flex flex-col">
-                    <span className="font-medium text-[#3D1C00]">
+                    <span className="font-medium text-foreground">
                         {agriculteur.nom} {agriculteur.prenom}
                     </span>
-                    <span className="text-xs text-gray-500">{agriculteur.code}</span>
+                    <span className="text-xs text-muted-foreground">{agriculteur.code}</span>
                 </div>
             );
         },
@@ -69,7 +69,7 @@ export const createPaiementsColumns = (
         accessorKey: "montant",
         header: t("finance.paiements.montantTotal"),
         cell: ({ row }) => (
-            <div className="text-right text-[#3D1C00]">{row.getValue<number>("montant").toFixed(2)}</div>
+            <div className="text-right text-foreground">{row.getValue<number>("montant").toFixed(2)}</div>
         ),
     },
     {
@@ -108,7 +108,7 @@ export const createPaiementsColumns = (
         // était réutilisée comme libellé de date générique.
         header: t("bonAchat.dateCreation"),
         cell: ({ row }) => (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
                 {format(new Date(row.getValue<Date>("createdAt")), "dd MMM yyyy", { locale: fr })}
             </span>
         ),

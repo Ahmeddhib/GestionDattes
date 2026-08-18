@@ -24,7 +24,7 @@ export async function DashboardHeader({ userName, wakalaName, saisonActive, canS
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#9f907c]">
                     <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#d39735]" />{wakalaName}</span>
                     {canSeeSaison && saisonActive && (
-                        <span className="inline-flex items-center gap-2 rounded-full border border-[#dfcfb9] bg-white/75 px-3 py-1 shadow-sm dark:border-[#614322]/60 dark:bg-black/20 dark:shadow-none">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-[#dfcfb9] bg-card/75 px-3 py-1 shadow-sm dark:border-[#614322]/60 dark:bg-black/20 dark:shadow-none">
                             <CalendarDays className="h-3.5 w-3.5 text-[#d39735]" />
                             {saisonActive.nom}
                             <span className="rounded-full border border-green-300 bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:border-green-700/40 dark:bg-green-900/50 dark:text-green-300">

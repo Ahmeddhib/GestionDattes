@@ -98,7 +98,7 @@ export function VentesTableServer({
         <div className="space-y-4">
             <div className="grid grid-cols-1 items-end gap-3 px-1 sm:grid-cols-2 xl:flex xl:flex-wrap">
                 <div className="min-w-0 xl:min-w-55">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                    <label className="mb-1 block text-xs text-muted-foreground">
                         {t("finance.ventes.client")}
                     </label>
                     <Select
@@ -108,7 +108,7 @@ export function VentesTableServer({
                         <SelectTrigger className="w-full rounded-sm border-border">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value={TOUS}>{t("common.all")}</SelectItem>
                             {clients.map((c) => (
                                 <SelectItem key={c.id} value={c.id}>
@@ -120,7 +120,7 @@ export function VentesTableServer({
                 </div>
 
                 <div className="min-w-0 xl:min-w-45">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">
+                    <label className="mb-1 block text-xs text-muted-foreground">
                         {t("finance.paiements.statut")}
                     </label>
                     <Select
@@ -130,7 +130,7 @@ export function VentesTableServer({
                         <SelectTrigger className="w-full rounded-sm border-border">
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-card">
                             <SelectItem value={TOUS}>{t("common.all")}</SelectItem>
                             <SelectItem value="EN_ATTENTE">
                                 {t("finance.paiements.statutEnAttente")}
@@ -142,7 +142,7 @@ export function VentesTableServer({
                 </div>
 
                 <div className="min-w-0">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60">{t("bonAchat.periode")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t("bonAchat.periode")}</label>
                     <DateRangePicker
                         value={dateRange}
                         onChange={(plage) =>
@@ -161,7 +161,7 @@ export function VentesTableServer({
                         variant="ghost"
                         size="sm"
                         onClick={() => setParams({ clientId: "", statut: "", from: "", to: "" })}
-                        className="gap-1.5 text-[#3D1C00]/70"
+                        className="gap-1.5 text-muted-foreground"
                     >
                         <X className="h-3.5 w-3.5" />
                         {t("common.resetFilters")}
@@ -183,7 +183,7 @@ export function VentesTableServer({
                             onClick={() =>
                                 void exporter((lignes) => exportVentesToPDF(lignes, branding))
                             }
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                            className="rounded-md border-border hover:bg-muted"
                         >
                             {enCours ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -197,7 +197,7 @@ export function VentesTableServer({
                             size="sm"
                             disabled={enCours}
                             onClick={() => void exporter((lignes) => exportVentesToExcel(lignes))}
-                            className="rounded-md border-[#C17A2B]/40 hover:bg-[#FAF0DC]"
+                            className="rounded-md border-border hover:bg-muted"
                         >
                             <FileSpreadsheet className="mr-2 h-4 w-4" />
                             {t("common.exportExcel")}

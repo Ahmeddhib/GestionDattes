@@ -92,9 +92,9 @@ function Card({
     children: React.ReactNode;
 }) {
     return (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <h3 className="text-sm font-semibold text-[#3D1C00] uppercase tracking-wide">{title}</h3>
-            {hint && <p className="text-xs text-gray-500 mt-1 mb-3">{hint}</p>}
+        <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">{title}</h3>
+            {hint && <p className="text-xs text-muted-foreground mt-1 mb-3">{hint}</p>}
             <div className={hint ? "space-y-2" : "space-y-2 mt-4"}>{children}</div>
         </div>
     );
@@ -103,8 +103,8 @@ function Card({
 function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
     return (
         <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">{label}</span>
-            <span className={highlight ? "font-bold text-[#3D1C00]" : "font-medium text-[#3D1C00]"}>
+            <span className="text-muted-foreground">{label}</span>
+            <span className={highlight ? "font-bold text-foreground" : "font-medium text-foreground"}>
                 {value}
             </span>
         </div>
@@ -147,14 +147,14 @@ export function SaisonDetailContent({
     return (
         <div className="space-y-6">
             {bilans.length === 0 ? (
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-10 text-center text-gray-600">
+                <div className="bg-card rounded-lg border border-border shadow-sm p-10 text-center text-muted-foreground">
                     {t("finance.saisons.provisoire.aucun")}
                 </div>
             ) : (
                 <>
-                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 flex items-center gap-4 flex-wrap">
+                    <div className="bg-card rounded-lg border border-border shadow-sm p-4 flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-muted-foreground">
                                 {t("finance.saisons.provisoire.selectVersion")}
                             </span>
                             <Select value={bilan?.id} onValueChange={setSelectedId}>
@@ -250,17 +250,17 @@ export function SaisonDetailContent({
                             </div>
 
                             <div className="grid gap-6 md:grid-cols-3">
-                                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 text-center">
-                                    <p className="text-sm text-gray-600">{t("finance.saisons.bilan.tresorerie")}</p>
+                                <div className="bg-card rounded-lg border border-border shadow-sm p-6 text-center">
+                                    <p className="text-sm text-muted-foreground">{t("finance.saisons.bilan.tresorerie")}</p>
                                     <p className="text-2xl font-bold text-[#C17A2B] mt-2">{fmt(bilan.tresorerie)} TND</p>
                                 </div>
-                                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 text-center">
-                                    <p className="text-sm text-gray-600">{t("finance.saisons.bilan.margeBrute")}</p>
-                                    <p className="text-2xl font-bold text-[#3D1C00] mt-2">{fmt(bilan.margeBrute)} TND</p>
+                                <div className="bg-card rounded-lg border border-border shadow-sm p-6 text-center">
+                                    <p className="text-sm text-muted-foreground">{t("finance.saisons.bilan.margeBrute")}</p>
+                                    <p className="text-2xl font-bold text-foreground mt-2">{fmt(bilan.margeBrute)} TND</p>
                                 </div>
-                                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 text-center">
-                                    <p className="text-sm text-gray-600">{t("finance.saisons.bilan.margeNette")}</p>
-                                    <p className="text-2xl font-bold text-[#3D1C00] mt-2">{fmt(bilan.margeNette)} TND</p>
+                                <div className="bg-card rounded-lg border border-border shadow-sm p-6 text-center">
+                                    <p className="text-sm text-muted-foreground">{t("finance.saisons.bilan.margeNette")}</p>
+                                    <p className="text-2xl font-bold text-foreground mt-2">{fmt(bilan.margeNette)} TND</p>
                                 </div>
                             </div>
 
@@ -270,7 +270,7 @@ export function SaisonDetailContent({
                                     hint={t("finance.saisons.bilan.stockFinalHint")}
                                 >
                                     {bilan.stockFinalParTypeDate.length === 0 ? (
-                                        <p className="text-sm text-gray-500">—</p>
+                                        <p className="text-sm text-muted-foreground">—</p>
                                     ) : (
                                         bilan.stockFinalParTypeDate.map((s) => (
                                             <Row key={s.typeDateId} label={s.nom} value={fmt(s.quantiteDisponible)} />
@@ -283,7 +283,7 @@ export function SaisonDetailContent({
                                     hint={t("finance.saisons.bilan.stockOrigineRestant")}
                                 >
                                     {bilan.stockEntreParTypeDate.length === 0 ? (
-                                        <p className="text-sm text-gray-500">—</p>
+                                        <p className="text-sm text-muted-foreground">—</p>
                                     ) : (
                                         bilan.stockEntreParTypeDate.map((s) => {
                                             const restant = bilan.stockOrigineRestantParTypeDate.find(
@@ -304,12 +304,12 @@ export function SaisonDetailContent({
                             <div className="grid gap-6 md:grid-cols-2">
                                 <Card title={t("finance.saisons.bilan.stockCaisses")}>
                                     {bilan.stockCaisses.length === 0 ? (
-                                        <p className="text-sm text-gray-500">—</p>
+                                        <p className="text-sm text-muted-foreground">—</p>
                                     ) : (
                                         bilan.stockCaisses.map((c) => (
                                             <div key={c.typeCaisseId} className="text-sm border-b border-gray-100 pb-2 mb-2 last:border-0">
-                                                <p className="font-medium text-[#3D1C00]">{c.nom}</p>
-                                                <div className="flex justify-between text-gray-600">
+                                                <p className="font-medium text-foreground">{c.nom}</p>
+                                                <div className="flex justify-between text-muted-foreground">
                                                     <span>{t("finance.saisons.bilan.caissesPretees")}: {c.nombrePrete}</span>
                                                     <span>{t("finance.saisons.bilan.caissesRetournees")}: {c.nombreRetourne}</span>
                                                     <span>{t("finance.saisons.bilan.caissesNonRetournees")}: {c.nombreNonRetourne}</span>
@@ -321,12 +321,12 @@ export function SaisonDetailContent({
 
                                 <Card title={t("finance.saisons.bilan.caissesSaison")}>
                                     {bilan.caissesSaison.length === 0 ? (
-                                        <p className="text-sm text-gray-500">—</p>
+                                        <p className="text-sm text-muted-foreground">—</p>
                                     ) : (
                                         bilan.caissesSaison.map((c) => (
                                             <div key={c.typeCaisseId} className="text-sm border-b border-gray-100 pb-2 mb-2 last:border-0">
-                                                <p className="font-medium text-[#3D1C00]">{c.nom}</p>
-                                                <div className="flex justify-between text-gray-600">
+                                                <p className="font-medium text-foreground">{c.nom}</p>
+                                                <div className="flex justify-between text-muted-foreground">
                                                     <span>{t("finance.saisons.bilan.caissesPretees")}: {c.nombrePrete}</span>
                                                     <span>{t("finance.saisons.bilan.caissesRetournees")}: {c.nombreRetourne}</span>
                                                     <span>{t("finance.saisons.bilan.caissesNonRetournees")}: {c.nombreNonRetourne}</span>
@@ -337,15 +337,15 @@ export function SaisonDetailContent({
                                 </Card>
                             </div>
 
-                            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                                <h3 className="text-sm font-semibold text-[#3D1C00] uppercase tracking-wide mb-2">
+                            <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+                                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-2">
                                     {t("finance.saisons.bilan.historique")}
                                 </h3>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                     {t("finance.saisons.bilan.creeLe")}{" "}
                                     {format(new Date(saison.createdAt), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
                                 </p>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-muted-foreground">
                                     {t("finance.saisons.provisoire.genereLe")}{" "}
                                     {format(new Date(bilan.genereAt), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
                                     {bilan.genereParNom && (
@@ -353,7 +353,7 @@ export function SaisonDetailContent({
                                     )}
                                 </p>
                                 {saison.clotureeAt && (
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-muted-foreground">
                                         {t("finance.saisons.bilan.clotureeLe")}{" "}
                                         {format(new Date(saison.clotureeAt), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
                                     </p>

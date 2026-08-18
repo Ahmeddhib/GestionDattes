@@ -31,7 +31,7 @@ export const createRegionsColumns = (
             accessorKey: "nom",
             header: t("regions.name"),
             cell: ({ row }) => (
-                <div className="font-medium text-[#3D1C00]">{row.getValue("nom")}</div>
+                <div className="font-medium text-foreground">{row.getValue("nom")}</div>
             ),
         },
         {
@@ -40,7 +40,7 @@ export const createRegionsColumns = (
             cell: ({ row }) => {
                 const code = row.getValue("code") as string | null;
                 return code ? (
-                    <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-border">
+                    <Badge variant="outline" className="bg-muted text-[#C17A2B] border-border">
                         {code}
                     </Badge>
                 ) : (
@@ -87,13 +87,13 @@ export const createRegionsColumns = (
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="h-8 w-8 p-0 text-[#3D1C00] hover:bg-[#FAF0DC]"
+                                className="h-8 w-8 p-0 text-foreground hover:bg-muted"
                             >
                                 <span className="sr-only">{t("common.actions")}</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-white">
+                        <DropdownMenuContent align="end" className="w-48 bg-card">
                             <DropdownMenuItem
                                 onClick={() => onUpdate(region)}
                                 className="cursor-pointer"

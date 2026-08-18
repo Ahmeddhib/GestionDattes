@@ -1,6 +1,7 @@
 export const ROUTES = {
     LOGIN: "/login",
     DASHBOARD: "/dashboard",
+    PROFILE: "/dashboard/profile",
     USERS: "/dashboard/users",
     USER: (id: string) => `/dashboard/users/${id}`,
     ROLES: "/dashboard/roles",

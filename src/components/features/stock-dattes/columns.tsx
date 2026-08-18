@@ -40,7 +40,7 @@ export const createStockDattesColumns = (
         accessorKey: "typeDate",
         header: t("stockDattes.typeDate"),
         cell: ({ row }) => (
-            <div className="font-medium text-[#3D1C00]">{row.original.typeDate}</div>
+            <div className="font-medium text-foreground">{row.original.typeDate}</div>
         ),
     },
     {

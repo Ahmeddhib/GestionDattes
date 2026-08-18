@@ -27,7 +27,7 @@ export async function SaisonAuditTable({ logs }: { logs: LigneAuditSaison[] }) {
     const t = await getServerTranslations();
 
     if (logs.length === 0) {
-        return <p className="p-10 text-center text-sm text-gray-600">{t("common.noResults")}</p>;
+        return <p className="p-10 text-center text-sm text-muted-foreground">{t("common.noResults")}</p>;
     }
 
     return (
@@ -48,7 +48,7 @@ export async function SaisonAuditTable({ logs }: { logs: LigneAuditSaison[] }) {
                             <ActionBadge action={log.action} />
                         </TableCell>
                         <TableCell>{log.auteur}</TableCell>
-                        <TableCell className="text-gray-600">{log.description ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{log.description ?? "—"}</TableCell>
                     </TableRow>
                 ))}
             </TableBody>

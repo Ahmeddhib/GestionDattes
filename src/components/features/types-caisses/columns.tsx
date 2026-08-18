@@ -27,7 +27,7 @@ export const createTypesCaissesColumns = (
             accessorKey: "nom",
             header: t("typesCaisses.name"),
             cell: ({ row }) => (
-                <div className="font-medium text-[#3D1C00]">{row.getValue("nom")}</div>
+                <div className="font-medium text-foreground">{row.getValue("nom")}</div>
             ),
         },
         {
@@ -37,7 +37,7 @@ export const createTypesCaissesColumns = (
                 const poids = row.getValue("poidsKg") as number;
                 return (
                     <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-border">
+                        <Badge variant="outline" className="bg-muted text-[#C17A2B] border-border">
                             {poids} {t("typesCaisses.kg")}
                         </Badge>
                     </div>

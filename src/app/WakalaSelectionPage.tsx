@@ -57,10 +57,10 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                     <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
                         Gestion Dattes
                     </h1>
-                    <p className="text-lg text-gray-600 mb-2">
+                    <p className="text-lg text-muted-foreground mb-2">
                         Plateforme ERP Multi-Wakala
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                         Sélectionnez une Wakala pour vous connecter
                     </p>
                 </div>
@@ -79,7 +79,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                             <h3 className="text-xl font-semibold text-text-primary mb-2">
                                 Créer Nouvelle Wakala
                             </h3>
-                            <p className="text-sm text-gray-500 text-center">
+                            <p className="text-sm text-muted-foreground text-center">
                                 Ajoutez un nouvel espace de travail
                             </p>
                         </button>
@@ -89,7 +89,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                             <button
                                 key={wakala.id}
                                 onClick={() => handleSelectWakala(wakala.id, wakala.code)}
-                                className="group relative bg-white rounded-lg border-2 border-gray-200 hover:border-[#C17A2B] hover:shadow-xl transition-all duration-300 p-8 text-left overflow-hidden"
+                                className="group relative bg-card rounded-lg border-2 border-border hover:border-[#C17A2B] hover:shadow-xl transition-all duration-300 p-8 text-left overflow-hidden"
                             >
                                 {/* Badge Code */}
                                 <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#C17A2B]/10 border border-[#C17A2B]/20">
@@ -111,18 +111,18 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                                 {/* Détails */}
                                 <div className="space-y-2 mb-6">
                                     {wakala.address && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <MapPin className="w-4 h-4 text-gray-400" />
                                             <span className="line-clamp-1">{wakala.address}</span>
                                         </div>
                                     )}
                                     {wakala.phone && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <Phone className="w-4 h-4 text-gray-400" />
                                             <span>{wakala.phone}</span>
                                         </div>
                                     )}
-                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <Calendar className="w-3 h-3 text-gray-400" />
                                         <span>
                                             Créée le {new Date(wakala.createdAt).toLocaleDateString("fr-FR")}
@@ -147,10 +147,10 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                             <div className="w-20 h-20 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
                                 <Building2 className="w-10 h-10 text-gray-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                            <h3 className="text-xl font-semibold text-foreground mb-2">
                                 Aucune Wakala disponible
                             </h3>
-                            <p className="text-gray-500 mb-6">
+                            <p className="text-muted-foreground mb-6">
                                 Créez votre première Wakala pour commencer
                             </p>
                         </div>
@@ -158,8 +158,8 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                 </div>
 
                 {/* Footer */}
-                <div className="text-center mt-12 pt-8 border-t border-gray-200">
-                    <p className="text-sm text-gray-500">
+                <div className="text-center mt-12 pt-8 border-t border-border">
+                    <p className="text-sm text-muted-foreground">
                         © 2026 Gestion Dattes — Tunisie
                     </p>
                 </div>

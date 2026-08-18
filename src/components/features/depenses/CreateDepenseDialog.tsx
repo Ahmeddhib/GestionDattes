@@ -96,9 +96,9 @@ export function CreateDepenseDialog({ saisonActive }: { saisonActive?: SaisonAct
                     {t("finance.depenses.nouvelleDepense")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("finance.depenses.nouvelleDepense")}
                     </DialogTitle>
                     <DialogDescription>{t("finance.depenses.description")}</DialogDescription>

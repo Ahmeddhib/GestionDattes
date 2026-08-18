@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/shared/Button";
 import { Eye, EyeOff, Mail, Lock, LogIn, AlertCircle, CheckCircle, ShieldCheck } from "lucide-react";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { googleSignInAction } from "@/actions/auth/google-signin.action";
 
 const schema = z.object({
     email: z.string().email("Email invalide"),
@@ -19,11 +20,28 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export function LoginForm() {
+function GoogleIcon() {
+    return (
+        <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4">
+            <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.6 4.6 0 0 1-2 3v2.6h3.3c1.9-1.8 2.9-4.4 2.9-7.5Z" />
+            <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.3l-3.3-2.6c-.9.6-2.1 1-3.4 1a5.9 5.9 0 0 1-5.6-4.1H3v2.7A10 10 0 0 0 12 22Z" />
+            <path fill="#FBBC05" d="M6.4 14a6 6 0 0 1 0-3.9V7.4H3a10 10 0 0 0 0 9.3L6.4 14Z" />
+            <path fill="#EA4335" d="M12 5.9c1.5 0 2.8.5 3.9 1.5l2.9-2.8A9.7 9.7 0 0 0 12 2a10 10 0 0 0-9 5.4l3.4 2.7A5.9 5.9 0 0 1 12 5.9Z" />
+        </svg>
+    );
+}
+
+export function LoginForm({ googleEnabled, authError }: { googleEnabled: boolean; authError?: string }) {
     const router = useRouter();
     const { t } = useClientTranslations();
     const [showPwd, setShowPwd] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(
+        authError === "GoogleAccountNotLinked"
+            ? "Ce compte Google n'est pas encore autorisé. Contactez un administrateur."
+            : authError
+                ? "La connexion Google a échoué. Veuillez réessayer."
+                : null
+    );
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -73,22 +91,51 @@ export function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <>
+                    <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() => {
+                            if (!googleEnabled) {
+                                const message = t("auth.googleNotConfigured");
+                                setError(message);
+                                toast.info(message);
+                                return;
+                            }
+                            setLoading(true);
+                            setError(null);
+                            void googleSignInAction().catch(() => {
+                                setLoading(false);
+                                const message = "La connexion Google a échoué. Veuillez réessayer.";
+                                setError(message);
+                                toast.error(message);
+                            });
+                        }}
+                        className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-[#dfccb3] bg-card px-4 text-sm font-semibold text-[#3d2a16] shadow-sm transition hover:border-[#c17a2b] hover:bg-[#fdfaf5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c17a2b]/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#5b4027] dark:bg-[#211810] dark:text-[#f8f1e4] dark:hover:border-[#c17a2b] dark:hover:bg-[#2b1d10]"
+                    >
+                        <GoogleIcon />
+                        {t("auth.continueGoogle")}
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <div className="h-px flex-1 bg-[#e8d5b0] dark:bg-[#5b4027]" />
+                        <span className="text-[11px] text-[#8a6c49] dark:text-[#aa9983]">{t("auth.orEmail")}</span>
+                        <div className="h-px flex-1 bg-[#e8d5b0] dark:bg-[#5b4027]" />
+                    </div>
+            </>
             {/* Email */}
             <div className="space-y-1.5">
-                <label className="text-xs font-medium" style={{ color: "#5C3A1A" }}>
+                <label className="text-xs font-medium text-[#5c3a1a] dark:text-[#ead8bc]">
                     {t("auth.email")}
                 </label>
                 <div className="relative">
                     <Mail
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                        style={{ color: "#B08A5E" }}
+                        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a744b] dark:text-[#bda98d]"
                     />
                     <Input
                         type="email"
                         placeholder="admin@dattes.tn"
                         {...register("email")}
-                        className="pl-9 h-10 rounded-md text-sm"
-                        style={{ borderColor: "#E8D5B0", background: "#FDFAF5" }}
+                        className="h-10 rounded-md border-[#dfccb3] bg-[#fdfaf5] pl-9 text-sm text-[#2c1a00] placeholder:text-[#a88b68] dark:border-[#5b4027] dark:bg-[#211810] dark:text-[#f8f1e4] dark:placeholder:text-[#806f5b]"
                     />
                 </div>
                 {errors.email && (
@@ -100,26 +147,23 @@ export function LoginForm() {
 
             {/* Password */}
             <div className="space-y-1.5">
-                <label className="text-xs font-medium" style={{ color: "#5C3A1A" }}>
+                <label className="text-xs font-medium text-[#5c3a1a] dark:text-[#ead8bc]">
                     {t("auth.password")}
                 </label>
                 <div className="relative">
                     <Lock
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                        style={{ color: "#B08A5E" }}
+                        className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a744b] dark:text-[#bda98d]"
                     />
                     <Input
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"
                         {...register("password")}
-                        className="pl-9 pr-10 h-10 rounded-md text-sm"
-                        style={{ borderColor: "#E8D5B0", background: "#FDFAF5" }}
+                        className="h-10 rounded-md border-[#dfccb3] bg-[#fdfaf5] pl-9 pr-10 text-sm text-[#2c1a00] placeholder:text-[#a88b68] dark:border-[#5b4027] dark:bg-[#211810] dark:text-[#f8f1e4] dark:placeholder:text-[#806f5b]"
                     />
                     <button
                         type="button"
                         onClick={() => setShowPwd(!showPwd)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2"
-                        style={{ color: "#B08A5E" }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a744b] dark:text-[#bda98d]"
                     >
                         {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -151,12 +195,9 @@ export function LoginForm() {
 
             {/* Feedback */}
             {error && (
-                <div
-                    className="flex items-center gap-2 p-3 rounded-lg"
-                    style={{ background: "#FDE8E8", border: "0.5px solid #F0C0C0" }}
-                >
+                <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/60 dark:bg-red-950/35">
                     <AlertCircle className="w-4 h-4 shrink-0" style={{ color: "#8B1A1A" }} />
-                    <p className="text-xs" style={{ color: "#8B1A1A" }}>
+                    <p className="text-xs text-red-800 dark:text-red-200">
                         {error}
                     </p>
                 </div>
@@ -175,11 +216,11 @@ export function LoginForm() {
 
             {/* Divider + badges */}
             <div className="flex items-center gap-3 pt-1">
-                <div className="flex-1 h-px" style={{ background: "#E8D5B0" }} />
-                <span className="text-[11px]" style={{ color: "#B08A5E" }}>
+                <div className="h-px flex-1 bg-[#e8d5b0] dark:bg-[#5b4027]" />
+                <span className="text-[11px] text-[#8a6c49] dark:text-[#aa9983]">
                     Accès sécurisé
                 </span>
-                <div className="flex-1 h-px" style={{ background: "#E8D5B0" }} />
+                <div className="h-px flex-1 bg-[#e8d5b0] dark:bg-[#5b4027]" />
             </div>
 
             <div className="flex flex-col items-center justify-center gap-2 min-[380px]:flex-row min-[380px]:flex-wrap">
@@ -190,11 +231,10 @@ export function LoginForm() {
                 ].map(({ icon: Icon, label }) => (
                     <div
                         key={label}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                        style={{ background: "#FAF3E8", border: "0.5px solid #E8D5B0" }}
+                        className="flex items-center gap-1.5 rounded-full border border-[#e8d5b0] bg-[#faf3e8] px-3 py-1.5 dark:border-[#5b4027] dark:bg-[#211810]"
                     >
                         <Icon className="w-3 h-3" style={{ color: "#8B4A0F" }} />
-                        <span className="text-[11px]" style={{ color: "#7A5C3A" }}>
+                        <span className="text-[11px] text-[#6f5232] dark:text-[#c5b49c]">
                             {label}
                         </span>
                     </div>

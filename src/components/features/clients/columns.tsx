@@ -26,7 +26,7 @@ export const createColumns = (
             accessorKey: "nom",
             header: t("clients.nom"),
             cell: ({ row }) => (
-                <div className="font-medium text-[#3D1C00]">
+                <div className="font-medium text-foreground">
                     {row.getValue("nom")}
                 </div>
             ),
@@ -86,7 +86,7 @@ export const createColumns = (
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(client)}
-                            className="h-8 w-8 p-0 hover:bg-[#FAF0DC]"
+                            className="h-8 w-8 p-0 hover:bg-muted"
                         >
                             <Edit className="h-4 w-4 text-[#C17A2B]" />
                         </Button>

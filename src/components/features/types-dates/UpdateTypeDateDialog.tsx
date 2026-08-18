@@ -62,12 +62,12 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("typesDates.updateDialog")}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("typesDates.updateDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -75,7 +75,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                     <input type="hidden" name="id" value={typeDate.id} />
 
                     <div className="space-y-2">
-                        <Label htmlFor="nom" className="text-[#3D1C00]">
+                        <Label htmlFor="nom" className="text-foreground">
                             {t("typesDates.name")}
                         </Label>
                         <Input
@@ -83,12 +83,12 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             name="nom"
                             defaultValue={typeDate.nom}
                             placeholder={t("typesDates.namePlaceholder")}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="description" className="text-[#3D1C00]">
+                        <Label htmlFor="description" className="text-foreground">
                             {t("typesDates.descriptionLabel")}
                         </Label>
                         <Textarea
@@ -97,12 +97,12 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             defaultValue={typeDate.description || ""}
                             placeholder={t("typesDates.descriptionPlaceholder")}
                             rows={3}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="seuilAlerte" className="text-[#3D1C00]">
+                        <Label htmlFor="seuilAlerte" className="text-foreground">
                             {t("typesDates.seuilAlerte")}
                         </Label>
                         <Input
@@ -113,7 +113,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             min="0"
                             defaultValue={typeDate.seuilAlerte ?? ""}
                             placeholder={t("typesDates.seuilAlertePlaceholder")}
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 

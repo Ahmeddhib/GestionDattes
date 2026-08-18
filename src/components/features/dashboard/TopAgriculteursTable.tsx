@@ -22,7 +22,7 @@ export async function TopAgriculteursTable({ data, periodLabel }: { data: TopAgr
                     </div>
                     {data.map((item, index) => (
                         <div key={item.agriculteurId} className="grid grid-cols-[24px_1fr_auto_auto] items-center gap-2 border-b border-[#5b4027]/25 py-2.5 text-xs last:border-0">
-                            <span className={`flex h-5 w-5 items-center justify-center rounded-full font-semibold ${index === 0 ? "bg-[#c17a2b] text-[#1c1005]" : "bg-[#b78b55]/15 text-[#7b5b37] dark:bg-white/10 dark:text-[#c9b9a3]"}`}>{index + 1}</span>
+                            <span className={`flex h-5 w-5 items-center justify-center rounded-full font-semibold ${index === 0 ? "bg-[#c17a2b] text-[#1c1005]" : "bg-[#b78b55]/15 text-[#7b5b37] dark:bg-card/10 dark:text-[#c9b9a3]"}`}>{index + 1}</span>
                             <span className="min-w-0 truncate text-[#e2d5c5]">{item.nom}</span>
                             <strong className="whitespace-nowrap text-white">{formatKg(item.quantiteLivree)}</strong>
                             <span className="w-7 text-right text-[#9f907c]">{item.nombreLivraisons}</span>

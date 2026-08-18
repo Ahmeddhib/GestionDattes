@@ -102,18 +102,18 @@ export function ClotureSaisonContent({ apercu }: { apercu: AperçuCloture }) {
                     <ArrowLeft className="h-4 w-4" />
                     {t("finance.saisons.cloture.backToList")}
                 </Link>
-                <h1 className="text-3xl font-bold text-[#3D1C00] flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                     <Lock className="h-8 w-8 text-amber-700" />
                     {t("finance.saisons.cloture.title")}
                 </h1>
-                <p className="text-gray-600 mt-2">
+                <p className="text-muted-foreground mt-2">
                     {saison.nom} — {t("finance.saisons.cloture.subtitle")}
                 </p>
             </div>
 
             {/* Points bloquants : empêchent réellement la clôture. */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <h3 className="text-sm font-semibold text-[#3D1C00] uppercase tracking-wide mb-1 flex items-center gap-2">
+            <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-1 flex items-center gap-2">
                     {blockers.length > 0 ? (
                         <XCircle className="h-4 w-4 text-red-600" />
                     ) : (
@@ -128,7 +128,7 @@ export function ClotureSaisonContent({ apercu }: { apercu: AperçuCloture }) {
                     </p>
                 ) : (
                     <>
-                        <p className="text-xs text-gray-500 mb-3">
+                        <p className="text-xs text-muted-foreground mb-3">
                             {t("finance.saisons.cloture.blockersDescription")}
                         </p>
                         <ul className="space-y-2">
@@ -154,17 +154,17 @@ export function ClotureSaisonContent({ apercu }: { apercu: AperçuCloture }) {
             </div>
 
             {/* Avertissements : informatifs, ne bloquent jamais. */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                <h3 className="text-sm font-semibold text-[#3D1C00] uppercase tracking-wide mb-1 flex items-center gap-2">
+            <div className="bg-card rounded-lg border border-border shadow-sm p-6">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-1 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-600" />
                     {t("finance.saisons.cloture.warningsTitle")}
                 </h3>
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-xs text-muted-foreground mb-3">
                     {t("finance.saisons.cloture.warningsHint")}
                 </p>
 
                 {warnings.length === 0 ? (
-                    <p className="text-sm text-gray-600">{t("finance.saisons.cloture.noWarnings")}</p>
+                    <p className="text-sm text-muted-foreground">{t("finance.saisons.cloture.noWarnings")}</p>
                 ) : (
                     <ul className="space-y-2">
                         {warnings.map((w) => (
@@ -188,7 +188,7 @@ export function ClotureSaisonContent({ apercu }: { apercu: AperçuCloture }) {
             </div>
 
             <div className="flex items-center justify-between gap-6 flex-wrap">
-                <label className="flex items-start gap-3 text-sm text-[#3D1C00] max-w-2xl cursor-pointer">
+                <label className="flex items-start gap-3 text-sm text-foreground max-w-2xl cursor-pointer">
                     <Checkbox
                         checked={acquitte}
                         onCheckedChange={(v) => setAcquitte(v === true)}

@@ -47,11 +47,11 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
     }
 
     return (
-        <div className="grid grid-cols-1 items-end gap-2 rounded-2xl border border-[#d8c8b2] bg-white/80 p-2 shadow-xl backdrop-blur-md dark:border-[#6b4b29]/45 dark:bg-[#14100c]/80 sm:grid-cols-2 xl:flex xl:flex-wrap">
+        <div className="grid grid-cols-1 items-end gap-2 rounded-2xl border border-[#d8c8b2] bg-card/80 p-2 shadow-xl backdrop-blur-md dark:border-[#6b4b29]/45 dark:bg-[#14100c]/80 sm:grid-cols-2 xl:flex xl:flex-wrap">
             <div className="min-w-0 xl:min-w-45">
                 <label className="sr-only">{t("dashboard.filters.periode")}</label>
                 <Select value={periode} onValueChange={(v) => setPeriode(v as PeriodeDashboard)}>
-                    <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-white/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-44">
+                    <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-card/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-44">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="border-[#d8c8b2] bg-[#fffaf3] text-[#4b3520] dark:border-[#5e452d] dark:bg-[#17120d] dark:text-[#eadfce]">
@@ -67,9 +67,9 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
 
             {periode === "saison" && (
                 <div className="min-w-0 xl:min-w-55">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-text-hint">{t("dashboard.filters.saison")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground dark:text-text-hint">{t("dashboard.filters.saison")}</label>
                     <Select value={saisonId} onValueChange={setSaisonId}>
-                    <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-white/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-52">
+                    <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-card/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-52">
                             <SelectValue placeholder={t("dashboard.filters.selectSaison")} />
                         </SelectTrigger>
                         <SelectContent className="border-[#d8c8b2] bg-[#fffaf3] text-[#4b3520] dark:border-[#5e452d] dark:bg-[#17120d] dark:text-[#eadfce]">
@@ -85,7 +85,7 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
 
             {periode === "personnalisee" && (
                 <div className="min-w-0">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-text-hint">{t("dashboard.filters.dateRange")}</label>
+                    <label className="mb-1 block text-xs text-muted-foreground dark:text-text-hint">{t("dashboard.filters.dateRange")}</label>
                     <DateRangePicker value={dateRange} onChange={setDateRange} />
                 </div>
             )}

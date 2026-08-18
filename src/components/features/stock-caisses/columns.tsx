@@ -43,9 +43,9 @@ export const createPretsColumns = (
             cell: ({ row }) => {
                 const agriculteur = row.original.agriculteur;
                 return (
-                    <div className="font-medium text-[#3D1C00]">
+                    <div className="font-medium text-foreground">
                         {agriculteur.nom} {agriculteur.prenom}
-                        <div className="text-xs text-[#3D1C00]/60">{agriculteur.code}</div>
+                        <div className="text-xs text-muted-foreground">{agriculteur.code}</div>
                     </div>
                 );
             },
@@ -56,9 +56,9 @@ export const createPretsColumns = (
             cell: ({ row }) => {
                 const typeCaisse = row.original.typeCaisse;
                 return (
-                    <div className="text-sm text-[#3D1C00]">
+                    <div className="text-sm text-foreground">
                         {typeCaisse.nom}
-                        <div className="text-xs text-[#3D1C00]/60">
+                        <div className="text-xs text-muted-foreground">
                             {typeCaisse.poidsKg} kg
                         </div>
                     </div>
@@ -123,7 +123,7 @@ export const createPretsColumns = (
             cell: ({ row }) => {
                 const date = new Date(row.getValue("datePreT"));
                 return (
-                    <div className="text-sm text-[#3D1C00]">
+                    <div className="text-sm text-foreground">
                         {format(date, "dd/MM/yyyy", { locale: fr })}
                     </div>
                 );
@@ -138,7 +138,7 @@ export const createPretsColumns = (
                     return <span className="text-xs text-gray-400">—</span>;
                 }
                 return (
-                    <div className="flex items-center gap-1.5 text-sm text-[#3D1C00]">
+                    <div className="flex items-center gap-1.5 text-sm text-foreground">
                         <Truck className="h-3.5 w-3.5 text-[#C17A2B]" />
                         {livreur.nom}
                     </div>

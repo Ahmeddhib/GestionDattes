@@ -40,7 +40,7 @@ export const createAgricultureursColumns = (
             accessorKey: "code",
             header: t("agriculteurs.code"),
             cell: ({ row }) => (
-                <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-border font-mono">
+                <Badge variant="outline" className="bg-muted text-[#C17A2B] border-border font-mono">
                     {row.getValue("code")}
                 </Badge>
             ),
@@ -54,7 +54,7 @@ export const createAgricultureursColumns = (
                         <User className="h-4 w-4 text-[#C17A2B]" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-medium text-[#3D1C00]">
+                        <span className="font-medium text-foreground">
                             {row.original.nom} {row.original.prenom}
                         </span>
                         <span className="text-xs text-muted-foreground">
@@ -70,7 +70,7 @@ export const createAgricultureursColumns = (
             cell: ({ row }) => {
                 const region = row.original.region;
                 return (
-                    <Badge variant="secondary" className="bg-[#FAF0DC] text-[#3D1C00] border-border">
+                    <Badge variant="secondary" className="bg-muted text-foreground border-border">
                         {region.nom}
                         {region.code && ` (${region.code})`}
                     </Badge>
@@ -139,13 +139,13 @@ export const createAgricultureursColumns = (
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="h-8 w-8 p-0 text-[#3D1C00] hover:bg-[#FAF0DC]"
+                                className="h-8 w-8 p-0 text-foreground hover:bg-muted"
                             >
                                 <span className="sr-only">{t("common.actions")}</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-white">
+                        <DropdownMenuContent align="end" className="w-48 bg-card">
                             <DropdownMenuItem
                                 onClick={() => onUpdate(agriculteur)}
                                 className="cursor-pointer"

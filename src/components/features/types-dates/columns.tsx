@@ -25,7 +25,7 @@ export const createTypesDatesColumns = (
             accessorKey: "nom",
             header: t("typesDates.name"),
             cell: ({ row }) => (
-                <div className="font-medium text-[#3D1C00]">{row.getValue("nom")}</div>
+                <div className="font-medium text-foreground">{row.getValue("nom")}</div>
             ),
         },
         {
@@ -34,7 +34,7 @@ export const createTypesDatesColumns = (
             cell: ({ row }) => {
                 const description = row.getValue("description") as string | null;
                 return description ? (
-                    <div className="text-sm text-[#3D1C00]/70 max-w-md truncate">
+                    <div className="text-sm text-muted-foreground max-w-md truncate">
                         {description}
                     </div>
                 ) : (

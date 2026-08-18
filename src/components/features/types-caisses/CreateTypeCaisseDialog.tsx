@@ -48,18 +48,18 @@ export function CreateTypeCaisseDialog() {
                     {t("typesCaisses.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-card">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("typesCaisses.createDialog")}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("typesCaisses.createDescription")}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="nom" className="text-[#3D1C00]">
+                        <Label htmlFor="nom" className="text-foreground">
                             {t("typesCaisses.name")}
                         </Label>
                         <Input
@@ -67,12 +67,12 @@ export function CreateTypeCaisseDialog() {
                             name="nom"
                             placeholder={t("typesCaisses.namePlaceholder")}
                             required
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="poidsKg" className="text-[#3D1C00]">
+                        <Label htmlFor="poidsKg" className="text-foreground">
                             {t("typesCaisses.poids")}
                         </Label>
                         <Input
@@ -83,12 +83,12 @@ export function CreateTypeCaisseDialog() {
                             min="0.01"
                             placeholder={t("typesCaisses.poidsPlaceholder")}
                             required
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="stockDisponible" className="text-[#3D1C00]">
+                        <Label htmlFor="stockDisponible" className="text-foreground">
                             {t("typesCaisses.stockDisponible")}
                         </Label>
                         <Input
@@ -99,7 +99,7 @@ export function CreateTypeCaisseDialog() {
                             defaultValue="0"
                             placeholder="Quantité en stock"
                             required
-                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>
 

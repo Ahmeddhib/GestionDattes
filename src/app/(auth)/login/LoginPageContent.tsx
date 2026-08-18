@@ -1,19 +1,45 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import Image from "next/image";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export function LoginPageContent() {
+export function LoginPageContent({
+    googleEnabled,
+    authError,
+    loggedOut,
+}: {
+    googleEnabled: boolean;
+    authError?: string;
+    loggedOut?: boolean;
+}) {
     const { t } = useClientTranslations();
+    const router = useRouter();
+    const logoutToastShown = useRef(false);
+
+    useEffect(() => {
+        if (!loggedOut || logoutToastShown.current) return;
+        logoutToastShown.current = true;
+        toast.dismiss();
+        toast.success(t("auth.loggedOut"), { id: "auth-logged-out" });
+        router.replace("/login", { scroll: false });
+    }, [loggedOut, router, t]);
 
     return (
-        <div className="min-h-screen bg-[#FAF0DC] flex items-center justify-center p-4">
-            <div className="w-full max-w-4xl flex rounded-2xl overflow-hidden shadow-xl">
+        <div className="relative flex min-h-screen items-center justify-center bg-[#f7efe1] p-4 text-[#2c1a00] transition-colors dark:bg-[#090705] dark:text-[#f8f1e4]">
+            <div className="absolute end-4 top-4 z-20 flex items-center gap-2 sm:end-6 sm:top-6">
+                <ThemeToggle premium />
+                <LanguageSwitcher />
+            </div>
+            <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl border border-[#e7d7c2] bg-card shadow-[0_24px_70px_rgba(72,42,12,.14)] dark:border-[#5b4027]/55 dark:bg-[#17120d] dark:shadow-[0_26px_80px_rgba(0,0,0,.5)]">
                 {/* ── Panneau gauche — Brand ── */}
                 <div
-                    className="hidden md:flex w-[42%] flex-col justify-between p-10 relative overflow-hidden"
-                    style={{ background: "#3D1C00" }}
+                    className="relative hidden w-[42%] flex-col justify-between overflow-hidden bg-[#4a2302] p-10 md:flex dark:bg-[#120c07]"
                 >
                     {/* Texture woven */}
                     <div
@@ -111,20 +137,20 @@ export function LoginPageContent() {
                 </div>
 
                 {/* ── Panneau droit — Formulaire ── */}
-                <div className="flex flex-1 items-center justify-center bg-white p-5 sm:p-8 md:p-12">
+                <div className="flex flex-1 items-center justify-center bg-card p-5 pt-20 transition-colors dark:bg-[#17120d] sm:p-8 sm:pt-20 md:p-12">
                     <div className="w-full max-w-sm">
                         <div className="mb-6 flex justify-center md:hidden">
                             <Image src="/kayen-logo.jpg" alt="Kayen Fruits Packaging" width={136} height={136} className="h-28 w-28 rounded-xl object-cover" priority />
                         </div>
                         <div className="mb-8">
-                            <h1 className="text-2xl font-medium mb-1.5" style={{ color: "#2C1A00" }}>
+                            <h1 className="mb-1.5 text-2xl font-semibold text-[#2c1a00] dark:text-[#f8f1e4]">
                                 {t("auth.login")}
                             </h1>
-                            <p className="text-sm" style={{ color: "#B08A5E" }}>
+                            <p className="text-sm text-[#8a6c49] dark:text-[#aa9983]">
                                 {t("auth.welcomeBack")}
                             </p>
                         </div>
-                        <LoginForm />
+                        <LoginForm googleEnabled={googleEnabled} authError={authError} />
                     </div>
                 </div>
             </div>

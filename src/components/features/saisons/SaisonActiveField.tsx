@@ -26,7 +26,7 @@ export function SaisonActiveField({ saison }: { saison: SaisonActive }) {
                 value={saison.nom}
                 disabled
                 readOnly
-                className="bg-[#FAF0DC] text-[#3D1C00] disabled:opacity-100"
+                className="bg-muted text-foreground disabled:opacity-100"
             />
         </div>
     );

@@ -87,10 +87,10 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card border-border rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">{t("roles.updateDialog")}</DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogTitle className="text-foreground">{t("roles.updateDialog")}</DialogTitle>
+                    <DialogDescription className="text-muted-foreground">
                         {t("roles.updateDescription")}
                     </DialogDescription>
                 </DialogHeader>
@@ -102,7 +102,7 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("roles.name")} *</FormLabel>
+                                    <FormLabel className="text-foreground">{t("roles.name")} *</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Ex: GESTIONNAIRE"
@@ -121,7 +121,7 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[#3D1C00]">{t("roles.descriptionLabel")}</FormLabel>
+                                    <FormLabel className="text-foreground">{t("roles.descriptionLabel")}</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             placeholder={t("roles.descriptionPlaceholder")}

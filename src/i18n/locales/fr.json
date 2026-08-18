@@ -76,7 +76,8 @@
         "paiementsAgriculteurs": "Paiements Agriculteurs",
         "ventes": "Ventes",
         "depensesAutres": "Autres Dépenses",
-        "saisons": "Saisons"
+        "saisons": "Saisons",
+        "profile": "Mon profil"
     },
     "dashboard": {
         "title": "Tableau de bord",
@@ -682,7 +683,9 @@
             "encaissementEnregistre": "Encaissement enregistré avec succès",
             "lotSaison": "Lot {nom}",
             "searchPlaceholder": "Rechercher un client, un lot, un type...",
-            "dateVente": "Date de vente"
+            "dateVente": "Date de vente",
+            "saisonOrigine": "Saison {nom}",
+            "reporte": "report"
         },
         "depenses": {
             "title": "Autres Dépenses",
@@ -732,7 +735,32 @@
         "loginButton": "Se connecter",
         "loggingIn": "Connexion...",
         "welcome": "Bienvenue",
-        "welcomeBack": "Connectez-vous à votre compte"
+        "welcomeBack": "Connectez-vous à votre compte",
+        "continueGoogle": "Continuer avec Google",
+        "orEmail": "ou avec votre e-mail",
+        "googleNotConfigured": "Google n'est pas encore configuré. Ajoutez les identifiants OAuth dans les variables d'environnement.",
+        "loggingOut": "Déconnexion...",
+        "loggedOut": "Vous êtes déconnecté avec succès",
+        "logoutError": "La déconnexion a échoué. Veuillez réessayer."
+    },
+    "profile": {
+        "title": "Mon profil",
+        "subtitle": "Gérez votre identité et consultez vos accès à la wakala.",
+        "active": "Compte actif",
+        "inactive": "Compte inactif",
+        "personalInfo": "Informations personnelles",
+        "personalHint": "Ces informations sont visibles dans l'application.",
+        "fullName": "Nom complet",
+        "emailLocked": "L'adresse e-mail d'identification ne peut pas être modifiée ici.",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "updated": "Profil mis à jour",
+        "account": "Compte et accès",
+        "wakala": "Wakala actuelle",
+        "role": "Rôle",
+        "signInMethod": "Méthode de connexion",
+        "password": "E-mail et mot de passe",
+        "memberSince": "Membre depuis"
     },
     "messages": {
         "success": {

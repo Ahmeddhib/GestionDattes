@@ -76,7 +76,8 @@
         "paiementsAgriculteurs": "Farmer Payments",
         "ventes": "Sales",
         "depensesAutres": "Other Expenses",
-        "saisons": "Seasons"
+        "saisons": "Seasons",
+        "profile": "My profile"
     },
     "dashboard": {
         "title": "Dashboard",
@@ -682,7 +683,9 @@
             "encaissementEnregistre": "Collection recorded successfully",
             "lotSaison": "Lot {nom}",
             "searchPlaceholder": "Search a client, a lot, a type...",
-            "dateVente": "Sale date"
+            "dateVente": "Sale date",
+            "saisonOrigine": "Season {nom}",
+            "reporte": "carryover"
         },
         "depenses": {
             "title": "Other Expenses",
@@ -732,7 +735,32 @@
         "loginButton": "Log in",
         "loggingIn": "Logging in...",
         "welcome": "Welcome",
-        "welcomeBack": "Log in to your account"
+        "welcomeBack": "Log in to your account",
+        "continueGoogle": "Continue with Google",
+        "orEmail": "or use your email",
+        "googleNotConfigured": "Google is not configured yet. Add the OAuth credentials to the environment variables.",
+        "loggingOut": "Signing out...",
+        "loggedOut": "You have signed out successfully",
+        "logoutError": "Sign-out failed. Please try again."
+    },
+    "profile": {
+        "title": "My profile",
+        "subtitle": "Manage your identity and review your wakala access.",
+        "active": "Active account",
+        "inactive": "Inactive account",
+        "personalInfo": "Personal information",
+        "personalHint": "This information is visible throughout the application.",
+        "fullName": "Full name",
+        "emailLocked": "Your sign-in email cannot be changed here.",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "updated": "Profile updated",
+        "account": "Account and access",
+        "wakala": "Current wakala",
+        "role": "Role",
+        "signInMethod": "Sign-in method",
+        "password": "Email and password",
+        "memberSince": "Member since"
     },
     "messages": {
         "success": {

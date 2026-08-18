@@ -82,7 +82,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-bold text-text-primary">{t("roles.title")}</h2>
-                        <p className="text-gray-600 mt-1">{t("roles.description")}</p>
+                        <p className="text-muted-foreground mt-1">{t("roles.description")}</p>
                     </div>
                     <Button
                         variant="primary"
@@ -151,7 +151,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-4 text-gray-600">
+                                            <td className="py-4 px-4 text-muted-foreground">
                                                 {role.description || "—"}
                                             </td>
                                             <td className="py-4 px-4">

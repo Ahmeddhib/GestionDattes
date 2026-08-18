@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,6 +38,7 @@ interface SidebarProps {
         name: string;
         email: string;
         role: string;
+        image?: string | null;
     };
     onNavigate?: () => void;
     className?: string;
@@ -46,6 +48,7 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
     const pathname = usePathname();
     const premiumDashboard = pathname.startsWith("/dashboard");
     const { t } = useClientTranslations();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const menuSections = [
         {
@@ -269,31 +272,35 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
             {/* User Info */}
             {user && (
                 <div className={cn("shrink-0 border-t border-white/10 bg-[#3D1C00] p-4", premiumDashboard && "bg-[#2a1607]/55 backdrop-blur-md dark:bg-black/35")}>
-                    <div className="flex items-center gap-3 mb-3">
-                        <Avatar name={user.name} size="md" />
+                    <Link href="/dashboard/profile" onClick={onNavigate} className="mb-3 flex items-center gap-3 rounded-lg p-1 transition hover:bg-white/10">
+                        <Avatar name={user.name} image={user.image} size="md" />
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{user.name}</p>
                             <p className="text-xs text-dattes-300 truncate">{user.role}</p>
                         </div>
-                    </div>
+                    </Link>
                     <button
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
+                        disabled={isLoggingOut}
+                        className="flex w-full items-center justify-center gap-2 rounded-md bg-white/10 px-4 py-2 text-sm font-medium transition-colors hover:bg-white/20 disabled:cursor-wait disabled:opacity-70"
                         onClick={async () => {
+                            setIsLoggingOut(true);
                             // Nettoyer les données de wakala côté client
                             sessionStorage.removeItem("selectedWakalaId");
                             sessionStorage.removeItem("selectedWakalaCode");
                             sessionStorage.removeItem("userEmail");
 
-                            // Afficher le toast AVANT la redirection
-                            toast.success("Déconnexion en cours...");
-
-                            // Appeler l'action serveur pour nettoyer les cookies et se déconnecter
-                            // Note: signOut va rediriger, donc le code après ne sera pas exécuté
-                            await logoutAction();
+                            try {
+                                await logoutAction();
+                            } catch (error) {
+                                // NEXT_REDIRECT est consommé par Next.js; les autres erreurs restent visibles.
+                                if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) return;
+                                setIsLoggingOut(false);
+                                toast.error(t("auth.logoutError"));
+                            }
                         }}
                     >
                         <LogOut className="w-4 h-4" />
-                        {t("common.logout")}
+                        {isLoggingOut ? t("auth.loggingOut") : t("common.logout")}
                     </button>
                 </div>
             )}

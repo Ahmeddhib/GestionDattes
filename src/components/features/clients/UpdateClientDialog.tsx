@@ -90,9 +90,9 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-card rounded-lg">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00]">
+                    <DialogTitle className="text-foreground">
                         {t("clients.edit")}
                     </DialogTitle>
                     <DialogDescription>

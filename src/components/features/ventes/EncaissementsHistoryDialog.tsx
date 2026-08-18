@@ -58,27 +58,27 @@ export function EncaissementsHistoryDialog({ venteId, clientNom }: Encaissements
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5 rounded-sm text-[#3D1C00] hover:bg-[#FAF0DC]"
+                    className="gap-1.5 rounded-sm text-foreground hover:bg-muted"
                 >
                     <Eye className="h-3.5 w-3.5 text-[#C17A2B]" />
                     {t("finance.ventes.historiqueEncaissements")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-lg sm:max-w-150 bg-white max-h-[80vh] overflow-y-auto">
+            <DialogContent className="rounded-lg sm:max-w-150 bg-card max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
+                    <DialogTitle className="text-foreground flex items-center gap-2">
                         <Wallet className="h-5 w-5 text-[#C17A2B]" />
                         {clientNom}
                     </DialogTitle>
-                    <DialogDescription className="text-[#3D1C00]/60">
+                    <DialogDescription className="text-muted-foreground">
                         {t("finance.ventes.historiqueEncaissements")}
                     </DialogDescription>
                 </DialogHeader>
 
                 {loading ? (
-                    <p className="text-sm text-gray-500 py-4">{t("common.loading")}</p>
+                    <p className="text-sm text-muted-foreground py-4">{t("common.loading")}</p>
                 ) : encaissements.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-4">{t("common.noResults")}</p>
+                    <p className="text-sm text-muted-foreground py-4">{t("common.noResults")}</p>
                 ) : (
                     <Table>
                         <TableHeader>
@@ -92,14 +92,14 @@ export function EncaissementsHistoryDialog({ venteId, clientNom }: Encaissements
                         <TableBody>
                             {encaissements.map((e) => (
                                 <TableRow key={e.id}>
-                                    <TableCell className="text-sm text-gray-600">
+                                    <TableCell className="text-sm text-muted-foreground">
                                         {format(new Date(e.dateEncaissement), "dd MMM yyyy HH:mm", { locale: fr })}
                                     </TableCell>
                                     <TableCell className="text-right font-semibold text-green-600">
                                         {e.montant.toFixed(2)}
                                     </TableCell>
-                                    <TableCell className="text-gray-600">{e.modePaiement || "—"}</TableCell>
-                                    <TableCell className="text-xs text-gray-500">{e.User.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{e.modePaiement || "—"}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">{e.User.name}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

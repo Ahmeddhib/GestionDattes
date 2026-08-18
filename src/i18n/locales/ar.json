@@ -76,7 +76,8 @@
         "paiementsAgriculteurs": "مدفوعات الفلاحين",
         "ventes": "المبيعات",
         "depensesAutres": "مصاريف أخرى",
-        "saisons": "المواسم"
+        "saisons": "المواسم",
+        "profile": "ملفي الشخصي"
     },
     "dashboard": {
         "title": "لوحة التحكم",
@@ -682,7 +683,9 @@
             "encaissementEnregistre": "تم تسجيل التحصيل بنجاح",
             "lotSaison": "دفعة {nom}",
             "searchPlaceholder": "البحث عن عميل أو دفعة أو نوع...",
-            "dateVente": "تاريخ البيع"
+            "dateVente": "تاريخ البيع",
+            "saisonOrigine": "موسم {nom}",
+            "reporte": "مرحّل"
         },
         "depenses": {
             "title": "مصاريف أخرى",
@@ -732,7 +735,32 @@
         "loginButton": "تسجيل الدخول",
         "loggingIn": "جاري تسجيل الدخول...",
         "welcome": "مرحباً",
-        "welcomeBack": "سجل الدخول إلى حسابك"
+        "welcomeBack": "سجل الدخول إلى حسابك",
+        "continueGoogle": "المتابعة باستخدام Google",
+        "orEmail": "أو باستخدام البريد الإلكتروني",
+        "googleNotConfigured": "لم يتم إعداد Google بعد. أضف بيانات OAuth إلى متغيرات البيئة.",
+        "loggingOut": "جارٍ تسجيل الخروج...",
+        "loggedOut": "تم تسجيل خروجك بنجاح",
+        "logoutError": "تعذر تسجيل الخروج. حاول مرة أخرى."
+    },
+    "profile": {
+        "title": "ملفي الشخصي",
+        "subtitle": "إدارة هويتك والاطلاع على صلاحيات الوكالة.",
+        "active": "حساب نشط",
+        "inactive": "حساب غير نشط",
+        "personalInfo": "المعلومات الشخصية",
+        "personalHint": "تظهر هذه المعلومات داخل التطبيق.",
+        "fullName": "الاسم الكامل",
+        "emailLocked": "لا يمكن تغيير بريد تسجيل الدخول من هنا.",
+        "save": "حفظ التغييرات",
+        "saving": "جارٍ الحفظ...",
+        "updated": "تم تحديث الملف الشخصي",
+        "account": "الحساب والصلاحيات",
+        "wakala": "الوكالة الحالية",
+        "role": "الدور",
+        "signInMethod": "طريقة تسجيل الدخول",
+        "password": "البريد وكلمة المرور",
+        "memberSince": "عضو منذ"
     },
     "messages": {
         "success": {

@@ -73,10 +73,10 @@ export function LivraisonsPageContent({
                             <Truck className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-[#3D1C00] sm:text-3xl">
+                            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
                                 {t("livraisons.title")}
                             </h1>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("livraisons.description")}
                             </p>
                         </div>
@@ -96,13 +96,13 @@ export function LivraisonsPageContent({
 
             {/* Stats Cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("livraisons.total")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">
+                            <p className="text-2xl font-bold text-foreground">
                                 {totaux.total}
                             </p>
                         </div>
@@ -112,13 +112,13 @@ export function LivraisonsPageContent({
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("livraisons.thisMonth")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">{totaux.ceMois}</p>
+                            <p className="text-2xl font-bold text-foreground">{totaux.ceMois}</p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Truck className="h-6 w-6 text-[#C17A2B]" />
@@ -126,13 +126,13 @@ export function LivraisonsPageContent({
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("livraisons.thisYear")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">{totaux.cetteAnnee}</p>
+                            <p className="text-2xl font-bold text-foreground">{totaux.cetteAnnee}</p>
                         </div>
                         <div className="rounded-xl bg-[#C17A2B]/10 p-3">
                             <Truck className="h-6 w-6 text-[#C17A2B]" />
@@ -140,13 +140,13 @@ export function LivraisonsPageContent({
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-[#3D1C00]/60">
+                            <p className="text-sm text-muted-foreground">
                                 {t("livraisons.totalQuantity")}
                             </p>
-                            <p className="text-2xl font-bold text-[#3D1C00]">
+                            <p className="text-2xl font-bold text-foreground">
                                 {totaux.quantiteTotale.toFixed(0)} {t("livraisons.kg")}
                             </p>
                         </div>

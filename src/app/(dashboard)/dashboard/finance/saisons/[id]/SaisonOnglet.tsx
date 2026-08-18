@@ -206,8 +206,8 @@ export async function SaisonOnglet({
 function Panneau({ children, note }: { children: React.ReactNode; note?: string }) {
     return (
         <div className="space-y-3">
-            {note && <p className="text-sm text-gray-600">{note}</p>}
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+            {note && <p className="text-sm text-muted-foreground">{note}</p>}
+            <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
                 {children}
             </div>
         </div>

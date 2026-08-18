@@ -122,7 +122,7 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
             accessorKey: "numeroLot",
             header: t("pesees.numeroLot"),
             cell: ({ row }) => (
-                <div className="font-medium text-[#3D1C00]">
+                <div className="font-medium text-foreground">
                     {row.original.numeroLot}
                 </div>
             ),
@@ -134,10 +134,10 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
                 const agriculteur = row.original.agriculteur;
                 return (
                     <div className="flex flex-col">
-                        <span className="font-medium text-[#3D1C00]">
+                        <span className="font-medium text-foreground">
                             {agriculteur.nom} {agriculteur.prenom}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                             {agriculteur.code}
                         </span>
                     </div>
@@ -173,7 +173,7 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
             accessorKey: "poidsTareTotal",
             header: t("pesees.poidsTareTotal"),
             cell: ({ row }) => (
-                <div className="text-right text-gray-500">
+                <div className="text-right text-muted-foreground">
                     {row.getValue<number>("poidsTareTotal").toFixed(2)} kg
                 </div>
             ),
@@ -202,7 +202,7 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
             cell: ({ row }) => {
                 const date = row.getValue<Date>("createdAt");
                 return (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-muted-foreground">
                         {format(new Date(date), "dd MMM yyyy HH:mm", { locale: fr })}
                     </span>
                 );

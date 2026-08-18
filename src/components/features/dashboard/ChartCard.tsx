@@ -28,7 +28,7 @@ export function ChartCard({
                 <div>
                     <h3 className="text-base font-semibold text-text-primary dark:text-dattes-100">{title}</h3>
                     {description && (
-                        <p className="text-sm text-gray-500 dark:text-text-hint">{description}</p>
+                        <p className="text-sm text-muted-foreground dark:text-text-hint">{description}</p>
                     )}
                 </div>
                 {href && (
