@@ -154,8 +154,11 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
         {
             accessorKey: "nombreCaisses",
             header: t("pesees.nombreCaisses"),
+            // Un décompte se centre ; les poids et montants s'alignent à droite
+            // pour que les ordres de grandeur se comparent d'un coup d'œil.
+            meta: { align: "center" },
             cell: ({ row }) => (
-                <div className="text-center font-medium">
+                <div className="font-medium">
                     {row.getValue<number>("nombreCaisses")}
                 </div>
             ),
@@ -163,8 +166,9 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
         {
             accessorKey: "poidsBrutTotal",
             header: t("pesees.poidsBrutTotal"),
+            meta: { align: "right" },
             cell: ({ row }) => (
-                <div className="text-right font-medium">
+                <div className="font-medium">
                     {row.getValue<number>("poidsBrutTotal").toFixed(2)} kg
                 </div>
             ),
@@ -172,8 +176,9 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
         {
             accessorKey: "poidsTareTotal",
             header: t("pesees.poidsTareTotal"),
+            meta: { align: "right" },
             cell: ({ row }) => (
-                <div className="text-right text-muted-foreground">
+                <div className="text-muted-foreground">
                     {row.getValue<number>("poidsTareTotal").toFixed(2)} kg
                 </div>
             ),
@@ -181,8 +186,9 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
         {
             accessorKey: "poidsNetTotal",
             header: t("pesees.poidsNetTotal"),
+            meta: { align: "right" },
             cell: ({ row }) => (
-                <div className="text-right font-bold text-[#C17A2B]">
+                <div className="font-bold text-[#C17A2B]">
                     {row.getValue<number>("poidsNetTotal").toFixed(2)} kg
                 </div>
             ),
@@ -190,8 +196,9 @@ export const createColumns = (t: (key: string) => string): ColumnDef<PeseeGroupe
         {
             accessorKey: "montant",
             header: t("bonAchat.montant"),
+            meta: { align: "right" },
             cell: ({ row }) => (
-                <div className="text-right font-bold text-[#C17A2B]">
+                <div className="font-bold text-[#C17A2B]">
                     {row.getValue<number>("montant").toFixed(2)}
                 </div>
             ),

@@ -92,39 +92,39 @@ export const createAgricultureursColumns = (
         {
             accessorKey: "nbPalmiers",
             header: t("agriculteurs.nbPalmiers"),
+            meta: { align: "center" },
             cell: ({ row }) => (
-                <div className="text-center">
-                    <Badge variant="secondary" className="bg-green-50 text-green-700">
-                        {row.getValue("nbPalmiers")} 🌴
-                    </Badge>
-                </div>
+                <Badge variant="secondary" className="bg-green-50 text-green-700">
+                    {row.getValue("nbPalmiers")} 🌴
+                </Badge>
             ),
         },
         {
             accessorKey: "superficie",
-            header: ({ column }) => (
-                <div className="text-right">{t("agriculteurs.superficie")}</div>
-            ),
+            // L'en-tête était aligné à la main dans un `<div>` : la seule
+            // colonne du projet à le faire, et donc la seule à ne pas se décaler.
+            // `meta.align` remplace ce cas particulier par la règle commune.
+            header: t("agriculteurs.superficie"),
+            meta: { align: "right" },
             cell: ({ row }) => {
                 const superficie = row.getValue("superficie") as number | null;
                 return superficie ? (
-                    <div className="text-right font-mono">{superficie.toFixed(1)} ha</div>
+                    <div className="font-mono">{superficie.toFixed(1)} ha</div>
                 ) : (
-                    <div className="text-right text-muted-foreground">—</div>
+                    <div className="text-muted-foreground">—</div>
                 );
             },
         },
         {
             accessorKey: "productionEstimee",
-            header: ({ column }) => (
-                <div className="text-right">{t("agriculteurs.production")}</div>
-            ),
+            header: t("agriculteurs.production"),
+            meta: { align: "right" },
             cell: ({ row }) => {
                 const production = row.getValue("productionEstimee") as number | null;
                 return production ? (
-                    <div className="text-right font-mono">{production.toLocaleString()} kg</div>
+                    <div className="font-mono">{production.toLocaleString()} kg</div>
                 ) : (
-                    <div className="text-right text-muted-foreground">—</div>
+                    <div className="text-muted-foreground">—</div>
                 );
             },
         },

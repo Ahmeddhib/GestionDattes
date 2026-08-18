@@ -1,0 +1,90 @@
+@startuml cas-utilisation-detaille-cloture
+' =====================================================================
+'  Cas d utilisation DETAILLE n 2 : Cloturer une saison
+'  Reference code : src/services/saison-cloture.service.ts
+' =====================================================================
+
+left to right direction
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FDF7EE
+  BorderColor #C17A2B
+  ArrowColor #6B4B2A
+}
+
+actor "Administrateur" as ADMIN
+actor "Direction" as DIR
+
+rectangle "Cloturer une saison" {
+
+  usecase "Cloturer une saison" as UC
+  usecase "Verifier la permission\nsaison:cloturer" as UC_PERM
+  usecase "Verifier que la saison\nest OUVERTE" as UC_OUV
+  usecase "Calculer l apercu\nde cloture" as UC_APER
+  usecase "Controler les points\nBLOQUANTS" as UC_BLOCK
+  usecase "Lister les\nAVERTISSEMENTS" as UC_WARN
+  usecase "Calculer les\nindicateurs" as UC_IND
+  usecase "Figer le bilan FINAL\n(snapshot)" as UC_SNAP
+  usecase "Passer la saison\nen CLOTUREE" as UC_STATUT
+  usecase "Journaliser l operation\n(audit)" as UC_AUDIT
+  usecase "Signaler qu une nouvelle\nsaison est requise" as UC_NEXT
+
+  usecase "Generer un bilan\nPROVISOIRE" as UC_PROV
+  usecase "Consulter le bilan\nfinal fige" as UC_LIRE
+  usecase "Exporter le bilan\n(PDF / Excel)" as UC_EXP
+}
+
+ADMIN --> UC
+ADMIN --> UC_PROV
+DIR   --> UC_PROV
+DIR   --> UC_LIRE
+
+UC ..> UC_PERM   : <<include>>
+UC ..> UC_OUV    : <<include>>
+UC ..> UC_BLOCK  : <<include>>
+UC ..> UC_IND    : <<include>>
+UC ..> UC_SNAP   : <<include>>
+UC ..> UC_STATUT : <<include>>
+UC ..> UC_AUDIT  : <<include>>
+
+UC_APER ..> UC_BLOCK : <<include>>
+UC_APER ..> UC_WARN  : <<include>>
+UC_APER ..> UC_IND   : <<include>>
+ADMIN --> UC_APER
+
+UC_PROV ..> UC_IND  : <<include>>
+UC_PROV ..> UC_SNAP : <<include>>
+
+UC <.. UC_NEXT : <<extend>>
+UC_LIRE <.. UC_EXP : <<extend>>
+
+note right of UC_BLOCK
+  Deux conditions BLOQUANTES :
+  - livraison sans aucune pesee
+    (poids net jamais etabli)
+  - livraison sans bon d achat
+    (achat jamais valorise)
+  Revalidees DANS la transaction :
+  l apercu vu a l ecran peut dater.
+end note
+
+note right of UC_WARN
+  Non bloquants : dettes agriculteurs,
+  creances clients, caisses non
+  retournees, stock restant, paiements
+  et encaissements partiels.
+  C est au proprietaire de decider que
+  la campagne est terminee.
+end note
+
+note bottom of UC_STATUT
+  Irreversible. La saison n est jamais
+  rouverte ; ses documents deviennent
+  en lecture seule via assertSaisonOuverte.
+  La saison suivante n est PAS creee
+  automatiquement.
+end note
+
+@enduml

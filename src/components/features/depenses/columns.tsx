@@ -46,8 +46,9 @@ export const createDepensesColumns = (
     {
         accessorKey: "montant",
         header: t("finance.depenses.montant"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right font-bold text-red-600">
+            <div className="font-bold text-red-600">
                 {row.getValue<number>("montant").toFixed(2)}
             </div>
         ),

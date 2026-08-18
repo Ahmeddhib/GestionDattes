@@ -68,15 +68,19 @@ export const createPaiementsColumns = (
     {
         accessorKey: "montant",
         header: t("finance.paiements.montantTotal"),
+        // `meta.align` porte l'alignement de l'en-tête ET des cellules. Le
+        // `text-right` posé sur la seule cellule laissait le libellé à gauche.
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right text-foreground">{row.getValue<number>("montant").toFixed(2)}</div>
+            <div className="text-foreground">{row.getValue<number>("montant").toFixed(2)}</div>
         ),
     },
     {
         accessorKey: "montantPaye",
         header: t("finance.paiements.montantPaye"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right font-semibold text-green-600">
+            <div className="font-semibold text-green-600">
                 {row.getValue<number>("montantPaye").toFixed(2)}
             </div>
         ),
@@ -84,10 +88,11 @@ export const createPaiementsColumns = (
     {
         accessorKey: "montantRestant",
         header: t("finance.paiements.montantRestant"),
+        meta: { align: "right" },
         cell: ({ row }) => {
             const restant = row.getValue<number>("montantRestant");
             return (
-                <div className={`text-right font-bold ${restant > 0 ? "text-orange-600" : "text-gray-400"}`}>
+                <div className={`font-bold ${restant > 0 ? "text-orange-600" : "text-gray-400"}`}>
                     {restant.toFixed(2)}
                 </div>
             );

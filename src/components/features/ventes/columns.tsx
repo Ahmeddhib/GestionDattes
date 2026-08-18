@@ -86,31 +86,35 @@ export const createVentesColumns = (
     {
         accessorKey: "quantite",
         header: t("finance.ventes.quantite"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right text-foreground">{row.getValue<number>("quantite").toFixed(2)} kg</div>
+            <div className="text-foreground">{row.getValue<number>("quantite").toFixed(2)} kg</div>
         ),
     },
     {
         accessorKey: "prixUnitaire",
         header: t("finance.ventes.prixUnitaire"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right text-foreground">{row.getValue<number>("prixUnitaire").toFixed(3)}</div>
+            <div className="text-foreground">{row.getValue<number>("prixUnitaire").toFixed(3)}</div>
         ),
     },
     {
         accessorKey: "montant",
         header: t("finance.ventes.montantTotal"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right font-bold text-[#C17A2B]">{row.getValue<number>("montant").toFixed(2)}</div>
+            <div className="font-bold text-[#C17A2B]">{row.getValue<number>("montant").toFixed(2)}</div>
         ),
     },
     {
         accessorKey: "montantRestant",
         header: t("finance.paiements.montantRestant"),
+        meta: { align: "right" },
         cell: ({ row }) => {
             const restant = row.getValue<number>("montantRestant");
             return (
-                <div className={`text-right font-bold ${restant > 0 ? "text-orange-600" : "text-gray-400"}`}>
+                <div className={`font-bold ${restant > 0 ? "text-orange-600" : "text-gray-400"}`}>
                     {restant.toFixed(2)}
                 </div>
             );

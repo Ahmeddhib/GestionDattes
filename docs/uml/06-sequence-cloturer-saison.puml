@@ -1,0 +1,147 @@
+@startuml sequence-cloturer-saison
+' =====================================================================
+'  Diagramme de sequence n 2 : Cloturer une saison
+'
+'  Fidele au code : page cloture -> cloturer-saison.action.ts
+'  -> saison-cloture.service.ts -> saison-bilan.service.ts / Prisma.
+' =====================================================================
+
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #6B4B2A
+  LifeLineBorderColor #C17A2B
+  ParticipantBorderColor #C17A2B
+  ParticipantBackgroundColor #FDF7EE
+  ActorBorderColor #C17A2B
+  BoxBorderColor #B8A98F
+}
+autonumber "<b>[00]"
+
+actor "Administrateur" as U
+
+box "Navigateur" #FFFDF8
+  participant "Page Cloture" as UI
+end box
+
+box "Serveur Next.js" #FBF6EE
+  participant "Server Actions" as ACT
+  participant "saisonClotureService" as SVC
+  participant "computeBlockers" as BLK
+  participant "computeWarnings" as WRN
+  participant "computeIndicateursSaison" as IND
+  participant "auditService" as AUDIT
+end box
+
+database "PostgreSQL\n(Neon)" as DB
+
+== Phase 1 : apercu (lecture seule) ==
+
+U -> UI : ouvre /finance/saisons/{id}/cloture
+activate UI
+UI -> ACT : getClotureApercuAction(saisonId)
+activate ACT
+ACT -> SVC : getApercuCloture(tenantId, saisonId)
+activate SVC
+
+SVC -> SVC : requirePermission("saison:cloturer")
+SVC -> DB : SELECT Saison WHERE id
+DB --> SVC : Saison
+alt statut != OUVERTE
+  SVC --> ACT : SaisonNonOuverteError
+  note right of SVC
+    Erreur "attendue" (retour arriere,
+    double-clic) : distinguee des erreurs
+    techniques pour ne pas etre loggee
+    comme un crash.
+  end note
+end
+
+SVC -> IND : computeIndicateursSaison(saisonId)
+IND -> DB : agregations (livraisons, achats,\npaiements, ventes, encaissements,\ndepenses, stock, caisses)
+DB --> IND : totaux
+IND --> SVC : IndicateursSaison
+
+par Controles en parallele
+  SVC -> BLK : computeBlockers()
+  BLK -> DB : COUNT livraisons SANS pesee
+  BLK -> DB : COUNT livraisons SANS bon d achat
+  DB --> BLK : compteurs
+  BLK --> SVC : blockers[]
+also
+  SVC -> WRN : computeWarnings(indicateurs)
+  WRN -> DB : COUNT bons PARTIEL / ventes PARTIEL /\nbons EN_ATTENTE
+  DB --> WRN : compteurs
+  WRN --> SVC : warnings[]
+end
+
+SVC --> ACT : { saison, indicateurs, blockers, warnings }
+deactivate SVC
+ACT --> UI : apercu
+deactivate ACT
+
+UI -> U : affiche la checklist\n(bloquants en rouge, avertissements en ambre)\net les indicateurs
+
+alt il reste des points bloquants
+  UI -> U : bouton "Cloturer" desactive,\nliens profonds vers les listes a corriger
+end
+
+== Phase 2 : cloture (irreversible) ==
+
+U -> UI : confirme la cloture
+UI -> ACT : cloturerSaisonAction(saisonId)
+activate ACT
+ACT -> SVC : cloturerSaison(tenantId, saisonId, userId)
+activate SVC
+
+SVC -> SVC : requirePermission("saison:cloturer")
+SVC -> DB : recharge la saison, verifie OUVERTE
+
+group Transaction ACID (timeout 20 s)
+  SVC -> BLK : computeBlockers(tx)
+  note right of BLK
+    REVALIDATION dans la transaction :
+    hors transaction, une livraison
+    incomplete pouvait etre creee entre
+    le controle et la cloture.
+  end note
+  BLK --> SVC : blockers[]
+  alt blockers non vide
+    SVC --> ACT : throw "points bloquants subsistent"
+  end
+
+  SVC -> IND : computeIndicateursSaison(tx)
+  IND --> SVC : indicateurs
+
+  SVC -> DB : SELECT MAX(version) FROM BilanSaison
+  DB --> SVC : version n
+  SVC -> DB : INSERT BilanSaison\n(type = FINAL, version = n+1)
+  note right of DB
+    Index unique partiel
+    BilanSaison_one_final_per_saison :
+    la base refuse un second bilan FINAL.
+  end note
+
+  SVC -> DB : UPDATE Saison\nSET statut = CLOTUREE,\nclotureeAt, clotureeParId
+
+  SVC -> AUDIT : log(CLOTURER_SAISON, tx)
+  AUDIT -> DB : INSERT AuditLog
+end
+
+SVC -> DB : findSaisonOuverte(tenantId)
+DB --> SVC : null
+SVC --> ACT : { saisonCloturee, bilanFinal,\nprochaineSaisonRequise: true }
+deactivate SVC
+
+ACT --> UI : succes
+deactivate ACT
+UI -> U : bilan final fige + invitation\na creer la saison suivante
+deactivate UI
+
+note over U, DB
+  Tant qu aucune nouvelle saison n est OUVERTE,
+  getSaisonOuverte bloque proprement toute
+  ecriture (livraison, pesee, vente, paiement).
+end note
+
+@enduml

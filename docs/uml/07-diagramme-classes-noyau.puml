@@ -1,0 +1,148 @@
+@startuml diagramme-classes-noyau
+' =====================================================================
+'  KAYEN - Gestion de dattes
+'  Diagramme de classes SIMPLIFIE : le flux metier principal
+'
+'  Vue reduite aux 12 entites du cycle recolte -> vente, destinee a
+'  tenir sur une page portrait. Le diagramme complet (28 entites) est
+'  dans 01-diagramme-classes.puml.
+' =====================================================================
+
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 40
+skinparam ranksep 50
+skinparam class {
+  BackgroundColor #FDF7EE
+  BorderColor #C17A2B
+  ArrowColor #6B4B2A
+  FontName Segoe UI
+}
+hide empty members
+
+class Saison {
+  +nom : String
+  +dateDebut : DateTime
+  +dateFin : DateTime
+  +statut : StatutSaison
+  +clotureeAt : DateTime
+}
+
+class Agriculteur {
+  +code : String
+  +cin : String
+  +nom : String
+  +prenom : String
+  +nbPalmiers : Int
+}
+
+class Livraison {
+  +numeroLot : String
+  +dateLivraison : DateTime
+  +quantiteLivree : Float
+  +quantiteAcceptee : Float
+}
+
+class Pesee {
+  +tareKg : Decimal
+  +nombreCaisses : Int
+  +poidsBrutTotal : Decimal
+  +poidsNetTotal : Decimal
+  +prixKg : Float
+  +quantiteAcceptee : Decimal
+}
+
+class BonAchat {
+  +numero : String
+  +prixKg : Float
+  +montant : Float
+  +statut : StatutBonAchat
+}
+
+class PaiementAgriculteur {
+  +montant : Float
+  +datePaiement : DateTime
+  +modePaiement : String
+}
+
+class StockDate {
+  +quantite : Float
+  +quantiteDisponible : Float
+  +dateEntree : DateTime
+}
+
+class TypeDate {
+  +nom : String
+  +seuilAlerte : Float
+}
+
+class Vente {
+  +date : DateTime
+  +quantite : Float
+  +prixUnitaire : Float
+  +montant : Float
+  +statut : StatutVente
+}
+
+class Client {
+  +nom : String
+  +telephone : String
+  +adresse : String
+}
+
+class EncaissementClient {
+  +montant : Float
+  +dateEncaissement : DateTime
+  +modePaiement : String
+}
+
+class BilanSaison {
+  +type : TypeBilanSaison
+  +version : Int
+  +chiffreAffaires : Float
+  +margeBrute : Float
+  +margeNette : Float
+  +tresorerie : Float
+}
+
+' ---- Flux principal : recolte -> achat -> stock -> vente -> encaissement
+Agriculteur "1" --> "0..*" Livraison : livre >
+Livraison "1" *--> "0..*" Pesee : est pesee en >
+Livraison "1" --> "0..1" BonAchat : valorisee par >
+BonAchat "1" --> "0..*" PaiementAgriculteur : soldee par >
+Livraison "1" --> "0..*" StockDate : alimente >
+TypeDate "1" --> "0..*" StockDate
+StockDate "1" --> "0..*" Vente : prelevee par >
+Client "1" --> "0..*" Vente : achete >
+Vente "1" --> "0..*" EncaissementClient : soldee par >
+
+' ---- Rattachement de campagne
+Saison "1" --> "0..*" Livraison
+Saison "1" --> "0..*" BonAchat
+Saison "1" --> "0..*" Vente : transaction >
+Saison "1" --> "0..*" StockDate : origine >
+Saison "1" --> "0..*" BilanSaison : fige >
+
+note right of BonAchat
+  livraisonId est UNIQUE :
+  une livraison ne peut jamais
+  etre payee deux fois.
+end note
+
+note bottom of StockDate
+  Deux saisons distinctes :
+  StockDate.saisonOrigineId = entree du lot
+  Vente.saisonId            = transaction
+  Un lot entre en A et vendu en B
+  est un REPORT.
+end note
+
+note left of PaiementAgriculteur
+  Le montant deja paye n est
+  pas stocke : il est la somme
+  des paiements. Le statut du
+  bon en decoule.
+end note
+
+@enduml

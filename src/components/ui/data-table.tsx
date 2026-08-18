@@ -20,6 +20,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { classeAlignement } from "@/components/ui/column-align";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -85,7 +87,13 @@ export function DataTable<TData, TValue>({
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                    <TableHead key={header.id} className="font-semibold text-foreground">
+                                    <TableHead
+                                        key={header.id}
+                                        className={cn(
+                                            "font-semibold text-foreground",
+                                            classeAlignement(header.column.columnDef.meta?.align)
+                                        )}
+                                    >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -107,7 +115,10 @@ export function DataTable<TData, TValue>({
                                             className="hover:bg-muted/50"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className={classeAlignement(cell.column.columnDef.meta?.align)}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

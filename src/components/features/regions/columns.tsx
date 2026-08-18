@@ -51,28 +51,26 @@ export const createRegionsColumns = (
         {
             accessorKey: "_count.agriculteurs",
             header: t("regions.agriculteurs"),
+            meta: { align: "center" },
             cell: ({ row }) => {
                 const count = row.original._count?.agriculteurs || 0;
                 return (
-                    <div className="text-center">
-                        <Badge variant="secondary" className="bg-[#C17A2B]/10 text-[#C17A2B]">
-                            {count}
-                        </Badge>
-                    </div>
+                    <Badge variant="secondary" className="bg-[#C17A2B]/10 text-[#C17A2B]">
+                        {count}
+                    </Badge>
                 );
             },
         },
         {
             accessorKey: "_count.users",
             header: t("regions.users"),
+            meta: { align: "center" },
             cell: ({ row }) => {
                 const count = row.original._count?.users || 0;
                 return (
-                    <div className="text-center">
-                        <Badge variant="secondary" className="bg-[#C17A2B]/10 text-[#C17A2B]">
-                            {count}
-                        </Badge>
-                    </div>
+                    <Badge variant="secondary" className="bg-[#C17A2B]/10 text-[#C17A2B]">
+                        {count}
+                    </Badge>
                 );
             },
         },

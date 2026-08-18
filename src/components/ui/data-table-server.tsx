@@ -44,6 +44,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { classeAlignement, classeBoutonTri } from "@/components/ui/column-align";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { useTableQueryState, usePrefetchNextPage } from "@/hooks/useTableQueryState";
 import type { PaginatedResult } from "@/lib/pagination";
@@ -164,19 +165,26 @@ export function DataTableServer<TData, TValue>({
                                 {headerGroup.headers.map((header) => {
                                     const cle = sortableColumns[header.column.id];
                                     const actif = cle !== undefined && cle === sortBy;
+                                    const align = header.column.columnDef.meta?.align;
                                     const contenu = header.isPlaceholder
                                         ? null
                                         : flexRender(header.column.columnDef.header, header.getContext());
 
                                     return (
-                                    <TableHead key={header.id} className="font-semibold text-foreground">
+                                    <TableHead
+                                        key={header.id}
+                                        className={cn("font-semibold text-foreground", classeAlignement(align))}
+                                    >
                                             {cle === undefined ? (
                                                 contenu
                                             ) : (
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleSort(cle)}
-                                                    className="-mx-2 flex items-center gap-1.5 rounded-sm px-2 py-1 transition-colors hover:text-[#C17A2B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C17A2B]"
+                                                    className={cn(
+                                                        "-mx-2 inline-flex items-center gap-1.5 rounded-sm px-2 py-1 transition-colors hover:text-[#C17A2B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C17A2B]",
+                                                        classeBoutonTri(align)
+                                                    )}
                                                     aria-label={`${t("common.sortBy")} ${header.column.id}`}
                                                 >
                                                     {contenu}
@@ -196,7 +204,10 @@ export function DataTableServer<TData, TValue>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className={classeAlignement(cell.column.columnDef.meta?.align)}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

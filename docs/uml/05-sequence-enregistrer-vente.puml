@@ -1,0 +1,131 @@
+@startuml sequence-enregistrer-vente
+' =====================================================================
+'  Diagramme de sequence n 1 : Enregistrer une vente
+'
+'  Fidele au code : CreateVenteDialog.tsx -> create-vente.action.ts
+'  -> vente.service.ts (create) -> vente.repository.ts / Prisma.
+' =====================================================================
+
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #6B4B2A
+  LifeLineBorderColor #C17A2B
+  ParticipantBorderColor #C17A2B
+  ParticipantBackgroundColor #FDF7EE
+  ActorBorderColor #C17A2B
+  BoxBorderColor #B8A98F
+}
+autonumber "<b>[00]"
+
+actor "Agent" as U
+
+box "Navigateur (Client Component)" #FFFDF8
+  participant "CreateVenteDialog" as UI
+end box
+
+box "Serveur Next.js" #FBF6EE
+  participant "createVenteAction\n(Server Action)" as ACT
+  participant "venteService" as SVC
+  participant "requirePermission" as PERM
+  participant "saison-guard" as GUARD
+  participant "venteRepository" as REPO
+  participant "auditService" as AUDIT
+end box
+
+database "PostgreSQL\n(Neon)" as DB
+
+== Ouverture du formulaire ==
+
+U -> UI : clique "Nouvelle Vente"
+activate UI
+UI -> ACT : getClientsAction()
+ACT -> DB : SELECT clients WHERE tenantId
+DB --> ACT : clients
+ACT --> UI : liste des clients
+
+UI -> ACT : getStockLotsForVenteAction()
+activate ACT
+ACT -> DB : SELECT StockDate\nWHERE quantiteDisponible > 0\nJOIN TypeDate, Livraison, Saison
+note right of DB
+  Aucun filtre de saison, volontairement :
+  le stock physique reporte doit rester
+  vendable. La saison d origine est
+  seulement AFFICHEE.
+end note
+DB --> ACT : lots + saisonOrigineId + saisonNom
+ACT --> UI : lots
+deactivate ACT
+
+UI -> U : affiche chaque lot avec\nson badge de saison\n(ambre + "report" si hors saison ouverte)
+
+== Soumission ==
+
+U -> UI : saisit client, lot, quantite, prix
+UI -> UI : validation Zod cote client\n(quantite <= stock du lot)
+UI -> ACT : createVenteAction(formData)
+deactivate UI
+activate ACT
+
+ACT -> ACT : auth() -> session\n+ resolution du tenant courant
+ACT -> ACT : createVenteSchema.parse(data)
+ACT -> SVC : create(tenantId, userId, data)
+activate SVC
+
+SVC -> PERM : requirePermission("vente:create")
+alt role non autorise
+  PERM --> SVC : throw
+  SVC --> ACT : erreur
+  ACT --> UI : { success: false, error }
+end
+
+SVC -> DB : findById(client)
+DB --> SVC : Client
+alt client introuvable dans cette Wakala
+  SVC --> ACT : throw "Client introuvable"
+end
+
+SVC -> DB : findById(stockDate)
+DB --> SVC : StockDate
+alt quantiteDisponible < quantite demandee
+  SVC --> ACT : throw "Stock insuffisant"
+end
+
+SVC -> SVC : montant = quantite x prixUnitaire
+SVC -> GUARD : getSaisonOuverte(tenantId)
+GUARD -> DB : SELECT Saison WHERE statut = OUVERTE
+DB --> GUARD : Saison
+alt aucune saison ouverte
+  GUARD --> SVC : throw
+  note right of GUARD
+    Toute ecriture est bloquee
+    entre deux campagnes.
+  end note
+end
+GUARD --> SVC : saison
+
+group Transaction ACID
+  SVC -> REPO : create(vente, saisonId)
+  REPO -> DB : INSERT INTO "Vente"\n(statut = EN_ATTENTE)
+  DB --> REPO : Vente
+  SVC -> DB : UPDATE "StockDate"\nSET quantiteDisponible -= quantite
+  note right of DB
+    Meme transaction : une vente ne peut
+    pas exister sans son decrement de stock.
+  end note
+end
+
+SVC -> AUDIT : log(CREATE_VENTE, details)
+AUDIT -> DB : INSERT INTO "AuditLog"
+SVC --> ACT : Vente
+deactivate SVC
+
+ACT -> ACT : revalidatePath("/dashboard/finance/ventes")
+ACT --> UI : { success: true, data }
+deactivate ACT
+activate UI
+
+UI -> U : toast de succes,\nfermeture du dialogue,\nrafraichissement du tableau
+deactivate UI
+
+@enduml

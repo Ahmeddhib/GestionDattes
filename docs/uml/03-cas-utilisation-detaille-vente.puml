@@ -1,0 +1,78 @@
+@startuml cas-utilisation-detaille-vente
+' =====================================================================
+'  Cas d utilisation DETAILLE n 1 : Enregistrer une vente
+'  Reference code : src/services/vente.service.ts (create)
+' =====================================================================
+
+left to right direction
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FDF7EE
+  BorderColor #C17A2B
+  ArrowColor #6B4B2A
+}
+
+actor "Agent de saisie" as AGENT
+actor "Administrateur" as ADMIN
+actor "Client" as CLIENT <<externe>>
+
+rectangle "Enregistrer une vente" {
+
+  usecase "Enregistrer une vente" as UC
+  usecase "S authentifier" as UC_AUTH
+  usecase "Verifier la permission\nvente:create" as UC_PERM
+  usecase "Selectionner le client" as UC_CLI
+  usecase "Selectionner le lot\nde stock" as UC_LOT
+  usecase "Afficher la saison\nd origine du lot" as UC_ORIG
+  usecase "Controler la quantite\ndisponible" as UC_QTE
+  usecase "Determiner la saison\nouverte" as UC_SAISON
+  usecase "Decrementer le stock\ndu lot" as UC_DEC
+  usecase "Journaliser l operation\n(audit)" as UC_AUDIT
+  usecase "Editer la facture PDF" as UC_FACT
+  usecase "Encaisser un reglement" as UC_ENC
+  usecase "Corriger une vente\nnon encaissee" as UC_UPD
+}
+
+AGENT --> UC
+ADMIN --> UC
+CLIENT <-- UC_FACT
+
+UC ..> UC_AUTH  : <<include>>
+UC ..> UC_PERM  : <<include>>
+UC ..> UC_CLI   : <<include>>
+UC ..> UC_LOT   : <<include>>
+UC ..> UC_QTE   : <<include>>
+UC ..> UC_SAISON: <<include>>
+UC ..> UC_DEC   : <<include>>
+UC ..> UC_AUDIT : <<include>>
+
+UC_LOT ..> UC_ORIG : <<include>>
+
+UC <.. UC_FACT : <<extend>>
+UC <.. UC_ENC  : <<extend>>
+UC <.. UC_UPD  : <<extend>>
+
+note right of UC_LOT
+  Le selecteur liste TOUS les lots
+  dont quantiteDisponible > 0, toutes
+  saisons confondues : filtrer par
+  saison masquerait le stock reporte
+  et empecherait de l ecouler.
+end note
+
+note right of UC_QTE
+  Regle : quantite demandee
+  <= StockDate.quantiteDisponible,
+  sinon la vente est refusee.
+end note
+
+note bottom of UC_UPD
+  Possible uniquement tant qu aucun
+  EncaissementClient n existe. Le lot
+  n est jamais modifiable ; la saison
+  non plus.
+end note
+
+@enduml

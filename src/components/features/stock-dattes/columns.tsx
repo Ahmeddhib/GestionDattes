@@ -58,8 +58,9 @@ export const createStockDattesColumns = (
     {
         accessorKey: "quantiteTotale",
         header: t("stockDattes.quantiteTotale"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right font-medium">
+            <div className="font-medium">
                 {row.getValue<number>("quantiteTotale").toFixed(2)} kg
             </div>
         ),
@@ -67,8 +68,9 @@ export const createStockDattesColumns = (
     {
         accessorKey: "quantiteDisponible",
         header: t("stockDattes.quantiteDisponible"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right font-bold text-[#C17A2B]">
+            <div className="font-bold text-[#C17A2B]">
                 {row.getValue<number>("quantiteDisponible").toFixed(2)} kg
             </div>
         ),

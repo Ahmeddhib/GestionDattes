@@ -1,0 +1,444 @@
+@startuml diagramme-classes
+' =====================================================================
+'  KAYEN - Gestion de dattes
+'  Diagramme de classes (modele du domaine)
+'
+'  Source de verite : prisma/schema.prisma. Les attributs techniques
+'  repetitifs (createdAt, updatedAt, tenantId) sont omis des classes
+'  metier pour la lisibilite ; le cloisonnement par tenantId est
+'  materialise par une association representative avec Tenant.
+' =====================================================================
+
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam nodesep 45
+skinparam ranksep 55
+skinparam class {
+  BackgroundColor #FDF7EE
+  BorderColor #C17A2B
+  ArrowColor #6B4B2A
+  FontName Segoe UI
+}
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #B8A98F
+  FontStyle bold
+}
+hide empty members
+
+' ---------------------------------------------------------------
+package "Securite et multi-tenant" {
+
+  class Tenant {
+    +id : String
+    +name : String
+    +code : String <<unique>>
+    +active : Boolean
+    +settings : Json
+  }
+  note right of Tenant
+    Une Wakala (agence). Cloisonne toutes
+    les donnees : chaque table porte tenantId
+    et toute requete le filtre.
+  end note
+
+  class User {
+    +id : String
+    +name : String
+    +email : String <<unique>>
+    +password : String <<hash bcrypt>>
+    +active : Boolean
+  }
+
+  class Role {
+    +id : String
+    +name : String <<unique>>
+    +description : String
+  }
+
+  class TenantUser {
+    +id : String
+    +active : Boolean
+  }
+  note bottom of TenantUser
+    Classe-association porteuse : un
+    utilisateur a un role PAR Wakala.
+    Unicite (userId, tenantId).
+  end note
+
+  class AuditLog {
+    +id : String
+    +action : AuditAction
+    +targetId : String
+    +description : String
+    +details : Json
+    +createdAt : DateTime
+  }
+
+  enum AuditAction {
+    CREATE_LIVRAISON
+    CREATE_PESEE
+    CREATE_BON_ACHAT
+    CREATE_VENTE
+    CREATE_PAIEMENT_AGRICULTEUR
+    CREATE_ENCAISSEMENT_CLIENT
+    CLOTURER_SAISON
+    GENERER_BILAN_PROVISOIRE
+    .. 61 valeurs au total ..
+  }
+}
+
+' ---------------------------------------------------------------
+package "Referentiels" {
+
+  class Region {
+    +id : String
+    +nom : String
+    +code : String
+  }
+
+  class Agriculteur {
+    +id : String
+    +code : String
+    +cin : String
+    +nom : String
+    +prenom : String
+    +telephone : String
+    +adresse : String
+    +nbPalmiers : Int
+    +superficie : Float
+    +productionEstimee : Float
+  }
+
+  class Client {
+    +id : String
+    +nom : String
+    +telephone : String
+    +adresse : String
+    +email : String
+  }
+
+  class Livreur {
+    +id : String
+    +nom : String
+    +cin : String
+    +vehicule : String
+    +active : Boolean
+  }
+
+  class TypeDate {
+    +id : String
+    +nom : String
+    +description : String
+    +seuilAlerte : Float
+  }
+
+  class TypeCaisse {
+    +id : String
+    +nom : String
+    +poidsKg : Float
+    +stockDisponible : Int
+  }
+}
+
+' ---------------------------------------------------------------
+package "Campagne (saison)" {
+
+  class Saison {
+    +id : String
+    +nom : String
+    +dateDebut : DateTime
+    +dateFin : DateTime
+    +statut : StatutSaison
+    +clotureeAt : DateTime
+  }
+  note right of Saison
+    Index unique partiel en base :
+    Saison_one_open_per_tenant
+    -> une seule saison OUVERTE par Wakala.
+    Une saison n est jamais supprimee
+    ni rouverte.
+  end note
+
+  enum StatutSaison {
+    OUVERTE
+    CLOTUREE
+  }
+
+  class BilanSaison {
+    +id : String
+    +type : TypeBilanSaison
+    +version : Int
+    +nombreLivraisons : Int
+    +totalQuantiteLivree : Float
+    +totalQuantiteAcceptee : Float
+    +totalAchatsMontant : Float
+    +totalPaiementsAgriculteurs : Float
+    +chiffreAffaires : Float
+    +totalEncaissements : Float
+    +margeBrute : Float
+    +margeNette : Float
+    +tresorerie : Float
+    +stockFinalParTypeDate : Json
+    +stockCaisses : Json
+  }
+  note bottom of BilanSaison
+    Snapshot fige : jamais recalcule
+    ni reecrit. Index unique partiel
+    BilanSaison_one_final_per_saison
+    -> au plus un bilan FINAL par saison.
+  end note
+
+  enum TypeBilanSaison {
+    PROVISOIRE
+    FINAL
+  }
+}
+
+' ---------------------------------------------------------------
+package "Reception et controle qualite" {
+
+  class Livraison {
+    +id : String
+    +numeroLot : String
+    +dateLivraison : DateTime
+    +quantiteLivree : Float
+    +quantiteAcceptee : Float
+  }
+
+  class LivraisonTypeCaisse {
+    +id : String
+    +quantite : Int
+  }
+
+  class Pesee {
+    +id : String
+    +tareKg : Decimal
+    +nombreCaisses : Int
+    +poidsBrutTotal : Decimal
+    +poidsTareTotal : Decimal
+    +poidsNetTotal : Decimal
+    +poidsBrutMoyen : Decimal
+    +poidsNetMoyen : Decimal
+    +prixKg : Float
+    +quantiteAcceptee : Decimal
+    +caissesRetournees : Int
+  }
+  note right of Pesee
+    Une ligne par couple
+    (type de datte, type de caisse).
+    poidsNet = poidsBrut - (nbCaisses x tare)
+  end note
+
+  class PeseeCaisse {
+    +id : String
+    +poidsBrut : Decimal
+    +ordre : Int
+  }
+
+  class Echantillon {
+    +id : String
+    +code : String
+  }
+
+  class Analyse {
+    +id : String
+    +dateAnalyse : DateTime
+    +humidite : Float
+    +tauxSucre : Float
+    +calibre : String
+    +qualite : String
+    +conforme : Boolean
+  }
+}
+
+' ---------------------------------------------------------------
+package "Caisses consignees" {
+
+  class PretCaisse {
+    +id : String
+    +nombrePrete : Int
+    +nombreRetourne : Int
+    +statut : StatutPret
+    +datePret : DateTime
+    +dateRetour : DateTime
+  }
+
+  enum StatutPret {
+    EN_COURS
+    RETOURNE
+    INCOMPLET
+  }
+}
+
+' ---------------------------------------------------------------
+package "Achat (dette fournisseur)" {
+
+  class BonAchat {
+    +id : String
+    +numero : String
+    +prixKg : Float
+    +montant : Float
+    +statut : StatutBonAchat
+    +observations : String
+  }
+  note right of BonAchat
+    Genere automatiquement a la pesee.
+    Relation 1..1 avec Livraison :
+    livraisonId est unique.
+  end note
+
+  class PaiementAgriculteur {
+    +id : String
+    +montant : Float
+    +datePaiement : DateTime
+    +modePaiement : String
+  }
+
+  enum StatutBonAchat {
+    EN_ATTENTE
+    PARTIEL
+    PAYE
+  }
+}
+
+' ---------------------------------------------------------------
+package "Stock et vente (creance client)" {
+
+  class StockDate {
+    +id : String
+    +quantite : Float
+    +quantiteDisponible : Float
+    +dateEntree : DateTime
+  }
+  note right of StockDate
+    saisonOrigineId = saison d ENTREE
+    du lot, jamais reecrite. Un lot entre
+    en saison A reste attribue a A meme
+    vendu pendant la saison B (report).
+  end note
+
+  class Conditionnement {
+    +id : String
+    +nombreCaisses : Int
+    +poidsTotal : Float
+  }
+
+  class BonSortie {
+    +id : String
+    +numero : String
+    +dateSortie : DateTime
+    +quantiteTotale : Float
+  }
+
+  class Vente {
+    +id : String
+    +date : DateTime
+    +quantite : Float
+    +prixUnitaire : Float
+    +montant : Float
+    +statut : StatutVente
+  }
+  note bottom of Vente
+    saisonId = saison de la TRANSACTION,
+    distincte de StockDate.saisonOrigineId.
+  end note
+
+  class EncaissementClient {
+    +id : String
+    +montant : Float
+    +dateEncaissement : DateTime
+    +modePaiement : String
+  }
+
+  enum StatutVente {
+    EN_ATTENTE
+    PARTIEL
+    PAYE
+  }
+}
+
+' ---------------------------------------------------------------
+package "Charges" {
+  class DepenseAutre {
+    +id : String
+    +libelle : String
+    +montant : Float
+    +categorie : String
+    +dateDepense : DateTime
+  }
+}
+
+' =====================================================================
+'  Associations
+' =====================================================================
+
+' -- Securite
+User "1" -- "0..*" TenantUser
+Tenant "1" -- "0..*" TenantUser
+Role "1" -- "0..*" TenantUser
+User "1" -- "0..*" AuditLog : acteur >
+AuditLog ..> AuditAction
+
+' -- Cloisonnement (association representative)
+Tenant "1" -- "0..*" Saison : cloisonne >
+
+' -- Referentiels
+Region "1" -- "0..*" Agriculteur
+
+' -- Campagne
+Saison "1" -- "0..*" BilanSaison
+Saison ..> StatutSaison
+BilanSaison ..> TypeBilanSaison
+User "1" -- "0..*" Saison : cree >
+User "0..1" -- "0..*" Saison : cloture >
+
+' -- Reception
+Agriculteur "1" -- "0..*" Livraison
+Saison "1" -- "0..*" Livraison
+Livraison "1" *-- "0..*" LivraisonTypeCaisse
+LivraisonTypeCaisse "0..*" -- "1" TypeCaisse
+LivraisonTypeCaisse "0..*" -- "1" TypeDate
+Livraison "1" *-- "0..*" Pesee
+Pesee "1" *-- "0..*" PeseeCaisse
+Pesee "0..*" -- "1" TypeCaisse
+Pesee "0..*" -- "1" TypeDate
+Pesee "0..*" -- "1" Agriculteur
+Livraison "1" -- "0..*" Echantillon
+Echantillon "1" -- "0..*" Analyse
+
+' -- Caisses
+Agriculteur "1" -- "0..*" PretCaisse
+TypeCaisse "1" -- "0..*" PretCaisse
+Livraison "0..1" -- "0..*" PretCaisse
+Livreur "0..1" -- "0..*" PretCaisse
+Saison "1" -- "0..*" PretCaisse
+PretCaisse ..> StatutPret
+
+' -- Achat
+Livraison "1" -- "0..1" BonAchat
+Saison "1" -- "0..*" BonAchat
+BonAchat "1" -- "0..*" PaiementAgriculteur
+Saison "1" -- "0..*" PaiementAgriculteur
+BonAchat ..> StatutBonAchat
+
+' -- Stock et vente
+Livraison "1" -- "0..*" StockDate
+TypeDate "1" -- "0..*" StockDate
+Saison "1" -- "0..*" StockDate : origine >
+StockDate "1" -- "0..*" Conditionnement
+StockDate "1" -- "0..*" BonSortie
+TypeCaisse "1" -- "0..*" Conditionnement
+TypeCaisse "1" -- "0..*" BonSortie
+StockDate "1" -- "0..*" Vente
+Client "1" -- "0..*" Vente
+Saison "1" -- "0..*" Vente : transaction >
+Vente "1" -- "0..*" EncaissementClient
+Saison "1" -- "0..*" EncaissementClient
+Vente ..> StatutVente
+
+' -- Charges
+Saison "1" -- "0..*" DepenseAutre
+
+@enduml

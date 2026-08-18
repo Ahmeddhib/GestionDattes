@@ -88,8 +88,9 @@ export const createBonsAchatColumns = (
     {
         accessorKey: "prixKg",
         header: t("bonAchat.prixKgMoyen"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right text-foreground">
+            <div className="text-foreground">
                 {row.getValue<number>("prixKg").toFixed(3)}
             </div>
         ),
@@ -97,8 +98,9 @@ export const createBonsAchatColumns = (
     {
         accessorKey: "montant",
         header: t("bonAchat.montant"),
+        meta: { align: "right" },
         cell: ({ row }) => (
-            <div className="text-right font-bold text-[#C17A2B]">
+            <div className="font-bold text-[#C17A2B]">
                 {row.getValue<number>("montant").toFixed(2)}
             </div>
         ),

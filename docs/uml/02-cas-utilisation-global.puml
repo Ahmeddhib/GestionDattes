@@ -1,0 +1,149 @@
+@startuml cas-utilisation-global
+' =====================================================================
+'  KAYEN - Gestion de dattes
+'  Diagramme de cas d utilisation GLOBAL
+'
+'  Les acteurs correspondent exactement aux roles definis dans
+'  src/constants/roles.ts, et le rattachement acteur -> cas reflete
+'  la matrice de droits de src/constants/permissions.ts.
+' =====================================================================
+
+left to right direction
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FDF7EE
+  BorderColor #C17A2B
+  ArrowColor #6B4B2A
+}
+skinparam package {
+  BorderColor #B8A98F
+  FontStyle bold
+}
+
+actor "Administrateur" as ADMIN
+actor "Agent de saisie" as AGENT
+actor "Responsable stock" as STOCK
+actor "Laborantin" as LABO
+actor "Direction" as DIR
+
+rectangle "Application KAYEN - Gestion de dattes" {
+
+  package "Administration" {
+    usecase "Gerer les utilisateurs\net leurs roles" as UC_USERS
+    usecase "Gerer les Wakalas\n(multi-tenant)" as UC_TENANT
+    usecase "Consulter le journal\nd audit" as UC_AUDIT
+    usecase "Gerer les referentiels\n(regions, types)" as UC_REF
+  }
+
+  package "Campagne" {
+    usecase "Creer une saison" as UC_SAISON_NEW
+    usecase "Generer un bilan\nprovisoire" as UC_BILAN
+    usecase "Cloturer une saison" as UC_CLOTURE
+    usecase "Verifier la checklist\nde cloture" as UC_CHECK
+    usecase "Consulter le bilan\nfinal fige" as UC_BILAN_FIN
+  }
+
+  package "Reception" {
+    usecase "Enregistrer\nune livraison" as UC_LIV
+    usecase "Peser les caisses" as UC_PESEE
+    usecase "Generer le bon\nd achat" as UC_BON
+    usecase "Preter / reprendre\ndes caisses" as UC_PRET
+    usecase "Prelever un\nechantillon" as UC_ECH
+    usecase "Saisir une analyse\nqualite" as UC_ANALYSE
+  }
+
+  package "Stock" {
+    usecase "Consulter le stock\nde dattes" as UC_STOCK
+    usecase "Consulter les lots\npar type" as UC_LOTS
+    usecase "Suivre le stock\nde caisses" as UC_STOCKC
+  }
+
+  package "Commerce" {
+    usecase "Gerer les agriculteurs" as UC_AGRI
+    usecase "Gerer les clients" as UC_CLI
+    usecase "Enregistrer une vente" as UC_VENTE
+    usecase "Editer la facture PDF" as UC_FACT
+    usecase "Encaisser un\nreglement client" as UC_ENC
+  }
+
+  package "Finance" {
+    usecase "Payer un agriculteur\n(bon d achat)" as UC_PAIE
+    usecase "Saisir une depense" as UC_DEP
+    usecase "Consulter le bilan\nfinancier" as UC_FIN
+    usecase "Exporter (PDF / Excel)" as UC_EXP
+  }
+
+  usecase "S authentifier" as UC_AUTH
+  usecase "Choisir sa Wakala" as UC_SELECT
+}
+
+' -- Tronc commun
+ADMIN --> UC_AUTH
+AGENT --> UC_AUTH
+STOCK --> UC_AUTH
+LABO  --> UC_AUTH
+DIR   --> UC_AUTH
+UC_AUTH <.. UC_SELECT : <<extend>>
+
+' -- Administration
+ADMIN --> UC_USERS
+ADMIN --> UC_TENANT
+ADMIN --> UC_REF
+ADMIN --> UC_AUDIT
+DIR   --> UC_AUDIT
+
+' -- Campagne
+ADMIN --> UC_SAISON_NEW
+DIR   --> UC_SAISON_NEW
+ADMIN --> UC_CLOTURE
+ADMIN --> UC_BILAN
+DIR   --> UC_BILAN
+DIR   --> UC_BILAN_FIN
+UC_CLOTURE ..> UC_CHECK : <<include>>
+UC_CLOTURE ..> UC_BILAN_FIN : <<include>>
+
+' -- Reception
+AGENT --> UC_LIV
+STOCK --> UC_LIV
+AGENT --> UC_PESEE
+AGENT --> UC_PRET
+STOCK --> UC_PRET
+LABO  --> UC_ECH
+LABO  --> UC_ANALYSE
+UC_PESEE ..> UC_BON : <<include>>
+UC_PESEE ..> UC_STOCK : <<include>>
+UC_PESEE ..> UC_PRET : <<extend>>
+
+' -- Stock
+STOCK --> UC_STOCK
+STOCK --> UC_STOCKC
+AGENT --> UC_STOCK
+LABO  --> UC_STOCK
+UC_STOCK ..> UC_LOTS : <<include>>
+
+' -- Commerce
+AGENT --> UC_AGRI
+AGENT --> UC_CLI
+AGENT --> UC_VENTE
+AGENT --> UC_ENC
+UC_VENTE ..> UC_LOTS : <<include>>
+UC_VENTE ..> UC_FACT : <<extend>>
+
+' -- Finance
+AGENT --> UC_PAIE
+STOCK --> UC_PAIE
+DIR   --> UC_DEP
+DIR   --> UC_FIN
+DIR   --> UC_EXP
+ADMIN --> UC_FIN
+
+note bottom of UC_AUTH
+  Toute operation d ecriture passe par
+  assertSaisonOuverte : elle est refusee
+  si aucune saison n est OUVERTE ou si
+  la saison visee est CLOTUREE.
+end note
+
+@enduml
