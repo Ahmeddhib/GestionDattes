@@ -1,8 +1,72 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 import type { CreatePretCaisseInput } from "@/validators/pret-caisse.validator";
+import { paginate, resolveOrderBy, type SortDirection } from "@/lib/pagination";
 
 type DbClient = typeof prisma | Prisma.TransactionClient;
+
+export type StatutPretFiltre = "EN_COURS" | "RETOURNE" | "INCOMPLET";
+
+export interface FiltresPret {
+    agriculteurId?: string;
+    typeCaisseId?: string;
+    statut?: StatutPretFiltre;
+    /** Bornes sur `datePreT`, incluses. */
+    from?: Date;
+    to?: Date;
+}
+
+/**
+ * Colonnes triables, par identifiant de colonne du tableau.
+ *
+ * `nombreRestant` en est absent : c'est `nombrePrete − nombreRetourne`, calculé
+ * après lecture. Aucun `ORDER BY` ne l'exprime, et le proposer trierait sur
+ * autre chose que ce que la colonne affiche.
+ */
+const TRIS_PRET: Record<string, (dir: SortDirection) => Prisma.PretCaisseOrderByWithRelationInput> = {
+    agriculteur: (dir) => ({ Agriculteur: { nom: dir } }),
+    typeCaisse: (dir) => ({ TypeCaisse: { nom: dir } }),
+    nombrePrete: (dir) => ({ nombrePrete: dir }),
+    nombreRetourne: (dir) => ({ nombreRetourne: dir }),
+    statut: (dir) => ({ statut: dir }),
+    datePreT: (dir) => ({ datePreT: dir }),
+};
+
+function buildPretWhere(
+    tenantId: string,
+    search: string,
+    saisonId?: string,
+    filtres?: FiltresPret
+): Prisma.PretCaisseWhereInput {
+    return {
+        tenantId,
+        ...(saisonId && { saisonId }),
+        ...(filtres?.agriculteurId && { agriculteurId: filtres.agriculteurId }),
+        ...(filtres?.typeCaisseId && { typeCaisseId: filtres.typeCaisseId }),
+        ...(filtres?.statut && { statut: filtres.statut }),
+        ...((filtres?.from || filtres?.to) && {
+            datePreT: {
+                ...(filtres.from && { gte: filtres.from }),
+                ...(filtres.to && { lte: filtres.to }),
+            },
+        }),
+        ...(search && {
+            OR: [
+                { Agriculteur: { nom: { contains: search, mode: "insensitive" as const } } },
+                { Agriculteur: { prenom: { contains: search, mode: "insensitive" as const } } },
+                { Agriculteur: { code: { contains: search, mode: "insensitive" as const } } },
+            ],
+        }),
+    };
+}
+
+const PRET_INCLUDE = {
+    Agriculteur: { select: { id: true, code: true, nom: true, prenom: true, cin: true } },
+    TypeCaisse: { select: { id: true, nom: true, poidsKg: true, stockDisponible: true } },
+    User: { select: { id: true, name: true, email: true } },
+    Livraison: { select: { id: true, numeroLot: true, dateLivraison: true } },
+    Livreur: { select: { id: true, nom: true, telephone: true } },
+} satisfies Prisma.PretCaisseInclude;
 
 /**
  * Repository MULTI-TENANT pour les prêts de caisses
@@ -81,6 +145,92 @@ export const pretCaisseRepository = {
                 createdAt: "desc",
             },
         });
+    },
+
+    /** Une page de prêts, filtrée et triée par la base. */
+    async findPage(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+            filtres?: FiltresPret;
+        }
+    ) {
+        const where = buildPretWhere(tenantId, params.search, params.saisonId, params.filtres);
+        const orderBy = resolveOrderBy<Prisma.PretCaisseOrderByWithRelationInput>(
+            params.sortBy,
+            params.sortDir,
+            TRIS_PRET,
+            (dir) => ({ createdAt: dir })
+        );
+
+        return paginate(
+            params.page,
+            params.pageSize,
+            (skip, take) =>
+                prisma.pretCaisse.findMany({ where, include: PRET_INCLUDE, orderBy, skip, take }),
+            () => prisma.pretCaisse.count({ where })
+        );
+    },
+
+    /** Toutes les lignes du filtre courant, sans pagination — réservé à l'export. */
+    async findAllFiltre(
+        tenantId: string,
+        params: { search: string; saisonId?: string; filtres?: FiltresPret }
+    ) {
+        return prisma.pretCaisse.findMany({
+            where: buildPretWhere(tenantId, params.search, params.saisonId, params.filtres),
+            include: PRET_INCLUDE,
+            orderBy: { createdAt: "desc" },
+        });
+    },
+
+    /**
+     * Totaux du jeu FILTRÉ. Distincts des statistiques globales de l'en-tête,
+     * qui restent volontairement un instantané physique toutes saisons.
+     */
+    async getTotauxFiltres(
+        tenantId: string,
+        params: { search: string; saisonId?: string; filtres?: FiltresPret }
+    ) {
+        const where = buildPretWhere(tenantId, params.search, params.saisonId, params.filtres);
+        const agg = await prisma.pretCaisse.aggregate({
+            where,
+            _count: { _all: true },
+            _sum: { nombrePrete: true, nombreRetourne: true },
+        });
+
+        const prete = agg._sum.nombrePrete ?? 0;
+        const retourne = agg._sum.nombreRetourne ?? 0;
+        return { total: agg._count._all, totalPrete: prete, totalRetourne: retourne, restant: prete - retourne };
+    },
+
+    /**
+     * Agriculteurs et types de caisse proposés dans les filtres.
+     *
+     * Requêtes dédiées et non déduction depuis les lignes affichées : une page
+     * n'en contient qu'une tranche, les menus seraient amputés et changeraient à
+     * chaque changement de page.
+     */
+    async findOptionsFiltres(tenantId: string, saisonId?: string) {
+        const [agriculteurs, typesCaisses] = await Promise.all([
+            prisma.agriculteur.findMany({
+                where: { tenantId, PretCaisse: { some: { tenantId, ...(saisonId && { saisonId }) } } },
+                select: { id: true, nom: true, prenom: true, code: true },
+                orderBy: [{ nom: "asc" }, { prenom: "asc" }],
+            }),
+            prisma.typeCaisse.findMany({
+                where: { tenantId, PretCaisse: { some: { tenantId, ...(saisonId && { saisonId }) } } },
+                select: { id: true, nom: true },
+                orderBy: { nom: "asc" },
+            }),
+        ]);
+
+        return { agriculteurs, typesCaisses };
     },
 
     /**

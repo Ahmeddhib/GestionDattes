@@ -78,7 +78,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] bg-white">
+            <DialogContent className="sm:max-w-125 bg-white">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-lg bg-[#C17A2B]/10 flex items-center justify-center">
@@ -99,7 +99,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                             id="name"
                             placeholder="Ex: Wakala Tunis Nord"
                             {...register("name")}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                         />
                         {errors.name && (
                             <p className="text-sm text-red-600">{errors.name.message}</p>
@@ -113,7 +113,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                             id="code"
                             placeholder="Ex: TUN-NORD"
                             {...register("code")}
-                            className="rounded-[9px] font-mono uppercase"
+                            className="rounded-md font-mono uppercase"
                             style={{ textTransform: "uppercase" }}
                         />
                         <p className="text-xs text-gray-500">
@@ -131,7 +131,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                             id="address"
                             placeholder="Adresse complète de la Wakala"
                             {...register("address")}
-                            className="rounded-[9px] resize-none"
+                            className="rounded-md resize-none"
                             rows={2}
                         />
                     </div>
@@ -144,7 +144,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                             type="tel"
                             placeholder="Ex: +216 XX XXX XXX"
                             {...register("phone")}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                         />
                     </div>
 
@@ -156,7 +156,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                             type="email"
                             placeholder="contact@wakala.tn"
                             {...register("email")}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                         />
                         {errors.email && (
                             <p className="text-sm text-red-600">{errors.email.message}</p>
@@ -165,7 +165,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
 
                     {/* Error Message */}
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-[9px] text-sm text-red-700">
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
                             {error}
                         </div>
                     )}
@@ -184,7 +184,7 @@ export default function CreateWakalaDialog({ open, onOpenChange, onSuccess }: Pr
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-[#C17A2B] hover:bg-[#8B4A0F]"
+                            className="flex-1 bg-[#C17A2B] hover:bg-dattes-600"
                         >
                             {loading ? (
                                 <>

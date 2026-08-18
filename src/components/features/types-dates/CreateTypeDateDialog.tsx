@@ -44,12 +44,12 @@ export function CreateTypeDateDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2 rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]">
+                <Button className="gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F]">
                     <Plus className="h-4 w-4" />
                     {t("typesDates.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[500px] bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("typesDates.createDialog")}
@@ -68,7 +68,7 @@ export function CreateTypeDateDialog() {
                             name="nom"
                             placeholder={t("typesDates.namePlaceholder")}
                             required
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -81,7 +81,7 @@ export function CreateTypeDateDialog() {
                             name="description"
                             placeholder={t("typesDates.descriptionPlaceholder")}
                             rows={3}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -96,7 +96,7 @@ export function CreateTypeDateDialog() {
                             step="0.01"
                             min="0"
                             placeholder={t("typesDates.seuilAlertePlaceholder")}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -105,7 +105,7 @@ export function CreateTypeDateDialog() {
                             type="button"
                             variant="outline"
                             onClick={() => setOpen(false)}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                             disabled={loading}
                         >
                             {t("common.cancel")}
@@ -113,7 +113,7 @@ export function CreateTypeDateDialog() {
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                            className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
                         >
                             {loading ? t("typesDates.creating") : t("common.create")}
                         </Button>

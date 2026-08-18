@@ -49,7 +49,7 @@ export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPage
 
             {/* Stats Cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -59,13 +59,13 @@ export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPage
                                 {totalPesees}
                             </p>
                         </div>
-                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
                             <Scale className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -76,13 +76,13 @@ export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPage
                             </p>
                             <p className="text-xs text-gray-500 mt-1">kg</p>
                         </div>
-                        <div className="h-12 w-12 bg-blue-100 rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-blue-100 rounded-md flex items-center justify-center">
                             <Weight className="h-6 w-6 text-blue-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -93,13 +93,13 @@ export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPage
                             </p>
                             <p className="text-xs text-gray-500 mt-1">kg</p>
                         </div>
-                        <div className="h-12 w-12 bg-green-100 rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-green-100 rounded-md flex items-center justify-center">
                             <TrendingUp className="h-6 w-6 text-green-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -112,7 +112,7 @@ export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPage
                                 {tareTotal.toFixed(0)} kg
                             </p>
                         </div>
-                        <div className="h-12 w-12 bg-gray-100 rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-gray-100 rounded-md flex items-center justify-center">
                             <Weight className="h-6 w-6 text-gray-600" />
                         </div>
                     </div>
@@ -120,7 +120,7 @@ export function PeseesPageContent({ resultat, totaux, saisonFiltre }: PeseesPage
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-[14px] border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
                 <PeseesTableServer resultat={resultat} />
             </div>
         </PageContainer>

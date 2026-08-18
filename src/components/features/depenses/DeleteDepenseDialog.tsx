@@ -55,7 +55,7 @@ export function DeleteDepenseDialog({ depense, open, onOpenChange }: DeleteDepen
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-125 bg-white border-[#F0E0C0] rounded-lg">
+            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
                 <DialogHeader>
                     <div className="flex items-start gap-4">
                         <div className="rounded-full bg-red-100 p-3">
@@ -80,7 +80,7 @@ export function DeleteDepenseDialog({ depense, open, onOpenChange }: DeleteDepen
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isLoading}
-                        className="rounded-md border-[#F0E0C0]"
+                        className="rounded-md border-border"
                     >
                         {t("common.cancel")}
                     </Button>

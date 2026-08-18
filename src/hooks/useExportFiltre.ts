@@ -10,6 +10,26 @@ type ResultatExport<T> =
     | { success: false; error: string };
 
 /**
+ * Filtres relus depuis l'URL et transmis à l'action d'export.
+ *
+ * Volontairement une union de toutes les clés utilisées par les modules plutôt
+ * qu'un type par module : chaque action ne déclare que ce qu'elle sait lire et
+ * ignore le reste. Un module qui gagne un filtre n'a ainsi qu'à l'ajouter ici,
+ * sans risque d'oublier de le propager à son export — c'est exactement l'oubli
+ * qui ferait exporter un jeu plus large que celui affiché.
+ */
+export interface ParamsExportFiltre {
+    search: string;
+    saisonId?: string;
+    clientId?: string;
+    agriculteurId?: string;
+    typeCaisseId?: string;
+    statut?: string;
+    from?: string;
+    to?: string;
+}
+
+/**
  * Recharge TOUTES les lignes du filtre courant, puis les remet à une fonction
  * d'export.
  *
@@ -17,11 +37,11 @@ type ResultatExport<T> =
  * tranche, et exporter ce qu'elle a produirait un fichier de dix lignes
  * présenté comme l'export complet — une erreur silencieuse.
  *
- * La recherche et la saison sont relues depuis l'URL, seule source de vérité du
- * filtre ; le `saisonId` est revalidé côté serveur contre le tenant.
+ * Les filtres sont relus depuis l'URL, seule source de vérité ; le `saisonId`
+ * est revalidé côté serveur contre le tenant.
  */
 export function useExportFiltre<T>(
-    action: (params: { search: string; saisonId?: string }) => Promise<ResultatExport<T>>
+    action: (params: ParamsExportFiltre) => Promise<ResultatExport<T>>
 ) {
     const searchParams = useSearchParams();
     const { t } = useClientTranslations();
@@ -30,9 +50,16 @@ export function useExportFiltre<T>(
     async function exporter(ecrire: (lignes: T[]) => void | Promise<void>) {
         setEnCours(true);
         try {
+            const lire = (cle: string) => searchParams.get(cle) ?? undefined;
             const resultat = await action({
                 search: searchParams.get("search") ?? "",
-                saisonId: searchParams.get("saisonId") ?? undefined,
+                saisonId: lire("saisonId"),
+                clientId: lire("clientId"),
+                agriculteurId: lire("agriculteurId"),
+                typeCaisseId: lire("typeCaisseId"),
+                statut: lire("statut"),
+                from: lire("from"),
+                to: lire("to"),
             });
 
             if (!resultat.success) {

@@ -93,7 +93,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#FAF0DC] p-4">
-            <div className="bg-white rounded-[14px] shadow-xl max-w-2xl w-full p-8">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-8">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#C17A2B]/10 mb-4">
@@ -110,7 +110,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-[9px] text-red-700 text-sm">
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
                         {error}
                     </div>
                 )}
@@ -133,7 +133,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 onClick={() => handleSelectWakala(tenant.id)}
                                 disabled={isPending}
                                 className={`
-                                    w-full flex items-center justify-between p-5 rounded-[9px] 
+                                    w-full flex items-center justify-between p-5 rounded-md
                                     border-2 transition-all duration-200
                                     ${selectedTenantId === tenant.id
                                         ? "border-[#C17A2B] bg-[#C17A2B]/5"
@@ -143,7 +143,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 `}
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-[9px] bg-[#C17A2B]/10 flex items-center justify-center">
+                                    <div className="w-12 h-12 rounded-md bg-[#C17A2B]/10 flex items-center justify-center">
                                         <Building2 className="w-6 h-6 text-[#C17A2B]" />
                                     </div>
                                     <div className="text-left">
@@ -173,7 +173,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                     <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                         <DialogTrigger asChild>
                             <button
-                                className="w-full flex items-center justify-center gap-3 p-5 rounded-[9px] border-2 border-dashed border-gray-300 hover:border-[#C17A2B] hover:bg-gray-50 transition-all duration-200"
+                                className="w-full flex items-center justify-center gap-3 p-5 rounded-md border-2 border-dashed border-gray-300 hover:border-[#C17A2B] hover:bg-gray-50 transition-all duration-200"
                                 disabled={isPending}
                             >
                                 <Plus className="w-5 h-5 text-[#C17A2B]" />
@@ -182,7 +182,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 </span>
                             </button>
                         </DialogTrigger>
-                        <DialogContent className="bg-white sm:max-w-[425px] rounded-[14px]">
+                        <DialogContent className="bg-white sm:max-w-106.25 rounded-lg">
                             <form onSubmit={handleCreateWakala}>
                                 <DialogHeader>
                                     <DialogTitle className="text-[#3D1C00]">Créer une nouvelle Wakala</DialogTitle>
@@ -192,7 +192,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 </DialogHeader>
 
                                 {createError && (
-                                    <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-[9px] text-red-700 text-sm">
+                                    <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
                                         {createError}
                                     </div>
                                 )}
@@ -208,7 +208,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                             onChange={(e) => setWakalaName(e.target.value)}
                                             placeholder="Ex: Wakala Tunis Centre"
                                             required
-                                            className="rounded-[7px] border-[#C17A2B]/40"
+                                            className="rounded-sm border-[#C17A2B]/40"
                                         />
                                     </div>
                                     <div className="grid gap-2">
@@ -222,7 +222,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                             placeholder="Ex: WKL001"
                                             required
                                             maxLength={20}
-                                            className="rounded-[7px] border-[#C17A2B]/40 font-mono"
+                                            className="rounded-sm border-[#C17A2B]/40 font-mono"
                                         />
                                         <p className="text-xs text-gray-500">
                                             Code unique pour identifier votre Wakala
@@ -235,14 +235,14 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                         variant="outline"
                                         onClick={() => setIsCreateDialogOpen(false)}
                                         disabled={isCreating}
-                                        className="rounded-[9px]"
+                                        className="rounded-md"
                                     >
                                         Annuler
                                     </Button>
                                     <Button
                                         type="submit"
                                         disabled={isCreating || !wakalaName || !wakalaCode}
-                                        className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                                        className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
                                     >
                                         {isCreating ? (
                                             <>

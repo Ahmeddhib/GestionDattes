@@ -4,6 +4,10 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
+// Les requetes Prisma ordinaires passent par HTTPS. C'est plus robuste sur
+// les reseaux qui filtrent `wss://*.neon.tech`; les transactions continuent
+// a utiliser WebSocket lorsque Prisma en a reellement besoin.
+neonConfig.poolQueryViaFetch = true;
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
@@ -30,7 +34,10 @@ function createPrismaClient() {
 
     console.log("✅ Creating Prisma client with Neon adapter...");
 
-    const adapter = new PrismaNeon({ connectionString });
+    const adapter = new PrismaNeon({
+        connectionString,
+        connectionTimeoutMillis: 15000,
+    });
 
     // PRISMA_QUERY_COUNT=1 : instrumentation temporaire de diagnostic. Compte
     // les requêtes et le temps cumulé, pour distinguer « une requête lente »

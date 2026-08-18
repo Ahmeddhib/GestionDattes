@@ -107,7 +107,7 @@ export function AgricultureursTableAdvanced({
                     {t("agriculteurs.region")} :
                 </label>
                 <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                    <SelectTrigger className="w-full rounded-[7px] border-[#C17A2B]/20 bg-white sm:w-[250px]">
+                    <SelectTrigger className="w-full rounded-sm border-[#C17A2B]/20 bg-white sm:w-62.5">
                         <SelectValue placeholder={t("common.all")} />
                     </SelectTrigger>
                     <SelectContent className="bg-white">

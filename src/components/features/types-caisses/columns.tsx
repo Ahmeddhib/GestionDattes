@@ -37,7 +37,7 @@ export const createTypesCaissesColumns = (
                 const poids = row.getValue("poidsKg") as number;
                 return (
                     <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-[#F0E0C0]">
+                        <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-border">
                             {poids} {t("typesCaisses.kg")}
                         </Badge>
                     </div>

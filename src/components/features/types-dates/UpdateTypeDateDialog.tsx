@@ -57,12 +57,12 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-[7px] text-[#C17A2B] hover:bg-[#C17A2B]/10 hover:text-[#C17A2B]"
+                    className="h-8 w-8 rounded-sm text-[#C17A2B] hover:bg-[#C17A2B]/10 hover:text-[#C17A2B]"
                 >
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[500px] bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("typesDates.updateDialog")}
@@ -83,7 +83,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             name="nom"
                             defaultValue={typeDate.nom}
                             placeholder={t("typesDates.namePlaceholder")}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -97,7 +97,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             defaultValue={typeDate.description || ""}
                             placeholder={t("typesDates.descriptionPlaceholder")}
                             rows={3}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -113,7 +113,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             min="0"
                             defaultValue={typeDate.seuilAlerte ?? ""}
                             placeholder={t("typesDates.seuilAlertePlaceholder")}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -122,7 +122,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                             type="button"
                             variant="outline"
                             onClick={() => setOpen(false)}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                             disabled={loading}
                         >
                             {t("common.cancel")}
@@ -130,7 +130,7 @@ export function UpdateTypeDateDialog({ typeDate }: UpdateTypeDateDialogProps) {
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                            className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
                         >
                             {loading ? t("typesDates.updating") : t("common.save")}
                         </Button>

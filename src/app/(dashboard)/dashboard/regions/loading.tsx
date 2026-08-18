@@ -10,28 +10,28 @@ export default function RegionsLoading() {
                         <MapPin className="h-6 w-6 text-[#C17A2B] animate-pulse" />
                     </div>
                     <div>
-                        <div className="h-9 w-48 animate-pulse rounded-lg bg-[#F0E0C0]" />
-                        <div className="mt-1 h-4 w-64 animate-pulse rounded bg-[#F0E0C0]" />
+                        <div className="h-9 w-48 animate-pulse rounded-lg bg-border" />
+                        <div className="mt-1 h-4 w-64 animate-pulse rounded bg-border" />
                     </div>
                 </div>
-                <div className="h-10 w-32 animate-pulse rounded-[9px] bg-[#F0E0C0]" />
+                <div className="h-10 w-32 animate-pulse rounded-md bg-border" />
             </div>
 
             {/* Stats Skeleton */}
             <div className="grid gap-4 md:grid-cols-3">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
-                        <div className="h-4 w-24 animate-pulse rounded bg-[#F0E0C0]" />
-                        <div className="mt-2 h-9 w-16 animate-pulse rounded bg-[#F0E0C0]" />
+                    <div key={i} className="rounded-lg border border-border bg-white p-6">
+                        <div className="h-4 w-24 animate-pulse rounded bg-border" />
+                        <div className="mt-2 h-9 w-16 animate-pulse rounded bg-border" />
                     </div>
                 ))}
             </div>
 
             {/* Table Skeleton */}
-            <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+            <div className="rounded-lg border border-border bg-white p-6">
                 <div className="space-y-4">
                     {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="h-12 animate-pulse rounded-lg bg-[#F0E0C0]" />
+                        <div key={i} className="h-12 animate-pulse rounded-lg bg-border" />
                     ))}
                 </div>
             </div>

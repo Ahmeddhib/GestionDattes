@@ -29,7 +29,7 @@ export async function SaisonTabsNav({
         <div
             // Onze onglets ne tiennent pas sur un téléphone : la barre défile
             // horizontalement au lieu de passer à la ligne ou de déborder.
-            className="-mx-3 overflow-x-auto border-b border-[#F0E0C0] px-3 sm:-mx-5 sm:px-5 lg:-mx-8 lg:px-8"
+            className="-mx-3 overflow-x-auto border-b border-border px-3 sm:-mx-5 sm:px-5 lg:-mx-8 lg:px-8"
         >
             <nav className="flex w-max min-w-full items-center gap-1" aria-label={t("finance.saisons.title")}>
                 {ONGLETS_SAISON.map((onglet) => {

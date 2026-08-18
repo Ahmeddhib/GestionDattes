@@ -18,7 +18,7 @@ export function StockCaissesContent({ typesCaisses }: StockCaissesContentProps) 
     const { t } = useClientTranslations();
 
     return (
-        <div className="rounded-[14px] bg-white p-4 md:p-6 shadow-sm border border-[#C17A2B]/20">
+        <div className="rounded-lg bg-white p-4 md:p-6 shadow-sm border border-[#C17A2B]/20">
             <h2 className="text-lg md:text-xl font-semibold text-[#3D1C00] mb-4">
                 {t('pretsCaisses.stockParType')}
             </h2>
@@ -51,7 +51,7 @@ export function StockCaissesContent({ typesCaisses }: StockCaissesContentProps) 
                         return (
                             <div
                                 key={type.id}
-                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 rounded-[9px] bg-[#FAF0DC] border border-[#C17A2B]/20 gap-2"
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 rounded-md bg-[#FAF0DC] border border-[#C17A2B]/20 gap-2"
                             >
                                 <div className="flex-1">
                                     <p className="font-medium text-[#3D1C00] text-sm md:text-base">
@@ -71,7 +71,7 @@ export function StockCaissesContent({ typesCaisses }: StockCaissesContentProps) 
                                         </p>
                                     </div>
                                     <Badge
-                                        className={`${stockColor} rounded-[7px] font-semibold px-2 py-1 text-xs`}
+                                        className={`${stockColor} rounded-sm font-semibold px-2 py-1 text-xs`}
                                     >
                                         {stockLabel}
                                     </Badge>

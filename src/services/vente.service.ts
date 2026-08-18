@@ -6,6 +6,8 @@ import { requirePermission } from "@/lib/permissions";
 import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import { prisma } from "@/lib/prisma";
 import type { CreateVenteInput, UpdateVenteInput } from "@/validators/vente.validator";
+import type { FiltresVente } from "@/repositories/vente.repository";
+import type { SortDirection } from "@/lib/pagination";
 
 function withSolde<T extends { montant: number; EncaissementClient: { montant: number }[] }>(vente: T) {
     const montantEncaisse = vente.EncaissementClient.reduce((sum, e) => sum + e.montant, 0);
@@ -22,6 +24,50 @@ export const venteService = {
         await requirePermission("vente:read");
         const ventes = await venteRepository.findAll(tenantId, opts);
         return ventes.map(withSolde);
+    },
+
+    /** Toutes les ventes du filtre courant, pour l'export. */
+    async getAllFiltre(
+        tenantId: string,
+        params: { search: string; saisonId?: string; filtres?: FiltresVente }
+    ) {
+        await requirePermission("vente:read");
+        const ventes = await venteRepository.findAllFiltre(tenantId, params);
+        return ventes.map(withSolde);
+    },
+
+    /**
+     * Une page de ventes, les totaux du jeu filtré et la liste des clients du
+     * filtre — tous trois calculés en base.
+     */
+    async getPage(
+        tenantId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+            filtres?: FiltresVente;
+        }
+    ) {
+        await requirePermission("vente:read");
+
+        const [page, totaux, clients] = await Promise.all([
+            venteRepository.findPage(tenantId, params),
+            venteRepository.getTotauxFiltres(tenantId, {
+                search: params.search,
+                saisonId: params.saisonId,
+                filtres: params.filtres,
+            }),
+            // La liste du menu déroulant suit la saison, mais PAS les autres
+            // filtres : sinon choisir un client viderait le menu de tous les
+            // autres et rendrait le filtre impossible à changer.
+            venteRepository.findClientsAvecVente(tenantId, params.saisonId),
+        ]);
+
+        return { resultat: { ...page, items: page.items.map(withSolde) }, totaux, clients };
     },
 
     async getById(tenantId: string, id: string) {

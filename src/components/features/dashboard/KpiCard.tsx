@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { Banknote, HandCoins, PackageOpen, ShoppingCart, Truck, UsersRound, type LucideIcon } from "lucide-react";
+import {
+    Banknote,
+    HandCoins,
+    PackageOpen,
+    ShoppingCart,
+    TrendingDown,
+    TrendingUp,
+    Truck,
+    UsersRound,
+    type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatKg, formatMontant, formatNombre } from "@/lib/format";
 import type { KpiDatum } from "@/types/dashboard";
@@ -22,6 +32,8 @@ const CARD_STYLES: Record<string, { icon: LucideIcon; color: string; glow: strin
 export function KpiCard({ kpi }: { kpi: KpiDatum }) {
     const style = CARD_STYLES[kpi.code] ?? CARD_STYLES.stockTotal;
     const Icon = style.icon;
+    const EvolutionIcon = kpi.evolution?.isPositive ? TrendingUp : TrendingDown;
+
     return (
         <Link
             href={kpi.href}
@@ -29,21 +41,38 @@ export function KpiCard({ kpi }: { kpi: KpiDatum }) {
             style={{ boxShadow: `inset 0 0 45px ${style.glow}, var(--dash-kpi-shadow)` }}
         >
             <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white/75 dark:bg-black/20" style={{ color: style.color, borderColor: `${style.color}55`, boxShadow: `0 0 22px ${style.glow}` }}>
+                <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-white/75 dark:bg-black/20"
+                    style={{ color: style.color, borderColor: `${style.color}55`, boxShadow: `0 0 22px ${style.glow}` }}
+                >
                     <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium text-[#c9b9a3]">{kpi.label}</p>
-                    <p className="mt-1 truncate text-xl font-semibold tracking-tight text-white 2xl:text-2xl">{formatValue(kpi)}</p>
+                    <p className="mt-1 truncate text-lg font-semibold tracking-tight text-white xl:text-xl">
+                        {formatValue(kpi)}
+                    </p>
                     {kpi.evolution && (
-                        <p dir="ltr" className={cn("mt-2 text-[11px] font-medium", kpi.evolution.isPositive ? "text-green-400" : "text-red-400")}>
-                            {kpi.evolution.isNew ? "" : kpi.evolution.isPositive ? "↗ " : "↘ "}{kpi.evolution.value}
+                        <p
+                            dir="ltr"
+                            className={cn(
+                                "mt-2 flex items-start gap-1 text-[11px] font-medium",
+                                kpi.evolution.isPositive
+                                    ? "text-emerald-600 dark:text-green-400"
+                                    : "text-red-600 dark:text-red-400"
+                            )}
+                        >
+                            {!kpi.evolution.isNew && <EvolutionIcon className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />}
+                            <span>{kpi.evolution.value}</span>
                             <span className="ms-1 font-normal text-[#8e806e]">{kpi.comparisonLabel}</span>
                         </p>
                     )}
                 </div>
             </div>
-            <div className="absolute inset-x-4 bottom-2 h-px opacity-40" style={{ background: `linear-gradient(90deg,transparent,${style.color},transparent)` }} />
+            <div
+                className="absolute inset-x-4 bottom-2 h-px opacity-40"
+                style={{ background: `linear-gradient(90deg,transparent,${style.color},transparent)` }}
+            />
         </Link>
     );
 }

@@ -34,7 +34,7 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
 
             {/* Stats Cards */}
             <div className="grid gap-6 md:grid-cols-3">
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -44,13 +44,13 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
                                 {totalClients}
                             </p>
                         </div>
-                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-[#FAF0DC] rounded-md flex items-center justify-center">
                             <Users className="h-6 w-6 text-[#C17A2B]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -60,13 +60,13 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
                                 {clientsAvecVentes}
                             </p>
                         </div>
-                        <div className="h-12 w-12 bg-green-100 rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-green-100 rounded-md flex items-center justify-center">
                             <Users className="h-6 w-6 text-green-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-[14px] border border-gray-200 shadow-sm">
+                <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">
@@ -76,7 +76,7 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
                                 {totalVentes}
                             </p>
                         </div>
-                        <div className="h-12 w-12 bg-blue-100 rounded-[9px] flex items-center justify-center">
+                        <div className="h-12 w-12 bg-blue-100 rounded-md flex items-center justify-center">
                             <Users className="h-6 w-6 text-blue-600" />
                         </div>
                     </div>
@@ -84,7 +84,7 @@ export function ClientsPageContent({ clients }: ClientsPageContentProps) {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-[14px] border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
                 <ClientsTableAdvanced data={clients} />
             </div>
         </PageContainer>

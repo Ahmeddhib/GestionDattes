@@ -50,7 +50,7 @@ export function RegionsPageContent({ regions }: RegionsPageContentProps) {
 
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("regions.total")}
                     </div>
@@ -58,7 +58,7 @@ export function RegionsPageContent({ regions }: RegionsPageContentProps) {
                         {regions.length}
                     </div>
                 </div>
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("regions.agriculteurs")}
                     </div>
@@ -66,7 +66,7 @@ export function RegionsPageContent({ regions }: RegionsPageContentProps) {
                         {totalAgriculteurs}
                     </div>
                 </div>
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("regions.users")}
                     </div>

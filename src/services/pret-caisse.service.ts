@@ -7,6 +7,35 @@ import { checkPermission } from "@/lib/permissions";
 import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
 import { prisma } from "@/lib/prisma";
 import type { CreatePretCaisseInput, RetourCaissesInput } from "@/validators/pret-caisse.validator";
+import type { FiltresPret } from "@/repositories/pret-caisse.repository";
+import type { SortDirection } from "@/lib/pagination";
+
+type PretAvecRelations = Awaited<ReturnType<typeof pretCaisseRepository.findAll>>[number];
+
+/**
+ * Transformation PascalCase → camelCase des relations, plus le restant dérivé.
+ *
+ * Extraite pour que la liste complète, la page et l'export produisent exactement
+ * la même forme — sans quoi les colonnes du tableau se videraient selon le
+ * chemin de lecture emprunté.
+ */
+function versCamelCase(pret: PretAvecRelations) {
+    return {
+        ...pret,
+        agriculteur: pret.Agriculteur,
+        typeCaisse: pret.TypeCaisse,
+        createdBy: pret.User,
+        livraison: pret.Livraison,
+        livreur: pret.Livreur,
+        nombreRestant: pret.nombrePrete - pret.nombreRetourne,
+        // Supprimer les versions PascalCase
+        Agriculteur: undefined,
+        TypeCaisse: undefined,
+        User: undefined,
+        Livraison: undefined,
+        Livreur: undefined,
+    };
+}
 
 /**
  * Service métier pour la gestion des prêts de caisses
@@ -19,23 +48,62 @@ export const pretCaisseService = {
         await checkPermission(userId, "pret-caisse:read");
 
         const prets = await pretCaisseRepository.findAll(tenantId, opts);
+        return prets.map(versCamelCase);
+    },
 
-        // Transformation PascalCase → camelCase
-        return prets.map((pret) => ({
-            ...pret,
-            agriculteur: pret.Agriculteur,
-            typeCaisse: pret.TypeCaisse,
-            createdBy: pret.User,
-            livraison: pret.Livraison,
-            livreur: pret.Livreur,
-            nombreRestant: pret.nombrePrete - pret.nombreRetourne,
-            // Supprimer les versions PascalCase
-            Agriculteur: undefined,
-            TypeCaisse: undefined,
-            User: undefined,
-            Livraison: undefined,
-            Livreur: undefined,
-        }));
+    /**
+     * Une page de prêts, plus les totaux du jeu filtré et les options des
+     * menus de filtre — tous calculés en base.
+     *
+     * Les statistiques de l'en-tête de page ne viennent PAS d'ici : elles
+     * restent un instantané physique global (`getStatistiques`), car des caisses
+     * prêtées lors d'une campagne précédente et jamais rendues sont toujours
+     * dehors aujourd'hui.
+     */
+    async getPage(
+        tenantId: string,
+        userId: string,
+        params: {
+            page: number;
+            pageSize: number;
+            search: string;
+            sortBy: string;
+            sortDir: SortDirection;
+            saisonId?: string;
+            filtres?: FiltresPret;
+        }
+    ) {
+        await checkPermission(userId, "pret-caisse:read");
+
+        const [page, totaux, options] = await Promise.all([
+            pretCaisseRepository.findPage(tenantId, params),
+            pretCaisseRepository.getTotauxFiltres(tenantId, {
+                search: params.search,
+                saisonId: params.saisonId,
+                filtres: params.filtres,
+            }),
+            // Les menus suivent la saison mais PAS les autres filtres : sinon
+            // choisir un agriculteur viderait le menu de tous les autres et
+            // rendrait le filtre impossible à changer.
+            pretCaisseRepository.findOptionsFiltres(tenantId, params.saisonId),
+        ]);
+
+        return {
+            resultat: { ...page, items: page.items.map(versCamelCase) },
+            totaux,
+            ...options,
+        };
+    },
+
+    /** Toutes les lignes du filtre courant, pour l'export. */
+    async getAllFiltre(
+        tenantId: string,
+        userId: string,
+        params: { search: string; saisonId?: string; filtres?: FiltresPret }
+    ) {
+        await checkPermission(userId, "pret-caisse:read");
+        const prets = await pretCaisseRepository.findAllFiltre(tenantId, params);
+        return prets.map(versCamelCase);
     },
 
     /**

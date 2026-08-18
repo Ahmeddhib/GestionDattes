@@ -74,7 +74,7 @@ export function RegionsTable({ initialData }: RegionsTableProps) {
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow className="border-[#F0E0C0] hover:bg-[#FAF0DC]/50">
+                        <TableRow className="border-border hover:bg-[#FAF0DC]/50">
                             <TableHead className="text-[#3D1C00] font-semibold">Nom</TableHead>
                             <TableHead className="text-[#3D1C00] font-semibold">Code</TableHead>
                             <TableHead className="text-[#3D1C00] font-semibold text-center">
@@ -96,14 +96,14 @@ export function RegionsTable({ initialData }: RegionsTableProps) {
                         {regions.map((region) => (
                             <TableRow
                                 key={region.id}
-                                className="border-[#F0E0C0] hover:bg-[#FAF0DC]/30"
+                                className="border-border hover:bg-[#FAF0DC]/30"
                             >
                                 <TableCell className="font-medium text-[#3D1C00]">
                                     {region.nom}
                                 </TableCell>
                                 <TableCell>
                                     {region.code ? (
-                                        <span className="inline-flex items-center rounded-[7px] bg-[#C17A2B]/10 px-2.5 py-0.5 text-xs font-medium text-[#C17A2B]">
+                                        <span className="inline-flex items-center rounded-sm bg-[#C17A2B]/10 px-2.5 py-0.5 text-xs font-medium text-[#C17A2B]">
                                             {region.code}
                                         </span>
                                     ) : (

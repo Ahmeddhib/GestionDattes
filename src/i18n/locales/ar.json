@@ -469,7 +469,8 @@
         "stats": {
             "total": "إجمالي السندات",
             "montantTotal": "المبلغ الإجمالي"
-        }
+        },
+        "dateCreation": "تاريخ الإنشاء"
     },
     "finance": {
         "bilan": {
@@ -679,7 +680,9 @@
             "nouvelEncaissement": "تحصيل جديد",
             "historiqueEncaissements": "سجل التحصيلات",
             "encaissementEnregistre": "تم تسجيل التحصيل بنجاح",
-            "lotSaison": "دفعة {nom}"
+            "lotSaison": "دفعة {nom}",
+            "searchPlaceholder": "البحث عن عميل أو دفعة أو نوع...",
+            "dateVente": "تاريخ البيع"
         },
         "depenses": {
             "title": "مصاريف أخرى",
@@ -690,7 +693,8 @@
             "categorie": "الفئة",
             "montant": "المبلغ",
             "searchPlaceholder": "البحث عن مصروف...",
-            "deleteConfirm": "هل أنت متأكد من حذف المصروف"
+            "deleteConfirm": "هل أنت متأكد من حذف المصروف",
+            "dateDepense": "تاريخ المصروف"
         },
         "encaissements": {
             "date": "التاريخ",

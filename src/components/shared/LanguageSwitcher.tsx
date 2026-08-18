@@ -28,7 +28,7 @@ export function LanguageSwitcher() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-[9px] hover:bg-[#FAF0DC] dark:hover:bg-[#2b1d10]"
+                    className="h-9 w-9 rounded-md hover:bg-[#FAF0DC] dark:hover:bg-[#2b1d10]"
                     title={`${localeFlags[currentLocale]} ${localeNames[currentLocale]}`}
                 >
                     <Globe className="h-5 w-5 text-[#3D1C00] dark:text-[#e6a73c]" />

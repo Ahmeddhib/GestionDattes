@@ -115,7 +115,7 @@ export function DataTableServer<TData, TValue>({
                     placeholder={searchPlaceholder || t("common.search")}
                     value={searchDraft}
                     onChange={(e) => setSearchDraft(e.target.value)}
-                    className="h-10 w-full rounded-xl border-border bg-background/80 focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
+                    className="h-10 w-full rounded-xl border-border bg-card focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
                 />
 
                 <div className="flex flex-wrap items-center gap-2 sm:ms-auto">

@@ -11,7 +11,7 @@ export function DashboardContent({ userName }: DashboardContentProps) {
 
     return (
         <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#2C1A00] mb-2">
+            <h1 className="text-3xl font-bold text-text-primary mb-2">
                 {t('common.welcome')}, {userName} 👋
             </h1>
             <p className="text-gray-600">

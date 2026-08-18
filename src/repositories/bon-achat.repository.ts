@@ -19,11 +19,17 @@ const TRIS_BON_ACHAT: Record<
     statut: (dir) => ({ statut: dir }),
     createdAt: (dir) => ({ createdAt: dir }),
     numeroLot: (dir) => ({ Livraison: { numeroLot: dir } }),
+    agriculteur: (dir) => ({ Livraison: { Agriculteur: { nom: dir } } }),
 };
 
 export interface FiltresBonAchat {
     /** Restreint à un agriculteur. Filtré en base, plus dans le tableau chargé. */
     agriculteurId?: string;
+    /**
+     * Statut de PAIEMENT du bon d'achat. Utilisé par la page Paiements
+     * agriculteurs ; la page Bons d'achat ne le renseigne pas.
+     */
+    statut?: "EN_ATTENTE" | "PARTIEL" | "PAYE";
     /** Bornes sur `createdAt`, incluses. */
     from?: Date;
     to?: Date;
@@ -41,6 +47,7 @@ function buildBonAchatWhere(
         ...(filtres?.agriculteurId && {
             Livraison: { agriculteurId: filtres.agriculteurId },
         }),
+        ...(filtres?.statut && { statut: filtres.statut }),
         ...((filtres?.from || filtres?.to) && {
             createdAt: {
                 ...(filtres.from && { gte: filtres.from }),

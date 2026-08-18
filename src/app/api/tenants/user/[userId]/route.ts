@@ -1,48 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getUserTenants } from "@/lib/tenant/get-tenant";
+import { estErreurConnexionBase } from "@/lib/db-error";
 
-/**
- * API route pour récupérer les tenants (wakalas) d'un utilisateur
- */
+/** API sécurisée pour récupérer les wakalas accessibles par l'utilisateur. */
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
         const session = await auth();
 
-        // Vérifier que l'utilisateur est authentifié
         if (!session?.user?.id) {
-            return NextResponse.json(
-                { error: "Non authentifié" },
-                { status: 401 }
-            );
+            return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
         }
 
-        // Await params (Next.js 15+)
         const { userId } = await params;
 
-        // Vérifier que l'utilisateur demande ses propres tenants
         if (session.user.id !== userId) {
-            return NextResponse.json(
-                { error: "Accès refusé" },
-                { status: 403 }
-            );
+            return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
         }
 
-        // Récupérer les tenants de l'utilisateur
         const tenants = await getUserTenants(userId);
-
-        return NextResponse.json({
-            success: true,
-            tenants,
-        });
+        return NextResponse.json({ success: true, tenants });
     } catch (error) {
-        console.error("Error fetching user tenants:", error);
+        const databaseUnavailable = estErreurConnexionBase(error);
+
+        // L'ErrorEvent WebSocket brut déclenchait l'overlay Next en dev sous
+        // la forme inutile `{clientVersion}`. Un avertissement concis suffit.
+        console.warn(
+            databaseUnavailable
+                ? "Tenant list temporarily unavailable (database timeout)"
+                : "Tenant list could not be loaded"
+        );
+
         return NextResponse.json(
-            { error: "Erreur lors de la récupération des wakalas" },
-            { status: 500 }
+            {
+                success: false,
+                tenants: [],
+                error: databaseUnavailable ? "DATABASE_UNAVAILABLE" : "TENANTS_UNAVAILABLE",
+                retryable: true,
+            },
+            { status: 503 }
         );
     }
 }

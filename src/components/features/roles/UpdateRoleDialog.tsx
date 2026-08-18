@@ -87,7 +87,7 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] bg-white border-[#F0E0C0] rounded-[14px]">
+            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">{t("roles.updateDialog")}</DialogTitle>
                     <DialogDescription className="text-[#3D1C00]/60">
@@ -108,7 +108,7 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
                                             placeholder="Ex: GESTIONNAIRE"
                                             {...field}
                                             disabled={isLoading}
-                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -128,7 +128,7 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
                                             {...field}
                                             value={field.value || ""}
                                             disabled={isLoading}
-                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B] min-h-[80px]"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B] min-h-20"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -142,14 +142,14 @@ export function UpdateRoleDialog({ role, open, onClose }: UpdateRoleDialogProps)
                                 variant="outline"
                                 onClick={onClose}
                                 disabled={isLoading}
-                                className="rounded-[9px] border-[#F0E0C0]"
+                                className="rounded-md border-border"
                             >
                                 {t("common.cancel")}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
+                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-md"
                             >
                                 {isLoading ? (
                                     <>

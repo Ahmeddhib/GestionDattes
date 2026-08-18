@@ -40,7 +40,7 @@ export const createRegionsColumns = (
             cell: ({ row }) => {
                 const code = row.getValue("code") as string | null;
                 return code ? (
-                    <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-[#F0E0C0]">
+                    <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-border">
                         {code}
                     </Badge>
                 ) : (

@@ -67,7 +67,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] bg-white border-[#F0E0C0] rounded-[14px]">
+            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
                 <DialogHeader>
                     <div className="flex items-start gap-4">
                         <div className="rounded-full bg-red-100 p-3">
@@ -88,7 +88,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
                 </DialogHeader>
 
                 {!canDelete && (
-                    <div className="rounded-[7px] bg-white border border-red-200 p-4">
+                    <div className="rounded-sm bg-white border border-red-200 p-4">
                         <p className="text-sm text-red-800 font-medium mb-2">
                             ❌ {t("messages.error.cannotDelete", { entity: t("regions.title") })}
                         </p>
@@ -106,7 +106,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
                 )}
 
                 {canDelete && (
-                    <div className="rounded-[7px] bg-white border border-amber-500 p-4">
+                    <div className="rounded-sm bg-white border border-amber-500 p-4">
                         <p className="text-sm text-amber-800">
                             ⚠️ {t("regions.deleteIrreversible")}
                         </p>
@@ -119,7 +119,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
                         variant="outline"
                         onClick={() => onOpenChange(false)}
                         disabled={isLoading}
-                        className="rounded-[9px] border-[#F0E0C0]"
+                        className="rounded-md border-border"
                     >
                         {t("common.cancel")}
                     </Button>
@@ -129,7 +129,7 @@ export function DeleteRegionDialog({ region, open, onOpenChange }: DeleteRegionD
                             variant="destructive"
                             onClick={handleDelete}
                             disabled={isLoading}
-                            className="rounded-[9px] bg-red-600 hover:bg-red-700"
+                            className="rounded-md bg-red-600 hover:bg-red-700"
                         >
                             {isLoading ? (
                                 <>

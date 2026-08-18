@@ -187,7 +187,7 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
         <aside
             className={cn(
                 "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#3D1C00] text-white",
-                premiumDashboard && "bg-[#2b1707] bg-[linear-gradient(180deg,rgba(43,23,7,.90),rgba(51,26,7,.82)),url('/dashboard-date-palm-bg.png')] bg-cover bg-left-bottom dark:bg-[#0d0a07] dark:bg-[linear-gradient(180deg,rgba(11,8,5,.92),rgba(14,9,5,.82)),url('/dashboard-date-palm-bg.png')]",
+                premiumDashboard && "bg-[#3a1d03] bg-[linear-gradient(180deg,rgba(47,23,3,.94),rgba(67,32,3,.86)),url('/dashboard-date-palm-bg.png')] bg-cover bg-left-bottom dark:bg-[#0d0a07] dark:bg-[linear-gradient(180deg,rgba(11,8,5,.92),rgba(14,9,5,.82)),url('/dashboard-date-palm-bg.png')]",
                 className
             )}
         >
@@ -240,7 +240,7 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
                                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dattes-200",
                                             isActive
                                                 ? premiumDashboard
-                                                    ? "border border-[#8b5b23]/45 bg-[#7a4517]/35 font-semibold text-[#f0b548] shadow-[inset_0_0_24px_rgba(193,122,43,.12)]"
+                                                    ? "border border-[#d08a34]/50 bg-[#a45a12]/75 font-semibold text-white shadow-[inset_0_0_24px_rgba(230,167,60,.16)]"
                                                     : "bg-dattes-600 font-semibold text-white"
                                                 : "text-white/85 hover:bg-white/10 hover:text-white"
                                         )}

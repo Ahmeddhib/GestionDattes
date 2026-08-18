@@ -113,7 +113,11 @@ export const createVentesColumns = (
     },
     {
         accessorKey: "createdAt",
-        header: t("pesees.datePesee"),
+        // Une vente n'a pas de date de pesée : la colonne réutilisait la clé
+        // `pesees.datePesee`, ce qui affichait « Date de pesée » au-dessus de
+        // dates de vente. Visible d'autant plus depuis que l'en-tête est
+        // cliquable pour trier.
+        header: t("finance.ventes.dateVente"),
         cell: ({ row }) => (
             <span className="text-sm text-gray-600">
                 {format(new Date(row.getValue<Date>("createdAt")), "dd MMM yyyy", { locale: fr })}

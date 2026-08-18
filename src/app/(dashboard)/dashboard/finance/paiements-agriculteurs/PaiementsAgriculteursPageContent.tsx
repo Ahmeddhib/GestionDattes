@@ -1,32 +1,54 @@
 "use client";
 
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { PaiementsAgriculteursTableAdvanced } from "@/components/features/paiements-agriculteurs/PaiementsAgriculteursTableAdvanced";
+import {
+    PaiementsAgriculteursTableServer,
+    type AgriculteurOptionPaiement,
+} from "@/components/features/paiements-agriculteurs/PaiementsAgriculteursTableServer";
 import type { BonAchatAvecSolde } from "@/components/features/paiements-agriculteurs/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
 import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
+import type { PaginatedResult } from "@/lib/pagination";
 import { HandCoins, Wallet } from "lucide-react";
 import type { PdfBranding } from "@/lib/pdf-branding";
+
+export interface TotauxPaiements {
+    total: number;
+    montantTotal: number;
+    montantPaye: number;
+    montantRestant: number;
+}
 
 interface PaiementsAgriculteursPageContentProps {
     saisonFiltre: SaisonFiltreProps;
     saisonOuverte: SaisonActive | null;
-    bonsAchat: BonAchatAvecSolde[];
+    resultat: PaginatedResult<BonAchatAvecSolde>;
+    /**
+     * Totaux agrégés en base sur tout le jeu filtré. Le montant payé vient d'une
+     * agrégation sur `PaiementAgriculteur` : le sommer depuis les lignes reçues
+     * donnerait le total des dix bons affichés, sans signe visible d'erreur.
+     */
+    totaux: TotauxPaiements;
+    agriculteurs: AgriculteurOptionPaiement[];
     branding: PdfBranding;
 }
 
 export function PaiementsAgriculteursPageContent({
-    bonsAchat,
+    resultat,
+    totaux,
+    agriculteurs,
     saisonFiltre,
     saisonOuverte,
     branding,
 }: PaiementsAgriculteursPageContentProps) {
     const { t } = useClientTranslations();
 
-    const totalMontant = bonsAchat.reduce((sum, b) => sum + b.montant, 0);
-    const totalPaye = bonsAchat.reduce((sum, b) => sum + b.montantPaye, 0);
-    const totalRestant = bonsAchat.reduce((sum, b) => sum + b.montantRestant, 0);
+    const {
+        montantTotal: totalMontant,
+        montantPaye: totalPaye,
+        montantRestant: totalRestant,
+    } = totaux;
 
     return (
         <PageContainer>
@@ -85,8 +107,9 @@ export function PaiementsAgriculteursPageContent({
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <PaiementsAgriculteursTableAdvanced
-                    data={bonsAchat}
+                <PaiementsAgriculteursTableServer
+                    resultat={resultat}
+                    agriculteurs={agriculteurs}
                     branding={branding}
                     saisonActive={saisonOuverte ?? undefined}
                 />

@@ -469,7 +469,8 @@
         "stats": {
             "total": "Total bons",
             "montantTotal": "Montant total"
-        }
+        },
+        "dateCreation": "Date de création"
     },
     "finance": {
         "bilan": {
@@ -679,7 +680,9 @@
             "nouvelEncaissement": "Nouvel encaissement",
             "historiqueEncaissements": "Historique des encaissements",
             "encaissementEnregistre": "Encaissement enregistré avec succès",
-            "lotSaison": "Lot {nom}"
+            "lotSaison": "Lot {nom}",
+            "searchPlaceholder": "Rechercher un client, un lot, un type...",
+            "dateVente": "Date de vente"
         },
         "depenses": {
             "title": "Autres Dépenses",
@@ -690,7 +693,8 @@
             "categorie": "Catégorie",
             "montant": "Montant",
             "searchPlaceholder": "Rechercher une dépense...",
-            "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la dépense"
+            "deleteConfirm": "Êtes-vous sûr de vouloir supprimer la dépense",
+            "dateDepense": "Date de dépense"
         },
         "encaissements": {
             "date": "Date",

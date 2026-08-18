@@ -59,7 +59,7 @@ export function TypesCaissesPageContent({ typesCaisses }: TypesCaissesPageConten
 
             {/* Stats Cards */}
             <div className="grid gap-6 md:grid-cols-3">
-                <div className="rounded-[14px] border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-[#3D1C00]/60">
@@ -75,7 +75,7 @@ export function TypesCaissesPageContent({ typesCaisses }: TypesCaissesPageConten
                     </div>
                 </div>
 
-                <div className="rounded-[14px] border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-[#3D1C00]/60">
@@ -89,7 +89,7 @@ export function TypesCaissesPageContent({ typesCaisses }: TypesCaissesPageConten
                     </div>
                 </div>
 
-                <div className="rounded-[14px] border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
+                <div className="rounded-lg border border-[#C17A2B]/20 bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-[#3D1C00]/60">Poids Moyen</p>

@@ -26,8 +26,8 @@ function RepartitionTooltip({ active, payload }: TooltipContentProps) {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload as RepartitionDatum;
     return (
-        <div className="rounded-md border border-[#F0E0C0] bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-[#5C2D00]">
-            <p className="font-medium text-[#2C1A00] dark:text-[#F5E6C8]">{d.nom}</p>
+        <div className="rounded-md border border-border bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
+            <p className="font-medium text-text-primary dark:text-dattes-100">{d.nom}</p>
             <p>{formatKg(d.quantite)}</p>
         </div>
     );
@@ -46,7 +46,7 @@ export function LivraisonsRepartitionChart({ data }: { data: RepartitionDatum[] 
             isEmpty={data.length === 0}
             emptyMessage={t("dashboard.empty.chart")}
         >
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={260} initialDimension={{ width: 1, height: 1 }}>
                 <PieChart>
                     <Pie
                         data={slices}

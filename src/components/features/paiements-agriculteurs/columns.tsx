@@ -48,6 +48,10 @@ export const createPaiementsColumns = (
     },
     {
         accessorKey: "Livraison.Agriculteur",
+        // `id` explicite : TanStack transforme les `accessorKey` pointés en
+        // remplaçant les points par des tirets bas (`Livraison_Agriculteur`).
+        // S'appuyer sur cette règle rendait l'en-tête non triable en silence.
+        id: "agriculteur",
         header: t("livraisons.agriculteur"),
         cell: ({ row }) => {
             const agriculteur = row.original.Livraison.Agriculteur;
@@ -100,7 +104,9 @@ export const createPaiementsColumns = (
     },
     {
         accessorKey: "createdAt",
-        header: t("pesees.datePesee"),
+        // Un bon d'achat n'a pas de date de pesée : la clé `pesees.datePesee`
+        // était réutilisée comme libellé de date générique.
+        header: t("bonAchat.dateCreation"),
         cell: ({ row }) => (
             <span className="text-sm text-gray-600">
                 {format(new Date(row.getValue<Date>("createdAt")), "dd MMM yyyy", { locale: fr })}

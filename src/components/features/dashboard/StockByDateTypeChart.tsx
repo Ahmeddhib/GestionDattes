@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { ArrowRight } from "lucide-react";
@@ -7,13 +8,21 @@ import { formatKg } from "@/lib/format";
 import { ROUTES } from "@/lib/routes";
 import type { StockParTypeDatum } from "@/types/dashboard";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { useLocale } from "@/contexts/LocaleContext";
 
 const COLORS = ["#e6a73c", "#5b9e51", "#3689b6", "#d75b38", "#9b67c4", "#9c7951"];
 
 export function StockByDateTypeChart({ data }: { data: StockParTypeDatum[] }) {
     const { t } = useClientTranslations();
+    const { locale } = useLocale();
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const available = data.filter((item) => item.quantiteDisponible > 0);
     const total = available.reduce((sum, item) => sum + item.quantiteDisponible, 0);
+    const activeItem = activeIndex === null ? null : available[activeIndex] ?? null;
+    const displayedValue = activeItem?.quantiteDisponible ?? total;
+    const numberLocale = locale === "ar" ? "ar-TN" : locale === "en" ? "en-GB" : "fr-FR";
+    const displayedNumber = new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 1 }).format(displayedValue);
+
     return (
         <section className="dashboard-card relative overflow-hidden rounded-2xl border border-[#6b4b29]/45 bg-[#14100c]/86 p-4 backdrop-blur-md">
             <div aria-hidden className="pointer-events-none absolute -bottom-14 -right-16 h-52 w-52 rounded-full bg-[#9b5e1d]/10 blur-3xl" />
@@ -35,30 +44,63 @@ export function StockByDateTypeChart({ data }: { data: StockParTypeDatum[] }) {
                 <div className="flex h-48 items-center justify-center text-sm text-[#8e806e]">{t("dashboard.premium.stockEmpty")}</div>
             ) : (
                 <div className="relative grid items-center gap-2 sm:grid-cols-[145px_1fr] xl:grid-cols-[145px_1fr]">
-                    <div className="relative h-40">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div
+                        className="relative h-40"
+                        onMouseLeave={() => setActiveIndex(null)}
+                    >
+                        <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 1, height: 1 }}>
                             <PieChart>
-                                <Pie data={available} dataKey="quantiteDisponible" nameKey="nom" innerRadius={43} outerRadius={64} paddingAngle={1} stroke="none">
-                                    {available.map((item, index) => <Cell key={item.typeDateId} fill={COLORS[index % COLORS.length]} />)}
+                                <Pie
+                                    data={available}
+                                    dataKey="quantiteDisponible"
+                                    nameKey="nom"
+                                    innerRadius={43}
+                                    outerRadius={64}
+                                    paddingAngle={1}
+                                    stroke="none"
+                                    animationDuration={650}
+                                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                                    onClick={(_, index) => setActiveIndex(index)}
+                                >
+                                    {available.map((item, index) => (
+                                        <Cell
+                                            key={item.typeDateId}
+                                            fill={COLORS[index % COLORS.length]}
+                                            opacity={activeIndex === null || activeIndex === index ? 1 : 0.35}
+                                            className="cursor-pointer outline-none transition-opacity duration-200"
+                                        />
+                                    ))}
                                 </Pie>
                             </PieChart>
                         </ResponsiveContainer>
-                        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-11 text-center">
-                            <strong className="max-w-20 text-[15px] leading-none text-white tabular-nums">
-                                {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(total)}
+                        <div aria-live="polite" className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
+                            <strong className="max-w-24 truncate text-[15px] leading-none text-white tabular-nums">
+                                {displayedNumber}
                             </strong>
                             <span className="mt-1 text-[10px] font-medium text-[#8e806e]">kg</span>
-                            <span className="text-[9px] text-[#8e806e]">{t("dashboard.premium.total")}</span>
+                            <span className="max-w-20 truncate text-[9px] text-[#8e806e]">
+                                {activeItem?.nom ?? t("dashboard.premium.total")}
+                            </span>
                         </div>
                     </div>
                     <div className="divide-y divide-[#5b4027]/30">
                         {available.slice(0, 5).map((item, index) => (
-                            <div key={item.typeDateId} className="flex items-center gap-2 py-2 text-xs">
+                            <button
+                                type="button"
+                                key={item.typeDateId}
+                                className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-start text-xs transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e6a73c]/70 dark:hover:bg-white/5"
+                                onMouseEnter={() => setActiveIndex(index)}
+                                onMouseLeave={() => setActiveIndex(null)}
+                                onFocus={() => setActiveIndex(index)}
+                                onBlur={() => setActiveIndex(null)}
+                                onClick={() => setActiveIndex((current) => current === index ? null : index)}
+                                aria-pressed={activeIndex === index}
+                            >
                                 <span className="h-2 w-2 rounded-full" style={{ background: COLORS[index % COLORS.length] }} />
                                 <span className="min-w-0 flex-1 truncate text-[#d4c6b4]">{item.nom}</span>
                                 <span className="font-medium text-white">{formatKg(item.quantiteDisponible)}</span>
                                 <span className="w-9 text-right text-[#8e806e]">{Math.round((item.quantiteDisponible / total) * 100)}%</span>
-                            </div>
+                            </button>
                         ))}
                     </div>
                 </div>

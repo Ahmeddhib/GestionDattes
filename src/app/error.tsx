@@ -17,11 +17,11 @@ export default function Error({
 
     return (
         <div className="min-h-screen bg-sand flex items-center justify-center p-4">
-            <div className="bg-white border border-[#F0E0C0] rounded-[14px] p-8 max-w-md w-full text-center">
-                <div className="w-16 h-16 rounded-[14px] bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <div className="bg-white border border-border rounded-lg p-8 max-w-md w-full text-center">
+                <div className="w-16 h-16 rounded-lg bg-red-100 flex items-center justify-center mx-auto mb-4">
                     <AlertTriangle className="w-8 h-8 text-red-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-[#2C1A00] mb-2">
+                <h2 className="text-2xl font-bold text-text-primary mb-2">
                     Une erreur est survenue
                 </h2>
                 <p className="text-gray-600 mb-6">

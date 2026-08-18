@@ -255,7 +255,7 @@ export function DataTableAdvanced<TData, TValue>({
                             }
                             onSearchChange?.(value);
                         }}
-                        className="h-10 w-full rounded-xl border-border bg-background/80 focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
+                        className="h-10 w-full rounded-xl border-border bg-card focus:border-[#C17A2B] focus:ring-[#C17A2B] sm:max-w-sm"
                     />
                 )}
 

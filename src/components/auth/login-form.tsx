@@ -87,7 +87,7 @@ export function LoginForm() {
                         type="email"
                         placeholder="admin@dattes.tn"
                         {...register("email")}
-                        className="pl-9 h-10 rounded-[9px] text-sm"
+                        className="pl-9 h-10 rounded-md text-sm"
                         style={{ borderColor: "#E8D5B0", background: "#FDFAF5" }}
                     />
                 </div>
@@ -112,7 +112,7 @@ export function LoginForm() {
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"
                         {...register("password")}
-                        className="pl-9 pr-10 h-10 rounded-[9px] text-sm"
+                        className="pl-9 pr-10 h-10 rounded-md text-sm"
                         style={{ borderColor: "#E8D5B0", background: "#FDFAF5" }}
                     />
                     <button

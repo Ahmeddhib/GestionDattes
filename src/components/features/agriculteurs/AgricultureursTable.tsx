@@ -112,7 +112,7 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                             placeholder="Rechercher par nom, prénom, code, CIN ou région..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                            className="pl-9 rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                         />
                     </div>
                     <div className="text-sm text-[#3D1C00]/60">
@@ -124,7 +124,7 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow className="border-[#F0E0C0] hover:bg-[#FAF0DC]/50">
+                            <TableRow className="border-border hover:bg-[#FAF0DC]/50">
                                 <TableHead className="text-[#3D1C00] font-semibold">Code</TableHead>
                                 <TableHead className="text-[#3D1C00] font-semibold">Agriculteur</TableHead>
                                 <TableHead className="text-[#3D1C00] font-semibold">CIN</TableHead>
@@ -139,10 +139,10 @@ export function AgricultureursTable({ initialData, regions }: AgricultureursTabl
                             {filteredAgriculteurs.map((agriculteur) => (
                                 <TableRow
                                     key={agriculteur.id}
-                                    className="border-[#F0E0C0] hover:bg-[#FAF0DC]/30"
+                                    className="border-border hover:bg-[#FAF0DC]/30"
                                 >
                                     <TableCell>
-                                        <span className="inline-flex items-center rounded-[7px] bg-[#C17A2B]/10 px-2.5 py-0.5 text-xs font-medium text-[#C17A2B]">
+                                        <span className="inline-flex items-center rounded-sm bg-[#C17A2B]/10 px-2.5 py-0.5 text-xs font-medium text-[#C17A2B]">
                                             {agriculteur.code}
                                         </span>
                                     </TableCell>

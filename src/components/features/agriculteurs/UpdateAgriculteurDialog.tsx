@@ -128,7 +128,7 @@ export function UpdateAgriculteurDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px] bg-white border-[#F0E0C0] rounded-[14px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-150 bg-white border-border rounded-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">{t("agriculteurs.updateDialog")}</DialogTitle>
                     <DialogDescription className="text-[#3D1C00]/60">
@@ -150,7 +150,7 @@ export function UpdateAgriculteurDialog({
                                                 <Input
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -169,7 +169,7 @@ export function UpdateAgriculteurDialog({
                                                     maxLength={8}
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -189,7 +189,7 @@ export function UpdateAgriculteurDialog({
                                                 <Input
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -207,7 +207,7 @@ export function UpdateAgriculteurDialog({
                                                 <Input
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -228,7 +228,7 @@ export function UpdateAgriculteurDialog({
                                                     {...field}
                                                     value={field.value || ""}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -248,7 +248,7 @@ export function UpdateAgriculteurDialog({
                                                 disabled={isLoading}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]">
+                                                    <SelectTrigger className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                 </FormControl>
@@ -278,7 +278,7 @@ export function UpdateAgriculteurDialog({
                                                 {...field}
                                                 value={field.value || ""}
                                                 disabled={isLoading}
-                                                className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -302,7 +302,7 @@ export function UpdateAgriculteurDialog({
                                                         field.onChange(parseInt(e.target.value) || 0)
                                                     }
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -329,7 +329,7 @@ export function UpdateAgriculteurDialog({
                                                         )
                                                     }
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -355,7 +355,7 @@ export function UpdateAgriculteurDialog({
                                                         )
                                                     }
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -371,14 +371,14 @@ export function UpdateAgriculteurDialog({
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
                                 disabled={isLoading}
-                                className="rounded-[9px] border-[#F0E0C0]"
+                                className="rounded-md border-border"
                             >
                                 {t("common.cancel")}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
+                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-md"
                             >
                                 {isLoading ? (
                                     <>

@@ -158,7 +158,7 @@ export function SaisonDetailContent({
                                 {t("finance.saisons.provisoire.selectVersion")}
                             </span>
                             <Select value={bilan?.id} onValueChange={setSelectedId}>
-                                <SelectTrigger className="w-[320px]">
+                                <SelectTrigger className="w-80">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>

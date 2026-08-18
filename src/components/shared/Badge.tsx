@@ -24,14 +24,14 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
     default: "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-[#d8c9b6]",
-    secondary: "border border-[#E8C97A] bg-[#F5E6C8] text-[#8B4A0F] dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300",
+    secondary: "border border-dattes-200 bg-dattes-100 text-dattes-600 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300",
     success: "bg-[#EBF2DC] text-[#3D6010] dark:bg-green-950/45 dark:text-green-300",
-    warning: "bg-[#FDF0D5] text-[#8B4A0F] dark:bg-amber-950/45 dark:text-amber-300",
+    warning: "bg-[#FDF0D5] text-dattes-600 dark:bg-amber-950/45 dark:text-amber-300",
     danger: "bg-[#FDE8E8] text-[#8B1A1A] dark:bg-red-950/45 dark:text-red-300",
-    role: "border border-[#E8C97A] bg-[#F5E6C8] text-[#8B4A0F] dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300",
+    role: "border border-dattes-200 bg-dattes-100 text-dattes-600 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300",
     active: "bg-[#EBF2DC] text-[#3D6010] dark:bg-green-950/45 dark:text-green-300",
     inactive: "bg-[#FDE8E8] text-[#8B1A1A] dark:bg-red-950/45 dark:text-red-300",
-    create: "bg-[#FDF0D5] text-[#8B4A0F] dark:bg-amber-950/45 dark:text-amber-300",
+    create: "bg-[#FDF0D5] text-dattes-600 dark:bg-amber-950/45 dark:text-amber-300",
     update: "bg-[#E0EEF8] text-[#1A4A7C] dark:bg-sky-950/45 dark:text-sky-300",
     activate: "bg-[#EBF2DC] text-[#3D6010] dark:bg-green-950/45 dark:text-green-300",
     deactivate: "bg-[#FEF0E0] text-[#8B5A00] dark:bg-orange-950/45 dark:text-orange-300",

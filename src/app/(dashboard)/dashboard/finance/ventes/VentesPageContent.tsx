@@ -1,34 +1,52 @@
 "use client";
 
 import { useClientTranslations } from "@/hooks/useClientTranslations";
-import { VentesTableAdvanced } from "@/components/features/ventes/VentesTableAdvanced";
+import {
+    VentesTableServer,
+    type ClientOption,
+} from "@/components/features/ventes/VentesTableServer";
 import { CreateVenteDialog } from "@/components/features/ventes/CreateVenteDialog";
 import type { Vente } from "@/components/features/ventes/columns";
 import { PageContainer } from "@/components/shared/PageContainer";
 import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import { AucuneSaisonAlert } from "@/components/features/saisons/AucuneSaisonAlert";
 import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
+import type { PaginatedResult } from "@/lib/pagination";
 import { ShoppingCart, Wallet } from "lucide-react";
 import type { PdfBranding } from "@/lib/pdf-branding";
+
+export interface TotauxVentes {
+    total: number;
+    chiffreAffaires: number;
+    totalEncaisse: number;
+    totalRestant: number;
+}
 
 interface VentesPageContentProps {
     saisonFiltre: SaisonFiltreProps;
     saisonOuverte: SaisonActive | null;
-    ventes: Vente[];
+    resultat: PaginatedResult<Vente>;
+    /**
+     * Totaux agrégés en base sur tout le jeu filtré. L'encaissé vient de
+     * `EncaissementClient`, agrégé avec le même filtre : le sommer depuis les
+     * lignes reçues donnerait le total des dix ventes affichées.
+     */
+    totaux: TotauxVentes;
+    clients: ClientOption[];
     branding: PdfBranding;
 }
 
 export function VentesPageContent({
-    ventes,
+    resultat,
+    totaux,
+    clients,
     saisonFiltre,
     saisonOuverte,
     branding,
 }: VentesPageContentProps) {
     const { t } = useClientTranslations();
 
-    const chiffreAffaires = ventes.reduce((sum, v) => sum + v.montant, 0);
-    const totalEncaisse = ventes.reduce((sum, v) => sum + v.montantEncaisse, 0);
-    const totalRestant = ventes.reduce((sum, v) => sum + v.montantRestant, 0);
+    const { chiffreAffaires, totalEncaisse, totalRestant } = totaux;
 
     return (
         <PageContainer>
@@ -91,8 +109,9 @@ export function VentesPageContent({
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                <VentesTableAdvanced
-                    data={ventes}
+                <VentesTableServer
+                    resultat={resultat}
+                    clients={clients}
                     branding={branding}
                     saisonActive={saisonOuverte ?? undefined}
                 />

@@ -90,7 +90,7 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] bg-white rounded-[14px]">
+            <DialogContent className="sm:max-w-125 bg-white rounded-lg">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("clients.edit")}
@@ -112,7 +112,7 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
                                         <Input
                                             {...field}
                                             placeholder={t("clients.nomPlaceholder")}
-                                            className="rounded-[7px]"
+                                            className="rounded-sm"
                                             disabled={isLoading}
                                         />
                                     </FormControl>
@@ -132,7 +132,7 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
                                             {...field}
                                             value={field.value || ""}
                                             placeholder={t("clients.telephonePlaceholder")}
-                                            className="rounded-[7px]"
+                                            className="rounded-sm"
                                             disabled={isLoading}
                                         />
                                     </FormControl>
@@ -153,7 +153,7 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
                                             value={field.value || ""}
                                             type="email"
                                             placeholder={t("clients.emailPlaceholder")}
-                                            className="rounded-[7px]"
+                                            className="rounded-sm"
                                             disabled={isLoading}
                                         />
                                     </FormControl>
@@ -173,7 +173,7 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
                                             {...field}
                                             value={field.value || ""}
                                             placeholder={t("clients.adressePlaceholder")}
-                                            className="rounded-[7px]"
+                                            className="rounded-sm"
                                             disabled={isLoading}
                                         />
                                     </FormControl>
@@ -188,14 +188,14 @@ export function UpdateClientDialog({ client, open, onOpenChange }: UpdateClientD
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
                                 disabled={isLoading}
-                                className="rounded-[9px]"
+                                className="rounded-md"
                             >
                                 {t("common.cancel")}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
+                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-md"
                             >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {t("common.update")}

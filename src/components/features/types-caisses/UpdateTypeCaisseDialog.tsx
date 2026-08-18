@@ -56,12 +56,12 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-[7px] text-[#C17A2B] hover:bg-[#C17A2B]/10 hover:text-[#C17A2B]"
+                    className="h-8 w-8 rounded-sm text-[#C17A2B] hover:bg-[#C17A2B]/10 hover:text-[#C17A2B]"
                 >
                     <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[500px] bg-white">
+            <DialogContent className="rounded-lg sm:max-w-125 bg-white">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">
                         {t("typesCaisses.updateDialog")}
@@ -82,7 +82,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             name="nom"
                             defaultValue={typeCaisse.nom}
                             placeholder={t("typesCaisses.namePlaceholder")}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -98,7 +98,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             min="0.01"
                             defaultValue={typeCaisse.poidsKg}
                             placeholder={t("typesCaisses.poidsPlaceholder")}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -113,7 +113,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             min="0"
                             defaultValue={typeCaisse.stockDisponible}
                             placeholder="Quantité en stock"
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -122,7 +122,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             type="button"
                             variant="outline"
                             onClick={() => setOpen(false)}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                             disabled={loading}
                         >
                             {t("common.cancel")}
@@ -130,7 +130,7 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                            className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
                         >
                             {loading ? t("typesCaisses.updating") : t("common.save")}
                         </Button>

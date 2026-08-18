@@ -16,7 +16,7 @@ async function AuditLogsData() {
 
 export default async function AuditLogsPage() {
     return (
-        <div className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto w-full max-w-400 px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
             <Suspense fallback={<TableSkeleton rows={10} />}>
                 <AuditLogsData />
             </Suspense>

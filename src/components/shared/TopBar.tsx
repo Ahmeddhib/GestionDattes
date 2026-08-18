@@ -42,12 +42,26 @@ export function TopBar({ user }: TopBarProps) {
 
     // Fetch available tenants for the user
     useEffect(() => {
-        if (user?.id) {
-            fetch(`/api/tenants/user/${user.id}`)
-                .then((res) => res.json())
-                .then((data) => setAvailableTenants(data.tenants || []))
-                .catch((err) => console.error("Error fetching tenants:", err));
-        }
+        if (!user?.id) return;
+
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 10000);
+
+        fetch(`/api/tenants/user/${user.id}`, { signal: controller.signal })
+            .then(async (res) => {
+                if (!res.ok) return null;
+                return res.json() as Promise<{ tenants?: Tenant[] }>;
+            })
+            .then((data) => {
+                if (data?.tenants) setAvailableTenants(data.tenants);
+            })
+            .catch(() => undefined)
+            .finally(() => window.clearTimeout(timeout));
+
+        return () => {
+            window.clearTimeout(timeout);
+            controller.abort();
+        };
     }, [user?.id]);
 
     // Map routes to translation keys
@@ -82,8 +96,8 @@ export function TopBar({ user }: TopBarProps) {
         // `shrink-0` et non `sticky` : l'en-tête est un frère de <main> dans un
         // shell à hauteur d'écran, donc il reste en place sans position collante.
         <header className={premiumDashboard
-            ? "relative z-30 flex min-h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#dfd1be] bg-[#faf6ee] px-3 py-2 text-[#2f2317] dark:border-[#5b4027]/45 dark:bg-[#0b0907] dark:text-white sm:px-5 lg:px-6"
-            : "relative z-30 flex min-h-16 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#F0E0C0] bg-white px-3 py-2 sm:px-5 lg:px-8"}>
+            ? "relative z-30 flex min-h-14 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-[#eadfd0] bg-white/95 px-3 py-2 text-[#2f2317] backdrop-blur-md dark:border-[#5b4027]/45 dark:bg-[#0b0907]/95 dark:text-white sm:px-5 lg:px-6"
+            : "relative z-30 flex min-h-16 w-full min-w-0 shrink-0 items-center justify-between gap-2 border-b border-border bg-white px-3 py-2 sm:px-5 lg:px-8"}>
             <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <Button
                     type="button"
@@ -112,7 +126,7 @@ export function TopBar({ user }: TopBarProps) {
                 )}
 
                 <div className={premiumDashboard ? "hidden min-w-0 lg:block" : "min-w-0"}>
-                    <h2 className={premiumDashboard ? "truncate text-sm font-medium text-[#6f5d48] dark:text-[#c9b9a3]" : "truncate text-base font-bold text-[#2C1A00] sm:text-xl"}>{pageName}</h2>
+                    <h2 className={premiumDashboard ? "truncate text-sm font-medium text-[#6f5d48] dark:text-[#c9b9a3]" : "truncate text-base font-bold text-text-primary sm:text-xl"}>{pageName}</h2>
                     <div className="mt-1 hidden min-w-0 items-center gap-2 overflow-hidden text-sm text-gray-600 md:flex">
                         {breadcrumbs.map((crumb, index) => (
                             <div key={crumb.path} className="flex items-center gap-2">

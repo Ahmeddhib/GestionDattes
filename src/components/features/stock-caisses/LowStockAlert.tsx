@@ -24,7 +24,7 @@ export function LowStockAlert({ typesCaisses = [] }: LowStockAlertProps) {
     }
 
     return (
-        <Alert className="rounded-[14px] border-orange-500 bg-orange-50">
+        <Alert className="rounded-lg border-orange-500 bg-orange-50">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
             <AlertTitle className="text-orange-800 font-semibold">
                 {t("pretsCaisses.alerteStockFaible")}

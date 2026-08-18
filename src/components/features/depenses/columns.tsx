@@ -54,7 +54,8 @@ export const createDepensesColumns = (
     },
     {
         accessorKey: "dateDepense",
-        header: t("pesees.datePesee"),
+        // Idem : la colonne porte la date de la dépense, pas une date de pesée.
+        header: t("finance.depenses.dateDepense"),
         cell: ({ row }) => (
             <span className="text-sm text-gray-600">
                 {format(new Date(row.getValue<Date>("dateDepense")), "dd MMM yyyy", { locale: fr })}

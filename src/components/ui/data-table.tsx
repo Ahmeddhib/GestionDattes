@@ -72,7 +72,7 @@ export function DataTable<TData, TValue>({
                         onChange={(event) =>
                             table.getColumn(searchKey)?.setFilterValue(event.target.value)
                         }
-                        className="h-10 w-full rounded-xl bg-background sm:max-w-sm"
+                        className="h-10 w-full rounded-xl bg-card sm:max-w-sm"
                     />
                 </div>
             )}
@@ -138,7 +138,7 @@ export function DataTable<TData, TValue>({
                                 table.setPageSize(Number(value));
                             }}
                         >
-                        <SelectTrigger className="h-9 w-[70px] rounded-lg bg-background">
+                        <SelectTrigger className="h-9 w-17.5 rounded-lg bg-card">
                                 <SelectValue placeholder={table.getState().pagination.pageSize} />
                             </SelectTrigger>
                         <SelectContent side="top">
@@ -157,7 +157,7 @@ export function DataTable<TData, TValue>({
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 rounded-[7px]"
+                            className="h-8 w-8 p-0 rounded-sm"
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
                         >
@@ -166,7 +166,7 @@ export function DataTable<TData, TValue>({
                         </Button>
                         <Button
                             variant="outline"
-                            className="h-8 w-8 p-0 rounded-[7px]"
+                            className="h-8 w-8 p-0 rounded-sm"
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
                         >

@@ -23,12 +23,12 @@ export function ChartCard({
     children,
 }: ChartCardProps) {
     return (
-        <Card className="flex h-full flex-col dark:bg-[#2A1800] dark:border-[#5C2D00]">
+        <Card className="flex h-full min-w-0 flex-col dark:border-dattes-800 dark:bg-[#2A1800]">
             <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
-                    <h3 className="text-base font-semibold text-[#2C1A00] dark:text-[#F5E6C8]">{title}</h3>
+                    <h3 className="text-base font-semibold text-text-primary dark:text-dattes-100">{title}</h3>
                     {description && (
-                        <p className="text-sm text-gray-500 dark:text-[#B08A5E]">{description}</p>
+                        <p className="text-sm text-gray-500 dark:text-text-hint">{description}</p>
                     )}
                 </div>
                 {href && (
@@ -45,7 +45,7 @@ export function ChartCard({
                     <EmptyState icon={<BarChart3 className="h-10 w-10" />} title={emptyMessage} />
                 </div>
             ) : (
-                <div className="flex-1">{children}</div>
+                <div className="min-w-0 flex-1">{children}</div>
             )}
         </Card>
     );

@@ -45,7 +45,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#FAF0DC] via-[#F5E6C8] to-[#FAF0DC]">
+        <div className="min-h-screen bg-gradient-to-br from-[#FAF0DC] via-dattes-100 to-[#FAF0DC]">
             {/* Header */}
             <div className="container mx-auto px-4 py-12">
                 <div className="text-center mb-12">
@@ -54,7 +54,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                         <span className="text-4xl">🌴</span>
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-bold text-[#2C1A00] mb-4">
+                    <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
                         Gestion Dattes
                     </h1>
                     <p className="text-lg text-gray-600 mb-2">
@@ -71,12 +71,12 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                         {/* Bouton Créer Nouvelle Wakala */}
                         <button
                             onClick={() => setShowCreateDialog(true)}
-                            className="group relative bg-white rounded-[14px] border-2 border-dashed border-[#C17A2B]/30 hover:border-[#C17A2B] hover:bg-[#C17A2B]/5 transition-all duration-300 p-8 flex flex-col items-center justify-center min-h-[280px] cursor-pointer"
+                            className="group relative bg-white rounded-lg border-2 border-dashed border-[#C17A2B]/30 hover:border-[#C17A2B] hover:bg-[#C17A2B]/5 transition-all duration-300 p-8 flex flex-col items-center justify-center min-h-70 cursor-pointer"
                         >
                             <div className="w-16 h-16 rounded-full bg-[#C17A2B]/10 group-hover:bg-[#C17A2B]/20 flex items-center justify-center mb-4 transition-colors">
                                 <Plus className="w-8 h-8 text-[#C17A2B]" />
                             </div>
-                            <h3 className="text-xl font-semibold text-[#2C1A00] mb-2">
+                            <h3 className="text-xl font-semibold text-text-primary mb-2">
                                 Créer Nouvelle Wakala
                             </h3>
                             <p className="text-sm text-gray-500 text-center">
@@ -89,7 +89,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                             <button
                                 key={wakala.id}
                                 onClick={() => handleSelectWakala(wakala.id, wakala.code)}
-                                className="group relative bg-white rounded-[14px] border-2 border-gray-200 hover:border-[#C17A2B] hover:shadow-xl transition-all duration-300 p-8 text-left overflow-hidden"
+                                className="group relative bg-white rounded-lg border-2 border-gray-200 hover:border-[#C17A2B] hover:shadow-xl transition-all duration-300 p-8 text-left overflow-hidden"
                             >
                                 {/* Badge Code */}
                                 <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#C17A2B]/10 border border-[#C17A2B]/20">
@@ -104,7 +104,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
                                 </div>
 
                                 {/* Nom */}
-                                <h3 className="text-xl font-bold text-[#2C1A00] mb-4 pr-20">
+                                <h3 className="text-xl font-bold text-text-primary mb-4 pr-20">
                                     {wakala.name}
                                 </h3>
 
@@ -132,7 +132,7 @@ export default function WakalaSelectionPage({ wakalas }: Props) {
 
                                 {/* Bouton Action */}
                                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                    <span className="text-sm font-medium text-[#C17A2B] group-hover:text-[#8B4A0F]">
+                                    <span className="text-sm font-medium text-[#C17A2B] group-hover:text-dattes-600">
                                         Se connecter
                                     </span>
                                     <ArrowRight className="w-5 h-5 text-[#C17A2B] group-hover:translate-x-1 transition-transform" />

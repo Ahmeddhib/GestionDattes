@@ -93,12 +93,12 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]">
+                <Button className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-md">
                     <Plus className="mr-2 h-4 w-4" />
                     {t("agriculteurs.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] bg-white border-[#F0E0C0] rounded-[14px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-150 bg-white border-border rounded-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">{t("agriculteurs.createDialog")}</DialogTitle>
                     <DialogDescription className="text-[#3D1C00]/60">
@@ -115,7 +115,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                             </h3>
 
                             {/* Info banner: code auto-généré */}
-                            <div className="bg-[#C17A2B]/10 border border-[#C17A2B]/20 rounded-[7px] p-3 flex items-start gap-2">
+                            <div className="bg-[#C17A2B]/10 border border-[#C17A2B]/20 rounded-sm p-3 flex items-start gap-2">
                                 <span className="text-[#C17A2B] text-lg">💡</span>
                                 <p className="text-sm text-[#3D1C00]/80">
                                     <strong className="text-[#C17A2B]">{t("agriculteurs.code")}</strong> : Un code unique sera généré automatiquement (ex: AGR-0001)
@@ -134,7 +134,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                 maxLength={8}
                                                 {...field}
                                                 disabled={isLoading}
-                                                className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -154,7 +154,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                     placeholder="Ben Ahmed"
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -173,7 +173,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                     placeholder="Mohamed"
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -194,7 +194,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                     placeholder="+216 98 123 456"
                                                     {...field}
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -214,7 +214,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                 disabled={isLoading}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]">
+                                                    <SelectTrigger className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]">
                                                         <SelectValue placeholder="Sélectionner" />
                                                     </SelectTrigger>
                                                 </FormControl>
@@ -244,7 +244,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                 placeholder="Douz, Kebili"
                                                 {...field}
                                                 disabled={isLoading}
-                                                className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -254,7 +254,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                         </div>
 
                         {/* Informations Exploitation */}
-                        <div className="space-y-4 pt-4 border-t border-[#F0E0C0]">
+                        <div className="space-y-4 pt-4 border-t border-border">
                             <h3 className="text-sm font-semibold text-[#3D1C00]">
                                 {t("agriculteurs.exploitationInfo")}
                             </h3>
@@ -276,7 +276,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                         field.onChange(parseInt(e.target.value) || 0)
                                                     }
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -304,7 +304,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                         )
                                                     }
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -331,7 +331,7 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                                         )
                                                     }
                                                     disabled={isLoading}
-                                                    className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                                    className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -347,14 +347,14 @@ export function CreateAgriculteurDialog({ regions }: CreateAgriculteurDialogProp
                                 variant="outline"
                                 onClick={() => setOpen(false)}
                                 disabled={isLoading}
-                                className="rounded-[9px] border-[#F0E0C0]"
+                                className="rounded-md border-border"
                             >
                                 {t("common.cancel")}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
+                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-md"
                             >
                                 {isLoading ? (
                                     <>

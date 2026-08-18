@@ -40,7 +40,7 @@ export const createAgricultureursColumns = (
             accessorKey: "code",
             header: t("agriculteurs.code"),
             cell: ({ row }) => (
-                <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-[#F0E0C0] font-mono">
+                <Badge variant="outline" className="bg-[#FAF0DC] text-[#C17A2B] border-border font-mono">
                     {row.getValue("code")}
                 </Badge>
             ),
@@ -70,7 +70,7 @@ export const createAgricultureursColumns = (
             cell: ({ row }) => {
                 const region = row.original.region;
                 return (
-                    <Badge variant="secondary" className="bg-[#FAF0DC] text-[#3D1C00] border-[#F0E0C0]">
+                    <Badge variant="secondary" className="bg-[#FAF0DC] text-[#3D1C00] border-border">
                         {region.nom}
                         {region.code && ` (${region.code})`}
                     </Badge>

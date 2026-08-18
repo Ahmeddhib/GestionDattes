@@ -119,7 +119,8 @@ export const createBonsAchatColumns = (
     },
     {
         accessorKey: "createdAt",
-        header: t("pesees.datePesee"),
+        // Idem : ce n'est pas une date de pesée mais la création du bon d'achat.
+        header: t("bonAchat.dateCreation"),
         cell: ({ row }) => {
             const date = row.getValue<Date>("createdAt");
             return (

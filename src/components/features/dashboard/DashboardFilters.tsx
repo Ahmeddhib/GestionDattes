@@ -67,7 +67,7 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
 
             {periode === "saison" && (
                 <div className="min-w-0 xl:min-w-55">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-[#B08A5E]">{t("dashboard.filters.saison")}</label>
+                    <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-text-hint">{t("dashboard.filters.saison")}</label>
                     <Select value={saisonId} onValueChange={setSaisonId}>
                     <SelectTrigger className="h-10 w-full rounded-xl border-[#d8c8b2] bg-white/80 text-[#4b3520] dark:border-[#5e452d]/50 dark:bg-black/25 dark:text-[#eadfce] xl:w-52">
                             <SelectValue placeholder={t("dashboard.filters.selectSaison")} />
@@ -85,7 +85,7 @@ export function DashboardFilters({ saisons, currentPeriode, currentSaisonId }: D
 
             {periode === "personnalisee" && (
                 <div className="min-w-0">
-                    <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-[#B08A5E]">{t("dashboard.filters.dateRange")}</label>
+                    <label className="mb-1 block text-xs text-[#3D1C00]/60 dark:text-text-hint">{t("dashboard.filters.dateRange")}</label>
                     <DateRangePicker value={dateRange} onChange={setDateRange} />
                 </div>
             )}

@@ -11,8 +11,8 @@ import type { TrendPoint } from "@/types/dashboard";
 function QuantiteTooltip({ active, payload, label }: TooltipContentProps) {
     if (!active || !payload?.length) return null;
     return (
-        <div className="rounded-md border border-[#F0E0C0] bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-[#5C2D00]">
-            <p className="font-medium text-[#2C1A00] dark:text-[#F5E6C8]">{label}</p>
+        <div className="rounded-md border border-border bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
+            <p className="font-medium text-text-primary dark:text-dattes-100">{label}</p>
             <p style={{ color: CHART_COLORS.blue.light }}>{formatKg(Number(payload[0].value))}</p>
         </div>
     );
@@ -21,8 +21,8 @@ function QuantiteTooltip({ active, payload, label }: TooltipContentProps) {
 function MontantTooltip({ active, payload, label }: TooltipContentProps) {
     if (!active || !payload?.length) return null;
     return (
-        <div className="rounded-md border border-[#F0E0C0] bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-[#5C2D00]">
-            <p className="font-medium text-[#2C1A00] dark:text-[#F5E6C8]">{label}</p>
+        <div className="rounded-md border border-border bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
+            <p className="font-medium text-text-primary dark:text-dattes-100">{label}</p>
             <p style={{ color: CHART_COLORS.orange.light }}>{formatMontant(Number(payload[0].value))}</p>
         </div>
     );
@@ -46,10 +46,10 @@ export function SalesTrendChart({ data }: { data: TrendPoint[] }) {
         >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <p className="mb-2 text-xs font-medium text-gray-500 dark:text-[#B08A5E]">
+                    <p className="mb-2 text-xs font-medium text-gray-500 dark:text-text-hint">
                         {t("dashboard.charts.sales.quantite")}
                     </p>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <ResponsiveContainer width="100%" height={200} initialDimension={{ width: 1, height: 1 }}>
                         <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={CHART_INK.grid.light} vertical={false} />
                             <XAxis dataKey="periode" tick={{ fontSize: 11, fill: CHART_INK.secondary.light }} tickLine={false} axisLine={{ stroke: CHART_INK.grid.light }} />
@@ -60,10 +60,10 @@ export function SalesTrendChart({ data }: { data: TrendPoint[] }) {
                     </ResponsiveContainer>
                 </div>
                 <div>
-                    <p className="mb-2 text-xs font-medium text-gray-500 dark:text-[#B08A5E]">
+                    <p className="mb-2 text-xs font-medium text-gray-500 dark:text-text-hint">
                         {t("dashboard.charts.sales.montant")}
                     </p>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <ResponsiveContainer width="100%" height={200} initialDimension={{ width: 1, height: 1 }}>
                         <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={CHART_INK.grid.light} vertical={false} />
                             <XAxis dataKey="periode" tick={{ fontSize: 11, fill: CHART_INK.secondary.light }} tickLine={false} axisLine={{ stroke: CHART_INK.grid.light }} />

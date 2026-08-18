@@ -36,13 +36,13 @@ export function LignesDetailDialog({ numeroLot, lignes }: LignesDetailDialogProp
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="gap-2 rounded-[7px] border-[#C17A2B]/30 text-[#3D1C00] hover:bg-[#FAF0DC]"
+                    className="gap-2 rounded-sm border-[#C17A2B]/30 text-[#3D1C00] hover:bg-[#FAF0DC]"
                 >
                     <Eye className="h-3.5 w-3.5 text-[#C17A2B]" />
                     {t("bonAchat.voirDetail")} ({lignes.length})
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[600px] bg-white max-h-[80vh] overflow-y-auto">
+            <DialogContent className="rounded-lg sm:max-w-150 bg-white max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
                         <Scale className="h-5 w-5 text-[#C17A2B]" />

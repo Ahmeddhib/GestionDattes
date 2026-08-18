@@ -111,7 +111,7 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-[#2C1A00]">{t("users.title")}</h2>
+                        <h2 className="text-2xl font-bold text-text-primary">{t("users.title")}</h2>
                         <p className="text-gray-600 mt-1">{t("users.description")}</p>
                     </div>
                     <Button
@@ -150,17 +150,17 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b border-[#F0E0C0]">
-                                        <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                    <tr className="border-b border-border">
+                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                             {t("users.name")}
                                         </th>
-                                        <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                             {t("users.role")}
                                         </th>
-                                        <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                             {t("users.status")}
                                         </th>
-                                        <th className="text-right py-3 px-4 font-semibold text-[#2C1A00]">
+                                        <th className="text-right py-3 px-4 font-semibold text-text-primary">
                                             {t("common.actions")}
                                         </th>
                                     </tr>
@@ -169,13 +169,13 @@ export function UsersTable({ initialData, initialTotal, roles }: UsersTableProps
                                     {data.map((user) => (
                                         <tr
                                             key={user.id}
-                                            className="border-b border-[#F0E0C0] last:border-0 hover:bg-sand/30 transition-colors"
+                                            className="border-b border-border last:border-0 hover:bg-sand/30 transition-colors"
                                         >
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-3">
                                                     <Avatar name={user.name} size="md" />
                                                     <div>
-                                                        <div className="font-medium text-[#2C1A00]">
+                                                        <div className="font-medium text-text-primary">
                                                             {user.name}
                                                         </div>
                                                         <div className="text-sm text-gray-500">

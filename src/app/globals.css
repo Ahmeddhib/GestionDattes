@@ -88,14 +88,49 @@
   --foreground: #f8f1e4;
 }
 
+/* Palette du produit : plus neutre et lisible que le beige historique. */
+.erp-shell {
+  --background: #f8f5ef;
+  --foreground: #302417;
+  --card: #fffdf9;
+  --card-foreground: #302417;
+  --popover: #fffdf9;
+  --popover-foreground: #302417;
+  --secondary: #f5ead8;
+  --secondary-foreground: #8b551c;
+  --muted: #f5efe6;
+  --muted-foreground: #806e59;
+  --accent: #fff1d9;
+  --accent-foreground: #8b551c;
+  --border: #e5d7c5;
+  --input: #ddcdb8;
+}
+
+.dark .erp-shell {
+  --background: #0b0907;
+  --foreground: #f8f1e4;
+  --card: #17120d;
+  --card-foreground: #f8f1e4;
+  --popover: #17120d;
+  --popover-foreground: #f8f1e4;
+  --secondary: #2b1d10;
+  --secondary-foreground: #f0c77d;
+  --muted: #211810;
+  --muted-foreground: #aa9983;
+  --accent: #352313;
+  --accent-foreground: #f2d39a;
+  --border: #5b4027;
+  --input: #5b4027;
+}
+
 .dashboard-premium {
-  --dash-bg: #f6f1e8;
-  --dash-card: rgb(255 252 247 / 0.9);
-  --dash-border: rgb(177 137 86 / 0.32);
-  --dash-heading: #2f2317;
-  --dash-copy: #705f4c;
-  --dash-muted: #97836b;
-  --dash-kpi-shadow: 0 12px 30px rgb(85 53 19 / 0.08);
+  --dash-bg: #fbf7f1;
+  --dash-card: rgb(255 255 255 / 0.96);
+  --dash-border: #eadfd0;
+  --dash-heading: #2c1c0d;
+  --dash-copy: #695744;
+  --dash-muted: #8d7962;
+  --dash-kpi-shadow: 0 10px 25px rgb(83 48 12 / 0.065);
   background-color: var(--dash-bg) !important;
   color: var(--dash-heading);
 }
@@ -113,7 +148,7 @@
 .dashboard-premium .dashboard-card {
   border-color: var(--dash-border) !important;
   background-color: var(--dash-card) !important;
-  box-shadow: 0 18px 45px rgb(73 45 17 / 0.08);
+  box-shadow: 0 10px 30px rgb(73 45 17 / 0.055);
 }
 
 .dark .dashboard-premium .dashboard-card {
@@ -122,24 +157,40 @@
 
 /* Shell visuel partagé par toutes les pages ERP. */
 .erp-main {
-  background-color: #f6f1e8;
+  background-color: #f8f5ef;
   background-image:
-    linear-gradient(180deg, rgb(246 241 232 / 0.90), #f6f1e8 23rem),
-    url('/dashboard-date-palm-bg.png');
-  background-position: top right;
+    radial-gradient(circle at 85% -8%, rgb(206 156 89 / 0.10), transparent 29rem),
+    linear-gradient(180deg, #fbf8f3, #f8f5ef 34rem);
+  background-position: top center;
   background-repeat: no-repeat;
-  background-size: min(1500px, 100%) auto;
+  background-size: 100% 100%;
 }
 
 .dark .erp-main {
   background-color: #0b0907;
   background-image:
-    linear-gradient(180deg, rgb(11 9 7 / 0.84), #0b0907 24rem),
-    url('/dashboard-date-palm-bg.png');
+    radial-gradient(circle at 85% -8%, rgb(132 77 24 / 0.12), transparent 30rem),
+    linear-gradient(180deg, #100d09, #0b0907 34rem);
 }
 
 .erp-page .page-title {
   color: #342414;
+}
+
+.erp-page > :first-child:has(h1) [class~="bg-[#C17A2B]/10"] {
+  border: 1px solid #f0d6b2;
+  background-color: #fff2df !important;
+  box-shadow: 0 7px 18px rgb(159 91 23 / 0.08);
+}
+
+.erp-shell [class~="bg-[#FAF0DC]"] {
+  background-color: #f7efe3 !important;
+}
+
+.dark .erp-page > :first-child:has(h1) [class~="bg-[#C17A2B]/10"] {
+  border-color: rgb(193 122 43 / 0.28);
+  background-color: rgb(193 122 43 / 0.12) !important;
+  box-shadow: none;
 }
 
 .dark .erp-page .page-title {
@@ -156,9 +207,9 @@
   overflow: hidden;
   border: 1px solid rgb(177 137 86 / 0.24);
   border-radius: 1rem;
-  background-color: rgb(255 252 247 / 0.84);
+  background-color: rgb(255 253 249 / 0.96);
   background-image:
-    linear-gradient(90deg, rgb(255 252 247 / 0.96), rgb(255 252 247 / 0.76) 58%, rgb(255 252 247 / 0.22)),
+    linear-gradient(90deg, rgb(255 253 249 / 0.99), rgb(255 253 249 / 0.92) 58%, rgb(255 253 249 / 0.64)),
     url('/dashboard-date-palm-bg.png');
   background-position: center;
   background-size: cover;
@@ -178,7 +229,7 @@
 .erp-page > .grid > [class~="bg-white"] {
   border-radius: 1rem !important;
   border-color: rgb(177 137 86 / 0.24) !important;
-  background-color: rgb(255 252 247 / 0.90) !important;
+  background-color: #fffdf9 !important;
   box-shadow: 0 12px 32px rgb(83 52 20 / 0.055);
   backdrop-filter: blur(6px);
 }
@@ -192,7 +243,7 @@
 .erp-page > [class~="bg-white"][class~="border"] {
   border-radius: 1rem !important;
   border-color: rgb(177 137 86 / 0.24) !important;
-  background-color: rgb(255 252 247 / 0.90) !important;
+  background-color: #fffdf9 !important;
   box-shadow: 0 12px 34px rgb(83 52 20 / 0.055);
   backdrop-filter: blur(6px);
 }
@@ -207,7 +258,7 @@
 .erp-page :where(div, section, article)[class~="bg-white"][class~="border"][class~="rounded-lg"],
 .erp-page :where(div, section, article)[class~="bg-white"][class~="border"][class~="rounded-xl"] {
   border-color: rgb(177 137 86 / 0.22) !important;
-  background-color: rgb(255 252 247 / 0.88) !important;
+  background-color: #fffdf9 !important;
   box-shadow: 0 10px 28px rgb(83 52 20 / 0.045);
   backdrop-filter: blur(5px);
 }
@@ -251,8 +302,7 @@
 .dark .erp-shell [class~="bg-[#FAF0DC]/50"],
 .dark .erp-shell [class~="bg-[#FAF0DC]/60"],
 .dark .erp-shell [class~="bg-[#FAF3E8]"],
-.dark .erp-shell [class~="bg-[#FDF7EE]"],
-.dark .erp-shell [class~="bg-[#F0E0C0]"] {
+.dark .erp-shell [class~="bg-[#FDF7EE]"] {
   background-color: rgb(38 27 17 / 0.78) !important;
 }
 
@@ -298,7 +348,6 @@
 .dark .erp-shell [class~="text-gray-600"],
 .dark .erp-shell [class~="text-gray-500"],
 .dark .erp-shell [class~="text-[#7A5C3A]"],
-.dark .erp-shell [class~="text-[#B08A5E]"],
 .dark .erp-shell [class~="text-[#3D1C00]/60"],
 .dark .erp-shell [class~="text-[#3D1C00]/50"],
 .dark .erp-shell [class~="text-[#3D1C00]/40"] {
@@ -307,7 +356,6 @@
 
 .dark .erp-shell [class~="border-gray-300"],
 .dark .erp-shell [class~="border-gray-200"],
-.dark .erp-shell [class~="border-[#F0E0C0]"],
 .dark .erp-shell [class~="border-[#C17A2B]/20"] {
   border-color: rgb(107 75 41 / 0.55) !important;
 }

@@ -42,7 +42,7 @@ export function LivreurDialog({ livreur, open, onOpenChange, deleteMode = false 
 
     return <Dialog open={dialogOpen} onOpenChange={changeOpen}>
         {!livreur && <DialogTrigger asChild><Button className="bg-[#C17A2B] hover:bg-[#A0621F]"><Plus className="mr-2 h-4 w-4" />Nouveau livreur</Button></DialogTrigger>}
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-125">
             <DialogHeader><DialogTitle>{deleteMode ? "Supprimer le livreur" : isEdit ? "Modifier le livreur" : "Nouveau livreur"}</DialogTitle><DialogDescription>{deleteMode ? `Supprimer définitivement ${livreur?.nom} ?` : "Renseignez les informations du livreur."}</DialogDescription></DialogHeader>
             {deleteMode ? <DialogFooter><Button variant="outline" onClick={() => changeOpen(false)} disabled={loading}>Annuler</Button><Button variant="destructive" onClick={remove} disabled={loading}>Supprimer</Button></DialogFooter> :
                 <form className="space-y-4" onSubmit={submit}>

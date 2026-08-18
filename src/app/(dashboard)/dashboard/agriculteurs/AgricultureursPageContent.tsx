@@ -68,7 +68,7 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
 
             {/* Stats Cards */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("agriculteurs.total")}
                     </div>
@@ -76,7 +76,7 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
                         {agriculteurs.length}
                     </div>
                 </div>
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("agriculteurs.nbPalmiers")}
                     </div>
@@ -84,7 +84,7 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
                         {totalPalmiers.toLocaleString()}
                     </div>
                 </div>
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("agriculteurs.superficie")}
                     </div>
@@ -92,7 +92,7 @@ export function AgricultureursPageContent({ agriculteurs, regions }: Agriculture
                         {totalSuperficie.toFixed(1)}
                     </div>
                 </div>
-                <div className="rounded-[14px] border border-[#F0E0C0] bg-white p-6">
+                <div className="rounded-lg border border-border bg-white p-6">
                     <div className="text-sm font-medium text-[#3D1C00]/60">
                         {t("agriculteurs.production")}
                     </div>

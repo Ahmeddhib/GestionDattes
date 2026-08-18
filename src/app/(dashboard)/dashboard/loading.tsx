@@ -17,7 +17,7 @@ export default function DashboardLoading() {
                 className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_-10%,rgba(193,122,43,0.12),transparent_35%),linear-gradient(180deg,rgba(246,241,232,0.72),#f6f1e8_42%)] dark:bg-[radial-gradient(circle_at_48%_-10%,rgba(132,77,24,0.20),transparent_35%),linear-gradient(180deg,rgba(8,7,5,0.68),#0b0907_42%)]"
             />
 
-            <div className="relative mx-auto w-full max-w-[1800px] space-y-4 px-3 py-4 sm:px-5 lg:px-6 2xl:px-8">
+            <div className="relative mx-auto w-full max-w-450 space-y-4 px-3 py-4 sm:px-5 lg:px-6 2xl:px-8">
                 <div className="flex min-h-20 flex-col justify-between gap-4 lg:flex-row lg:items-center">
                     <div>
                         <div className="mb-3 h-7 w-56 animate-pulse rounded-lg bg-[#5c4027]/45" />

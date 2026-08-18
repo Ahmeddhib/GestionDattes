@@ -61,10 +61,10 @@ export function ActivityTrendChart({ data }: { data: TrendPoint[] }) {
     const { t } = useClientTranslations();
     const series: TranslatedSeries[] = SERIES.map((item) => ({ ...item, label: t(item.labelKey) }));
     return (
-        <section className="dashboard-card h-full min-h-[420px] rounded-2xl border border-[#6b4b29]/45 bg-[#14100c]/82 p-4 shadow-[0_20px_60px_rgba(0,0,0,.24)] backdrop-blur-md sm:p-5">
+        <section className="dashboard-card h-full min-h-105 rounded-2xl border border-[#6b4b29]/45 bg-[#14100c]/82 p-4 shadow-[0_20px_60px_rgba(0,0,0,.24)] backdrop-blur-md sm:p-5">
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#b97824]/45 bg-[#5a310b]/35 text-[#f0b548]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-200 bg-amber-50 text-amber-600 shadow-sm dark:border-[#b97824]/45 dark:bg-[#5a310b]/35 dark:text-[#f0b548] dark:shadow-none">
                         <Wheat className="h-5 w-5" />
                     </div>
                     <div>
@@ -83,9 +83,9 @@ export function ActivityTrendChart({ data }: { data: TrendPoint[] }) {
             </div>
 
             {data.length === 0 ? (
-                <div className="flex h-[320px] items-center justify-center text-sm text-[#8e806e]">{t("dashboard.empty.chart")}</div>
+                <div className="flex h-80 items-center justify-center text-sm text-[#8e806e]">{t("dashboard.empty.chart")}</div>
             ) : (
-                <ResponsiveContainer width="100%" height={330}>
+                <ResponsiveContainer width="100%" height={330} initialDimension={{ width: 1, height: 1 }}>
                     <ComposedChart data={data} margin={{ top: 10, right: 6, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="deliveryGlow" x1="0" y1="0" x2="0" y2="1">

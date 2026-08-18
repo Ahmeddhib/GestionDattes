@@ -44,7 +44,7 @@ export function AuditLogsTable({ initialData, initialTotal }: AuditLogsTableProp
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h2 className="text-2xl font-bold text-[#2C1A00]">Journal d'audit</h2>
+                <h2 className="text-2xl font-bold text-text-primary">Journal d'audit</h2>
                 <p className="text-gray-600 mt-1">
                     Historique de toutes les actions effectuées dans le système
                 </p>
@@ -62,17 +62,17 @@ export function AuditLogsTable({ initialData, initialTotal }: AuditLogsTableProp
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-[#F0E0C0]">
-                                    <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                <tr className="border-b border-border">
+                                    <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                         Utilisateur
                                     </th>
-                                    <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                    <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                         Action
                                     </th>
-                                    <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                    <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                         Description
                                     </th>
-                                    <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                    <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                         Date
                                     </th>
                                 </tr>
@@ -81,13 +81,13 @@ export function AuditLogsTable({ initialData, initialTotal }: AuditLogsTableProp
                                 {data.map((log) => (
                                     <tr
                                         key={log.id}
-                                        className="border-b border-[#F0E0C0] last:border-0 hover:bg-sand/30 transition-colors"
+                                        className="border-b border-border last:border-0 hover:bg-sand/30 transition-colors"
                                     >
                                         <td className="py-4 px-4">
                                             <div className="flex items-center gap-3">
                                                 <Avatar name={log.actor.name} size="sm" />
                                                 <div>
-                                                    <div className="font-medium text-[#2C1A00] text-sm">
+                                                    <div className="font-medium text-text-primary text-sm">
                                                         {log.actor.name}
                                                     </div>
                                                     <div className="text-xs text-gray-500">

@@ -86,7 +86,7 @@ export function UpdateRegionDialog({ region, open, onOpenChange }: UpdateRegionD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] bg-white border-[#F0E0C0] rounded-[14px]">
+            <DialogContent className="sm:max-w-125 bg-white border-border rounded-lg">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00]">{t("regions.updateDialog")}</DialogTitle>
                     <DialogDescription className="text-[#3D1C00]/60">
@@ -109,7 +109,7 @@ export function UpdateRegionDialog({ region, open, onOpenChange }: UpdateRegionD
                                             placeholder="Ex: Kebili"
                                             {...field}
                                             disabled={isLoading}
-                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -130,7 +130,7 @@ export function UpdateRegionDialog({ region, open, onOpenChange }: UpdateRegionD
                                             placeholder="Ex: KB"
                                             {...field}
                                             disabled={isLoading}
-                                            className="rounded-[7px] border-[#F0E0C0] focus:border-[#C17A2B] focus:ring-[#C17A2B]"
+                                            className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -144,14 +144,14 @@ export function UpdateRegionDialog({ region, open, onOpenChange }: UpdateRegionD
                                 variant="outline"
                                 onClick={() => onOpenChange(false)}
                                 disabled={isLoading}
-                                className="rounded-[9px] border-[#F0E0C0]"
+                                className="rounded-md border-border"
                             >
                                 {t("common.cancel")}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-[9px]"
+                                className="bg-[#C17A2B] hover:bg-[#A0621F] text-white rounded-md"
                             >
                                 {isLoading ? (
                                     <>

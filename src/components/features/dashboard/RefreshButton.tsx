@@ -30,7 +30,7 @@ export function RefreshButton() {
     return (
         <div className="flex items-center gap-3">
             {lastUpdated && (
-                <span className="text-xs text-gray-500 dark:text-[#B08A5E]">
+                <span className="text-xs text-gray-500 dark:text-text-hint">
                     {t("dashboard.refreshedAt", {
                         time: lastUpdated.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
                     })}
@@ -42,7 +42,7 @@ export function RefreshButton() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={isPending}
-                className="gap-2 rounded-md border-[#C17A2B]/30 text-[#3D1C00] dark:text-[#F5E6C8]"
+                className="gap-2 rounded-md border-[#C17A2B]/30 text-[#3D1C00] dark:text-dattes-100"
             >
                 <RefreshCw className={`h-4 w-4 ${isPending ? "animate-spin" : ""}`} />
                 {t("dashboard.refresh")}

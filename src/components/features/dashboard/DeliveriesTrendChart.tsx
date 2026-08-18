@@ -21,8 +21,8 @@ import type { TrendPoint } from "@/types/dashboard";
 function TrendTooltip({ active, payload, label }: TooltipContentProps) {
     if (!active || !payload?.length) return null;
     return (
-        <div className="rounded-md border border-[#F0E0C0] bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-[#5C2D00]">
-            <p className="mb-1 font-medium text-[#2C1A00] dark:text-[#F5E6C8]">{label}</p>
+        <div className="rounded-md border border-border bg-white p-3 text-sm shadow-md dark:bg-[#2A1800] dark:border-dattes-800">
+            <p className="mb-1 font-medium text-text-primary dark:text-dattes-100">{label}</p>
             {payload.map((entry) => (
                 <p key={String(entry.dataKey)} style={{ color: entry.color }}>
                     {entry.name}: {formatKg(Number(entry.value))}
@@ -43,7 +43,7 @@ export function DeliveriesTrendChart({ data }: { data: TrendPoint[] }) {
             isEmpty={data.length === 0}
             emptyMessage={t("dashboard.empty.chart")}
         >
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={260} initialDimension={{ width: 1, height: 1 }}>
                 <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_INK.grid.light} vertical={false} />
                     <XAxis

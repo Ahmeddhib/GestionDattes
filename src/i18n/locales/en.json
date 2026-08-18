@@ -469,7 +469,8 @@
         "stats": {
             "total": "Total orders",
             "montantTotal": "Total amount"
-        }
+        },
+        "dateCreation": "Created on"
     },
     "finance": {
         "bilan": {
@@ -679,7 +680,9 @@
             "nouvelEncaissement": "New collection",
             "historiqueEncaissements": "Collection history",
             "encaissementEnregistre": "Collection recorded successfully",
-            "lotSaison": "Lot {nom}"
+            "lotSaison": "Lot {nom}",
+            "searchPlaceholder": "Search a client, a lot, a type...",
+            "dateVente": "Sale date"
         },
         "depenses": {
             "title": "Other Expenses",
@@ -690,7 +693,8 @@
             "categorie": "Category",
             "montant": "Amount",
             "searchPlaceholder": "Search an expense...",
-            "deleteConfirm": "Are you sure you want to delete the expense"
+            "deleteConfirm": "Are you sure you want to delete the expense",
+            "dateDepense": "Expense date"
         },
         "encaissements": {
             "date": "Date",

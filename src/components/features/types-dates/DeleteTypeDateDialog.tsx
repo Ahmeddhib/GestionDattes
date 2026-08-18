@@ -51,12 +51,12 @@ export function DeleteTypeDateDialog({ typeDate }: DeleteTypeDateDialogProps) {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-[7px] text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="h-8 w-8 rounded-sm text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
                     <Trash2 className="h-4 w-4" />
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="rounded-[14px] bg-white">
+            <AlertDialogContent className="rounded-lg bg-white">
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-[#3D1C00]">
                         {t("typesDates.deleteDialog")}
@@ -69,13 +69,13 @@ export function DeleteTypeDateDialog({ typeDate }: DeleteTypeDateDialogProps) {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-[9px]" disabled={loading}>
+                    <AlertDialogCancel className="rounded-md" disabled={loading}>
                         {t("common.cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleDelete}
                         disabled={loading}
-                        className="rounded-[9px] bg-red-600 hover:bg-red-700"
+                        className="rounded-md bg-red-600 hover:bg-red-700"
                     >
                         {loading ? t("typesDates.deleting") : t("common.delete")}
                     </AlertDialogAction>

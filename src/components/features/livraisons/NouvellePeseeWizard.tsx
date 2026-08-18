@@ -243,12 +243,12 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2 rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]">
+                <Button className="gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F]">
                     <Plus className="h-4 w-4" />
                     {t("nouvellePesee.createNew")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[14px] sm:max-w-[760px] bg-white max-h-[90vh] overflow-y-auto">
+            <DialogContent className="rounded-lg sm:max-w-190 bg-white max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#3D1C00] flex items-center gap-2">
                         <Scale className="h-5 w-5 text-[#C17A2B]" />
@@ -266,7 +266,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                         <div className="space-y-2">
                             <Label className="text-[#3D1C00]">{t("livraisons.agriculteur")}</Label>
                             <Select value={agriculteurId} onValueChange={setAgriculteurId}>
-                                <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
                                     <SelectValue placeholder={t("livraisons.selectAgriculteur")} />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white">
@@ -284,13 +284,13 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                 type="date"
                                 value={dateLivraison}
                                 onChange={(e) => setDateLivraison(e.target.value)}
-                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                             />
                         </div>
                     </div>
 
                     {agriculteurId && !loadingPrets && pretsEnCours.length > 0 && (
-                        <div className="rounded-[7px] bg-amber-50 border border-amber-300 p-3 space-y-1.5">
+                        <div className="rounded-sm bg-amber-50 border border-amber-300 p-3 space-y-1.5">
                             <div className="flex items-center gap-2 text-sm font-medium text-amber-800">
                                 <PackageOpen className="h-4 w-4" />
                                 {t("pretsCaisses.pretEnCours")}
@@ -317,7 +317,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                 type="button"
                                 onClick={addLigne}
                                 size="sm"
-                                className="gap-1 rounded-[7px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                                className="gap-1 rounded-sm bg-[#C17A2B] hover:bg-[#A0621F]"
                             >
                                 <Plus className="h-3 w-3" />
                                 {t("nouvellePesee.addLigne")}
@@ -329,7 +329,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                             return (
                                 <div
                                     key={ligne.clientId}
-                                    className="rounded-[9px] border border-[#C17A2B]/20 p-3 space-y-3"
+                                    className="rounded-md border border-[#C17A2B]/20 p-3 space-y-3"
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 flex-1">
@@ -337,7 +337,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                 value={ligne.typeDateId}
                                                 onValueChange={(value) => updateLigne(ligne.clientId, { typeDateId: value })}
                                             >
-                                                <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
                                                     <SelectValue placeholder={t("livraisons.selectTypeDate")} />
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-white">
@@ -352,7 +352,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                 value={ligne.typeCaisseId}
                                                 onValueChange={(value) => updateLigne(ligne.clientId, { typeCaisseId: value })}
                                             >
-                                                <SelectTrigger className="rounded-[7px] border-[#C17A2B]/20 bg-white">
+                                                <SelectTrigger className="rounded-sm border-[#C17A2B]/20 bg-white">
                                                     <SelectValue placeholder={t("livraisons.selectTypeCaisse")} />
                                                 </SelectTrigger>
                                                 <SelectContent className="bg-white">
@@ -371,7 +371,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     updateLigne(ligne.clientId, { nombreCaisses: Number(e.target.value) || 0 })
                                                 }
                                                 placeholder={t("nouvellePesee.quantiteDeclaree")}
-                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             />
                                         </div>
                                         {lignes.length > 1 && (
@@ -380,7 +380,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => removeLigne(ligne.clientId)}
-                                                className="h-9 w-9 rounded-[7px] text-red-600 hover:bg-red-50 hover:text-red-700"
+                                                className="h-9 w-9 rounded-sm text-red-600 hover:bg-red-50 hover:text-red-700"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
@@ -400,7 +400,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     updateLigne(ligne.clientId, { poidsBrutTotal: parseFloat(e.target.value) || 0 })
                                                 }
                                                 placeholder={t("pesees.grossWeightLabel")}
-                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -416,12 +416,12 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     updateLigne(ligne.clientId, { prixKg: parseFloat(e.target.value) || 0 })
                                                 }
                                                 placeholder={t("nouvellePesee.prixKgLigne")}
-                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-2 rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
+                                    <div className="flex items-center justify-between gap-2 rounded-sm bg-[#FAF0DC] p-2 text-sm">
                                         <span className="text-[#3D1C00]/70">{t("pesees.poidsNetTotal")}:</span>
                                         <span className="font-semibold text-[#C17A2B]">
                                             {totals.poidsNetTotal.toFixed(2)} kg
@@ -443,7 +443,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                         quantiteAcceptee: e.target.value === "" ? null : parseFloat(e.target.value) || 0,
                                                     })
                                                 }
-                                                className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                                                className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                                             />
                                             {ligne.quantiteAcceptee !== null && (
                                                 <Button
@@ -451,7 +451,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => updateLigne(ligne.clientId, { quantiteAcceptee: null })}
-                                                    className="h-9 shrink-0 rounded-[7px] text-[#C17A2B] hover:bg-[#C17A2B]/10"
+                                                    className="h-9 shrink-0 rounded-sm text-[#C17A2B] hover:bg-[#C17A2B]/10"
                                                 >
                                                     {t("common.reset")}
                                                 </Button>
@@ -459,7 +459,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-2 rounded-[7px] bg-[#FAF0DC] p-2 text-sm">
+                                    <div className="flex items-center justify-between gap-2 rounded-sm bg-[#FAF0DC] p-2 text-sm">
                                         <span className="text-[#3D1C00]/70">{t("nouvellePesee.montantLigne")}:</span>
                                         <span className="font-semibold text-[#C17A2B]">
                                             {totals.montant.toFixed(2)}
@@ -474,7 +474,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                         )}
                     </div>
 
-                    <div className="rounded-[9px] bg-[#FAF0DC] border border-[#C17A2B] p-4 space-y-3">
+                    <div className="rounded-md bg-[#FAF0DC] border border-[#C17A2B] p-4 space-y-3">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-[#3D1C00]">
                                 {t("nouvellePesee.grandTotal")}
@@ -496,7 +496,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                     <div className="border-t pt-4">
                         <div className="space-y-2">
                             <Label className="text-[#3D1C00]">{t("nouvellePesee.montant")}</Label>
-                            <div className="rounded-[7px] border border-[#C17A2B]/20 bg-white px-3 py-2 text-sm font-semibold text-[#3D1C00]">
+                            <div className="rounded-sm border border-[#C17A2B]/20 bg-white px-3 py-2 text-sm font-semibold text-[#3D1C00]">
                                 {montant.toFixed(2)}
                             </div>
                         </div>
@@ -507,7 +507,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                         <Textarea
                             value={observations}
                             onChange={(e) => setObservations(e.target.value)}
-                            className="rounded-[7px] border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
+                            className="rounded-sm border-[#C17A2B]/20 focus:border-[#C17A2B] bg-white"
                         />
                     </div>
 
@@ -516,7 +516,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                             type="button"
                             variant="outline"
                             onClick={() => setOpen(false)}
-                            className="rounded-[9px]"
+                            className="rounded-md"
                             disabled={loading}
                         >
                             {t("common.cancel")}
@@ -524,7 +524,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="rounded-[9px] bg-[#C17A2B] hover:bg-[#A0621F]"
+                            className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
                         >
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {loading ? t("livraisons.creating") : t("common.create")}

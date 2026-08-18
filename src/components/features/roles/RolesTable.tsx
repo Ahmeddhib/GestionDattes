@@ -81,7 +81,7 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-[#2C1A00]">{t("roles.title")}</h2>
+                        <h2 className="text-2xl font-bold text-text-primary">{t("roles.title")}</h2>
                         <p className="text-gray-600 mt-1">{t("roles.description")}</p>
                     </div>
                     <Button
@@ -120,17 +120,17 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b border-[#F0E0C0]">
-                                        <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                    <tr className="border-b border-border">
+                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                             {t("roles.name")}
                                         </th>
-                                        <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                             {t("roles.description")}
                                         </th>
-                                        <th className="text-left py-3 px-4 font-semibold text-[#2C1A00]">
+                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
                                             {t("roles.users")}
                                         </th>
-                                        <th className="text-right py-3 px-4 font-semibold text-[#2C1A00]">
+                                        <th className="text-right py-3 px-4 font-semibold text-text-primary">
                                             {t("common.actions")}
                                         </th>
                                     </tr>
@@ -139,14 +139,14 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                                     {data.map((role) => (
                                         <tr
                                             key={role.id}
-                                            className="border-b border-[#F0E0C0] last:border-0 hover:bg-sand/30 transition-colors"
+                                            className="border-b border-border last:border-0 hover:bg-sand/30 transition-colors"
                                         >
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-[8px] bg-dattes-100 flex items-center justify-center">
                                                         <Shield className="w-5 h-5 text-dattes-600" />
                                                     </div>
-                                                    <span className="font-medium text-[#2C1A00]">
+                                                    <span className="font-medium text-text-primary">
                                                         {role.name}
                                                     </span>
                                                 </div>

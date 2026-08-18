@@ -102,7 +102,7 @@ export const createLivraisonsColumns = (
                 }
 
                 return (
-                    <div className="space-y-1 max-w-[280px]">
+                    <div className="space-y-1 max-w-70">
                         {caisses.map((caisse, index) => {
                             const totalKg = caisse.quantite * caisse.typeCaisse.poidsKg;
                             return (
