@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PAGINATION } from "@/constants/pagination";
+import { Prisma } from "@/generated/prisma";
 
 /**
  * Repository User (MULTI-TENANT)
@@ -7,14 +8,19 @@ import { PAGINATION } from "@/constants/pagination";
  * Les rôles sont gérés par TenantUser (rôle par Wakala).
  */
 export const userRepository = {
-    async findAll(options?: { page?: number; pageSize?: number; search?: string; active?: boolean }) {
+    async findAll(
+        options?: { page?: number; pageSize?: number; search?: string; active?: boolean },
+        tenantId?: string
+    ) {
         const page = options?.page || 1;
         const pageSize = Math.min(
             options?.pageSize || PAGINATION.DEFAULT_PAGE_SIZE,
             PAGINATION.MAX_PAGE_SIZE
         );
 
-        const where: any = {};
+        const where: Prisma.UserWhereInput = tenantId
+            ? { TenantUser: { some: { tenantId, active: true } } }
+            : {};
 
         if (options?.search) {
             where.OR = [
@@ -39,9 +45,11 @@ export const userRepository = {
                     updatedAt: true,
                     // Rôles via TenantUser
                     TenantUser: {
+                        where: tenantId ? { tenantId, active: true } : undefined,
                         select: {
                             Role: {
                                 select: {
+                                    id: true,
                                     name: true,
                                 },
                             },

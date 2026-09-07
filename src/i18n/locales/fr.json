@@ -288,7 +288,8 @@
         "creating": "Création...",
         "updating": "Mise à jour...",
         "activated": "Utilisateur activé",
-        "deactivated": "Utilisateur désactivé"
+        "deactivated": "Utilisateur désactivé",
+        "defaultUserRole": "Rôle simple attribué automatiquement"
     },
     "roles": {
         "title": "Rôles",
@@ -760,7 +761,23 @@
         "role": "Rôle",
         "signInMethod": "Méthode de connexion",
         "password": "E-mail et mot de passe",
-        "memberSince": "Membre depuis"
+        "memberSince": "Membre depuis",
+        "changePassword": "Modifier le mot de passe",
+        "passwordHint": "Disponible uniquement pour les comptes e-mail et mot de passe.",
+        "currentPassword": "Mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "currentPasswordPlaceholder": "Saisissez votre mot de passe actuel",
+        "newPasswordPlaceholder": "Saisissez au moins 8 caractères",
+        "confirmPasswordPlaceholder": "Répétez le nouveau mot de passe",
+        "passwordMinimum": "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+        "passwordsMatch": "Les mots de passe correspondent.",
+        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+        "showPassword": "Afficher le mot de passe",
+        "hidePassword": "Masquer le mot de passe",
+        "updatePassword": "Mettre à jour le mot de passe",
+        "savingPassword": "Mise à jour...",
+        "passwordUpdated": "Mot de passe mis à jour"
     },
     "messages": {
         "success": {

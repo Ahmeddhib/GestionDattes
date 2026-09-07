@@ -17,6 +17,20 @@ export async function createWakalaAction(data: { name: string; code: string }) {
             return { error: "Non authentifié" };
         }
 
+        // Créer une Wakala est une opération d'administration. Un nouveau
+        // compte Google sans rattachement ne peut pas s'auto-promouvoir.
+        const adminMembership = await prisma.tenantUser.findFirst({
+            where: {
+                userId: session.user.id,
+                active: true,
+                Role: { name: "ADMIN" },
+            },
+            select: { id: true },
+        });
+        if (!adminMembership) {
+            return { error: "Seul un administrateur peut créer une nouvelle Wakala" };
+        }
+
         // Validation
         if (!data.name || data.name.trim().length < 3) {
             return { error: "Le nom doit contenir au moins 3 caractères" };

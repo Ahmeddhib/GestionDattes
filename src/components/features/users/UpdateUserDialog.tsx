@@ -186,15 +186,15 @@ export function UpdateUserDialog({ user, roles, open, onClose }: UpdateUserDialo
                                     <FormLabel className="text-foreground">{t("users.role")} *</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
-                                        defaultValue={field.value}
+                                        value={field.value}
                                         disabled={isLoading}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]">
+                                            <SelectTrigger className="w-full rounded-sm border-border bg-background text-foreground focus:border-[#C17A2B] focus:ring-[#C17A2B]">
                                                 <SelectValue placeholder={t("users.selectRole")} />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent className="border-border bg-popover text-popover-foreground">
                                             {roles.map((role) => (
                                                 <SelectItem key={role.id} value={role.id}>
                                                     {role.name}

@@ -104,12 +104,9 @@ export function LoginForm({ googleEnabled, authError }: { googleEnabled: boolean
                             }
                             setLoading(true);
                             setError(null);
-                            void googleSignInAction().catch(() => {
-                                setLoading(false);
-                                const message = "La connexion Google a échoué. Veuillez réessayer.";
-                                setError(message);
-                                toast.error(message);
-                            });
+                            // Une redirection Auth.js est transportée comme une réponse spéciale
+                            // de Server Action : ne pas la convertir en fausse erreur utilisateur.
+                            void googleSignInAction();
                         }}
                         className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-[#dfccb3] bg-card px-4 text-sm font-semibold text-[#3d2a16] shadow-sm transition hover:border-[#c17a2b] hover:bg-[#fdfaf5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c17a2b]/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#5b4027] dark:bg-[#211810] dark:text-[#f8f1e4] dark:hover:border-[#c17a2b] dark:hover:bg-[#2b1d10]"
                     >

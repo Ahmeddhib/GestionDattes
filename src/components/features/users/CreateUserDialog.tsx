@@ -19,13 +19,6 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -51,7 +44,7 @@ export function CreateUserDialog({ roles, open, onClose }: CreateUserDialogProps
             name: "",
             email: "",
             password: "",
-            roleId: roles[0]?.id || "",
+            roleId: roles.find((role) => role.name === "USER")?.id || "USER",
         },
     });
 
@@ -152,34 +145,12 @@ export function CreateUserDialog({ roles, open, onClose }: CreateUserDialogProps
                             )}
                         />
 
-                        <FormField
-                            control={form.control}
-                            name="roleId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-foreground">{t("users.role")} *</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                        disabled={isLoading}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="rounded-sm border-border focus:border-[#C17A2B] focus:ring-[#C17A2B]">
-                                                <SelectValue placeholder={t("users.selectRole")} />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {roles.map((role) => (
-                                                <SelectItem key={role.id} value={role.id}>
-                                                    {role.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="rounded-xl border border-border bg-muted/45 p-3">
+                            <p className="text-sm font-medium text-foreground">{t("users.role")}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                USER · {t("users.defaultUserRole")}
+                            </p>
+                        </div>
 
                         <div className="flex justify-end gap-3 pt-4">
                             <Button

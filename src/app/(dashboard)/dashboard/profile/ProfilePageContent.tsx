@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AtSign, BadgeCheck, Building2, CalendarDays, KeyRound, Save, ShieldCheck, UserRound } from "lucide-react";
+import { AtSign, BadgeCheck, Building2, CalendarDays, Eye, EyeOff, KeyRound, LockKeyhole, Save, ShieldCheck, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { updateProfileAction } from "@/actions/profile/update-profile.action";
 import { Avatar } from "@/components/shared/Avatar";
 import { Button } from "@/components/shared/Button";
 import { Input } from "@/components/ui/input";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { changePasswordAction } from "@/actions/profile/change-password.action";
 
 interface ProfileUser {
     name: string;
@@ -25,6 +26,15 @@ export function ProfilePageContent({ user }: { user: ProfileUser }) {
     const { t, locale } = useClientTranslations();
     const [name, setName] = useState(user.name);
     const [isPending, startTransition] = useTransition();
+    const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    const [visiblePasswords, setVisiblePasswords] = useState({ currentPassword: false, newPassword: false, confirmPassword: false });
+    const [isChangingPassword, startPasswordTransition] = useTransition();
+    const passwordConfirmationStarted = passwords.confirmPassword.length > 0;
+    const passwordsMatch = passwords.newPassword === passwords.confirmPassword;
+    const passwordFormValid =
+        passwords.currentPassword.length > 0 &&
+        passwords.newPassword.length >= 8 &&
+        passwordsMatch;
 
     const save = (event: React.FormEvent) => {
         event.preventDefault();
@@ -35,6 +45,19 @@ export function ProfilePageContent({ user }: { user: ProfileUser }) {
                 return;
             }
             toast.success(t("profile.updated"));
+        });
+    };
+
+    const changePassword = (event: React.FormEvent) => {
+        event.preventDefault();
+        startPasswordTransition(async () => {
+            const result = await changePasswordAction(passwords);
+            if (result.error) {
+                toast.error(result.error);
+                return;
+            }
+            setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            toast.success(t("profile.passwordUpdated"));
         });
     };
 
@@ -99,6 +122,65 @@ export function ProfilePageContent({ user }: { user: ProfileUser }) {
                     </dl>
                 </aside>
             </div>
+
+            {user.provider === "credentials" && (
+                <form onSubmit={changePassword} className="dashboard-card mt-5 rounded-2xl border p-5 sm:p-6">
+                    <div className="mb-6 flex items-center gap-3">
+                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fff1d9] text-[#b36b1d] dark:bg-[#352313] dark:text-[#f0b654]"><LockKeyhole className="h-5 w-5" /></span>
+                        <div><h2 className="font-semibold">{t("profile.changePassword")}</h2><p className="text-xs text-muted-foreground">{t("profile.passwordHint")}</p></div>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-3">
+                        {([
+                            ["currentPassword", t("profile.currentPassword"), t("profile.currentPasswordPlaceholder")],
+                            ["newPassword", t("profile.newPassword"), t("profile.newPasswordPlaceholder")],
+                            ["confirmPassword", t("profile.confirmPassword"), t("profile.confirmPasswordPlaceholder")],
+                        ] as const).map(([field, label, placeholder]) => (
+                            <label key={field} className="space-y-2 text-sm font-medium">
+                                <span>{label}</span>
+                                <div className="relative">
+                                    <Input
+                                        type={visiblePasswords[field] ? "text" : "password"}
+                                        placeholder={placeholder}
+                                        value={passwords[field]}
+                                        onChange={(event) => setPasswords((current) => ({ ...current, [field]: event.target.value }))}
+                                        minLength={field === "currentPassword" ? 1 : 8}
+                                        maxLength={128}
+                                        autoComplete={field === "currentPassword" ? "current-password" : "new-password"}
+                                        aria-invalid={field === "confirmPassword" && passwordConfirmationStarted && !passwordsMatch}
+                                        className="pe-11"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setVisiblePasswords((current) => ({ ...current, [field]: !current[field] }))}
+                                        className="absolute end-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-[#f4e7d4] hover:text-[#9b5d1b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c17a2b] dark:hover:bg-[#352313] dark:hover:text-[#f0b654]"
+                                        aria-label={visiblePasswords[field] ? t("profile.hidePassword") : t("profile.showPassword")}
+                                        title={visiblePasswords[field] ? t("profile.hidePassword") : t("profile.showPassword")}
+                                    >
+                                        {visiblePasswords[field] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                                {field === "newPassword" && (
+                                    <span className={`block text-xs font-normal ${passwords.newPassword.length > 0 && passwords.newPassword.length < 8 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
+                                        {t("profile.passwordMinimum")}
+                                    </span>
+                                )}
+                                {field === "confirmPassword" && passwordConfirmationStarted && (
+                                    <span className={`block text-xs font-medium ${passwordsMatch ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`} aria-live="polite">
+                                        {passwordsMatch ? t("profile.passwordsMatch") : t("profile.passwordsDoNotMatch")}
+                                    </span>
+                                )}
+                            </label>
+                        ))}
+                    </div>
+                    <div className="mt-6 flex justify-end border-t border-border pt-5">
+                        <Button type="submit" disabled={isChangingPassword || !passwordFormValid}>
+                            <KeyRound className="h-4 w-4" />
+                            {isChangingPassword ? t("profile.savingPassword") : t("profile.updatePassword")}
+                        </Button>
+                    </div>
+                </form>
+            )}
         </div>
     );
 }

@@ -288,7 +288,8 @@
         "creating": "Creating...",
         "updating": "Updating...",
         "activated": "User activated",
-        "deactivated": "User deactivated"
+        "deactivated": "User deactivated",
+        "defaultUserRole": "Simple user role assigned automatically"
     },
     "roles": {
         "title": "Roles",
@@ -760,7 +761,23 @@
         "role": "Role",
         "signInMethod": "Sign-in method",
         "password": "Email and password",
-        "memberSince": "Member since"
+        "memberSince": "Member since",
+        "changePassword": "Change password",
+        "passwordHint": "Available only for email and password accounts.",
+        "currentPassword": "Current password",
+        "newPassword": "New password",
+        "confirmPassword": "Confirm password",
+        "currentPasswordPlaceholder": "Enter your current password",
+        "newPasswordPlaceholder": "Enter at least 8 characters",
+        "confirmPasswordPlaceholder": "Repeat the new password",
+        "passwordMinimum": "The new password must contain at least 8 characters.",
+        "passwordsMatch": "Passwords match.",
+        "passwordsDoNotMatch": "Passwords do not match.",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "updatePassword": "Update password",
+        "savingPassword": "Updating...",
+        "passwordUpdated": "Password updated"
     },
     "messages": {
         "success": {

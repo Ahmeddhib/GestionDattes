@@ -288,7 +288,8 @@
         "creating": "جارٍ الإنشاء...",
         "updating": "جارٍ التحديث...",
         "activated": "تم تفعيل المستخدم",
-        "deactivated": "تم إلغاء تفعيل المستخدم"
+        "deactivated": "تم إلغاء تفعيل المستخدم",
+        "defaultUserRole": "يتم تعيين دور المستخدم البسيط تلقائيًا"
     },
     "roles": {
         "title": "الأدوار",
@@ -760,7 +761,23 @@
         "role": "الدور",
         "signInMethod": "طريقة تسجيل الدخول",
         "password": "البريد وكلمة المرور",
-        "memberSince": "عضو منذ"
+        "memberSince": "عضو منذ",
+        "changePassword": "تغيير كلمة المرور",
+        "passwordHint": "متاح فقط لحسابات البريد الإلكتروني وكلمة المرور.",
+        "currentPassword": "كلمة المرور الحالية",
+        "newPassword": "كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "currentPasswordPlaceholder": "أدخل كلمة المرور الحالية",
+        "newPasswordPlaceholder": "أدخل 8 أحرف على الأقل",
+        "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور الجديدة",
+        "passwordMinimum": "يجب أن تتكون كلمة المرور الجديدة من 8 أحرف على الأقل.",
+        "passwordsMatch": "كلمتا المرور متطابقتان.",
+        "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
+        "showPassword": "إظهار كلمة المرور",
+        "hidePassword": "إخفاء كلمة المرور",
+        "updatePassword": "تحديث كلمة المرور",
+        "savingPassword": "جارٍ التحديث...",
+        "passwordUpdated": "تم تحديث كلمة المرور"
     },
     "messages": {
         "success": {

@@ -36,6 +36,14 @@ export function estErreurConnexionBase(valeur: unknown, profondeur = 0): boolean
 
     const objet = valeur as Record<string, unknown>;
 
+    const message = objet.message;
+    if (
+        typeof message === "string" &&
+        /error connecting to database|fetch failed|connection timed out|network error/i.test(message)
+    ) {
+        return true;
+    }
+
     const code = objet.code ?? objet.errorCode;
     if (typeof code === "string" && CODES_CONNEXION.has(code)) return true;
 

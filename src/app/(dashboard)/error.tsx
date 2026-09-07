@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AlertTriangle, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
+import { estErreurConnexionBase } from "@/lib/db-error";
 
 /**
  * Frontière d'erreur du tableau de bord.
@@ -38,10 +39,11 @@ export default function DashboardError({
     // En production Next masque le message des Server Components ; et un objet
     // non-`Error` se sérialise en « [object Object] ». Dans les deux cas, un
     // message générique traduit vaut mieux qu'un texte inutile.
-    const message =
-        error.message && !error.message.includes("[object") && error.message !== "Erreur inconnue"
-            ? error.message
-            : t("messages.error.generic");
+    const message = estErreurConnexionBase(error)
+        ? t("messages.error.database")
+        : error.message && !error.message.includes("[object") && error.message !== "Erreur inconnue"
+          ? error.message
+          : t("messages.error.generic");
 
     return (
         <div className="flex min-h-[60vh] items-center justify-center p-6">

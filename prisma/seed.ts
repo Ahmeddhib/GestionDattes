@@ -12,6 +12,7 @@ async function main() {
     console.log("\n📋 Création des rôles...");
     const roles = [
         { name: "ADMIN", description: "Administrateur avec tous les droits" },
+        { name: "USER", description: "Utilisateur simple avec accès en lecture" },
         { name: "AGENT", description: "Agent de réception des livraisons" },
         { name: "LABORANTIN", description: "Laborantin avec accès aux analyses" },
         { name: "RESPONSABLE_STOCK", description: "Responsable de la gestion des stocks" },

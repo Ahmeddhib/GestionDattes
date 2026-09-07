@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Building2, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Building2, ChevronRight, Loader2, LogOut, Plus } from "lucide-react";
 import { selectWakalaAction } from "@/actions/auth/select-wakala.action";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createWakalaAction } from "@/actions/auth/create-wakala.action";
 import { toast } from "sonner";
+import { logoutAction } from "@/actions/auth/logout.action";
 
 interface Tenant {
     id: string;
@@ -23,13 +24,14 @@ interface Tenant {
 
 interface Props {
     tenants: Tenant[];
+    canCreateWakala: boolean;
     user: {
         name: string;
         email: string;
     };
 }
 
-export default function WakalaSelectorContent({ tenants, user }: Props) {
+export default function WakalaSelectorContent({ tenants, user, canCreateWakala }: Props) {
     const router = useRouter();
     const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
@@ -41,6 +43,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
     const [createError, setCreateError] = useState<string | null>(null);
     const [wakalaName, setWakalaName] = useState("");
     const [wakalaCode, setWakalaCode] = useState("");
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const handleSelectWakala = async (tenantId: string) => {
         setSelectedTenantId(tenantId);
@@ -60,7 +63,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                     router.push("/dashboard");
                     router.refresh();
                 }
-            } catch (err) {
+            } catch {
                 setError("Une erreur est survenue");
                 toast.error("Une erreur est survenue lors de la sélection");
                 setSelectedTenantId(null);
@@ -89,7 +92,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                 // Recharger la page pour afficher la nouvelle wakala dans la liste
                 router.refresh();
             }
-        } catch (err) {
+        } catch {
             setCreateError("Une erreur est survenue lors de la création");
             toast.error("Une erreur est survenue lors de la création");
         } finally {
@@ -126,10 +129,10 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                     {tenants.length === 0 ? (
                         <div className="text-center py-8">
                             <p className="text-muted-foreground mb-6">
-                                Vous n'êtes associé à aucune Wakala pour le moment.
+                                Vous n’êtes associé à aucune Wakala pour le moment.
                             </p>
                             <p className="text-sm text-muted-foreground mb-4">
-                                Créez votre première Wakala pour commencer ou attendez qu'un administrateur vous invite.
+                                Attendez qu’un administrateur vous ajoute à une Wakala avec le rôle USER.
                             </p>
                         </div>
                     ) : (
@@ -139,11 +142,11 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 onClick={() => handleSelectWakala(tenant.id)}
                                 disabled={isPending}
                                 className={`
-                                    w-full flex items-center justify-between p-5 rounded-md
+                                    group w-full flex items-center justify-between p-5 rounded-md text-start
                                     border-2 transition-all duration-200
                                     ${selectedTenantId === tenant.id
-                                        ? "border-[#C17A2B] bg-[#C17A2B]/5"
-                                        : "border-gray-200 hover:border-[#C17A2B]/50 hover:bg-gray-50"
+                                        ? "border-[#C17A2B] bg-[#fff7eb] dark:bg-[#2b1d10]"
+                                        : "border-border bg-card hover:border-[#C17A2B]/60 hover:bg-[#fff7eb] dark:hover:bg-[#2b1d10]"
                                     }
                                     ${isPending ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                                 `}
@@ -153,13 +156,13 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                         <Building2 className="w-6 h-6 text-[#C17A2B]" />
                                     </div>
                                     <div className="text-left">
-                                        <h3 className="font-semibold text-foreground text-lg">
+                                        <h3 className="text-lg font-semibold text-[#2b1b0d] group-hover:text-[#2b1b0d] dark:text-[#f8f1e4] dark:group-hover:text-[#f8f1e4]">
                                             {tenant.name}
                                         </h3>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-sm text-[#806e59] group-hover:text-[#695642] dark:text-[#bfae99] dark:group-hover:text-[#ddccb8]">
                                             Code: <span className="font-mono">{tenant.code}</span>
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-xs text-[#9a6a32] group-hover:text-[#7d4f1e] dark:text-[#d19a57] dark:group-hover:text-[#efb86e]">
                                             Rôle: {tenant.role.name}
                                         </p>
                                     </div>
@@ -168,7 +171,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                     {isPending && selectedTenantId === tenant.id ? (
                                         <Loader2 className="w-5 h-5 text-[#C17A2B] animate-spin" />
                                     ) : (
-                                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                                        <ChevronRight className="h-5 w-5 text-[#9a8064] transition-transform group-hover:translate-x-0.5 group-hover:text-[#c17a2b] dark:text-[#ad9a84]" />
                                     )}
                                 </div>
                             </button>
@@ -176,14 +179,14 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                     )}
 
                     {/* Create New Wakala Button */}
-                    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                    {canCreateWakala && <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                         <DialogTrigger asChild>
                             <button
-                                className="w-full flex items-center justify-center gap-3 p-5 rounded-md border-2 border-dashed border-gray-300 hover:border-[#C17A2B] hover:bg-gray-50 transition-all duration-200"
+                                className="group w-full flex items-center justify-center gap-3 rounded-md border-2 border-dashed border-border bg-card p-5 transition-all duration-200 hover:border-[#C17A2B] hover:bg-[#fff7eb] dark:hover:bg-[#2b1d10]"
                                 disabled={isPending}
                             >
                                 <Plus className="w-5 h-5 text-[#C17A2B]" />
-                                <span className="font-semibold text-foreground">
+                                <span className="font-semibold text-[#2b1b0d] group-hover:text-[#7d4f1e] dark:text-[#f8f1e4] dark:group-hover:text-[#efb86e]">
                                     Créer une nouvelle Wakala
                                 </span>
                             </button>
@@ -193,7 +196,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 <DialogHeader>
                                     <DialogTitle className="text-foreground">Créer une nouvelle Wakala</DialogTitle>
                                     <DialogDescription>
-                                        Remplissez les informations pour créer votre Wakala. Vous serez automatiquement l'administrateur.
+                                        Remplissez les informations pour créer votre Wakala. Vous serez automatiquement l’administrateur.
                                     </DialogDescription>
                                 </DialogHeader>
 
@@ -262,7 +265,7 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                                 </DialogFooter>
                             </form>
                         </DialogContent>
-                    </Dialog>
+                    </Dialog>}
                 </div>
 
                 {/* Info Footer */}
@@ -270,6 +273,22 @@ export default function WakalaSelectorContent({ tenants, user }: Props) {
                     <p className="text-xs text-muted-foreground text-center">
                         Vous pouvez changer de Wakala à tout moment depuis le menu principal
                     </p>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isLoggingOut}
+                        className="mt-4 w-full gap-2"
+                        onClick={async () => {
+                            setIsLoggingOut(true);
+                            sessionStorage.removeItem("selectedWakalaId");
+                            sessionStorage.removeItem("selectedWakalaCode");
+                            sessionStorage.removeItem("userEmail");
+                            await logoutAction();
+                        }}
+                    >
+                        {isLoggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                        {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+                    </Button>
                 </div>
             </div>
         </div>
