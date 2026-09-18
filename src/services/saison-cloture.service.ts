@@ -75,8 +75,8 @@ async function computeBlockers(
     client: DbClient = prisma
 ): Promise<ChecklistItem[]> {
     const [sansPesee, sansBonAchat] = await Promise.all([
-        client.livraison.count({ where: { tenantId, saisonId, Pesee: { none: {} } } }),
-        client.livraison.count({ where: { tenantId, saisonId, BonAchat: null } }),
+        client.livraison.count({ where: { tenantId, saisonId, statut: "VALIDEE", Pesee: { none: {} } } }),
+        client.livraison.count({ where: { tenantId, saisonId, statut: "VALIDEE", BonAchat: null } }),
     ]);
 
     const items: ChecklistItem[] = [];

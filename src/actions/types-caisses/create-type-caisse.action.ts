@@ -19,7 +19,6 @@ export async function createTypeCaisseAction(formData: FormData) {
         const rawData = {
             nom: formData.get("nom"),
             poidsKg: Number(formData.get("poidsKg")),
-            stockDisponible: formData.get("stockDisponible") ? Number(formData.get("stockDisponible")) : 0,
         };
 
         const parsed = createTypeCaisseSchema.safeParse(rawData);

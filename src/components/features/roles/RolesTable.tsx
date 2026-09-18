@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
@@ -32,25 +32,15 @@ interface RolesTableProps {
 export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
     const { t } = useClientTranslations();
     const router = useRouter();
-    const [data, setData] = useState(initialData);
-    const [total, setTotal] = useState(initialTotal);
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState("");
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | null>(null);
     const [deletingRole, setDeletingRole] = useState<Role | null>(null);
 
-    // Synchroniser avec les props quand elles changent (après router.refresh())
-    useEffect(() => {
-        setData(initialData);
-        setTotal(initialTotal);
-    }, [initialData, initialTotal]);
-
     const pageSize = 10;
-    const totalPages = Math.ceil(total / pageSize);
+    const totalPages = Math.ceil(initialTotal / pageSize);
 
-    const handleSearch = (value: string) => {
-        setSearchTerm(value);
+    const handleSearch = () => {
         setCurrentPage(1);
         // TODO: Refetch data with search filter
     };
@@ -79,14 +69,20 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
         <>
             <div className="space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-2xl font-bold text-text-primary">{t("roles.title")}</h2>
-                        <p className="text-muted-foreground mt-1">{t("roles.description")}</p>
+                <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card/90 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#efd6b5] bg-[#fff1dc] text-[#b46b1d] dark:border-[#6b4b29]/60 dark:bg-[#352313] dark:text-[#f0b654]">
+                            <Shield className="h-5 w-5" />
+                        </span>
+                        <div className="min-w-0">
+                            <h2 className="text-2xl font-bold text-foreground">{t("roles.title")}</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">{t("roles.description")}</p>
+                        </div>
                     </div>
                     <Button
                         variant="primary"
                         onClick={() => setShowCreateDialog(true)}
+                        className="w-full sm:w-auto"
                     >
                         <Plus className="w-4 h-4 mr-2" />
                         {t("roles.createNew")}
@@ -100,8 +96,8 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                 />
 
                 {/* Table */}
-                <Card>
-                    {data.length === 0 ? (
+                <Card className="overflow-hidden !p-0">
+                    {initialData.length === 0 ? (
                         <EmptyState
                             icon={<Shield className="w-12 h-12" />}
                             title={t("roles.noResults")}
@@ -119,34 +115,34 @@ export function RolesTable({ initialData, initialTotal }: RolesTableProps) {
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead>
+                                <thead className="bg-muted/55">
                                     <tr className="border-b border-border">
-                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
+                                        <th className="px-4 py-3 text-start font-semibold text-muted-foreground">
                                             {t("roles.name")}
                                         </th>
-                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
+                                        <th className="px-4 py-3 text-start font-semibold text-muted-foreground">
                                             {t("roles.description")}
                                         </th>
-                                        <th className="text-left py-3 px-4 font-semibold text-text-primary">
+                                        <th className="px-4 py-3 text-start font-semibold text-muted-foreground">
                                             {t("roles.users")}
                                         </th>
-                                        <th className="text-right py-3 px-4 font-semibold text-text-primary">
+                                        <th className="px-4 py-3 text-end font-semibold text-muted-foreground">
                                             {t("common.actions")}
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {data.map((role) => (
+                                    {initialData.map((role) => (
                                         <tr
                                             key={role.id}
-                                            className="border-b border-border last:border-0 hover:bg-sand/30 transition-colors"
+                                            className="border-b border-border/70 transition-colors last:border-0 hover:bg-muted/45"
                                         >
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-[8px] bg-dattes-100 flex items-center justify-center">
-                                                        <Shield className="w-5 h-5 text-dattes-600" />
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#efd6b5] bg-[#fff1dc] dark:border-[#6b4b29]/60 dark:bg-[#352313]">
+                                                        <Shield className="h-5 w-5 text-[#b46b1d] dark:text-[#f0b654]" />
                                                     </div>
-                                                    <span className="font-medium text-text-primary">
+                                                    <span className="font-medium text-foreground">
                                                         {role.name}
                                                     </span>
                                                 </div>

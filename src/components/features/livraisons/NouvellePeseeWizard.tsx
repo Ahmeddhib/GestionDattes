@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, PackageOpen, Scale, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
     DialogContent,
@@ -77,9 +78,20 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
     const [observations, setObservations] = useState("");
 
     const [pretsEnCours, setPretsEnCours] = useState<
-        { id: string; typeCaisse?: { nom: string }; nombreRestant: number }[]
+        {
+            id: string;
+            typeCaisse?: { nom: string };
+            nombreRestant: number;
+            sources?: Array<{
+                id: string;
+                proprietaire: "WAKALA" | "CLIENT";
+                clientProprietaire?: { id: string; nom: string } | null;
+                nombreRestant: number;
+            }>;
+        }[]
     >([]);
     const [loadingPrets, setLoadingPrets] = useState(false);
+    const pretsRequestId = useRef(0);
 
     async function loadData() {
         const [agriResult, datesResult, caissesResult] = await Promise.all([
@@ -99,28 +111,27 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
         setObservations("");
     }
 
-    useEffect(() => {
-        if (open) {
-            loadData();
-            resetForm();
-        }
-    }, [open]);
-
-    useEffect(() => {
-        let cancelled = false;
+    async function handleAgriculteurChange(value: string) {
+        setAgriculteurId(value);
+        const requestId = ++pretsRequestId.current;
         setLoadingPrets(true);
-        const request = agriculteurId
-            ? getPretsEnCoursAgriculteurAction(agriculteurId)
-            : Promise.resolve({ success: true as const, data: [] as typeof pretsEnCours });
-        request.then((result) => {
-            if (cancelled) return;
-            setPretsEnCours(result.success ? result.data || [] : []);
+        const result = await getPretsEnCoursAgriculteurAction(value);
+        if (requestId !== pretsRequestId.current) return;
+        setPretsEnCours(result.success ? result.data || [] : []);
+        setLoadingPrets(false);
+    }
+
+    function handleOpenChange(value: boolean) {
+        setOpen(value);
+        if (value) {
+            resetForm();
+            setPretsEnCours([]);
+            void loadData();
+        } else {
+            pretsRequestId.current += 1;
             setLoadingPrets(false);
-        });
-        return () => {
-            cancelled = true;
-        };
-    }, [agriculteurId]);
+        }
+    }
 
     function tareFor(typeCaisseId: string) {
         return typesCaisses.find((tc) => tc.id === typeCaisseId)?.poidsKg ?? 0;
@@ -241,7 +252,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button className="gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F]">
                     <Plus className="h-4 w-4" />
@@ -265,7 +276,7 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                             <Label className="text-foreground">{t("livraisons.agriculteur")}</Label>
-                            <Select value={agriculteurId} onValueChange={setAgriculteurId}>
+                            <Select value={agriculteurId} onValueChange={(value) => void handleAgriculteurChange(value)}>
                                 <SelectTrigger className="rounded-sm border-border bg-card">
                                     <SelectValue placeholder={t("livraisons.selectAgriculteur")} />
                                 </SelectTrigger>
@@ -290,18 +301,32 @@ export function NouvellePeseeWizard({ saisonActive }: { saisonActive?: SaisonAct
                     </div>
 
                     {agriculteurId && !loadingPrets && pretsEnCours.length > 0 && (
-                        <div className="rounded-sm bg-amber-50 border border-amber-300 p-3 space-y-1.5">
-                            <div className="flex items-center gap-2 text-sm font-medium text-amber-800">
+                        <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700/70 dark:bg-amber-950/25">
+                            <div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
                                 <PackageOpen className="h-4 w-4" />
                                 {t("pretsCaisses.pretEnCours")}
                             </div>
-                            <ul className="space-y-1">
+                            <ul className="space-y-2">
                                 {pretsEnCours.map((pret) => (
-                                    <li key={pret.id} className="flex justify-between text-sm text-amber-900">
-                                        <span>{pret.typeCaisse?.nom}</span>
-                                        <span className="font-semibold">
-                                            {pret.nombreRestant} {t("pretsCaisses.nombreRestant")}
-                                        </span>
+                                    <li key={pret.id} className="rounded-sm border border-amber-200 bg-white/65 p-2 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-black/20 dark:text-amber-100">
+                                        <div className="flex flex-wrap justify-between gap-2">
+                                            <span className="font-medium">{pret.typeCaisse?.nom}</span>
+                                            <span className="font-semibold">
+                                                {pret.nombreRestant} {t("pretsCaisses.nombreRestant")}
+                                            </span>
+                                        </div>
+                                        {!!pret.sources?.length && (
+                                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                                {pret.sources.map((source) => (
+                                                    <Badge key={source.id} variant="outline" className="border-amber-300 bg-amber-100/70 text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100">
+                                                        {source.proprietaire === "WAKALA"
+                                                            ? t("caisseStock.wakala")
+                                                            : source.clientProprietaire?.nom ?? t("caisseStock.client")}
+                                                        {" · "}{source.nombreRestant}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        )}
                                     </li>
                                 ))}
                             </ul>

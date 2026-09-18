@@ -2,6 +2,8 @@ import { typeCaisseRepository } from "@/repositories/type-caisse.repository";
 import { auditService } from "@/services/audit.service";
 import { requirePermission } from "@/lib/permissions";
 import type { CreateTypeCaisseInput, UpdateTypeCaisseInput } from "@/validators/type-caisse.validator";
+import type { Prisma } from "@/generated/prisma";
+import { prisma } from "@/lib/prisma";
 
 /**
  * Service de gestion des types de caisses (MULTI-TENANT)
@@ -13,13 +15,13 @@ export const typeCaisseService = {
      * Récupérer tous les types de caisses (du tenant)
      * Permission: Tous les utilisateurs authentifiés peuvent voir les types de caisses
      */
-    async getAll(tenantId: string, userId: string) {
+    async getAll(tenantId: string) {
         await requirePermission("type-caisse:read");
 
         const typesCaisses = await typeCaisseRepository.findAll(tenantId);
 
         // Transformer les données pour le format attendu par le composant
-        return typesCaisses.map((type: any) => ({
+        return typesCaisses.map((type) => ({
             ...type,
             _count: {
                 livraisons: type._count?.LivraisonTypeCaisse || 0,
@@ -58,25 +60,24 @@ export const typeCaisseService = {
             throw new Error("Un type de caisse avec ce nom existe déjà dans cette Wakala");
         }
 
-        const typeCaisse = await typeCaisseRepository.create(tenantId, {
-            nom: data.nom,
-            poidsKg: data.poidsKg,
-            stockDisponible: data.stockDisponible ?? 0,
-        });
-
-        // Audit
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "CREATE_TYPE_CAISSE",
-            targetId: typeCaisse.id,
-            description: `Type de caisse créé: ${typeCaisse.nom} (${typeCaisse.poidsKg} kg, stock: ${typeCaisse.stockDisponible})`,
-            details: {
-                nom: typeCaisse.nom,
-                poidsKg: typeCaisse.poidsKg,
-                stockDisponible: typeCaisse.stockDisponible,
-            },
-        });
+        const typeCaisse = await prisma.$transaction(async (tx) => {
+            const cree = await typeCaisseRepository.create(tenantId, {
+                nom: data.nom,
+                poidsKg: data.poidsKg,
+            }, tx);
+            await auditService.log({
+                tenantId,
+                actorId: userId,
+                action: "CREATE_TYPE_CAISSE",
+                targetId: cree.id,
+                description: `Type de caisse créé: ${cree.nom} (${cree.poidsKg} kg)`,
+                details: {
+                    nom: cree.nom,
+                    poidsKg: cree.poidsKg,
+                },
+            }, tx);
+            return cree;
+        }, { timeout: 20_000, maxWait: 10_000 });
 
         return typeCaisse;
     },
@@ -101,26 +102,25 @@ export const typeCaisseService = {
             }
         }
 
-        const updateData: any = {};
+        const updateData: Prisma.TypeCaisseUpdateInput = {};
         if (data.nom !== undefined) updateData.nom = data.nom;
         if (data.poidsKg !== undefined) updateData.poidsKg = data.poidsKg;
-        if (data.stockDisponible !== undefined) updateData.stockDisponible = data.stockDisponible;
 
-        const typeCaisse = await typeCaisseRepository.update(tenantId, data.id, updateData);
-
-        // Audit
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "UPDATE_TYPE_CAISSE",
-            targetId: typeCaisse.id,
-            description: `Type de caisse mis à jour: ${typeCaisse.nom}`,
-            details: {
-                nom: typeCaisse.nom,
-                poidsKg: typeCaisse.poidsKg,
-                stockDisponible: typeCaisse.stockDisponible,
-            },
-        });
+        const typeCaisse = await prisma.$transaction(async (tx) => {
+            const misAJour = await typeCaisseRepository.update(tenantId, data.id, updateData, tx);
+            await auditService.log({
+                tenantId,
+                actorId: userId,
+                action: "UPDATE_TYPE_CAISSE",
+                targetId: misAJour.id,
+                description: `Type de caisse mis à jour: ${misAJour.nom}`,
+                details: {
+                    nom: misAJour.nom,
+                    poidsKg: misAJour.poidsKg,
+                },
+            }, tx);
+            return misAJour;
+        }, { timeout: 20_000, maxWait: 10_000 });
 
         return typeCaisse;
     },

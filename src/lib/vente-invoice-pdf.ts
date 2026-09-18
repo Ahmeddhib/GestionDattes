@@ -23,6 +23,18 @@ export type VenteForInvoice = {
         TypeDate: { nom: string };
         Livraison: { numeroLot: string };
     };
+    Caisses?: Array<{
+        quantite: number;
+        proprietaire: "WAKALA" | "CLIENT";
+        TypeCaisse: { nom: string };
+        ClientProprietaire?: { nom: string } | null;
+    }>;
+    SituationCaissesClient?: Array<{
+        typeCaisse: string;
+        apportees: number;
+        sortiesVente: number;
+        solde: number;
+    }>;
 };
 
 const TIMBRE_FISCAL = 1;
@@ -127,8 +139,47 @@ async function buildVenteInvoiceDoc(vente: VenteForInvoice, branding?: PdfBrandi
         },
     });
 
-    const tableEnd = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 140;
-    const totalsTop = Math.max(tableEnd + 50, 205);
+    let tableEnd = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 140;
+    if (vente.Caisses && vente.Caisses.length > 0) {
+        autoTable(doc, {
+            startY: tableEnd + 10,
+            margin: { left: 14, right: 14 },
+            head: [["CAISSES", "QUANTITÉ", "PROPRIÉTAIRE"]],
+            body: vente.Caisses.map((caisse) => [
+                caisse.TypeCaisse.nom,
+                caisse.quantite.toString(),
+                caisse.proprietaire === "WAKALA"
+                    ? "Wakala"
+                    : caisse.ClientProprietaire?.nom ?? "Client",
+            ]),
+            theme: "grid",
+            styles: { font: "helvetica", fontSize: 9, textColor: DARK, lineColor: [220, 210, 195] },
+            headStyles: { fillColor: GREEN, textColor: [255, 255, 255], fontStyle: "bold" },
+        });
+        tableEnd = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? tableEnd;
+    }
+    if (vente.SituationCaissesClient && vente.SituationCaissesClient.length > 0) {
+        autoTable(doc, {
+            startY: tableEnd + 8,
+            margin: { left: 14, right: 14 },
+            head: [[`SITUATION CAISSES — ${vente.Client.nom}`, "APPORTÉES", "SORTIES VENTE", "SOLDE"]],
+            body: vente.SituationCaissesClient.map((situation) => [
+                situation.typeCaisse,
+                situation.apportees.toString(),
+                situation.sortiesVente.toString(),
+                situation.solde.toString(),
+            ]),
+            theme: "grid",
+            styles: { font: "helvetica", fontSize: 8.5, textColor: DARK, lineColor: [220, 210, 195] },
+            headStyles: { fillColor: [193, 122, 43], textColor: [255, 255, 255], fontStyle: "bold" },
+        });
+        tableEnd = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? tableEnd;
+    }
+    let totalsTop = Math.max(tableEnd + 30, 205);
+    if (totalsTop > 245) {
+        doc.addPage();
+        totalsTop = 40;
+    }
     doc.setDrawColor(70, 70, 70);
     doc.setLineWidth(0.3);
     doc.line(14, totalsTop - 8, pageWidth - 14, totalsTop - 8);

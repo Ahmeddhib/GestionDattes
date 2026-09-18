@@ -21,7 +21,6 @@ type TypeCaisse = {
     id: string;
     nom: string;
     poidsKg: number;
-    stockDisponible?: number;
 };
 
 type UpdateTypeCaisseDialogProps = {
@@ -98,21 +97,6 @@ export function UpdateTypeCaisseDialog({ typeCaisse }: UpdateTypeCaisseDialogPro
                             min="0.01"
                             defaultValue={typeCaisse.poidsKg}
                             placeholder={t("typesCaisses.poidsPlaceholder")}
-                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="stockDisponible" className="text-foreground">
-                            {t("typesCaisses.stockDisponible")}
-                        </Label>
-                        <Input
-                            id="stockDisponible"
-                            name="stockDisponible"
-                            type="number"
-                            min="0"
-                            defaultValue={typeCaisse.stockDisponible}
-                            placeholder="Quantité en stock"
                             className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
                         />
                     </div>

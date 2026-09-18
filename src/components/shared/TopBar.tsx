@@ -77,7 +77,7 @@ export function TopBar({ user }: TopBarProps) {
         "/dashboard/agriculteurs": "nav.agriculteurs",
         "/dashboard/types-caisses": "nav.typesCaisses",
         "/dashboard/types-dates": "nav.typesDates",
-        "/dashboard/livraisons": "nav.livraisons",
+        "/dashboard/livraisons": "nav.receptionDattes",
         "/dashboard/stock-caisses": "nav.stockCaisses",
         "/dashboard/profile": "nav.profile",
     };

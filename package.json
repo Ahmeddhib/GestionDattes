@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
+    "test": "bun test",
+    "test:integration:stock-caisses": "bun scripts/run-stock-caisses-integration.ts",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate"

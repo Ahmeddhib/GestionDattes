@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
+import { annulerRetoursPesee } from "@/services/pret-caisse.service";
+import { auditService } from "@/services/audit.service";
 
 /**
  * Suppression d'une livraison et de tout ce qu'elle a engendré.
@@ -104,6 +106,17 @@ async function annulerRetoursCaisses(
                 },
             });
 
+            const source = await tx.pretCaisseSource.findFirst({
+                where: { tenantId, pretCaisseId: pret.id, quantiteRetournee: { gt: 0 } },
+                orderBy: { createdAt: "desc" },
+            });
+            if (source) {
+                await tx.pretCaisseSource.update({
+                    where: { id: source.id },
+                    data: { quantiteRetournee: { decrement: Math.min(reprise, source.quantiteRetournee) } },
+                });
+            }
+
             restant -= reprise;
         }
 
@@ -113,10 +126,11 @@ async function annulerRetoursCaisses(
 
     // Les caisses ne sont finalement pas revenues : elles ressortent du stock.
     for (const [typeCaisseId, nombre] of annuleParType) {
-        await tx.typeCaisse.updateMany({
-            where: { id: typeCaisseId, tenantId },
-            data: { stockDisponible: { decrement: nombre }, updatedAt: new Date() },
+        const resultat = await tx.stockCaisseWakala.updateMany({
+            where: { typeCaisseId, tenantId, quantite: { gte: nombre } },
+            data: { quantite: { decrement: nombre } },
         });
+        if (resultat.count !== 1) throw new Error("Stock Wakala insuffisant pour annuler le retour historique");
     }
 
     return annuleParType;
@@ -130,9 +144,11 @@ async function annulerRetoursCaisses(
  * `PeseeCaisse` et `LivraisonTypeCaisse` sont supprimées automatiquement par
  * la base (`onDelete: Cascade`).
  */
-export async function supprimerLivraisonEnCascade(
+export async function annulerLivraisonAvecCompensation(
     tenantId: string,
-    livraisonId: string
+    livraisonId: string,
+    userId: string,
+    motifAnnulation: string
 ) {
     return prisma.$transaction(async (tx) => {
         // Revérifié DANS la transaction : entre l'affichage de la confirmation
@@ -148,16 +164,32 @@ export async function supprimerLivraisonEnCascade(
                 id: true,
                 numeroLot: true,
                 agriculteurId: true,
-                Pesee: { select: { typeCaisseId: true, caissesRetournees: true } },
+                statut: true,
+                Agriculteur: { select: { nom: true, prenom: true } },
+                Pesee: { select: { id: true, typeCaisseId: true, caissesRetournees: true } },
             },
         });
         if (!livraison) {
             throw new Error("Livraison introuvable");
         }
+        if (livraison.statut === "ANNULEE") {
+            throw new Error("Cette réception de dattes est déjà annulée");
+        }
 
         const caissesParType = new Map<string, number>();
+        const caissesExactes = new Map<string, number>();
         for (const p of livraison.Pesee) {
             if (p.caissesRetournees <= 0) continue;
+            const mouvementsAnnules = await annulerRetoursPesee(tx, { tenantId, userId, peseeId: p.id });
+            if (mouvementsAnnules.length > 0) {
+                for (const mouvement of mouvementsAnnules) {
+                    caissesExactes.set(
+                        mouvement.typeCaisseId,
+                        (caissesExactes.get(mouvement.typeCaisseId) ?? 0) + mouvement.quantite
+                    );
+                }
+                continue;
+            }
             caissesParType.set(
                 p.typeCaisseId,
                 (caissesParType.get(p.typeCaisseId) ?? 0) + p.caissesRetournees
@@ -169,6 +201,9 @@ export async function supprimerLivraisonEnCascade(
             livraison.agriculteurId,
             caissesParType
         );
+        for (const [typeCaisseId, nombre] of caissesExactes) {
+            caissesAnnulees.set(typeCaisseId, (caissesAnnulees.get(typeCaisseId) ?? 0) + nombre);
+        }
 
         await tx.bonAchat.deleteMany({ where: { livraisonId, tenantId } });
         await tx.stockDate.deleteMany({ where: { livraisonId, tenantId } });
@@ -182,11 +217,38 @@ export async function supprimerLivraisonEnCascade(
             data: { livraisonId: null },
         });
 
-        await tx.livraison.delete({ where: { id: livraisonId } });
+        await tx.livraison.update({
+            where: { id: livraisonId },
+            data: {
+                statut: "ANNULEE",
+                annuleParId: userId,
+                annuleeLe: new Date(),
+                motifAnnulation,
+                updatedAt: new Date(),
+            },
+        });
+
+        await auditService.log({
+            tenantId,
+            actorId: userId,
+            action: "CANCEL_LIVRAISON",
+            targetId: livraisonId,
+            description: `Réception de dattes annulée: ${livraison.numeroLot}`,
+            details: {
+                numeroLot: livraison.numeroLot,
+                agriculteur: `${livraison.Agriculteur.nom} ${livraison.Agriculteur.prenom}`,
+                motifAnnulation,
+                peseesConservees: livraison.Pesee.length,
+                caissesRetireesDuStock: Array.from(caissesAnnulees, ([typeCaisseId, nombre]) => ({
+                    typeCaisseId,
+                    nombre,
+                })),
+            },
+        }, tx);
 
         return {
             numeroLot: livraison.numeroLot,
-            peseesSupprimees: livraison.Pesee.length,
+            peseesConservees: livraison.Pesee.length,
             caissesRetireesDuStock: Array.from(caissesAnnulees, ([typeCaisseId, nombre]) => ({
                 typeCaisseId,
                 nombre,
@@ -194,3 +256,6 @@ export async function supprimerLivraisonEnCascade(
         };
     }, { timeout: 20000, maxWait: 10000 });
 }
+
+/** @deprecated Utiliser `annulerLivraisonAvecCompensation`. */
+export const supprimerLivraisonEnCascade = annulerLivraisonAvecCompensation;

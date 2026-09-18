@@ -46,7 +46,7 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
                 router.refresh();
                 onClose();
             }
-        } catch (error) {
+        } catch {
             toast.error(t("messages.error.generic"));
         } finally {
             setLoading(false);
@@ -58,18 +58,18 @@ export function DeleteRoleDialog({ role, open, onClose }: DeleteRoleDialogProps)
             <AlertDialogContent className="bg-card border-border rounded-lg">
                 <AlertDialogHeader>
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 rounded-md bg-red-100 flex items-center justify-center">
-                            <AlertTriangle className="w-6 h-6 text-red-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-red-100 dark:bg-red-950/45">
+                            <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-300" />
                         </div>
-                        <AlertDialogTitle className="text-xl font-bold text-text-primary">
+                        <AlertDialogTitle className="text-xl font-bold text-foreground">
                             {t("roles.deleteDialog")}
                         </AlertDialogTitle>
                     </div>
-                    <AlertDialogDescription className="text-muted-foreground bg-card border border-amber-500 rounded-sm p-4 mt-4">
-                        <p className="text-sm text-amber-800 mb-2">
+                    <AlertDialogDescription className="mt-4 rounded-sm border border-amber-400/70 bg-amber-50/80 p-4 text-muted-foreground dark:border-amber-700/60 dark:bg-amber-950/30">
+                        <p className="mb-2 text-sm text-amber-900 dark:text-amber-200">
                             ⚠️ {t("roles.deleteWarning", { name: role.name })}
                         </p>
-                        <p className="text-sm text-amber-800">
+                        <p className="text-sm text-amber-900 dark:text-amber-200">
                             {t("roles.deleteIrreversible")}
                         </p>
                     </AlertDialogDescription>

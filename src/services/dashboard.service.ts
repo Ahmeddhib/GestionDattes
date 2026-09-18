@@ -371,7 +371,7 @@ export const dashboardService = {
             tasks.push(
                 (async () => {
                     const rows = await prisma.livraison.findMany({
-                        where: { tenantId },
+                        where: { tenantId, statut: "VALIDEE" },
                         orderBy: { createdAt: "desc" },
                         take: 5,
                         select: {

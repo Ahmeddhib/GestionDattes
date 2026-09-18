@@ -140,6 +140,11 @@ package "Referentiels" {
     +poidsKg : Float
     +stockDisponible : Int
   }
+  note right of TypeCaisse
+    stockDisponible est un champ historique.
+    Les soldes operationnels sont portes par
+    StockCaisseWakala et StockCaisseClient.
+  end note
 }
 
 ' ---------------------------------------------------------------
@@ -205,6 +210,14 @@ package "Reception et controle qualite" {
     +dateLivraison : DateTime
     +quantiteLivree : Float
     +quantiteAcceptee : Float
+    +statut : StatutLivraison
+    +annuleeLe : DateTime?
+    +motifAnnulation : String?
+  }
+
+  enum StatutLivraison {
+    VALIDEE
+    ANNULEE
   }
 
   class LivraisonTypeCaisse {
@@ -256,6 +269,31 @@ package "Reception et controle qualite" {
 ' ---------------------------------------------------------------
 package "Caisses consignees" {
 
+  class StockCaisseWakala {
+    +id : String
+    +quantite : Int <<>= 0>>
+  }
+
+  class StockCaisseClient {
+    +id : String
+    +quantite : Int <<>= 0>>
+  }
+
+  class ReceptionCaisses {
+    +id : String
+    +numero : String
+    +date : DateTime
+    +matriculeCamion : String
+    +chauffeur : String
+    +statut : StatutReceptionCaisses
+    +motifAnnulation : String
+  }
+
+  class ReceptionCaissesLigne {
+    +id : String
+    +quantite : Int <<> 0>>
+  }
+
   class PretCaisse {
     +id : String
     +nombrePrete : Int
@@ -263,6 +301,54 @@ package "Caisses consignees" {
     +statut : StatutPret
     +datePret : DateTime
     +dateRetour : DateTime
+  }
+
+  class PretCaisseSource {
+    +id : String
+    +proprietaire : ProprietaireCaisse
+    +quantite : Int
+    +quantiteRetournee : Int
+  }
+
+  class VenteCaisse {
+    +id : String
+    +proprietaire : ProprietaireCaisse
+    +quantite : Int
+  }
+
+  class MouvementCaisse <<ledger immuable>> {
+    +id : String
+    +proprietaire : ProprietaireCaisse
+    +type : TypeMouvementCaisse
+    +direction : DirectionMouvementCaisse
+    +quantite : Int
+    +reference : String
+    +createdAt : DateTime
+  }
+
+  enum ProprietaireCaisse {
+    WAKALA
+    CLIENT
+  }
+
+  enum DirectionMouvementCaisse {
+    ENTREE
+    SORTIE
+  }
+
+  enum TypeMouvementCaisse {
+    RECEPTION_CLIENT
+    ANNULATION_RECEPTION
+    SORTIE_VENTE
+    PRET_AGRICULTEUR
+    RETOUR_AGRICULTEUR
+    ANNULATION_RETOUR_AGRICULTEUR
+    AJUSTEMENT
+  }
+
+  enum StatutReceptionCaisses {
+    VALIDEE
+    ANNULEE
   }
 
   enum StatutPret {
@@ -398,6 +484,7 @@ User "0..1" -- "0..*" Saison : cloture >
 Agriculteur "1" -- "0..*" Livraison
 Saison "1" -- "0..*" Livraison
 Livraison "1" *-- "0..*" LivraisonTypeCaisse
+Livraison ..> StatutLivraison
 LivraisonTypeCaisse "0..*" -- "1" TypeCaisse
 LivraisonTypeCaisse "0..*" -- "1" TypeDate
 Livraison "1" *-- "0..*" Pesee
@@ -409,12 +496,33 @@ Livraison "1" -- "0..*" Echantillon
 Echantillon "1" -- "0..*" Analyse
 
 ' -- Caisses
+Tenant "1" -- "0..*" StockCaisseWakala
+Tenant "1" -- "0..*" StockCaisseClient
+TypeCaisse "1" -- "0..1" StockCaisseWakala
+TypeCaisse "1" -- "0..*" StockCaisseClient
+Client "1" -- "0..*" StockCaisseClient : proprietaire >
+Client "1" -- "0..*" ReceptionCaisses : apporte >
+ReceptionCaisses "1" *-- "1..*" ReceptionCaissesLigne
+ReceptionCaissesLigne "0..*" -- "1" TypeCaisse
+ReceptionCaisses ..> StatutReceptionCaisses
 Agriculteur "1" -- "0..*" PretCaisse
 TypeCaisse "1" -- "0..*" PretCaisse
 Livraison "0..1" -- "0..*" PretCaisse
 Livreur "0..1" -- "0..*" PretCaisse
 Saison "1" -- "0..*" PretCaisse
 PretCaisse ..> StatutPret
+PretCaisse "1" *-- "1..*" PretCaisseSource : consomme >
+PretCaisseSource "0..*" -- "1" TypeCaisse
+PretCaisseSource "0..*" -- "0..1" Client : proprietaire >
+PretCaisseSource ..> ProprietaireCaisse
+MouvementCaisse "0..*" -- "1" TypeCaisse
+MouvementCaisse "0..*" -- "0..1" Client : proprietaire >
+MouvementCaisse "0..*" -- "0..1" ReceptionCaisses
+MouvementCaisse "0..*" -- "0..1" PretCaisse
+MouvementCaisse "0..*" -- "0..1" Pesee
+MouvementCaisse ..> ProprietaireCaisse
+MouvementCaisse ..> DirectionMouvementCaisse
+MouvementCaisse ..> TypeMouvementCaisse
 
 ' -- Achat
 Livraison "1" -- "0..1" BonAchat
@@ -435,6 +543,11 @@ StockDate "1" -- "0..*" Vente
 Client "1" -- "0..*" Vente
 Saison "1" -- "0..*" Vente : transaction >
 Vente "1" -- "0..*" EncaissementClient
+Vente "1" *-- "0..*" VenteCaisse : consomme >
+VenteCaisse "0..*" -- "1" TypeCaisse
+VenteCaisse "0..*" -- "0..1" Client : proprietaire >
+VenteCaisse ..> ProprietaireCaisse
+MouvementCaisse "0..*" -- "0..1" Vente
 Saison "1" -- "0..*" EncaissementClient
 Vente ..> StatutVente
 

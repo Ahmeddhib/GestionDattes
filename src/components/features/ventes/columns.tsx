@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Edit, ReceiptText } from "lucide-react";
+import { Boxes, Edit, ReceiptText } from "lucide-react";
 import { RecordEncaissementDialog } from "./RecordEncaissementDialog";
 import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
 import { EncaissementsHistoryDialog } from "./EncaissementsHistoryDialog";
@@ -39,6 +39,18 @@ export type Vente = {
         Saison: { id: string; nom: string };
     };
     Saison: { id: string; nom: string } | null;
+    Caisses?: Array<{
+        quantite: number;
+        proprietaire: "WAKALA" | "CLIENT";
+        TypeCaisse: { nom: string };
+        ClientProprietaire?: { nom: string } | null;
+    }>;
+    SituationCaissesClient?: Array<{
+        typeCaisse: string;
+        apportees: number;
+        sortiesVente: number;
+        solde: number;
+    }>;
 };
 
 const STATUT_CONFIG: Record<string, { labelKey: string; className: string }> = {
@@ -79,6 +91,34 @@ export const createVentesColumns = (
                             !!row.original.Saison && sd.saisonOrigineId !== row.original.Saison.id
                         }
                     />
+                </div>
+            );
+        },
+    },
+    {
+        id: "caisses",
+        header: t("caisseStock.usedCrates"),
+        cell: ({ row }) => {
+            const caisses = row.original.Caisses ?? [];
+            if (caisses.length === 0) return <span className="text-muted-foreground">—</span>;
+
+            return (
+                <div className="min-w-44 space-y-1.5">
+                    {caisses.map((caisse, index) => (
+                        <div key={`${caisse.TypeCaisse.nom}-${index}`} className="flex items-start gap-1.5 text-xs">
+                            <Boxes className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#C17A2B]" />
+                            <span>
+                                <span className="font-semibold text-foreground">
+                                    {caisse.quantite} × {caisse.TypeCaisse.nom}
+                                </span>
+                                <span className="block text-muted-foreground">
+                                    {caisse.proprietaire === "WAKALA"
+                                        ? t("caisseStock.wakala")
+                                        : caisse.ClientProprietaire?.nom ?? t("caisseStock.client")}
+                                </span>
+                            </span>
+                        </div>
+                    ))}
                 </div>
             );
         },

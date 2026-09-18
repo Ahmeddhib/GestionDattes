@@ -86,7 +86,7 @@ export function Sidebar({ user, onNavigate, className = "" }: SidebarProps) {
                 },
                 {
                     href: "/dashboard/livraisons",
-                    label: t("nav.livraisons"),
+                    label: t("nav.receptionDattes"),
                     icon: Truck,
                 },
                 {

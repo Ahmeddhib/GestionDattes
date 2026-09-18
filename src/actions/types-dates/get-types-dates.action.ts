@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { typeDateService } from "@/services/type-date.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
+import { unstable_rethrow } from "next/navigation";
 
 /**
  * Action pour récupérer tous les types de dattes (du tenant actuel)
@@ -19,6 +20,7 @@ export async function getTypesDatesAction() {
 
         return { success: true, data: typesDates };
     } catch (error) {
+        unstable_rethrow(error);
         console.error("❌ getTypesDatesAction error:", error);
         return {
             success: false,

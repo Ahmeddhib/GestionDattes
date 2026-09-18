@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 /**
  * Action pour supprimer une livraison
  */
-export async function deleteLivraisonAction(id: string) {
+export async function cancelLivraisonAction(id: string, motifAnnulation: string) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -17,7 +17,7 @@ export async function deleteLivraisonAction(id: string) {
         }
 
         const tenantId = await getTenantId();
-        await livraisonService.delete(tenantId, session.user.id, id);
+        await livraisonService.cancel(tenantId, session.user.id, id, motifAnnulation);
 
         revalidatePath("/dashboard/livraisons");
         revalidatePath("/dashboard");
@@ -30,4 +30,9 @@ export async function deleteLivraisonAction(id: string) {
             error: await resolveActionErrorMessage(error),
         };
     }
+}
+
+/** Compatibilité avec les anciens appels : l'opération reste une annulation tracée. */
+export async function deleteLivraisonAction(id: string) {
+    return cancelLivraisonAction(id, "Annulation demandée par l'utilisateur");
 }

@@ -12,6 +12,8 @@ import { requirePermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma";
 import { assertSaisonOuverte } from "@/lib/saison-guard";
+import { annulerRetoursPesee, retournerSourcesPret } from "@/services/pret-caisse.service";
+import { repartirRetoursFifo } from "@/lib/caisse-stock-domain";
 import {
     buildCreatePeseeSchema,
     buildUpdatePeseeSchema,
@@ -28,11 +30,14 @@ import {
 async function assertLivraisonSaisonOuverte(tenantId: string, livraisonId: string) {
     const livraison = await prisma.livraison.findFirst({
         where: { id: livraisonId, tenantId },
-        select: { saisonId: true },
+        select: { saisonId: true, statut: true },
     });
 
     if (!livraison) {
         throw new Error("Livraison introuvable dans cette Wakala");
+    }
+    if (livraison.statut === "ANNULEE") {
+        throw new Error("Une réception annulée ne peut plus être modifiée");
     }
 
     await assertSaisonOuverte(tenantId, livraison.saisonId);
@@ -303,42 +308,52 @@ export async function syncLivraisonWithPesees(
 export async function retournerCaissesAutomatiquement(
     tx: Prisma.TransactionClient,
     tenantId: string,
+    userId: string,
     agriculteurId: string,
     typeCaisseId: string,
     nombreCaissesPesees: number,
-    numeroLot: string
+    numeroLot: string,
+    peseeId?: string
 ) {
-    const pretEnCours = await pretCaisseRepository.findEnCoursByAgriculteurEtType(
-        agriculteurId,
-        typeCaisseId,
-        tenantId,
-        tx
-    );
+    if (nombreCaissesPesees <= 0) return 0;
 
-    // Retourne le nombre RÉELLEMENT remis au stock — souvent 0, quand
-    // l'agriculteur n'a aucun prêt ouvert pour ce type de caisse. L'appelant
-    // le consigne sur la pesée pour pouvoir l'annuler exactement.
-    if (!pretEnCours) return 0;
+    // Une même pesée peut solder plusieurs prêts anciens. Le FIFO garantit que
+    // les caisses sont rendues sur les prêts dans leur ordre chronologique.
+    const pretsEnCours = await tx.pretCaisse.findMany({
+        where: {
+            tenantId,
+            agriculteurId,
+            typeCaisseId,
+            statut: { in: ["EN_COURS", "INCOMPLET"] },
+        },
+        orderBy: [{ datePreT: "asc" }, { createdAt: "asc" }],
+        select: { id: true, nombrePrete: true, nombreRetourne: true },
+    });
 
-    const nombreRestant = pretEnCours.nombrePrete - pretEnCours.nombreRetourne;
-    const quantiteARetourner = Math.min(nombreCaissesPesees, nombreRestant);
-    if (quantiteARetourner <= 0) return 0;
+    const repartition = repartirRetoursFifo(pretsEnCours, nombreCaissesPesees);
+    const description = `Retour automatique après pesée de la livraison ${numeroLot}`;
 
-    await pretCaisseRepository.retournerCaisses(
-        pretEnCours.id,
-        quantiteARetourner,
-        tenantId,
-        `Retour automatique après pesée de la livraison ${numeroLot}`,
-        tx
-    );
+    for (const allocation of repartition.allocations) {
+        await pretCaisseRepository.retournerCaisses(
+            allocation.pretId,
+            allocation.quantite,
+            tenantId,
+            description,
+            tx
+        );
+        await retournerSourcesPret(tx, {
+            tenantId,
+            userId,
+            pretId: allocation.pretId,
+            quantite: allocation.quantite,
+            peseeId,
+            reference: numeroLot,
+            description,
+        });
 
-    // Incrément atomique : une seule instruction, filtrée par tenant. La
-    // version précédente lisait le stock puis réécrivait la somme, ce qui
-    // perdait silencieusement une mise à jour quand deux pesées du même type
-    // de caisse se croisaient.
-    await typeCaisseRepository.incrementerStock(tenantId, typeCaisseId, quantiteARetourner, tx);
+    }
 
-    return quantiteARetourner;
+    return repartition.totalRetourne;
 }
 
 export const peseeService = {
@@ -459,14 +474,22 @@ export const peseeService = {
 
             await syncLivraisonWithPesees(tx, tenantId, data.livraisonId);
 
-            await retournerCaissesAutomatiquement(
+            const caissesRetournees = await retournerCaissesAutomatiquement(
                 tx,
                 tenantId,
+                userId,
                 livraisonTypeCaisse.Livraison.agriculteurId,
                 data.typeCaisseId,
                 totals.nombreCaisses,
-                livraisonTypeCaisse.Livraison.numeroLot
+                livraisonTypeCaisse.Livraison.numeroLot,
+                created.id
             );
+            if (caissesRetournees > 0) {
+                await tx.pesee.update({
+                    where: { id: created.id },
+                    data: { caissesRetournees },
+                });
+            }
 
             await auditService.log(
                 {
@@ -563,6 +586,7 @@ export const peseeService = {
         await assertLivraisonSaisonOuverte(tenantId, existing.livraisonId);
 
         await prisma.$transaction(async (tx) => {
+            await annulerRetoursPesee(tx, { tenantId, userId, peseeId: id });
             await peseeRepository.delete(tenantId, id, tx);
             await syncLivraisonWithPesees(tx, tenantId, existing.livraisonId);
 

@@ -87,22 +87,6 @@ export function CreateTypeCaisseDialog() {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="stockDisponible" className="text-foreground">
-                            {t("typesCaisses.stockDisponible")}
-                        </Label>
-                        <Input
-                            id="stockDisponible"
-                            name="stockDisponible"
-                            type="number"
-                            min="0"
-                            defaultValue="0"
-                            placeholder="Quantité en stock"
-                            required
-                            className="rounded-sm border-border focus:border-[#C17A2B] bg-card"
-                        />
-                    </div>
-
                     <div className="flex justify-end gap-3 pt-4">
                         <Button
                             type="button"

@@ -88,18 +88,10 @@ export const livraisonPeseeService = {
             const entreesAudit: Parameters<typeof auditService.logMany>[0] = [];
 
             for (const r of resolved) {
-                // Le retour de caisses est fait AVANT la pesée pour que son
-                // résultat exact soit consigné dessus : c'est cette trace qui
-                // permet d'annuler le retour à l'identique si la livraison est
+                // La pesée est créée d'abord afin que chaque mouvement de retour
+                // puisse la référencer et être compensé exactement si elle est
                 // supprimée plus tard.
-                const caissesRetournees = await retournerCaissesAutomatiquement(
-                    tx,
-                    tenantId,
-                    data.agriculteurId,
-                    r.typeCaisseId,
-                    r.totals.nombreCaisses,
-                    numeroLot
-                );
+                let caissesRetournees = 0;
 
                 const pesee = await peseeRepository.create(
                     tenantId,
@@ -115,6 +107,23 @@ export const livraisonPeseeService = {
                     tx,
                     caissesRetournees
                 );
+
+                caissesRetournees = await retournerCaissesAutomatiquement(
+                    tx,
+                    tenantId,
+                    userId,
+                    data.agriculteurId,
+                    r.typeCaisseId,
+                    r.totals.nombreCaisses,
+                    numeroLot,
+                    pesee.id
+                );
+                if (caissesRetournees > 0) {
+                    await tx.pesee.update({
+                        where: { id: pesee.id },
+                        data: { caissesRetournees },
+                    });
+                }
 
                 entreesAudit.push({
                     tenantId,
@@ -197,6 +206,9 @@ export const livraisonPeseeService = {
         const existing = await livraisonRepository.findById(livraisonId, tenantId);
         if (!existing) {
             throw new Error("Livraison introuvable dans cette Wakala");
+        }
+        if (existing.statut === "ANNULEE") {
+            throw new Error("Une réception annulée ne peut plus être modifiée");
         }
 
         await assertSaisonOuverte(tenantId, existing.saisonId);

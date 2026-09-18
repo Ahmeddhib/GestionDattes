@@ -27,6 +27,7 @@ const ACTION_CONFIG: Record<
     DELETE_DEPENSE_AUTRE: { label: "Suppression dépense", variant: "danger" },
     CREATE_VENTE: { label: "Création vente", variant: "success" },
     UPDATE_VENTE: { label: "Modification vente", variant: "warning" },
+    CANCEL_LIVRAISON: { label: "Annulation réception de dattes", variant: "danger" },
 };
 
 interface ActionBadgeProps {

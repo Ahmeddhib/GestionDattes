@@ -1,0 +1,76 @@
+@startuml cas-utilisation-stock-caisses
+' Gestion detaillee des stocks de caisses par proprietaire
+
+left to right direction
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FDF7EE
+  BorderColor #C17A2B
+  ArrowColor #6B4B2A
+}
+
+actor "Agent de saisie" as AGENT
+actor "Responsable stock" as STOCK
+actor "Administrateur" as ADMIN
+actor "Client" as CLIENT <<externe>>
+actor "Agriculteur" as AGRI <<externe>>
+
+rectangle "Stock de caisses" {
+  usecase "Consulter la vue globale" as GLOBAL
+  usecase "Consulter les stocks Wakala" as WAKALA
+  usecase "Consulter les stocks clients" as CLIENTS
+  usecase "Receptionner les caisses\nd un camion client" as RECEPTION
+  usecase "Annuler une reception" as ANNULER
+  usecase "Preter des caisses\na un agriculteur" as PRETER
+  usecase "Choisir une ou plusieurs sources\nWakala / clients" as SOURCES
+  usecase "Retourner les caisses\nmanuellement ou par pesee" as RETOUR
+  usecase "Annuler un retour de pesee\npar compensation" as COMPENSER
+  usecase "Consulter le ledger immuable" as LEDGER
+  usecase "Ajuster le stock Wakala\navec motif" as AJUSTER
+  usecase "Verifier stock >= quantite" as INVARIANT
+  usecase "Produire le bon de reception PDF" as PDF
+}
+
+AGENT --> GLOBAL
+AGENT --> RECEPTION
+AGENT --> PRETER
+STOCK --> GLOBAL
+STOCK --> WAKALA
+STOCK --> CLIENTS
+STOCK --> RECEPTION
+STOCK --> PRETER
+STOCK --> RETOUR
+STOCK --> LEDGER
+STOCK --> AJUSTER
+ADMIN --> ANNULER
+ADMIN --> AJUSTER
+ADMIN --> LEDGER
+CLIENT <-- RECEPTION
+AGRI <-- PRETER
+AGRI --> RETOUR
+
+GLOBAL ..> WAKALA : <<include>>
+GLOBAL ..> CLIENTS : <<include>>
+RECEPTION ..> LEDGER : <<include>>
+RECEPTION <.. PDF : <<extend>>
+ANNULER ..> INVARIANT : <<include>>
+ANNULER ..> LEDGER : <<include>>
+PRETER ..> SOURCES : <<include>>
+PRETER ..> INVARIANT : <<include>>
+PRETER ..> LEDGER : <<include>>
+RETOUR ..> SOURCES : <<include>>
+RETOUR ..> LEDGER : <<include>>
+COMPENSER ..> INVARIANT : <<include>>
+COMPENSER ..> LEDGER : <<include>>
+AJUSTER ..> INVARIANT : <<include>>
+AJUSTER ..> LEDGER : <<include>>
+
+note bottom of INVARIANT
+  Les debits sont atomiques et filtres par
+  tenantId, type de caisse et proprietaire.
+  Aucun solde ne peut devenir negatif.
+end note
+
+@enduml

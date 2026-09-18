@@ -9,6 +9,129 @@ import { prisma } from "@/lib/prisma";
 import type { CreatePretCaisseInput, RetourCaissesInput } from "@/validators/pret-caisse.validator";
 import type { FiltresPret } from "@/repositories/pret-caisse.repository";
 import type { SortDirection } from "@/lib/pagination";
+import { appliquerEntreesCaisses, appliquerSortiesCaisses } from "@/services/caisse-stock.service";
+import { creerMouvementCaisse, decrementerStockProprietaire } from "@/repositories/caisse-stock.repository";
+import type { Prisma } from "@/generated/prisma";
+
+/** Restitue exactement chaque source du prêt et protège contre les doubles retours. */
+export async function retournerSourcesPret(
+    tx: Prisma.TransactionClient,
+    params: {
+        tenantId: string;
+        userId: string;
+        pretId: string;
+        quantite: number;
+        peseeId?: string;
+        reference?: string;
+        description?: string;
+    }
+) {
+    const sources = await tx.pretCaisseSource.findMany({
+        where: { tenantId: params.tenantId, pretCaisseId: params.pretId },
+        orderBy: { createdAt: "asc" },
+    });
+    let restant = params.quantite;
+    const retours: Array<{ proprietaire: "WAKALA" | "CLIENT"; clientProprietaireId?: string; typeCaisseId: string; quantite: number }> = [];
+
+    for (const source of sources) {
+        if (restant <= 0) break;
+        const disponible = source.quantite - source.quantiteRetournee;
+        const quantite = Math.min(disponible, restant);
+        if (quantite <= 0) continue;
+        const updated = await tx.pretCaisseSource.updateMany({
+            where: { id: source.id, tenantId: params.tenantId, quantiteRetournee: source.quantiteRetournee },
+            data: { quantiteRetournee: { increment: quantite } },
+        });
+        if (updated.count !== 1) throw new Error("Le prêt a été modifié simultanément, veuillez réessayer");
+        retours.push({
+            proprietaire: source.proprietaire,
+            clientProprietaireId: source.clientProprietaireId ?? undefined,
+            typeCaisseId: source.typeCaisseId,
+            quantite,
+        });
+        restant -= quantite;
+    }
+    if (restant !== 0) throw new Error("Les sources du prêt ne permettent pas ce retour");
+
+    await appliquerEntreesCaisses(tx, {
+        tenantId: params.tenantId,
+        userId: params.userId,
+        sources: retours,
+        type: "RETOUR_AGRICULTEUR",
+        pretCaisseId: params.pretId,
+        peseeId: params.peseeId,
+        reference: params.reference,
+        description: params.description,
+    });
+    return retours;
+}
+
+/** Annule exactement les retours générés par une pesée, sans effacer le ledger. */
+export async function annulerRetoursPesee(
+    tx: Prisma.TransactionClient,
+    params: { tenantId: string; userId: string; peseeId: string }
+) {
+    const mouvements = await tx.mouvementCaisse.findMany({
+        where: {
+            tenantId: params.tenantId,
+            peseeId: params.peseeId,
+            type: "RETOUR_AGRICULTEUR",
+            direction: "ENTREE",
+        },
+        orderBy: { createdAt: "desc" },
+    });
+
+    for (const mouvement of mouvements) {
+        if (!mouvement.pretCaisseId) throw new Error("Mouvement de retour sans prêt associé");
+        const source = await tx.pretCaisseSource.findFirst({
+            where: {
+                tenantId: params.tenantId,
+                pretCaisseId: mouvement.pretCaisseId,
+                typeCaisseId: mouvement.typeCaisseId,
+                proprietaire: mouvement.proprietaire,
+                clientProprietaireId: mouvement.clientProprietaireId,
+                quantiteRetournee: { gte: mouvement.quantite },
+            },
+            orderBy: { createdAt: "desc" },
+        });
+        if (!source) throw new Error("Source du retour automatique introuvable");
+        const sourceUpdate = await tx.pretCaisseSource.updateMany({
+            where: { id: source.id, tenantId: params.tenantId, quantiteRetournee: source.quantiteRetournee },
+            data: { quantiteRetournee: { decrement: mouvement.quantite } },
+        });
+        if (sourceUpdate.count !== 1) throw new Error("Retour modifié simultanément, veuillez réessayer");
+        const pretUpdate = await tx.pretCaisse.updateMany({
+            where: { id: mouvement.pretCaisseId, tenantId: params.tenantId, nombreRetourne: { gte: mouvement.quantite } },
+            data: {
+                nombreRetourne: { decrement: mouvement.quantite },
+                statut: "EN_COURS",
+                dateRetour: null,
+                updatedAt: new Date(),
+            },
+        });
+        if (pretUpdate.count !== 1) throw new Error("Prêt du retour automatique incohérent");
+
+        const stockSource = {
+            proprietaire: mouvement.proprietaire,
+            clientProprietaireId: mouvement.clientProprietaireId ?? undefined,
+            typeCaisseId: mouvement.typeCaisseId,
+            quantite: mouvement.quantite,
+        };
+        await decrementerStockProprietaire(tx, params.tenantId, stockSource);
+        await creerMouvementCaisse(tx, {
+            tenantId: params.tenantId,
+            createdById: params.userId,
+            source: stockSource,
+            type: "ANNULATION_RETOUR_AGRICULTEUR",
+            direction: "SORTIE",
+            pretCaisseId: mouvement.pretCaisseId,
+            peseeId: params.peseeId,
+            reference: mouvement.reference ?? undefined,
+            description: "Annulation du retour automatique suite à la suppression de la pesée",
+        });
+    }
+    return mouvements;
+}
 
 type PretAvecRelations = Awaited<ReturnType<typeof pretCaisseRepository.findAll>>[number];
 
@@ -165,7 +288,19 @@ export const pretCaisseService = {
             ...pret,
             typeCaisse: pret.TypeCaisse,
             nombreRestant: pret.nombrePrete - pret.nombreRetourne,
+            sources: pret.Sources
+                .map((source) => ({
+                    id: source.id,
+                    proprietaire: source.proprietaire,
+                    clientProprietaire: source.ClientProprietaire,
+                    typeCaisse: source.TypeCaisse,
+                    quantiteInitiale: source.quantite,
+                    quantiteRetournee: source.quantiteRetournee,
+                    nombreRestant: source.quantite - source.quantiteRetournee,
+                }))
+                .filter((source) => source.nombreRestant > 0),
             TypeCaisse: undefined,
+            Sources: undefined,
         }));
     },
 
@@ -193,10 +328,11 @@ export const pretCaisseService = {
         }
 
         // Vérifier le stock disponible
-        if (typeCaisse.stockDisponible < data.nombrePrete) {
-            throw new Error(
-                `Stock insuffisant. Disponible: ${typeCaisse.stockDisponible}, Demandé: ${data.nombrePrete}`
-            );
+        const sources = data.sources.length > 0
+            ? data.sources
+            : [{ proprietaire: "WAKALA" as const, quantite: data.nombrePrete }];
+        if (sources.reduce((total, source) => total + source.quantite, 0) !== data.nombrePrete) {
+            throw new Error("La somme des sources doit être égale au nombre de caisses prêtées");
         }
 
         // Vérifier que le livreur (facultatif) appartient bien au tenant
@@ -222,13 +358,45 @@ export const pretCaisseService = {
                 // `updateMany` filtré par tenant : `update` sur l'id seul
                 // laissait la porte ouverte à un décrément sur le type de caisse
                 // d'une autre Wakala si l'id venait à ne pas correspondre.
-                await tx.typeCaisse.updateMany({
-                    where: { id: data.typeCaisseId, tenantId },
-                    data: {
-                        stockDisponible: { decrement: data.nombrePrete },
-                        updatedAt: new Date(),
-                    },
+                const sourcesAvecType = sources.map((source) => ({
+                    ...source,
+                    typeCaisseId: data.typeCaisseId,
+                }));
+                await tx.pretCaisseSource.createMany({
+                    data: sourcesAvecType.map((source) => ({
+                        tenantId,
+                        pretCaisseId: nouveauPret.id,
+                        typeCaisseId: data.typeCaisseId,
+                        quantite: source.quantite,
+                        proprietaire: source.proprietaire,
+                        clientProprietaireId: source.clientProprietaireId,
+                    })),
                 });
+
+                await appliquerSortiesCaisses(tx, {
+                    tenantId,
+                    userId,
+                    sources: sourcesAvecType,
+                    type: "PRET_AGRICULTEUR",
+                    pretCaisseId: nouveauPret.id,
+                    reference: nouveauPret.id,
+                    description: `Prêt à ${agriculteur.nom} ${agriculteur.prenom}`,
+                });
+
+                await auditService.log({
+                    tenantId,
+                    actorId: userId,
+                    action: "CREATE_PRET_CAISSE",
+                    targetId: nouveauPret.id,
+                    description: `Prêt de ${data.nombrePrete} ${typeCaisse.nom} à ${agriculteur.nom} ${agriculteur.prenom}`,
+                    details: {
+                        agriculteur: `${agriculteur.nom} ${agriculteur.prenom}`,
+                        typeCaisse: typeCaisse.nom,
+                        nombrePrete: data.nombrePrete,
+                        sources,
+                        livreur: livreur?.nom ?? null,
+                    },
+                }, tx);
 
                 return nouveauPret;
             },
@@ -238,22 +406,6 @@ export const pretCaisseService = {
             // un P2028 alors que rien n'était anormal.
             { timeout: 20000, maxWait: 10000 }
         );
-
-        // Audit log
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "CREATE_PRET_CAISSE",
-            targetId: pret.id,
-            description: `Prêt de ${data.nombrePrete} ${typeCaisse.nom} à ${agriculteur.nom} ${agriculteur.prenom}`,
-            details: {
-                agriculteur: `${agriculteur.nom} ${agriculteur.prenom}`,
-                typeCaisse: typeCaisse.nom,
-                nombrePrete: data.nombrePrete,
-                stockRestant: typeCaisse.stockDisponible - data.nombrePrete,
-                livreur: livreur?.nom ?? null,
-            },
-        });
 
         return pret;
     },
@@ -294,40 +446,38 @@ export const pretCaisseService = {
                 data.pretId,
                 data.nombreRetourne,
                 tenantId,
-                data.observations
+                data.observations,
+                tx
             );
 
-            // Ajouter au stock
-            await tx.typeCaisse.update({
-                where: { id: pret.typeCaisseId },
-                data: {
-                    stockDisponible: {
-                        increment: data.nombreRetourne,
-                    },
-                    updatedAt: new Date(),
-                },
+            await retournerSourcesPret(tx, {
+                tenantId,
+                userId,
+                pretId: pret.id,
+                quantite: data.nombreRetourne,
+                reference: pret.id,
+                description: data.observations || "Retour manuel",
             });
 
-            return pretUpdated;
-        });
+            const estComplet = pretUpdated.nombreRetourne === pretUpdated.nombrePrete;
+            await auditService.log({
+                tenantId,
+                actorId: userId,
+                action: "RETOUR_PRET_CAISSE",
+                targetId: pret.id,
+                description: `Retour de ${data.nombreRetourne} ${pret.TypeCaisse.nom} par ${pret.Agriculteur.nom} ${pret.Agriculteur.prenom}${estComplet ? " (Prêt clôturé)" : ""}`,
+                details: {
+                    agriculteur: `${pret.Agriculteur.nom} ${pret.Agriculteur.prenom}`,
+                    typeCaisse: pret.TypeCaisse.nom,
+                    nombreRetourne: data.nombreRetourne,
+                    nombreRestant: pretUpdated.nombrePrete - pretUpdated.nombreRetourne,
+                    statut: pretUpdated.statut,
+                    estComplet,
+                },
+            }, tx);
 
-        // Audit log
-        const estComplet = pretMisAJour.nombreRetourne === pretMisAJour.nombrePrete;
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "RETOUR_PRET_CAISSE",
-            targetId: pret.id,
-            description: `Retour de ${data.nombreRetourne} ${pret.TypeCaisse.nom} par ${pret.Agriculteur.nom} ${pret.Agriculteur.prenom}${estComplet ? " (Prêt clôturé)" : ""}`,
-            details: {
-                agriculteur: `${pret.Agriculteur.nom} ${pret.Agriculteur.prenom}`,
-                typeCaisse: pret.TypeCaisse.nom,
-                nombreRetourne: data.nombreRetourne,
-                nombreRestant: pretMisAJour.nombrePrete - pretMisAJour.nombreRetourne,
-                statut: pretMisAJour.statut,
-                estComplet,
-            },
-        });
+            return pretUpdated;
+        }, { timeout: 20_000, maxWait: 10_000 });
 
         return {
             ...pretMisAJour,

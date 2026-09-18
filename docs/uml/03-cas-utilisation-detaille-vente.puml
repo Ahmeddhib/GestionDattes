@@ -24,11 +24,15 @@ rectangle "Enregistrer une vente" {
   usecase "S authentifier" as UC_AUTH
   usecase "Verifier la permission\nvente:create" as UC_PERM
   usecase "Selectionner le client" as UC_CLI
+  usecase "Afficher ses caisses\ndisponibles" as UC_CAISSES_CLI
   usecase "Selectionner le lot\nde stock" as UC_LOT
   usecase "Afficher la saison\nd origine du lot" as UC_ORIG
   usecase "Controler la quantite\ndisponible" as UC_QTE
   usecase "Determiner la saison\nouverte" as UC_SAISON
   usecase "Decrementer le stock\ndu lot" as UC_DEC
+  usecase "Choisir les sources de caisses\nWakala / client" as UC_CAISSES
+  usecase "Controler puis debiter\nchaque solde de caisses" as UC_DECC
+  usecase "Creer les lignes VenteCaisse\net le ledger" as UC_LEDGERC
   usecase "Journaliser l operation\n(audit)" as UC_AUDIT
   usecase "Editer la facture PDF" as UC_FACT
   usecase "Encaisser un reglement" as UC_ENC
@@ -42,10 +46,14 @@ CLIENT <-- UC_FACT
 UC ..> UC_AUTH  : <<include>>
 UC ..> UC_PERM  : <<include>>
 UC ..> UC_CLI   : <<include>>
+UC_CLI ..> UC_CAISSES_CLI : <<include>>
 UC ..> UC_LOT   : <<include>>
 UC ..> UC_QTE   : <<include>>
 UC ..> UC_SAISON: <<include>>
 UC ..> UC_DEC   : <<include>>
+UC ..> UC_CAISSES : <<include>>
+UC ..> UC_DECC : <<include>>
+UC ..> UC_LEDGERC : <<include>>
 UC ..> UC_AUDIT : <<include>>
 
 UC_LOT ..> UC_ORIG : <<include>>
@@ -66,6 +74,20 @@ note right of UC_QTE
   Regle : quantite demandee
   <= StockDate.quantiteDisponible,
   sinon la vente est refusee.
+end note
+
+note right of UC_CAISSES
+  Une source CLIENT doit appartenir au
+  client de la vente. La somme peut etre
+  repartie sur plusieurs proprietaires,
+  sans jamais melanger les tenants.
+end note
+
+note right of UC_DECC
+  Le debit utilise UPDATE ... WHERE
+  quantite >= demande. En concurrence,
+  une seule operation peut consommer le
+  dernier stock disponible.
 end note
 
 note bottom of UC_UPD

@@ -215,31 +215,31 @@ model Saison {
 /// `BilanSaison_one_final_per_saison` sur ("saisonId") WHERE type = 'FINAL',
 /// qui garantit au niveau base qu'une saison n'a jamais deux bilans finaux.
 model BilanSaison {
-  id                             String          @id
-  saisonId                       String
-  tenantId                       String
-  type                           TypeBilanSaison @default(PROVISOIRE)
-  version                        Int
+  id       String          @id
+  saisonId String
+  tenantId String
+  type     TypeBilanSaison @default(PROVISOIRE)
+  version  Int
 
-  nombreLivraisons               Int
-  totalQuantiteLivree            Float
-  totalQuantiteAcceptee          Float
+  nombreLivraisons      Int
+  totalQuantiteLivree   Float
+  totalQuantiteAcceptee Float
 
-  totalAchatsMontant             Float
-  quantitePayable                Float
-  totalPaiementsAgriculteurs     Float
-  soldeAgriculteursRestant       Float
+  totalAchatsMontant         Float
+  quantitePayable            Float
+  totalPaiementsAgriculteurs Float
+  soldeAgriculteursRestant   Float
 
-  totalVentesQuantite            Float
-  chiffreAffairesVentes          Float
-  totalEncaissements             Float
-  creancesClientsRestantes       Float
+  totalVentesQuantite      Float
+  chiffreAffairesVentes    Float
+  totalEncaissements       Float
+  creancesClientsRestantes Float
 
-  totalDepensesAutres            Float
+  totalDepensesAutres Float
 
-  tresorerie                     Float
-  margeBrute                     Float
-  margeNette                     Float
+  tresorerie Float
+  margeBrute Float
+  margeNette Float
 
   /// Instantané PHYSIQUE de l'entrepôt du tenant au moment du calcul, toutes
   /// saisons d'origine confondues. Volontairement NON filtré par saison :
@@ -252,20 +252,20 @@ model BilanSaison {
   /// (StockDate.saisonOrigineId). Stable pour toujours.
   /// Le @default("[]") ne sert qu'aux bilans antérieurs à cette colonne :
   /// tout nouveau snapshot renseigne les trois champs explicitement.
-  stockEntreParTypeDate          Json            @default("[]")
+  stockEntreParTypeDate          Json @default("[]")
   /// Part de ce stock encore disponible AU MOMENT DU CALCUL. Valide
   /// uniquement figée : cette valeur continue de baisser après la clôture,
   /// au fil des ventes des lots de cette saison.
-  stockOrigineRestantParTypeDate Json            @default("[]")
+  stockOrigineRestantParTypeDate Json @default("[]")
   /// Caisses prêtées DURANT la saison (PretCaisse.saisonId).
-  caissesSaison                  Json            @default("[]")
+  caissesSaison                  Json @default("[]")
 
-  genereAt                       DateTime        @default(now())
-  genereParId                    String
+  genereAt    DateTime @default(now())
+  genereParId String
 
-  Saison                         Saison          @relation(fields: [saisonId], references: [id])
-  Tenant                         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  User                           User            @relation(fields: [genereParId], references: [id])
+  Saison Saison @relation(fields: [saisonId], references: [id])
+  Tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  User   User   @relation(fields: [genereParId], references: [id])
 
   @@unique([saisonId, version])
   @@index([tenantId])
@@ -322,16 +322,21 @@ model BonSortie {
 }
 
 model Client {
-  id        String   @id
-  nom       String
-  telephone String?
-  adresse   String?
-  email     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  tenantId  String
-  Tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  Vente     Vente[]
+  id                           String              @id
+  nom                          String
+  telephone                    String?
+  adresse                      String?
+  email                        String?
+  createdAt                    DateTime            @default(now())
+  updatedAt                    DateTime
+  tenantId                     String
+  Tenant                       Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Vente                        Vente[]
+  StockCaisseClient            StockCaisseClient[]
+  ReceptionCaisses             ReceptionCaisses[]
+  MouvementCaisseProprietaire  MouvementCaisse[]   @relation("MouvementCaisseProprietaire")
+  VenteCaisseProprietaire      VenteCaisse[]       @relation("VenteCaisseProprietaire")
+  PretCaisseSourceProprietaire PretCaisseSource[]  @relation("PretCaisseSourceProprietaire")
 
   @@index([nom])
   @@index([tenantId])
@@ -397,6 +402,10 @@ model Livraison {
   quantiteAcceptee    Float
   agriculteurId       String
   saisonId            String
+  statut              StatutLivraison       @default(VALIDEE)
+  annuleParId         String?
+  annuleeLe           DateTime?
+  motifAnnulation     String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime
   tenantId            String
@@ -406,6 +415,7 @@ model Livraison {
   Agriculteur         Agriculteur           @relation(fields: [agriculteurId], references: [id])
   Saison              Saison                @relation(fields: [saisonId], references: [id])
   Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  AnnulePar           User?                 @relation("LivraisonAnnulePar", fields: [annuleParId], references: [id], onDelete: Restrict)
   Pesee               Pesee[]
   PretCaisse          PretCaisse[]
   StockDate           StockDate[]
@@ -419,6 +429,8 @@ model Livraison {
   @@index([tenantId])
   @@index([tenantId, saisonId])
   @@index([tenantId, saisonId, dateLivraison])
+  @@index([statut])
+  @@index([annuleParId])
 }
 
 model LivraisonTypeCaisse {
@@ -439,34 +451,35 @@ model LivraisonTypeCaisse {
 }
 
 model Pesee {
-  id               String        @id @default(cuid())
-  livraisonId      String
-  agriculteurId    String
-  typeCaisseId     String
-  typeDateId       String
-  tareKg           Decimal       @db.Decimal(6, 2)
-  nombreCaisses    Int
-  poidsBrutTotal   Decimal       @db.Decimal(8, 2)
-  poidsTareTotal   Decimal       @db.Decimal(8, 2)
-  poidsNetTotal    Decimal       @db.Decimal(8, 2)
-  poidsBrutMoyen   Decimal       @db.Decimal(6, 2)
-  poidsNetMoyen    Decimal       @db.Decimal(6, 2)
-  prixKg           Float         @default(0)
-  quantiteAcceptee Decimal       @default(0) @db.Decimal(8, 2)
+  id                String            @id @default(cuid())
+  livraisonId       String
+  agriculteurId     String
+  typeCaisseId      String
+  typeDateId        String
+  tareKg            Decimal           @db.Decimal(6, 2)
+  nombreCaisses     Int
+  poidsBrutTotal    Decimal           @db.Decimal(8, 2)
+  poidsTareTotal    Decimal           @db.Decimal(8, 2)
+  poidsNetTotal     Decimal           @db.Decimal(8, 2)
+  poidsBrutMoyen    Decimal           @db.Decimal(6, 2)
+  poidsNetMoyen     Decimal           @db.Decimal(6, 2)
+  prixKg            Float             @default(0)
+  quantiteAcceptee  Decimal           @default(0) @db.Decimal(8, 2)
   /// Nombre de caisses effectivement rendues au stock par le retour
   /// automatique declenche a la pesee. Sans cette trace, supprimer la
   /// livraison ne pouvait pas annuler le retour exactement : on retombait sur
   /// le nombre de caisses pesees, qui surestime des qu aucun pret n etait
   /// ouvert, et le stock devenait faux.
-  caissesRetournees Int          @default(0)
-  createdAt        DateTime      @default(now())
-  tenantId         String
-  Caisses          PeseeCaisse[]
-  Livraison        Livraison     @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
-  Agriculteur      Agriculteur   @relation(fields: [agriculteurId], references: [id])
-  TypeCaisse       TypeCaisse    @relation(fields: [typeCaisseId], references: [id])
-  TypeDate         TypeDate      @relation(fields: [typeDateId], references: [id])
-  Tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  caissesRetournees Int               @default(0)
+  createdAt         DateTime          @default(now())
+  tenantId          String
+  Caisses           PeseeCaisse[]
+  Livraison         Livraison         @relation(fields: [livraisonId], references: [id], onDelete: Cascade)
+  Agriculteur       Agriculteur       @relation(fields: [agriculteurId], references: [id])
+  TypeCaisse        TypeCaisse        @relation(fields: [typeCaisseId], references: [id])
+  TypeDate          TypeDate          @relation(fields: [typeDateId], references: [id])
+  Tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  MouvementCaisse   MouvementCaisse[]
 
   @@unique([livraisonId, typeCaisseId, typeDateId])
   @@index([livraisonId])
@@ -487,31 +500,33 @@ model PeseeCaisse {
 }
 
 model PretCaisse {
-  id             String      @id
-  nombrePrete    Int
-  nombreRetourne Int         @default(0)
-  statut         StatutPret  @default(EN_COURS)
-  datePreT       DateTime    @default(now())
-  dateRetour     DateTime?
-  observations   String?
-  agriculteurId  String
-  typeCaisseId   String
-  livraisonId    String?
-  livreurId      String?
+  id              String             @id
+  nombrePrete     Int
+  nombreRetourne  Int                @default(0)
+  statut          StatutPret         @default(EN_COURS)
+  datePreT        DateTime           @default(now())
+  dateRetour      DateTime?
+  observations    String?
+  agriculteurId   String
+  typeCaisseId    String
+  livraisonId     String?
+  livreurId       String?
   /// Saison durant laquelle le prêt a été consenti. `livraisonId` étant
   /// optionnel, un prêt autonome n'aurait sinon aucun rattachement possible.
-  saisonId       String
-  createdById    String
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime
-  tenantId       String
-  Agriculteur    Agriculteur @relation(fields: [agriculteurId], references: [id])
-  User           User        @relation(fields: [createdById], references: [id])
-  Livraison      Livraison?  @relation(fields: [livraisonId], references: [id])
-  Livreur        Livreur?    @relation(fields: [livreurId], references: [id])
-  Saison         Saison      @relation(fields: [saisonId], references: [id])
-  Tenant         Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  TypeCaisse     TypeCaisse  @relation(fields: [typeCaisseId], references: [id])
+  saisonId        String
+  createdById     String
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime
+  tenantId        String
+  Agriculteur     Agriculteur        @relation(fields: [agriculteurId], references: [id])
+  User            User               @relation(fields: [createdById], references: [id])
+  Livraison       Livraison?         @relation(fields: [livraisonId], references: [id])
+  Livreur         Livreur?           @relation(fields: [livreurId], references: [id])
+  Saison          Saison             @relation(fields: [saisonId], references: [id])
+  Tenant          Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse      TypeCaisse         @relation(fields: [typeCaisseId], references: [id])
+  Sources         PretCaisseSource[]
+  MouvementCaisse MouvementCaisse[]
 
   @@index([agriculteurId])
   @@index([createdById])
@@ -615,6 +630,12 @@ model Tenant {
   Saison              Saison[]
   DepenseAutre        DepenseAutre[]
   BilanSaison         BilanSaison[]
+  StockCaisseWakala   StockCaisseWakala[]
+  StockCaisseClient   StockCaisseClient[]
+  ReceptionCaisses    ReceptionCaisses[]
+  MouvementCaisse     MouvementCaisse[]
+  VenteCaisse         VenteCaisse[]
+  PretCaisseSource    PretCaisseSource[]
 
   @@index([active])
   @@index([code])
@@ -639,11 +660,11 @@ model TenantUser {
 }
 
 model TypeCaisse {
-  id                  String                @id
+  id                  String                  @id
   nom                 String
   poidsKg             Float
-  stockDisponible     Int                   @default(0)
-  createdAt           DateTime              @default(now())
+  stockDisponible     Int                     @default(0)
+  createdAt           DateTime                @default(now())
   updatedAt           DateTime
   tenantId            String
   BonSortie           BonSortie[]
@@ -651,7 +672,13 @@ model TypeCaisse {
   LivraisonTypeCaisse LivraisonTypeCaisse[]
   Pesee               Pesee[]
   PretCaisse          PretCaisse[]
-  Tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  StockCaisseWakala   StockCaisseWakala[]
+  StockCaisseClient   StockCaisseClient[]
+  ReceptionLignes     ReceptionCaissesLigne[]
+  MouvementCaisse     MouvementCaisse[]
+  VenteCaisse         VenteCaisse[]
+  PretCaisseSource    PretCaisseSource[]
+  Tenant              Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, nom])
   @@index([tenantId])
@@ -676,28 +703,32 @@ model TypeDate {
 }
 
 model User {
-  id                  String                @id
-  name                String
-  email               String                @unique
-  password            String
-  active              Boolean               @default(true)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  AuditLog            AuditLog[]
-  BonAchat            BonAchat[]
-  BonSortie           BonSortie[]
-  PretCaisse          PretCaisse[]
-  TenantUser          TenantUser[]
-  Vente               Vente[]
-  PaiementAgriculteur PaiementAgriculteur[]
-  EncaissementClient  EncaissementClient[]
+  id                       String                @id
+  name                     String
+  email                    String                @unique
+  password                 String
+  active                   Boolean               @default(true)
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  AuditLog                 AuditLog[]
+  BonAchat                 BonAchat[]
+  BonSortie                BonSortie[]
+  PretCaisse               PretCaisse[]
+  TenantUser               TenantUser[]
+  Vente                    Vente[]
+  PaiementAgriculteur      PaiementAgriculteur[]
+  EncaissementClient       EncaissementClient[]
   // Le nom de champ reste `Saison` (les relations sont nommées uniquement
   // pour lever l'ambiguïté introduite par `SaisonCloturee` — le renommer
   // casserait tous les consommateurs existants).
-  Saison              Saison[]              @relation("SaisonCreatedBy")
-  SaisonCloturee      Saison[]              @relation("SaisonClotureePar")
-  DepenseAutre        DepenseAutre[]
-  BilanSaison         BilanSaison[]
+  Saison                   Saison[]              @relation("SaisonCreatedBy")
+  SaisonCloturee           Saison[]              @relation("SaisonClotureePar")
+  DepenseAutre             DepenseAutre[]
+  BilanSaison              BilanSaison[]
+  ReceptionCaissesCreees   ReceptionCaisses[]    @relation("ReceptionCreatedBy")
+  ReceptionCaissesAnnulees ReceptionCaisses[]    @relation("ReceptionAnnulePar")
+  LivraisonsAnnulees       Livraison[]           @relation("LivraisonAnnulePar")
+  MouvementCaisse          MouvementCaisse[]
 
   @@index([email])
 }
@@ -721,6 +752,8 @@ model Vente {
   Saison             Saison               @relation(fields: [saisonId], references: [id])
   Tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   EncaissementClient EncaissementClient[]
+  Caisses            VenteCaisse[]
+  MouvementCaisse    MouvementCaisse[]
 
   @@index([clientId])
   @@index([createdById])
@@ -730,6 +763,162 @@ model Vente {
   @@index([tenantId])
   @@index([tenantId, saisonId])
   @@index([tenantId, saisonId, date])
+}
+
+/// Solde opérationnel des caisses appartenant à la Wakala.
+model StockCaisseWakala {
+  id           String     @id @default(cuid())
+  tenantId     String
+  typeCaisseId String
+  quantite     Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse   TypeCaisse @relation(fields: [typeCaisseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, typeCaisseId])
+  @@index([tenantId])
+  @@index([typeCaisseId])
+}
+
+/// Solde opérationnel des caisses d'un client présentes dans une Wakala.
+model StockCaisseClient {
+  id           String     @id @default(cuid())
+  tenantId     String
+  clientId     String
+  typeCaisseId String
+  quantite     Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Client       Client     @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  TypeCaisse   TypeCaisse @relation(fields: [typeCaisseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, clientId, typeCaisseId])
+  @@index([tenantId])
+  @@index([clientId])
+  @@index([typeCaisseId])
+}
+
+model ReceptionCaisses {
+  id              String                  @id @default(cuid())
+  numero          String
+  tenantId        String
+  clientId        String
+  date            DateTime                @default(now())
+  matriculeCamion String?
+  chauffeur       String?
+  observations    String?
+  statut          StatutReceptionCaisses  @default(VALIDEE)
+  createdById     String
+  annuleParId     String?
+  annuleeLe       DateTime?
+  motifAnnulation String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  Tenant          Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Client          Client                  @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  CreatedBy       User                    @relation("ReceptionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  AnnulePar       User?                   @relation("ReceptionAnnulePar", fields: [annuleParId], references: [id], onDelete: Restrict)
+  Lignes          ReceptionCaissesLigne[]
+  Mouvements      MouvementCaisse[]
+
+  @@unique([tenantId, numero])
+  @@index([tenantId, date])
+  @@index([clientId])
+  @@index([statut])
+}
+
+model ReceptionCaissesLigne {
+  id           String           @id @default(cuid())
+  receptionId  String
+  typeCaisseId String
+  quantite     Int
+  Reception    ReceptionCaisses @relation(fields: [receptionId], references: [id], onDelete: Cascade)
+  TypeCaisse   TypeCaisse       @relation(fields: [typeCaisseId], references: [id], onDelete: Restrict)
+
+  @@unique([receptionId, typeCaisseId])
+  @@index([receptionId])
+  @@index([typeCaisseId])
+}
+
+/// Ledger immuable : chaque ligne explique une entrée ou une sortie de stock.
+model MouvementCaisse {
+  id                   String                   @id @default(cuid())
+  tenantId             String
+  typeCaisseId         String
+  proprietaire         ProprietaireCaisse
+  clientProprietaireId String?
+  type                 TypeMouvementCaisse
+  direction            DirectionMouvementCaisse
+  quantite             Int
+  receptionId          String?
+  venteId              String?
+  pretCaisseId         String?
+  peseeId              String?
+  reference            String?
+  description          String?
+  createdById          String
+  createdAt            DateTime                 @default(now())
+  Tenant               Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  TypeCaisse           TypeCaisse               @relation(fields: [typeCaisseId], references: [id], onDelete: Restrict)
+  ClientProprietaire   Client?                  @relation("MouvementCaisseProprietaire", fields: [clientProprietaireId], references: [id], onDelete: Restrict)
+  Reception            ReceptionCaisses?        @relation(fields: [receptionId], references: [id], onDelete: Restrict)
+  Vente                Vente?                   @relation(fields: [venteId], references: [id], onDelete: Restrict)
+  PretCaisse           PretCaisse?              @relation(fields: [pretCaisseId], references: [id], onDelete: Restrict)
+  Pesee                Pesee?                   @relation(fields: [peseeId], references: [id], onDelete: SetNull)
+  CreatedBy            User                     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, type, createdAt])
+  @@index([tenantId, typeCaisseId, createdAt])
+  @@index([tenantId, clientProprietaireId, createdAt])
+  @@index([receptionId])
+  @@index([venteId])
+  @@index([pretCaisseId])
+  @@index([peseeId])
+}
+
+model VenteCaisse {
+  id                   String             @id @default(cuid())
+  tenantId             String
+  venteId              String
+  typeCaisseId         String
+  quantite             Int
+  proprietaire         ProprietaireCaisse
+  clientProprietaireId String?
+  createdAt            DateTime           @default(now())
+  Tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Vente                Vente              @relation(fields: [venteId], references: [id], onDelete: Cascade)
+  TypeCaisse           TypeCaisse         @relation(fields: [typeCaisseId], references: [id], onDelete: Restrict)
+  ClientProprietaire   Client?            @relation("VenteCaisseProprietaire", fields: [clientProprietaireId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([venteId])
+  @@index([typeCaisseId])
+  @@index([clientProprietaireId])
+}
+
+model PretCaisseSource {
+  id                   String             @id @default(cuid())
+  tenantId             String
+  pretCaisseId         String
+  typeCaisseId         String
+  quantite             Int
+  quantiteRetournee    Int                @default(0)
+  proprietaire         ProprietaireCaisse
+  clientProprietaireId String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  Tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  PretCaisse           PretCaisse         @relation(fields: [pretCaisseId], references: [id], onDelete: Cascade)
+  TypeCaisse           TypeCaisse         @relation(fields: [typeCaisseId], references: [id], onDelete: Restrict)
+  ClientProprietaire   Client?            @relation("PretCaisseSourceProprietaire", fields: [clientProprietaireId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([pretCaisseId])
+  @@index([typeCaisseId])
+  @@index([clientProprietaireId])
 }
 
 enum AuditAction {
@@ -756,6 +945,7 @@ enum AuditAction {
   CREATE_LIVRAISON
   UPDATE_LIVRAISON
   DELETE_LIVRAISON
+  CANCEL_LIVRAISON
   CREATE_LIVREUR
   UPDATE_LIVREUR
   DELETE_LIVREUR
@@ -794,6 +984,40 @@ enum AuditAction {
   CREATE_DEPENSE_AUTRE
   UPDATE_DEPENSE_AUTRE
   DELETE_DEPENSE_AUTRE
+  CREATE_RECEPTION_CAISSES
+  CANCEL_RECEPTION_CAISSES
+  ADJUST_STOCK_CAISSES
+  CREATE_MOUVEMENT_CAISSE
+}
+
+enum ProprietaireCaisse {
+  WAKALA
+  CLIENT
+}
+
+enum DirectionMouvementCaisse {
+  ENTREE
+  SORTIE
+}
+
+enum TypeMouvementCaisse {
+  RECEPTION_CLIENT
+  ANNULATION_RECEPTION
+  SORTIE_VENTE
+  PRET_AGRICULTEUR
+  RETOUR_AGRICULTEUR
+  ANNULATION_RETOUR_AGRICULTEUR
+  AJUSTEMENT
+}
+
+enum StatutReceptionCaisses {
+  VALIDEE
+  ANNULEE
+}
+
+enum StatutLivraison {
+  VALIDEE
+  ANNULEE
 }
 
 enum StatutBonAchat {

@@ -11,11 +11,13 @@ import type { SortDirection } from "@/lib/pagination";
  * partageable, rechargeable et navigable au retour arrière. Aucun état
  * dupliqué côté client, sauf le texte de recherche en cours de frappe.
  */
-export function useTableQueryState() {
+export function useTableQueryState(options: { navigationDelayMs?: number } = {}) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
+    const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const navigationDelayMs = options.navigationDelayMs ?? 0;
 
     const page = Number(searchParams.get("page") ?? "1");
     const pageSize = Number(searchParams.get("pageSize") ?? "10");
@@ -31,7 +33,10 @@ export function useTableQueryState() {
      */
     const setParams = useCallback(
         (maj: Record<string, string | number | undefined>, options?: { resetPage?: boolean }) => {
-            const params = new URLSearchParams(searchParams.toString());
+            // Une navigation differee peut avoir deja modifie l'URL sans que le
+            // rendu serveur soit revenu. Repartir de l'URL du navigateur evite
+            // alors qu'un second filtre ecrase le premier.
+            const params = new URLSearchParams(window.location.search);
 
             for (const [cle, valeur] of Object.entries(maj)) {
                 if (valeur === undefined || valeur === "") params.delete(cle);
@@ -42,12 +47,31 @@ export function useTableQueryState() {
                 params.delete("page");
             }
 
-            startTransition(() => {
-                router.push(`${pathname}?${params.toString()}`, { scroll: false });
-            });
+            const query = params.toString();
+            const destination = query ? `${pathname}?${query}` : pathname;
+            const actuelle = `${window.location.pathname}${window.location.search}`;
+            if (destination === actuelle) return;
+
+            if (navigationDelayMs > 0) {
+                // Next synchronise `useSearchParams` avec l'API History. Les
+                // controles reagissent donc tout de suite, puis les changements
+                // rapproches sont regroupes dans une seule requete RSC.
+                window.history.replaceState(null, "", destination);
+                if (navigationTimer.current) clearTimeout(navigationTimer.current);
+                navigationTimer.current = setTimeout(() => {
+                    startTransition(() => router.refresh());
+                }, navigationDelayMs);
+                return;
+            }
+
+            startTransition(() => router.push(destination, { scroll: false }));
         },
-        [pathname, router, searchParams]
+        [navigationDelayMs, pathname, router]
     );
+
+    useEffect(() => () => {
+        if (navigationTimer.current) clearTimeout(navigationTimer.current);
+    }, []);
 
     // ---------------------------------------------------------------- recherche
     // Le champ reste piloté localement pendant la frappe : passer par l'URL à

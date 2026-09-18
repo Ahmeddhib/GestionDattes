@@ -9,7 +9,6 @@ export type TypeCaisse = {
     id: string;
     nom: string;
     poidsKg: number;
-    stockDisponible?: number;
     _count?: {
         livraisons: number;
         pretsCaisses: number;
@@ -19,8 +18,6 @@ export type TypeCaisse = {
 };
 
 export const createTypesCaissesColumns = (
-    onUpdate: (typeCaisse: TypeCaisse) => void,
-    onDelete: (typeCaisse: TypeCaisse) => void,
     t: (key: string) => string
 ): ColumnDef<TypeCaisse>[] => [
         {
@@ -39,26 +36,6 @@ export const createTypesCaissesColumns = (
                     <div className="flex items-center gap-2">
                         <Badge variant="outline" className="bg-muted text-[#C17A2B] border-border">
                             {poids} {t("typesCaisses.kg")}
-                        </Badge>
-                    </div>
-                );
-            },
-        },
-        {
-            accessorKey: "stockDisponible",
-            header: t("typesCaisses.stockDisponible"),
-            cell: ({ row }) => {
-                const stock = row.getValue("stockDisponible") as number;
-                return (
-                    <div className="text-center">
-                        <Badge
-                            variant="outline"
-                            className={`font-semibold ${stock > 50 ? 'bg-green-50 text-green-700 border-green-200' :
-                                stock > 20 ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                                    'bg-red-50 text-red-700 border-red-200'
-                                }`}
-                        >
-                            {stock}
                         </Badge>
                     </div>
                 );

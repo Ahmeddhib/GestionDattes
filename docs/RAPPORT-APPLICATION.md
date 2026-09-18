@@ -186,7 +186,7 @@ structurants.
 | Campagne | `Saison`, `BilanSaison` |
 | Réception | `Livraison`, `LivraisonTypeCaisse`, `Pesee`, `PeseeCaisse` |
 | Qualité | `Echantillon`, `Analyse` |
-| Caisses | `PretCaisse` |
+| Caisses | `StockCaisseWakala`, `StockCaisseClient`, `ReceptionCaisses`, `ReceptionCaissesLigne`, `PretCaisse`, `PretCaisseSource`, `VenteCaisse`, `MouvementCaisse` |
 | Achat | `BonAchat`, `PaiementAgriculteur` |
 | Stock et vente | `StockDate`, `Conditionnement`, `BonSortie`, `Vente`, `EncaissementClient` |
 | Charges | `DepenseAutre` |
@@ -277,6 +277,22 @@ et à un livreur, mais les deux sont optionnels : un prêt autonome (avant toute
 livraison) doit rester possible. C'est pourquoi `PretCaisse.saisonId` est
 obligatoire — sans lui, un prêt autonome n'aurait aucun rattachement de campagne.
 
+Le stock distingue maintenant les caisses appartenant à la Wakala
+(`StockCaisseWakala`) de celles appartenant à chaque client
+(`StockCaisseClient`). Une `ReceptionCaisses` enregistre les caisses apportées
+par un camion client et crédite uniquement ce propriétaire. Une vente ou un
+prêt peut consommer plusieurs sources ; les répartitions sont figées dans
+`VenteCaisse` et `PretCaisseSource`.
+
+Chaque entrée et sortie écrit un `MouvementCaisse` immuable. Les annulations ne
+suppriment donc pas l'historique : elles créent un mouvement compensatoire. Les
+débits utilisent une mise à jour conditionnelle `quantite >= demande`, ce qui
+préserve l'invariant de stock non négatif même en concurrence.
+
+*Diagrammes : `docs/uml/08-cas-utilisation-stock-caisses.puml`,
+`docs/uml/09-sequence-reception-caisses.puml` et
+`docs/uml/10-sequence-pret-retour-caisses.puml`.*
+
 ### 5.4 Achats et paiements agriculteurs
 
 Le bon d'achat porte le prix au kilo, le montant et un statut. Le montant déjà
@@ -294,8 +310,9 @@ consultable dans une fenêtre dédiée. L'agrégation est faite **en base**
 le nombre de lots.
 
 La vente sélectionne un lot, une quantité et un prix. Le service refuse la vente
-si la quantité demandée dépasse `quantiteDisponible`, puis crée la vente et
-décrémente le lot dans la même transaction. Chaque vente peut être imprimée en
+si la quantité demandée dépasse `quantiteDisponible`, puis crée la vente,
+décrémente le lot et débite ses sources de caisses dans la même transaction.
+Chaque vente peut être imprimée en
 facture PDF et soldée par des encaissements successifs.
 
 ### 5.6 Finance
@@ -338,7 +355,7 @@ changent ensuite : c'est ce qui en fait une pièce d'archive.
 | **Acteurs** | Agent de saisie, Administrateur (acteur secondaire : le client, destinataire de la facture) |
 | **Objectif** | Enregistrer la vente d'une quantité de dattes issue d'un lot de stock, à un client, et diminuer le stock en conséquence |
 | **Préconditions** | L'utilisateur est authentifié, rattaché à une wakala, détient `vente:create` ; une saison est `OUVERTE` ; au moins un lot a `quantiteDisponible > 0` |
-| **Postconditions** | Une `Vente` existe au statut `EN_ATTENTE` ; `StockDate.quantiteDisponible` a diminué d'autant ; un `AuditLog` `CREATE_VENTE` a été écrit |
+| **Postconditions** | Une `Vente` existe au statut `EN_ATTENTE` ; `StockDate.quantiteDisponible` et les soldes de caisses sélectionnés ont diminué ; les lignes `VenteCaisse`, le ledger et l'audit ont été écrits |
 
 **Scénario nominal**
 
@@ -349,12 +366,12 @@ changent ensuite : c'est ce qui en fait une pièce d'archive.
 3. L'agent choisit un client.
 4. L'agent choisit un lot. Un lot issu d'une campagne antérieure est signalé par
    un badge ambre portant la mention « report ».
-5. L'agent saisit la quantité et le prix unitaire ; le montant total s'affiche.
+5. L'agent saisit la quantité et le prix unitaire, puis répartit les caisses entre les sources Wakala et client disponibles.
 6. L'agent valide.
 7. Le système vérifie la permission, l'existence du client et du lot dans cette
    wakala, puis que la quantité demandée est disponible.
 8. Le système détermine la saison ouverte.
-9. Dans une transaction : la vente est créée, puis le lot est décrémenté.
+9. Dans une transaction : la vente et ses lignes de caisses sont créées, puis le lot et chaque solde de caisses sont décrémentés atomiquement.
 10. L'opération est journalisée, la liste rafraîchie, une confirmation affichée.
 
 **Scénarios alternatifs et d'erreur**
@@ -364,6 +381,7 @@ changent ensuite : c'est ce qui en fait une pièce d'archive.
 | Permission absente | Refus, message d'autorisation |
 | Client ou lot d'une autre wakala | Refus : « introuvable dans cette Wakala » |
 | Quantité > stock disponible | Refus : « Stock insuffisant. Disponible : X, Demandé : Y » |
+| Source de caisses insuffisante ou d'un autre tenant | Refus et rollback intégral de la vente |
 | Aucune saison ouverte | Refus par la garde de saison |
 | Base injoignable | Message dédié, frontière d'erreur préservant la navigation |
 
@@ -578,13 +596,16 @@ un éventuel défaut du code.
 
 | Fichier source | Contenu | Format rendu |
 |---|---|---|
-| `01-diagramme-classes.puml` | Diagramme de classes complet (28 entités, 8 domaines) | 4823 × 2006 — **page paysage** |
-| `07-diagramme-classes-noyau.puml` | Vue simplifiée : les 12 entités du flux récolte → vente | 1180 × 925 — page portrait |
+| `01-diagramme-classes.puml` | Diagramme de classes complet (35 entités) | **page paysage** |
+| `07-diagramme-classes-noyau.puml` | Vue simplifiée du flux récolte → vente et des caisses | page portrait |
 | `02-cas-utilisation-global.puml` | Cas d'utilisation global, 5 acteurs | 1082 × 3042 — page portrait |
 | `03-cas-utilisation-detaille-vente.puml` | Cas d'utilisation détaillé — Enregistrer une vente | 1026 × 1254 |
 | `04-cas-utilisation-detaille-cloture.puml` | Cas d'utilisation détaillé — Clôturer une saison | 1012 × 1046 |
 | `05-sequence-enregistrer-vente.puml` | Séquence — Enregistrer une vente | 2005 × 2146 |
 | `06-sequence-cloturer-saison.puml` | Séquence — Clôturer une saison | 2083 × 2335 |
+| `08-cas-utilisation-stock-caisses.puml` | Cas d'utilisation détaillé — Stock de caisses par propriétaire | rendu PNG et SVG |
+| `09-sequence-reception-caisses.puml` | Séquence — Réception d'un camion de caisses client | rendu PNG et SVG |
+| `10-sequence-pret-retour-caisses.puml` | Séquence — Prêt multi-source, retour et compensation | rendu PNG et SVG |
 
 **Les images sont déjà générées** dans `docs/uml/png/` (insertion directe dans
 Word) et `docs/uml/svg/` (vectoriel, à préférer pour l'impression et le zoom).

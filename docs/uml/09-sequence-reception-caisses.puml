@@ -1,0 +1,46 @@
+@startuml sequence-reception-caisses
+' Reception des caisses apportees par un camion client
+
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #6B4B2A
+  LifeLineBorderColor #C17A2B
+  ParticipantBorderColor #C17A2B
+  ParticipantBackgroundColor #FDF7EE
+}
+autonumber "<b>[00]"
+
+actor "Agent" as U
+participant "ReceptionCaissesDialog" as UI
+participant "Server Action" as ACT
+participant "caisseStockService" as SVC
+participant "requirePermission" as PERM
+database "PostgreSQL\n(Neon)" as DB
+
+U -> UI : choisit client, camion, chauffeur\net quantites par type
+UI -> UI : validation Zod\n(lignes uniques, quantites > 0)
+UI -> ACT : createReceptionCaissesAction(data)
+ACT -> SVC : creerReception(tenantId, userId, data)
+SVC -> PERM : caisse:reception:create
+SVC -> DB : verifier client et types WHERE tenantId
+
+group Transaction ACID
+  SVC -> DB : INSERT ReceptionCaisses + lignes
+  loop chaque type de caisse
+    SVC -> DB : UPSERT StockCaisseClient\nquantite += recue
+    SVC -> DB : INSERT MouvementCaisse\nRECEPTION_CLIENT / ENTREE
+  end
+  SVC -> DB : INSERT AuditLog\nCREATE_RECEPTION_CAISSES
+end
+
+SVC --> ACT : reception validee
+ACT --> UI : succes + revalidation
+UI --> U : toast + bon de reception PDF
+
+note over SVC, DB
+  Le client est le proprietaire des caisses.
+  La reception ne credite jamais le stock Wakala.
+end note
+
+@enduml

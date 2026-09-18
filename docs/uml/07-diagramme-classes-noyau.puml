@@ -3,7 +3,7 @@
 '  KAYEN - Gestion de dattes
 '  Diagramme de classes SIMPLIFIE : le flux metier principal
 '
-'  Vue reduite aux 12 entites du cycle recolte -> vente, destinee a
+'  Vue reduite aux entites essentielles du cycle recolte -> vente, destinee a
 '  tenir sur une page portrait. Le diagramme complet (28 entites) est
 '  dans 01-diagramme-classes.puml.
 ' =====================================================================
@@ -42,6 +42,13 @@ class Livraison {
   +dateLivraison : DateTime
   +quantiteLivree : Float
   +quantiteAcceptee : Float
+  +statut : StatutLivraison
+  +motifAnnulation : String?
+}
+
+enum StatutLivraison {
+  VALIDEE
+  ANNULEE
 }
 
 class Pesee {
@@ -77,6 +84,11 @@ class TypeDate {
   +seuilAlerte : Float
 }
 
+class TypeCaisse {
+  +nom : String
+  +poidsKg : Float
+}
+
 class Vente {
   +date : DateTime
   +quantite : Float
@@ -106,9 +118,37 @@ class BilanSaison {
   +tresorerie : Float
 }
 
+class StockCaisseWakala {
+  +quantite : Int
+}
+
+class StockCaisseClient {
+  +quantite : Int
+}
+
+class ReceptionCaisses {
+  +numero : String
+  +date : DateTime
+  +statut : StatutReceptionCaisses
+}
+
+class PretCaisse {
+  +nombrePrete : Int
+  +nombreRetourne : Int
+  +statut : StatutPret
+}
+
+class MouvementCaisse <<ledger>> {
+  +proprietaire : ProprietaireCaisse
+  +type : TypeMouvementCaisse
+  +direction : DirectionMouvementCaisse
+  +quantite : Int
+}
+
 ' ---- Flux principal : recolte -> achat -> stock -> vente -> encaissement
 Agriculteur "1" --> "0..*" Livraison : livre >
 Livraison "1" *--> "0..*" Pesee : est pesee en >
+Livraison ..> StatutLivraison
 Livraison "1" --> "0..1" BonAchat : valorisee par >
 BonAchat "1" --> "0..*" PaiementAgriculteur : soldee par >
 Livraison "1" --> "0..*" StockDate : alimente >
@@ -116,6 +156,16 @@ TypeDate "1" --> "0..*" StockDate
 StockDate "1" --> "0..*" Vente : prelevee par >
 Client "1" --> "0..*" Vente : achete >
 Vente "1" --> "0..*" EncaissementClient : soldee par >
+TypeCaisse "1" --> "0..1" StockCaisseWakala
+Client "1" --> "0..*" StockCaisseClient : possede >
+TypeCaisse "1" --> "0..*" StockCaisseClient
+Client "1" --> "0..*" ReceptionCaisses : apporte >
+Agriculteur "1" --> "0..*" PretCaisse
+MouvementCaisse "0..*" --> "1" TypeCaisse
+MouvementCaisse "0..*" --> "0..1" Client : proprietaire >
+MouvementCaisse "0..*" --> "0..1" ReceptionCaisses
+MouvementCaisse "0..*" --> "0..1" PretCaisse
+MouvementCaisse "0..*" --> "0..1" Vente
 
 ' ---- Rattachement de campagne
 Saison "1" --> "0..*" Livraison

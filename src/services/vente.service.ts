@@ -8,22 +8,33 @@ import { prisma } from "@/lib/prisma";
 import type { CreateVenteInput, UpdateVenteInput } from "@/validators/vente.validator";
 import type { FiltresVente } from "@/repositories/vente.repository";
 import type { SortDirection } from "@/lib/pagination";
+import { appliquerSortiesCaisses } from "@/services/caisse-stock.service";
+import { caisseStockRepository } from "@/repositories/caisse-stock.repository";
 
-function withSolde<T extends { montant: number; EncaissementClient: { montant: number }[] }>(vente: T) {
-    const montantEncaisse = vente.EncaissementClient.reduce((sum, e) => sum + e.montant, 0);
-    return {
-        ...vente,
-        montantEncaisse,
-        montantRestant: vente.montant - montantEncaisse,
-        EncaissementClient: undefined,
-    };
+async function withSituationsCaisses<
+    T extends { clientId: string; montant: number; EncaissementClient: { montant: number }[] }
+>(tenantId: string, ventes: T[]) {
+    const situations = await caisseStockRepository.getSituationsClients(
+        tenantId,
+        ventes.map((vente) => vente.clientId)
+    );
+    return ventes.map((vente) => {
+        const montantEncaisse = vente.EncaissementClient.reduce((sum, encaissement) => sum + encaissement.montant, 0);
+        return {
+            ...vente,
+            montantEncaisse,
+            montantRestant: vente.montant - montantEncaisse,
+            EncaissementClient: undefined,
+            SituationCaissesClient: situations.filter((situation) => situation.clientId === vente.clientId),
+        };
+    });
 }
 
 export const venteService = {
     async getAll(tenantId: string, opts?: { saisonId?: string }) {
         await requirePermission("vente:read");
         const ventes = await venteRepository.findAll(tenantId, opts);
-        return ventes.map(withSolde);
+        return withSituationsCaisses(tenantId, ventes);
     },
 
     /** Toutes les ventes du filtre courant, pour l'export. */
@@ -33,7 +44,7 @@ export const venteService = {
     ) {
         await requirePermission("vente:read");
         const ventes = await venteRepository.findAllFiltre(tenantId, params);
-        return ventes.map(withSolde);
+        return withSituationsCaisses(tenantId, ventes);
     },
 
     /**
@@ -67,7 +78,7 @@ export const venteService = {
             venteRepository.findClientsAvecVente(tenantId, params.saisonId),
         ]);
 
-        return { resultat: { ...page, items: page.items.map(withSolde) }, totaux, clients };
+        return { resultat: { ...page, items: await withSituationsCaisses(tenantId, page.items) }, totaux, clients };
     },
 
     async getById(tenantId: string, id: string) {
@@ -76,7 +87,7 @@ export const venteService = {
         if (!vente) {
             throw new Error("Vente introuvable dans cette Wakala");
         }
-        return withSolde(vente);
+        return (await withSituationsCaisses(tenantId, [vente]))[0];
     },
 
     /**
@@ -96,10 +107,10 @@ export const venteService = {
             throw new Error("Lot de stock introuvable dans cette Wakala");
         }
 
-        if (stockDate.quantiteDisponible < data.quantite) {
-            throw new Error(
-                `Stock insuffisant. Disponible: ${stockDate.quantiteDisponible}, Demandé: ${data.quantite}`
-            );
+        if (data.caisses.some((caisse) =>
+            caisse.proprietaire === "CLIENT" && caisse.clientProprietaireId !== data.clientId
+        )) {
+            throw new Error("Les caisses client utilisées doivent appartenir au client de la vente");
         }
 
         const montant = data.quantite * data.prixUnitaire;
@@ -113,30 +124,57 @@ export const venteService = {
                 tx
             );
 
-            await tx.stockDate.update({
-                where: { id: data.stockId },
+            const stockDebit = await tx.stockDate.updateMany({
+                where: { id: data.stockId, tenantId, quantiteDisponible: { gte: data.quantite } },
                 data: {
                     quantiteDisponible: { decrement: data.quantite },
                     updatedAt: new Date(),
                 },
             });
 
-            return nouvelleVente;
-        });
+            if (stockDebit.count !== 1) {
+                throw new Error("Stock de dattes insuffisant ou lot inaccessible");
+            }
 
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "CREATE_VENTE",
-            targetId: vente.id,
-            description: `Vente de ${data.quantite} kg à ${client.nom} pour ${montant.toFixed(2)}`,
-            details: {
-                client: client.nom,
-                quantite: data.quantite,
-                prixUnitaire: data.prixUnitaire,
-                montant,
-            },
-        });
+            if (data.caisses.length > 0) {
+                await tx.venteCaisse.createMany({
+                    data: data.caisses.map((caisse) => ({
+                        tenantId,
+                        venteId: nouvelleVente.id,
+                        typeCaisseId: caisse.typeCaisseId,
+                        quantite: caisse.quantite,
+                        proprietaire: caisse.proprietaire,
+                        clientProprietaireId: caisse.clientProprietaireId,
+                    })),
+                });
+                await appliquerSortiesCaisses(tx, {
+                    tenantId,
+                    userId,
+                    sources: data.caisses,
+                    type: "SORTIE_VENTE",
+                    venteId: nouvelleVente.id,
+                    reference: nouvelleVente.id,
+                    description: `Caisses utilisées pour la vente à ${client.nom}`,
+                });
+            }
+
+            await auditService.log({
+                tenantId,
+                actorId: userId,
+                action: "CREATE_VENTE",
+                targetId: nouvelleVente.id,
+                description: `Vente de ${data.quantite} kg à ${client.nom} pour ${montant.toFixed(2)}`,
+                details: {
+                    client: client.nom,
+                    quantite: data.quantite,
+                    prixUnitaire: data.prixUnitaire,
+                    montant,
+                    caisses: data.caisses,
+                },
+            }, tx);
+
+            return nouvelleVente;
+        }, { timeout: 20_000, maxWait: 10_000 });
 
         return vente;
     },
@@ -169,6 +207,10 @@ export const venteService = {
                 throw new Error(
                     "Impossible de modifier une vente qui a déjà un encaissement enregistré"
                 );
+            }
+
+            if (existing.clientId !== data.clientId && existing.Caisses.some((caisse) => caisse.proprietaire === "CLIENT")) {
+                throw new Error("Le client ne peut pas être modifié car la vente utilise ses propres caisses");
             }
 
             await assertSaisonOuverte(tenantId, existing.saisonId, tx);

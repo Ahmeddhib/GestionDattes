@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { regionService } from "@/services/region.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
+import { unstable_rethrow } from "next/navigation";
 
 /**
  * Server Action: Récupérer toutes les régions (MULTI-TENANT)
@@ -22,8 +23,9 @@ export async function getRegionsAction() {
         const regions = await regionService.getAll(tenantId, session.user.id);
 
         return { success: true, data: regions };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        unstable_rethrow(error);
         console.error("❌ getRegionsAction error:", error);
-        return { success: false, error: error.message || "Erreur lors de la récupération des régions" };
+        return { success: false, error: error instanceof Error ? error.message : "Erreur lors de la récupération des régions" };
     }
 }

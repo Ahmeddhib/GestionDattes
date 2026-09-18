@@ -1,0 +1,43 @@
+@startuml sequence-annuler-reception-dattes
+title Annuler une reception de dattes avec compensation
+
+actor "Agent autorise" as Agent
+participant "DeleteLivraisonDialog" as UI
+participant "cancelLivraisonAction" as Action
+participant "livraisonService" as Service
+participant "annulerLivraisonAvecCompensation" as Compensation
+database PostgreSQL as DB
+
+Agent -> UI : Choisir Annuler
+UI -> Agent : Demander le motif obligatoire
+Agent -> UI : Confirmer(motif)
+UI -> Action : cancelLivraisonAction(id, motif)
+Action -> Service : cancel(tenantId, userId, id, motif)
+Service -> Service : verifier permission et saison ouverte
+Service -> Compensation : annulerLivraisonAvecCompensation(...)
+
+group Transaction atomique
+  Compensation -> DB : verifier les usages en aval
+  alt dependances aval existantes
+    DB --> Compensation : blocages
+    Compensation --> Service : refus motive
+  else annulation autorisee
+    Compensation -> DB : annuler les retours de caisses
+    Compensation -> DB : supprimer BonAchat / StockDate / Echantillon
+    Compensation -> DB : detacher les prets
+    Compensation -> DB : UPDATE Livraison\nstatut=ANNULEE, motif, auteur, date
+    Compensation -> DB : INSERT AuditLog(CANCEL_LIVRAISON)
+  end
+end
+
+Service --> Action : succes
+Action -> Action : revalidatePath(livraisons, dashboard)
+Action --> UI : resultat
+UI --> Agent : toast et tableau actualise
+
+note right of DB
+  La Livraison, ses lignes declarees et ses pesees
+  restent dans l historique. Les effets operationnels
+  sont compenses sans suppression aveugle.
+end note
+@enduml

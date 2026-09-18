@@ -22,6 +22,13 @@ export async function createVenteAction(formData: FormData) {
             stockId: formData.get("stockId"),
             quantite: formData.get("quantite"),
             prixUnitaire: formData.get("prixUnitaire"),
+            caisses: (() => {
+                try {
+                    return JSON.parse(String(formData.get("caisses") || "[]"));
+                } catch {
+                    return [];
+                }
+            })(),
         };
 
         const parsed = createVenteSchema.safeParse(rawData);

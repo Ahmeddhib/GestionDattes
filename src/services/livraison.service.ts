@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ROLES } from "@/constants/roles";
 import { assertSaisonOuverte, getSaisonOuverte } from "@/lib/saison-guard";
-import { supprimerLivraisonEnCascade } from "./livraison-suppression.service";
+import { annulerLivraisonAvecCompensation } from "./livraison-suppression.service";
 import { type SortDirection } from "@/lib/pagination";
 
 /**
@@ -26,6 +26,29 @@ function mapLivraison(
             0
         );
 
+    const originesCaisses = Array.from(
+        livraison.Pesee.flatMap((pesee) => pesee.MouvementCaisse).reduce((groupes, mouvement) => {
+            const cle = `${mouvement.proprietaire}:${mouvement.ClientProprietaire?.id ?? "WAKALA"}:${mouvement.TypeCaisse.id}`;
+            const existant = groupes.get(cle);
+            if (existant) {
+                existant.quantite += mouvement.quantite;
+            } else {
+                groupes.set(cle, {
+                    proprietaire: mouvement.proprietaire,
+                    clientProprietaire: mouvement.ClientProprietaire,
+                    typeCaisse: mouvement.TypeCaisse,
+                    quantite: mouvement.quantite,
+                });
+            }
+            return groupes;
+        }, new Map<string, {
+            proprietaire: "WAKALA" | "CLIENT";
+            clientProprietaire: { id: string; nom: string } | null;
+            typeCaisse: { id: string; nom: string };
+            quantite: number;
+        }>()).values()
+    );
+
     return {
         ...livraison,
         agriculteur: livraison.Agriculteur,
@@ -42,6 +65,7 @@ function mapLivraison(
             typeDate: ltc.TypeDate,
         })),
         bonAchat: livraison.BonAchat,
+        originesCaisses,
         quantiteKg,
         _count: livraison._count
             ? {
@@ -55,6 +79,7 @@ function mapLivraison(
         Agriculteur: undefined,
         LivraisonTypeCaisse: undefined,
         BonAchat: undefined,
+        Pesee: undefined,
     };
 }
 import type { CreateLivraisonInput, UpdateLivraisonInput } from "@/validators/livraison.validator";
@@ -262,6 +287,9 @@ export const livraisonService = {
         if (!existing) {
             throw new Error("Livraison introuvable");
         }
+        if (existing.statut === "ANNULEE") {
+            throw new Error("Une réception annulée ne peut plus être modifiée");
+        }
 
         await assertSaisonOuverte(tenantId, existing.saisonId);
 
@@ -334,8 +362,13 @@ export const livraisonService = {
     /**
      * Supprime une livraison
      */
-    async delete(tenantId: string, userId: string, id: string) {
+    async cancel(tenantId: string, userId: string, id: string, motifAnnulation: string) {
         await checkPermission(userId, "livraison:delete");
+
+        const motif = motifAnnulation.trim();
+        if (motif.length < 3) {
+            throw new Error("Le motif d'annulation doit contenir au moins 3 caractères");
+        }
 
         const existing = await livraisonRepository.findById(id, tenantId);
         if (!existing) {
@@ -348,21 +381,11 @@ export const livraisonService = {
         // par l'assistant sont défaits, et les retours de caisses annulés.
         // Seules les traces laissées en aval (vente, paiement, conditionnement,
         // analyse) bloquent encore — cf. livraison-suppression.service.ts.
-        const resultat = await supprimerLivraisonEnCascade(tenantId, id);
+        await annulerLivraisonAvecCompensation(tenantId, id, userId, motif);
+    },
 
-        await auditService.log({
-            tenantId,
-            actorId: userId,
-            action: "DELETE_LIVRAISON",
-            targetId: id,
-            description: `Livraison supprimée: ${existing.numeroLot}`,
-            details: {
-                numeroLot: existing.numeroLot,
-                agriculteur: existing.Agriculteur ? `${existing.Agriculteur.nom} ${existing.Agriculteur.prenom}` : undefined,
-                peseesSupprimees: resultat.peseesSupprimees,
-                caissesRetireesDuStock: resultat.caissesRetireesDuStock,
-            },
-        });
+    async delete(tenantId: string, userId: string, id: string) {
+        return this.cancel(tenantId, userId, id, "Annulation demandée par l'utilisateur");
     },
 
     /**

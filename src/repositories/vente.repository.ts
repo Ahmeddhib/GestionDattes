@@ -75,6 +75,12 @@ const VENTE_INCLUDE = {
     // vente n'a qu'une poignée d'encaissements. Ce sont les totaux d'en-tête qui
     // ne peuvent pas s'en déduire — d'où `getTotauxFiltres`.
     EncaissementClient: { select: { montant: true } },
+    Caisses: {
+        include: {
+            TypeCaisse: { select: { id: true, nom: true } },
+            ClientProprietaire: { select: { id: true, nom: true } },
+        },
+    },
 } satisfies Prisma.VenteInclude;
 
 export const venteRepository = {
@@ -220,7 +226,7 @@ export const venteRepository = {
     async findEditableById(id: string, tenantId: string, client: DbClient = prisma) {
         return client.vente.findFirst({
             where: { id, tenantId },
-            include: { StockDate: true },
+            include: { StockDate: true, Caisses: true },
         });
     },
 

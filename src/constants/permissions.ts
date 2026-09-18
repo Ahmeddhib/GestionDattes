@@ -54,6 +54,13 @@ export const PERMISSIONS = {
     "pret-caisse:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
     "pret-caisse:update": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
 
+    // Stock physique et propriété des caisses
+    "caisse:read": [ROLES.ADMIN, ROLES.USER, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+    "caisse:reception:create": [ROLES.ADMIN, ROLES.AGENT, ROLES.RESPONSABLE_STOCK],
+    "caisse:reception:cancel": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
+    "caisse:adjust": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK],
+    "caisse:movement:read": [ROLES.ADMIN, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
+
     // Clients
     "client:read": [ROLES.ADMIN, ROLES.USER, ROLES.AGENT, ROLES.RESPONSABLE_STOCK, ROLES.DIRECTION],
     "client:create": [ROLES.ADMIN, ROLES.AGENT],

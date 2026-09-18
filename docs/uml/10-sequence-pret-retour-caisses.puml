@@ -1,0 +1,65 @@
+@startuml sequence-pret-retour-caisses
+' Pret multi-source, retour FIFO et annulation compensatoire
+
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #6B4B2A
+  LifeLineBorderColor #C17A2B
+  ParticipantBorderColor #C17A2B
+  ParticipantBackgroundColor #FDF7EE
+}
+autonumber "<b>[00]"
+
+actor "Responsable stock" as U
+participant "Formulaire de pret" as UI
+participant "pretCaisseService" as PRET
+participant "caisseStockService" as STOCK
+database "PostgreSQL\n(Neon)" as DB
+
+== Pret ==
+U -> UI : choisit agriculteur, type, total\net sources Wakala/client
+UI -> UI : somme(sources) = nombrePrete
+UI -> PRET : create(tenantId, userId, data)
+PRET -> DB : verifier saison, agriculteur, type, livreur
+group Transaction ACID
+  PRET -> DB : INSERT PretCaisse
+  PRET -> DB : INSERT PretCaisseSource[]
+  PRET -> STOCK : appliquerSortiesCaisses(sources)
+  loop chaque source
+    STOCK -> DB : UPDATE solde WHERE quantite >= demande
+    alt stock insuffisant
+      STOCK --> PRET : throw
+      note right of DB
+        Rollback complet : aucun pret,
+        aucune source, aucun mouvement.
+      end note
+    else stock disponible
+      STOCK -> DB : INSERT MouvementCaisse\nPRET_AGRICULTEUR / SORTIE
+    end
+  end
+  PRET -> DB : INSERT AuditLog
+end
+PRET --> UI : pret cree
+
+== Retour lie a une pesee ==
+U -> PRET : retournerSourcesPret(quantite, peseeId)
+PRET -> DB : SELECT PretCaisseSource ORDER BY createdAt
+loop allocation FIFO, source par source
+  PRET -> DB : UPDATE quantiteRetournee\navec controle optimiste
+  PRET -> STOCK : appliquerEntreesCaisses(source)
+  STOCK -> DB : UPSERT solde proprietaire
+  STOCK -> DB : INSERT MouvementCaisse\nRETOUR_AGRICULTEUR / ENTREE
+end
+
+== Suppression de la pesee ==
+U -> PRET : annulerRetoursPesee(peseeId)
+PRET -> DB : retrouver les mouvements de retour
+loop chaque mouvement retourne
+  PRET -> DB : decremente quantiteRetournee\net nombreRetourne
+  PRET -> STOCK : debiter le meme proprietaire
+  STOCK -> DB : INSERT MouvementCaisse\nANNULATION_RETOUR_AGRICULTEUR / SORTIE
+end
+PRET -> DB : DELETE Pesee\n(ledger conserve, peseeId devient NULL)
+
+@enduml

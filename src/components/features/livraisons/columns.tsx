@@ -14,6 +14,9 @@ export type Livraison = {
     quantiteKg: number;
     quantiteLivree?: number;
     quantiteAcceptee?: number;
+    statut: "VALIDEE" | "ANNULEE";
+    annuleeLe?: Date | null;
+    motifAnnulation?: string | null;
     agriculteur?: {
         id: string;
         code: string;
@@ -42,6 +45,12 @@ export type Livraison = {
         prixKg: number;
         montant: number;
     } | null;
+    originesCaisses?: Array<{
+        proprietaire: "WAKALA" | "CLIENT";
+        clientProprietaire?: { id: string; nom: string } | null;
+        typeCaisse: { id: string; nom: string };
+        quantite: number;
+    }>;
     _count?: {
         echantillons: number;
         pretsCaisses: number;
@@ -55,7 +64,9 @@ export const createLivraisonsColumns = (
     onDelete: (livraison: Livraison) => void,
     t: (key: string) => string,
     canEditAcceptedQuantity: boolean
-): ColumnDef<Livraison>[] => [
+): ColumnDef<Livraison>[] => {
+    void canEditAcceptedQuantity;
+    return [
         {
             accessorKey: "numeroLot",
             header: t("livraisons.numeroLot"),
@@ -75,8 +86,32 @@ export const createLivraisonsColumns = (
                         {format(date, "dd/MM/yyyy", { locale: fr })}
                     </div>
                 );
-            },
         },
+    },
+    {
+        id: "origineCaisses",
+        header: t("livraisons.crateOwners"),
+        cell: ({ row }) => {
+            const origines = row.original.originesCaisses ?? [];
+            if (origines.length === 0) return <span className="text-muted-foreground">—</span>;
+            return (
+                <div className="min-w-40 space-y-1 text-xs">
+                    {origines.map((origine, index) => (
+                        <div key={`${origine.typeCaisse.id}-${origine.clientProprietaire?.id ?? "wakala"}-${index}`}>
+                            <span className="font-semibold text-foreground">
+                                {origine.quantite} × {origine.typeCaisse.nom}
+                            </span>
+                            <span className="block text-muted-foreground">
+                                {origine.proprietaire === "WAKALA"
+                                    ? t("caisseStock.wakala")
+                                    : origine.clientProprietaire?.nom ?? t("caisseStock.client")}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            );
+        },
+    },
         {
             accessorKey: "agriculteur",
             header: t("livraisons.agriculteur"),
@@ -198,18 +233,41 @@ export const createLivraisonsColumns = (
                 );
             },
         },
-        {
-            id: "actions",
+    {
+        accessorKey: "statut",
+        header: t("livraisons.status"),
+        cell: ({ row }) => row.original.statut === "ANNULEE" ? (
+            <div className="max-w-48">
+                <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300">
+                    {t("livraisons.cancelled")}
+                </Badge>
+                {row.original.motifAnnulation && (
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground" title={row.original.motifAnnulation}>
+                        {row.original.motifAnnulation}
+                    </p>
+                )}
+            </div>
+        ) : (
+            <Badge variant="outline" className="border-green-300 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300">
+                {t("livraisons.validated")}
+            </Badge>
+        ),
+    },
+    {
+        id: "actions",
             header: t("common.actions"),
             cell: ({ row }) => {
                 const livraison = row.original;
 
                 return (
                     <div className="flex items-center gap-2">
-                        <UpdateLivraisonDialog livraison={livraison} />
+                        {livraison.statut !== "ANNULEE" && (
+                            <UpdateLivraisonDialog livraison={livraison} />
+                        )}
                         <DeleteLivraisonDialog livraison={livraison} />
                     </div>
                 );
             },
         },
     ];
+};

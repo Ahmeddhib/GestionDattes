@@ -9,16 +9,16 @@ export type TrendFilter = { saisonId: string } | { dateFrom: Date; dateTo: Date 
 
 function livraisonWhere(tenantId: string, filter: TrendFilter) {
     if ("saisonId" in filter) {
-        return { tenantId, saisonId: filter.saisonId };
+        return { tenantId, saisonId: filter.saisonId, statut: "VALIDEE" as const };
     }
-    return { tenantId, dateLivraison: { gte: filter.dateFrom, lte: filter.dateTo } };
+    return { tenantId, statut: "VALIDEE" as const, dateLivraison: { gte: filter.dateFrom, lte: filter.dateTo } };
 }
 
 function peseeLivraisonWhere(tenantId: string, filter: TrendFilter) {
     if ("saisonId" in filter) {
-        return { tenantId, Livraison: { saisonId: filter.saisonId } };
+        return { tenantId, Livraison: { saisonId: filter.saisonId, statut: "VALIDEE" as const } };
     }
-    return { tenantId, Livraison: { dateLivraison: { gte: filter.dateFrom, lte: filter.dateTo } } };
+    return { tenantId, Livraison: { statut: "VALIDEE" as const, dateLivraison: { gte: filter.dateFrom, lte: filter.dateTo } } };
 }
 
 type Granularity = "day" | "month";
@@ -52,7 +52,7 @@ export const dashboardRepository = {
                        COALESCE(SUM("quantiteAcceptee"), 0)::float AS "quantitePayable",
                        COUNT(*) AS "nombreLivraisons"
                 FROM "Livraison"
-                WHERE "tenantId" = ${tenantId} AND "saisonId" = ${filter.saisonId}
+                WHERE "tenantId" = ${tenantId} AND "saisonId" = ${filter.saisonId} AND "statut" = 'VALIDEE'
                 GROUP BY periode
                 ORDER BY periode ASC
             `;
@@ -63,7 +63,7 @@ export const dashboardRepository = {
                    COALESCE(SUM("quantiteAcceptee"), 0)::float AS "quantitePayable",
                    COUNT(*) AS "nombreLivraisons"
             FROM "Livraison"
-            WHERE "tenantId" = ${tenantId} AND "dateLivraison" BETWEEN ${filter.dateFrom} AND ${filter.dateTo}
+            WHERE "tenantId" = ${tenantId} AND "statut" = 'VALIDEE' AND "dateLivraison" BETWEEN ${filter.dateFrom} AND ${filter.dateTo}
             GROUP BY periode
             ORDER BY periode ASC
         `;
@@ -232,8 +232,8 @@ export const dashboardRepository = {
             prisma.bonAchat.count({ where: { tenantId, statut: { not: "PAYE" } } }),
             prisma.vente.count({ where: { tenantId, statut: { not: "PAYE" } } }),
             prisma.pretCaisse.count({ where: { tenantId, statut: { in: ["EN_COURS", "INCOMPLET"] } } }),
-            prisma.livraison.count({ where: { tenantId, BonAchat: null } }),
-            prisma.livraison.count({ where: { tenantId, Pesee: { none: {} } } }),
+            prisma.livraison.count({ where: { tenantId, statut: "VALIDEE", BonAchat: null } }),
+            prisma.livraison.count({ where: { tenantId, statut: "VALIDEE", Pesee: { none: {} } } }),
         ]);
 
         return { bonsAchatImpayes, ventesImpayees, pretsEnCours, livraisonsSansBonAchat, livraisonsSansPesee };

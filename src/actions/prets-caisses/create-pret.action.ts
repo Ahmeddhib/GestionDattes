@@ -24,6 +24,13 @@ export async function createPretAction(formData: FormData) {
             observations: formData.get("observations") || undefined,
             livraisonId: formData.get("livraisonId") || undefined,
             livreurId: formData.get("livreurId") || undefined,
+            sources: (() => {
+                try {
+                    return JSON.parse(String(formData.get("sources") || "[]"));
+                } catch {
+                    return [];
+                }
+            })(),
         };
 
         const parsed = createPretCaisseSchema.safeParse(rawData);

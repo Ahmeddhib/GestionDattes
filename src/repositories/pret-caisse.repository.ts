@@ -62,10 +62,13 @@ function buildPretWhere(
 
 const PRET_INCLUDE = {
     Agriculteur: { select: { id: true, code: true, nom: true, prenom: true, cin: true } },
-    TypeCaisse: { select: { id: true, nom: true, poidsKg: true, stockDisponible: true } },
+    TypeCaisse: { select: { id: true, nom: true, poidsKg: true } },
     User: { select: { id: true, name: true, email: true } },
     Livraison: { select: { id: true, numeroLot: true, dateLivraison: true } },
     Livreur: { select: { id: true, nom: true, telephone: true } },
+    Sources: {
+        include: { ClientProprietaire: { select: { id: true, nom: true } } },
+    },
 } satisfies Prisma.PretCaisseInclude;
 
 /**
@@ -116,7 +119,6 @@ export const pretCaisseRepository = {
                         id: true,
                         nom: true,
                         poidsKg: true,
-                        stockDisponible: true,
                     },
                 },
                 User: {
@@ -257,7 +259,6 @@ export const pretCaisseRepository = {
                         id: true,
                         nom: true,
                         poidsKg: true,
-                        stockDisponible: true,
                     },
                 },
                 User: {
@@ -338,6 +339,13 @@ export const pretCaisseRepository = {
                         nom: true,
                         poidsKg: true,
                     },
+                },
+                Sources: {
+                    include: {
+                        TypeCaisse: { select: { id: true, nom: true } },
+                        ClientProprietaire: { select: { id: true, nom: true } },
+                    },
+                    orderBy: { createdAt: "asc" },
                 },
             },
             orderBy: {
@@ -449,9 +457,10 @@ export const pretCaisseRepository = {
         const estComplet = nouveauNombreRetourne === pret.nombrePrete;
         const nouveauStatut = estComplet ? "RETOURNE" : "EN_COURS";
 
-        // Mettre à jour le prêt
-        return client.pretCaisse.update({
-            where: { id: pretId },
+        // Mise à jour optimiste : deux retours concurrents ne peuvent pas
+        // écraser silencieusement le compteur lu par l'autre transaction.
+        const resultat = await client.pretCaisse.updateMany({
+            where: { id: pretId, tenantId, nombreRetourne: pret.nombreRetourne },
             data: {
                 nombreRetourne: nouveauNombreRetourne,
                 statut: nouveauStatut,
@@ -461,11 +470,20 @@ export const pretCaisseRepository = {
                     : pret.observations,
                 updatedAt: new Date(),
             },
+        });
+        if (resultat.count !== 1) {
+            throw new Error("Le prêt a été modifié simultanément, veuillez réessayer");
+        }
+
+        const misAJour = await client.pretCaisse.findFirst({
+            where: { id: pretId, tenantId },
             include: {
                 Agriculteur: true,
                 TypeCaisse: true,
             },
         });
+        if (!misAJour) throw new Error("Prêt introuvable après mise à jour");
+        return misAJour;
     },
 
     /**

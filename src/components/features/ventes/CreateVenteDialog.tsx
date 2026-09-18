@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, User, Package, Check, ChevronsUpDown } from "lucide-react";
+import { Plus, User, Package, Check, ChevronsUpDown, Boxes, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useClientTranslations } from "@/hooks/useClientTranslations";
 import { SaisonActiveField, type SaisonActive } from "@/components/features/saisons/SaisonActiveField";
@@ -13,6 +13,7 @@ import { SaisonOrigineBadge } from "./SaisonOrigineBadge";
 import { getClientsAction } from "@/actions/clients/get-clients.action";
 import { getStockLotsForVenteAction } from "@/actions/ventes/get-stock-lots-for-vente.action";
 import { createVenteAction } from "@/actions/ventes/create-vente.action";
+import { getCaisseStockOverviewAction } from "@/actions/stock-caisses/caisse-stock.actions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -61,15 +62,32 @@ function stockLevelBadgeClass(quantite: number) {
     return "bg-green-100 text-green-700";
 }
 
+type ClientOption = { id: string; nom: string };
+type StockLotOption = {
+    id: string;
+    typeDate: string;
+    numeroLot: string;
+    quantiteDisponible: number;
+    saisonOrigineId: string;
+    saisonNom: string;
+};
+type StockCaisseTypeOption = {
+    id: string;
+    nom: string;
+    quantiteWakala: number;
+    proprietairesClients: Array<{ clientId: string; quantite: number }>;
+};
+
 export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActive }) {
     const { t } = useClientTranslations();
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [clients, setClients] = useState<any[]>([]);
-    const [lots, setLots] = useState<any[]>([]);
+    const [clients, setClients] = useState<ClientOption[]>([]);
+    const [lots, setLots] = useState<StockLotOption[]>([]);
     const [stockMax, setStockMax] = useState(0);
     const [stockPopoverOpen, setStockPopoverOpen] = useState(false);
+    const [stockCaisses, setStockCaisses] = useState<StockCaisseTypeOption[]>([]);
 
     const formSchema = z.object({
         clientId: z.string().min(1, t("validation.required")),
@@ -88,6 +106,11 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
             (val) => (val === "" || val === undefined ? undefined : Number(val)),
             z.number({ message: t("validation.required") }).positive(t("validation.positive"))
         ),
+        caisses: z.array(z.object({
+            proprietaire: z.enum(["WAKALA", "CLIENT"]),
+            typeCaisseId: z.string().min(1, t("validation.required")),
+            quantite: z.coerce.number().int().positive(t("validation.positive")),
+        })),
     });
 
     type FormData = {
@@ -95,47 +118,45 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
         stockId: string;
         quantite: number;
         prixUnitaire: number;
+        caisses: Array<{ proprietaire: "WAKALA" | "CLIENT"; typeCaisseId: string; quantite: number }>;
     };
 
     const form = useForm<FormData>({
-        resolver: zodResolver(formSchema) as any,
+        resolver: zodResolver(formSchema) as Resolver<FormData>,
         defaultValues: {
             clientId: "",
             stockId: "",
-            quantite: undefined as any,
-            prixUnitaire: undefined as any,
+            quantite: undefined!,
+            prixUnitaire: undefined!,
+            caisses: [],
         },
     });
+    const caisseFields = useFieldArray({ control: form.control, name: "caisses" });
 
-    useEffect(() => {
-        if (open) loadData();
-    }, [open]);
-
-    const watchStockId = form.watch("stockId");
-    useEffect(() => {
-        if (watchStockId) {
-            const lot = lots.find((l) => l.id === watchStockId);
-            const newMax = lot?.quantiteDisponible || 0;
-            setStockMax(newMax);
-
-            const currentValue = form.getValues("quantite");
-            if (currentValue && currentValue > newMax) {
-                form.trigger("quantite");
-            }
-        }
-    }, [watchStockId, lots, form]);
-
-    const watchQuantite = form.watch("quantite");
-    const watchPrixUnitaire = form.watch("prixUnitaire");
+    const watchQuantite = useWatch({ control: form.control, name: "quantite" });
+    const watchPrixUnitaire = useWatch({ control: form.control, name: "prixUnitaire" });
+    const watchClientId = useWatch({ control: form.control, name: "clientId" });
+    const watchCaisses = useWatch({ control: form.control, name: "caisses" });
     const montantTotal = (watchQuantite || 0) * (watchPrixUnitaire || 0);
+    const stocksDuClient = watchClientId
+        ? stockCaisses
+            .map((type) => ({
+                id: type.id,
+                nom: type.nom,
+                quantite: type.proprietairesClients.find((stock) => stock.clientId === watchClientId)?.quantite ?? 0,
+            }))
+            .filter((stock) => stock.quantite > 0)
+        : [];
 
     async function loadData() {
-        const [clientsResult, lotsResult] = await Promise.all([
+        const [clientsResult, lotsResult, caissesResult] = await Promise.all([
             getClientsAction(),
             getStockLotsForVenteAction(),
+            getCaisseStockOverviewAction(),
         ]);
         if (clientsResult.success) setClients(clientsResult.data || []);
         if (lotsResult.success) setLots(lotsResult.data || []);
+        if (caissesResult.success) setStockCaisses(caissesResult.data.parType || []);
     }
 
     async function onSubmit(data: FormData) {
@@ -146,6 +167,10 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
         formData.append("stockId", data.stockId);
         formData.append("quantite", data.quantite.toString());
         formData.append("prixUnitaire", data.prixUnitaire.toString());
+        formData.append("caisses", JSON.stringify(data.caisses.map((caisse) => ({
+            ...caisse,
+            ...(caisse.proprietaire === "CLIENT" && { clientProprietaireId: data.clientId }),
+        }))));
 
         const result = await createVenteAction(formData);
         setLoading(false);
@@ -163,7 +188,9 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
 
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen);
-        if (!newOpen) {
+        if (newOpen) {
+            void loadData();
+        } else {
             form.reset();
             setStockMax(0);
         }
@@ -172,7 +199,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button className="gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F]">
+                <Button className="w-full gap-2 rounded-md bg-[#C17A2B] hover:bg-[#A0621F] sm:w-auto">
                     <Plus className="h-4 w-4" />
                     {t("finance.ventes.nouvelleVente")}
                 </Button>
@@ -184,8 +211,8 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                 `sm` (640px), cette largeur dépassait la fenêtre entre 640 et
                 700px — téléphone en paysage, petite tablette — et le dialogue
                 collait aux deux bords, sans marge. */}
-            <DialogContent className="rounded-lg sm:max-w-[calc(100%-2rem)] md:max-w-175 bg-card">
-                <DialogHeader>
+            <DialogContent className="w-[calc(100vw-0.75rem)] max-w-none overflow-x-hidden rounded-lg bg-card p-3 sm:w-full sm:max-w-[calc(100%-2rem)] sm:p-5 md:max-w-175">
+                <DialogHeader className="min-w-0 pe-8">
                     <DialogTitle className="text-foreground">{t("finance.ventes.nouvelleVente")}</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
                         {t("finance.ventes.description")}
@@ -202,7 +229,13 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-foreground">{t("finance.ventes.client")}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={(value) => {
+                                            field.onChange(value);
+                                            caisseFields.replace([]);
+                                        }}
+                                        value={field.value}
+                                    >
                                         <FormControl>
                                             <SelectTrigger className="h-10 w-full rounded-sm border-border bg-card">
                                                 <SelectValue placeholder={t("finance.ventes.client")} />
@@ -231,6 +264,28 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                 </FormItem>
                             )}
                         />
+
+                        {watchClientId && (
+                            <section className="rounded-md border border-sky-200 bg-sky-50/70 p-3 dark:border-sky-800/70 dark:bg-sky-950/20">
+                                <div className="flex items-center gap-2 text-sm font-semibold text-sky-900 dark:text-sky-100">
+                                    <Boxes className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                                    {t("caisseStock.clientCratesAvailable")}
+                                </div>
+                                {stocksDuClient.length > 0 ? (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {stocksDuClient.map((stock) => (
+                                            <Badge key={stock.id} variant="outline" className="border-sky-300 bg-white text-sky-900 dark:border-sky-700 dark:bg-sky-950/50 dark:text-sky-100">
+                                                {stock.nom} · {stock.quantite} {t("caisseStock.available")}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="mt-1 text-xs text-sky-700 dark:text-sky-300">
+                                        {t("caisseStock.noClientCrates")}
+                                    </p>
+                                )}
+                            </section>
+                        )}
 
                         <FormField
                             control={form.control}
@@ -324,6 +379,8 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                                                                 value={`${l.typeDate} Lot ${l.numeroLot} ${l.saisonNom}`}
                                                                 onSelect={() => {
                                                                     field.onChange(l.id);
+                                                                    setStockMax(l.quantiteDisponible);
+                                                                    if ((form.getValues("quantite") || 0) > l.quantiteDisponible) void form.trigger("quantite");
                                                                     setStockPopoverOpen(false);
                                                                 }}
                                                                 className="py-2"
@@ -445,19 +502,100 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                             />
                         </div>
 
-                        <div className="rounded-md bg-muted p-3 flex items-center justify-between">
+                        <section className="space-y-3 rounded-lg border border-border bg-muted/35 p-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                        <Boxes className="h-4 w-4 text-[#C17A2B]" />
+                                        {t("caisseStock.usedCrates")}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground">Optionnel — sélectionnez la propriété réelle de chaque caisse.</p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => caisseFields.append({ proprietaire: "CLIENT", typeCaisseId: "", quantite: 1 })}
+                                    disabled={!watchClientId}
+                                >
+                                    <Plus className="h-4 w-4" /> {t("caisseStock.add")}
+                                </Button>
+                            </div>
+
+                            {caisseFields.fields.map((item, index) => {
+                                const proprietaire = watchCaisses?.[index]?.proprietaire;
+                                const clientId = watchClientId;
+                                return (
+                                    <div key={item.id} className="grid min-w-0 gap-3 rounded-md border border-border bg-card p-3 md:grid-cols-[8rem_minmax(0,1fr)_7rem_auto]">
+                                        <FormField
+                                            control={form.control}
+                                            name={`caisses.${index}.proprietaire`}
+                                            render={({ field }) => (
+                                                <FormItem className="min-w-0">
+                                                    <FormLabel>{t("caisseStock.owner")}</FormLabel>
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <FormControl><SelectTrigger className="w-full min-w-0"><SelectValue /></SelectTrigger></FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="CLIENT">Client</SelectItem>
+                                                            <SelectItem value="WAKALA">Wakala</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name={`caisses.${index}.typeCaisseId`}
+                                            render={({ field }) => (
+                                                <FormItem className="min-w-0">
+                                                    <FormLabel>Type de caisse</FormLabel>
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <FormControl><SelectTrigger className="w-full min-w-0"><SelectValue placeholder={t("caisseStock.select")} /></SelectTrigger></FormControl>
+                                                        <SelectContent position="popper">
+                                                            {stockCaisses.map((type) => {
+                                                                const disponible = proprietaire === "WAKALA"
+                                                                    ? type.quantiteWakala
+                                                                    : type.proprietairesClients.find((stock) => stock.clientId === clientId)?.quantite ?? 0;
+                                                                return <SelectItem key={type.id} value={type.id} disabled={disponible <= 0}>{type.nom} — {disponible} {t("caisseStock.available")}</SelectItem>;
+                                                            })}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name={`caisses.${index}.quantite`}
+                                            render={({ field }) => (
+                                                <FormItem className="min-w-0">
+                                                    <FormLabel>Quantité</FormLabel>
+                                                    <FormControl><Input type="number" min={1} step={1} {...field} onChange={(event) => field.onChange(Number(event.target.value))} /></FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <Button type="button" variant="ghost" size="icon" className="justify-self-end self-end text-red-600 md:justify-self-start" onClick={() => caisseFields.remove(index)} aria-label="Retirer cette ligne">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </section>
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted p-3">
                             <span className="text-sm font-medium text-foreground">
                                 {t("finance.ventes.montantTotal")}
                             </span>
                             <span className="text-lg font-bold text-[#C17A2B]">{montantTotal.toFixed(2)}</span>
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-2">
+                        <div className="sticky -bottom-3 z-10 -mx-3 flex flex-col-reverse gap-2 border-t border-border bg-card/95 px-3 pb-1 pt-3 backdrop-blur sm:-bottom-5 sm:-mx-5 sm:flex-row sm:justify-end sm:px-5 sm:pb-0">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => handleOpenChange(false)}
-                                className="rounded-md"
+                                className="w-full rounded-md sm:w-auto"
                                 disabled={loading}
                             >
                                 {t("common.cancel")}
@@ -465,7 +603,7 @@ export function CreateVenteDialog({ saisonActive }: { saisonActive?: SaisonActiv
                             <Button
                                 type="submit"
                                 disabled={loading || stockMax === 0}
-                                className="rounded-md bg-[#C17A2B] hover:bg-[#A0621F]"
+                                className="w-full rounded-md bg-[#C17A2B] hover:bg-[#A0621F] sm:w-auto"
                             >
                                 {loading ? t("pretsCaisses.preting") : t("common.create")}
                             </Button>

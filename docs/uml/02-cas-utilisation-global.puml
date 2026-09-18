@@ -47,6 +47,7 @@ rectangle "Application KAYEN - Gestion de dattes" {
 
   package "Reception" {
     usecase "Enregistrer\nune livraison" as UC_LIV
+    usecase "Annuler une reception de dattes\navec compensation" as UC_CANCEL_LIV
     usecase "Peser les caisses" as UC_PESEE
     usecase "Generer le bon\nd achat" as UC_BON
     usecase "Preter / reprendre\ndes caisses" as UC_PRET
@@ -58,6 +59,11 @@ rectangle "Application KAYEN - Gestion de dattes" {
     usecase "Consulter le stock\nde dattes" as UC_STOCK
     usecase "Consulter les lots\npar type" as UC_LOTS
     usecase "Suivre le stock\nde caisses" as UC_STOCKC
+    usecase "Receptionner les caisses\nd un camion client" as UC_RECC
+    usecase "Consulter les soldes\nWakala / clients" as UC_SOLDEC
+    usecase "Consulter le journal\ndes mouvements" as UC_LEDGERC
+    usecase "Annuler une reception\navec compensation" as UC_CANCELC
+    usecase "Ajuster un stock\navec motif" as UC_ADJUSTC
   }
 
   package "Commerce" {
@@ -107,6 +113,8 @@ UC_CLOTURE ..> UC_BILAN_FIN : <<include>>
 ' -- Reception
 AGENT --> UC_LIV
 STOCK --> UC_LIV
+ADMIN --> UC_CANCEL_LIV
+AGENT --> UC_CANCEL_LIV
 AGENT --> UC_PESEE
 AGENT --> UC_PRET
 STOCK --> UC_PRET
@@ -115,13 +123,29 @@ LABO  --> UC_ANALYSE
 UC_PESEE ..> UC_BON : <<include>>
 UC_PESEE ..> UC_STOCK : <<include>>
 UC_PESEE ..> UC_PRET : <<extend>>
+UC_CANCEL_LIV ..> UC_STOCK : <<include>>
+UC_CANCEL_LIV ..> UC_LEDGERC : <<include>>
 
 ' -- Stock
 STOCK --> UC_STOCK
 STOCK --> UC_STOCKC
+STOCK --> UC_RECC
+STOCK --> UC_SOLDEC
+STOCK --> UC_LEDGERC
+STOCK --> UC_CANCELC
+STOCK --> UC_ADJUSTC
+AGENT --> UC_RECC
+AGENT --> UC_SOLDEC
+ADMIN --> UC_LEDGERC
+ADMIN --> UC_CANCELC
+ADMIN --> UC_ADJUSTC
 AGENT --> UC_STOCK
 LABO  --> UC_STOCK
 UC_STOCK ..> UC_LOTS : <<include>>
+UC_STOCKC ..> UC_SOLDEC : <<include>>
+UC_RECC ..> UC_LEDGERC : <<include>>
+UC_CANCELC ..> UC_LEDGERC : <<include>>
+UC_ADJUSTC ..> UC_LEDGERC : <<include>>
 
 ' -- Commerce
 AGENT --> UC_AGRI
@@ -129,6 +153,7 @@ AGENT --> UC_CLI
 AGENT --> UC_VENTE
 AGENT --> UC_ENC
 UC_VENTE ..> UC_LOTS : <<include>>
+UC_VENTE ..> UC_SOLDEC : <<include>>
 UC_VENTE ..> UC_FACT : <<extend>>
 
 ' -- Finance
@@ -144,6 +169,13 @@ note bottom of UC_AUTH
   assertSaisonOuverte : elle est refusee
   si aucune saison n est OUVERTE ou si
   la saison visee est CLOTUREE.
+end note
+
+note bottom of UC_RECC
+  Chaque entree ou sortie conserve son
+  proprietaire (Wakala ou client), son type
+  et son document source. Un debit atomique
+  interdit toujours un solde negatif.
 end note
 
 @enduml

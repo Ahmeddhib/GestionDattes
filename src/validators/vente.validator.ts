@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { caisseSourceLineSchema } from "@/validators/caisse-stock.validator";
 
 /**
  * Schéma de validation pour la création d'une vente. Le stock disponible
@@ -10,6 +11,17 @@ export const createVenteSchema = z.object({
     stockId: z.string().min(1, "Le lot de stock est requis"),
     quantite: z.coerce.number().positive("La quantité doit être positive"),
     prixUnitaire: z.coerce.number().positive("Le prix unitaire doit être positif"),
+    caisses: z.array(caisseSourceLineSchema).default([]),
+}).superRefine((data, ctx) => {
+    data.caisses.forEach((caisse, index) => {
+        if (caisse.proprietaire === "CLIENT" && caisse.clientProprietaireId !== data.clientId) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["caisses", index, "clientProprietaireId"],
+                message: "Les caisses client doivent appartenir au client de la vente",
+            });
+        }
+    });
 });
 
 /**

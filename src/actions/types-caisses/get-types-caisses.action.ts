@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { typeCaisseService } from "@/services/type-caisse.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
+import { unstable_rethrow } from "next/navigation";
 
 /**
  * Action pour récupérer tous les types de caisses (du tenant actuel)
@@ -15,10 +16,11 @@ export async function getTypesCaissesAction() {
         }
 
         const tenantId = await getTenantId();
-        const typesCaisses = await typeCaisseService.getAll(tenantId, session.user.id);
+        const typesCaisses = await typeCaisseService.getAll(tenantId);
 
         return { success: true, data: typesCaisses };
     } catch (error) {
+        unstable_rethrow(error);
         console.error("❌ getTypesCaissesAction error:", error);
         return {
             success: false,

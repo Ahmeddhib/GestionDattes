@@ -92,7 +92,7 @@ export async function computeIndicateursSaison(
         pretCaisseSaisonRows,
     ] = await Promise.all([
         client.livraison.aggregate({
-            where: { tenantId, saisonId },
+            where: { tenantId, saisonId, statut: "VALIDEE" },
             _count: { _all: true },
             _sum: { quantiteLivree: true, quantiteAcceptee: true },
         }),

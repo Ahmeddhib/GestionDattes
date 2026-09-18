@@ -61,6 +61,20 @@ const LIVRAISON_INCLUDE = {
         },
     },
     BonAchat: { select: { id: true, numero: true, prixKg: true, montant: true } },
+    Pesee: {
+        select: {
+            id: true,
+            MouvementCaisse: {
+                where: { type: "RETOUR_AGRICULTEUR", direction: "ENTREE" },
+                select: {
+                    quantite: true,
+                    proprietaire: true,
+                    TypeCaisse: { select: { id: true, nom: true } },
+                    ClientProprietaire: { select: { id: true, nom: true } },
+                },
+            },
+        },
+    },
     _count: {
         select: { Echantillon: true, PretCaisse: true, StockDate: true, Pesee: true },
     },
@@ -75,51 +89,8 @@ export const livraisonRepository = {
      */
     async findAll(tenantId: string, opts?: { saisonId?: string }) {
         return prisma.livraison.findMany({
-            where: { tenantId, ...(opts?.saisonId && { saisonId: opts.saisonId }) },
-            include: {
-                Agriculteur: {
-                    select: {
-                        id: true,
-                        code: true,
-                        nom: true,
-                        prenom: true,
-                        cin: true,
-                    },
-                },
-                LivraisonTypeCaisse: {
-                    include: {
-                        TypeCaisse: {
-                            select: {
-                                id: true,
-                                nom: true,
-                                poidsKg: true,
-                            },
-                        },
-                        TypeDate: {
-                            select: {
-                                id: true,
-                                nom: true,
-                            },
-                        },
-                    },
-                },
-                BonAchat: {
-                    select: {
-                        id: true,
-                        numero: true,
-                        prixKg: true,
-                        montant: true,
-                    },
-                },
-                _count: {
-                    select: {
-                        Echantillon: true,
-                        PretCaisse: true,
-                        StockDate: true,
-                        Pesee: true,
-                    },
-                },
-            },
+            where: { tenantId, statut: "VALIDEE", ...(opts?.saisonId && { saisonId: opts.saisonId }) },
+            include: LIVRAISON_INCLUDE,
             orderBy: { createdAt: "desc" },
         });
     },
@@ -169,7 +140,10 @@ export const livraisonRepository = {
         tenantId: string,
         params: { search: string; saisonId?: string }
     ) {
-        const where = buildLivraisonWhere(tenantId, params.search, params.saisonId);
+        const where = {
+            ...buildLivraisonWhere(tenantId, params.search, params.saisonId),
+            statut: "VALIDEE" as const,
+        };
         const maintenant = new Date();
         const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
         const debutAnnee = new Date(maintenant.getFullYear(), 0, 1);
@@ -347,9 +321,9 @@ export const livraisonRepository = {
         client: DbClient = prisma
     ) {
         // Si les caisses sont mises à jour, on supprime les anciennes et on crée les nouvelles
-        const updateData: any = {
+        const updateData: Prisma.LivraisonUpdateInput = {
             ...(data.dateLivraison && { dateLivraison: new Date(data.dateLivraison) }),
-            ...(data.agriculteurId && { agriculteurId: data.agriculteurId }),
+            ...(data.agriculteurId && { Agriculteur: { connect: { id: data.agriculteurId } } }),
             ...(data.quantiteLivree !== undefined && { quantiteLivree: data.quantiteLivree }),
             ...(data.quantiteAcceptee !== undefined && { quantiteAcceptee: data.quantiteAcceptee }),
             updatedAt: new Date(),
@@ -432,12 +406,13 @@ export const livraisonRepository = {
     async getStatistics(tenantId: string) {
         const [total, thisMonth, thisYear] = await Promise.all([
             // Total des livraisons
-            prisma.livraison.count({ where: { tenantId } }),
+            prisma.livraison.count({ where: { tenantId, statut: "VALIDEE" } }),
 
             // Livraisons ce mois
             prisma.livraison.count({
                 where: {
                     tenantId,
+                    statut: "VALIDEE",
                     dateLivraison: {
                         gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
                     },
@@ -448,6 +423,7 @@ export const livraisonRepository = {
             prisma.livraison.count({
                 where: {
                     tenantId,
+                    statut: "VALIDEE",
                     dateLivraison: {
                         gte: new Date(new Date().getFullYear(), 0, 1),
                     },
@@ -461,7 +437,7 @@ export const livraisonRepository = {
             FROM "LivraisonTypeCaisse" ltc
             INNER JOIN "TypeCaisse" tc ON ltc."typeCaisseId" = tc.id
             INNER JOIN "Livraison" l ON ltc."livraisonId" = l.id
-            WHERE l."tenantId" = ${tenantId}
+            WHERE l."tenantId" = ${tenantId} AND l."statut" = 'VALIDEE'
         `;
 
         return {
@@ -480,6 +456,7 @@ export const livraisonRepository = {
             where: {
                 agriculteurId,
                 tenantId,
+                statut: "VALIDEE",
             },
             include: {
                 LivraisonTypeCaisse: {

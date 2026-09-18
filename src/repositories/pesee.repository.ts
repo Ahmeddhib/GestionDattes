@@ -33,6 +33,7 @@ function buildLivraisonPeseeWhere(
 ): Prisma.LivraisonWhereInput {
     return {
         tenantId,
+        statut: "VALIDEE",
         // Seules les livraisons effectivement pesées : le tableau se construisait
         // à partir des `Pesee`, une livraison sans pesée n'y figurait pas.
         Pesee: { some: {} },

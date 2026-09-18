@@ -3,6 +3,7 @@ import { AuditLogsTable } from "@/components/features/audit/AuditLogsTable";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/shared/LoadingSkeleton";
 import { getTenantId } from "@/lib/tenant/get-tenant";
+import { PageContainer } from "@/components/shared/PageContainer";
 
 export const metadata = {
     title: "Journal d'audit — Gestion des Dattes",
@@ -16,10 +17,10 @@ async function AuditLogsData() {
 
 export default async function AuditLogsPage() {
     return (
-        <div className="mx-auto w-full max-w-400 px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
+        <PageContainer>
             <Suspense fallback={<TableSkeleton rows={10} />}>
                 <AuditLogsData />
             </Suspense>
-        </div>
+        </PageContainer>
     );
 }

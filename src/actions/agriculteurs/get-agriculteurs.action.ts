@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { agriculteurService } from "@/services/agriculteur.service";
 import { getTenantId } from "@/lib/tenant/get-tenant";
+import { unstable_rethrow } from "next/navigation";
 
 /**
  * Server Action: Récupérer tous les agriculteurs (MULTI-TENANT)
@@ -22,8 +23,9 @@ export async function getAgricultureursAction() {
         const agriculteurs = await agriculteurService.getAll(tenantId, session.user.id);
 
         return { success: true, data: agriculteurs };
-    } catch (error: any) {
+    } catch (error: unknown) {
+        unstable_rethrow(error);
         console.error("❌ getAgricultureursAction error:", error);
-        return { success: false, error: error.message || "Erreur lors de la récupération des agriculteurs" };
+        return { success: false, error: error instanceof Error ? error.message : "Erreur lors de la récupération des agriculteurs" };
     }
 }

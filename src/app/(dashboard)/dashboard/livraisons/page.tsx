@@ -7,8 +7,8 @@ import { parseQueryParams, type RawSearchParams } from "@/lib/pagination";
 import { LivraisonsPageContent } from "./LivraisonsPageContent";
 
 export const metadata = {
-    title: "Livraisons - Gestion Dattes",
-    description: "Gestion des livraisons de dattes",
+    title: "Réception de dattes - Gestion Dattes",
+    description: "Gestion des réceptions de dattes",
 };
 
 export default async function LivraisonsPage({

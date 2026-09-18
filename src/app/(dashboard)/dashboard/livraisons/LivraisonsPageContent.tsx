@@ -9,28 +9,7 @@ import { PageContainer } from "@/components/shared/PageContainer";
 import { SaisonFilterBar, type SaisonFiltreProps } from "@/components/shared/SaisonFilterBar";
 import { AucuneSaisonAlert } from "@/components/features/saisons/AucuneSaisonAlert";
 import type { SaisonActive } from "@/components/features/saisons/SaisonActiveField";
-
-type Livraison = {
-    id: string;
-    numeroLot: string;
-    dateLivraison: Date;
-    quantiteKg: number;
-    quantiteLivree: number;
-    quantiteAcceptee: number;
-    agriculteur?: {
-        id: string;
-        code: string;
-        nom: string;
-        prenom: string;
-        cin: string;
-    };
-    _count?: {
-        echantillons: number;
-        pretsCaisses: number;
-        stocksDates: number;
-        pesees: number;
-    };
-};
+import type { Livraison } from "@/components/features/livraisons/columns";
 
 export type TotauxLivraisons = {
     total: number;

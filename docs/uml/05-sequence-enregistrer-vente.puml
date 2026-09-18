@@ -30,6 +30,7 @@ box "Serveur Next.js" #FBF6EE
   participant "requirePermission" as PERM
   participant "saison-guard" as GUARD
   participant "venteRepository" as REPO
+  participant "caisseStockService" as CAISSE
   participant "auditService" as AUDIT
 end box
 
@@ -57,11 +58,16 @@ DB --> ACT : lots + saisonOrigineId + saisonNom
 ACT --> UI : lots
 deactivate ACT
 
+UI -> ACT : getStocksCaissesDisponiblesAction(clientId)
+ACT -> DB : SELECT soldes Wakala + soldes du client
+DB --> ACT : sources disponibles par type
+ACT --> UI : soldes de caisses
+
 UI -> U : affiche chaque lot avec\nson badge de saison\n(ambre + "report" si hors saison ouverte)
 
 == Soumission ==
 
-U -> UI : saisit client, lot, quantite, prix
+U -> UI : saisit client, lot, quantite, prix\n+ repartition des caisses Wakala/client
 UI -> UI : validation Zod cote client\n(quantite <= stock du lot)
 UI -> ACT : createVenteAction(formData)
 deactivate UI
@@ -113,6 +119,22 @@ group Transaction ACID
     Meme transaction : une vente ne peut
     pas exister sans son decrement de stock.
   end note
+  SVC -> DB : INSERT "VenteCaisse"\n(une ligne par source)
+  SVC -> CAISSE : appliquerSortiesCaisses(sources)
+  loop chaque source Wakala/client
+    CAISSE -> DB : UPDATE solde WHERE tenantId\nAND quantite >= quantite demandee
+    alt solde insuffisant ou mauvais tenant
+      DB --> CAISSE : 0 ligne modifiee
+      CAISSE --> SVC : throw "Stock de caisses insuffisant"
+      note right of DB
+        Toute la transaction est annulee :
+        Vente, stock de dattes et caisses
+        restent dans leur etat initial.
+      end note
+    else debit accepte
+      CAISSE -> DB : INSERT "MouvementCaisse"\n(type SORTIE_VENTE, direction SORTIE)
+    end
+  end
 end
 
 SVC -> AUDIT : log(CREATE_VENTE, details)
